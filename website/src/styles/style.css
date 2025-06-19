@@ -1,0 +1,276 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+Bhai+2:wght@400..800&family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Space+Grotesk:wght@300..700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,100..900;1,100..900&family=Baloo+Bhai+2:wght@400..800&family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Space+Grotesk:wght@300..700&display=swap");
+
+/* ====================
+  Reset Default CSS Start
+  ==================== */
+
+:root {
+    --primary-font: "Space Grotesk";
+    --secondary-font: "Albert Sans";
+    --primary-color: #5AA469;
+    --secondary-color: #ffffff;
+    --ac-1: #c6c6c6;
+    --ac-2: #eeeeee;
+    --shade-1: #F4FFF2;
+    --shade-2: #facfae;
+    --main-60: #f7b786;
+    --main-80: #00c527;
+    --main-120: #c26c2a;
+    --main-140: #915120;
+    --main-160: #613615;
+    --main-180: #301b0b;
+    --text-1: #171717;
+    --text-2: #454545;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: var(--primary-font);
+    scroll-behavior: smooth;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+    margin-top: 0;
+}
+
+h6 {
+    font-family: var(--secondary-font);
+}
+
+a {
+    text-decoration: none !important;
+    font-family: var(--primary-font);
+
+}
+
+p {
+    color: var(--ac-ash);
+    text-align: center;
+    font-family: var(--secondary-font);
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 28.8px;
+}
+
+ul {
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none;
+}
+
+button {
+    border: none;
+    outline: none;
+    font-family: var(--primary-font);
+}
+
+input {
+    outline: none;
+}
+
+body {
+    background: var(--ac-black) !important;
+}
+
+/*====================
+Reset Default CSS End
+====================*/
+
+/* Webkit Scroll bar */
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    transition: 0.3s;
+    background: var(--primary-color);
+    -webkit-transition: 0.3s;
+    -moz-transition: 0.3s;
+    -ms-transition: 0.3s;
+    -o-transition: 0.3s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Webkit Scroll bar */
+
+
+
+/* Navbar Start */
+/* Desktop Dropdown Styles */
+@media (min-width: 1024px) {
+    .dropdown-content {
+        display: block;
+        opacity: 0;
+        max-height: 0;
+        transition: all 0.4s ease;
+        visibility: hidden;
+        background-color: var(--secondary-color);
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .dropdown:hover .dropdown-content {
+        opacity: 1;
+        max-height: 500px;
+        visibility: visible;
+    }
+
+    .sub-dropdown-content {
+        display: block;
+        opacity: 0;
+        max-height: 0;
+        transition: all 0.4s ease;
+        visibility: hidden;
+        position: absolute;
+        min-width: 14rem;
+        background-color: var(--secondary-color);
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .has-sub-dropdown:hover .sub-dropdown-content {
+        opacity: 1;
+        max-height: 500px;
+        visibility: visible;
+    }
+
+    .rotate-sub-icon {
+        transform: rotate(0deg);
+        transition: transform 0.3s ease;
+    }
+
+    .has-sub-dropdown:hover .rotate-sub-icon {
+        transform: rotate(-90deg);
+    }
+
+    .dropdown:hover .rotate-icon {
+        transform: rotate(180deg);
+    }
+
+    /* Dynamic positioning classes */
+    .dropdown-content-right {
+        left: 0;
+    }
+
+    .dropdown-content-left {
+        right: 0;
+    }
+
+    .sub-dropdown-content-right {
+        left: 100%;
+        top: 0;
+    }
+
+    .sub-dropdown-content-left {
+        right: 100%;
+        top: 0;
+    }
+
+    #menu-overlay {
+        display: none;
+    }
+}
+
+/* Mobile Dropdown Styles */
+.mobile-dropdown {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.mobile-dropdown.open {
+    max-height: 1000px;
+    transition: max-height 0.5s ease-in;
+    -webkit-transition: max-height 0.5s ease-in;
+    -moz-transition: max-height 0.5s ease-in;
+    -ms-transition: max-height 0.5s ease-in;
+    -o-transition: max-height 0.5s ease-in;
+}
+
+.mobile-dropdown-btn.open {
+    background: red !important;
+}
+
+.sub-mobile-dropdown {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.sub-mobile-dropdown.open {
+    max-height: 1000px;
+    transition: max-height 0.5s ease-in;
+}
+
+.mobile-dropdown-icon {
+    transition: transform 0.3s ease;
+}
+
+.mobile-dropdown-icon.open {
+    transform: rotate(180deg);
+}
+/* Navbar End */
+
+
+/* Notice single page Start */
+@media print {
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    body * {
+        visibility: hidden;
+    }
+
+    .viewer-box,
+    .viewer-box * {
+        visibility: visible;
+    }
+
+    .viewer-box {
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        display: block !important;
+        box-sizing: border-box;
+    }
+
+    .zoom-container {
+        width: 100%;
+        height: 100%;
+        transform: none !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    .zoom-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: fill;
+        margin: 0;
+        padding: 0;
+        display: block;
+    }
+}
+/* Notice single page End */

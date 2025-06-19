@@ -1,0 +1,109 @@
+/* Font imports for website */
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Albert+Sans:ital,wght@0,100..900;1,100..900&display=swap");
+
+/* Import Tailwind */
+@import "tailwindcss";
+
+/* Website-specific styles */
+.website-layout {
+    --primary-font: "Space Grotesk";
+    --secondary-font: "Albert Sans";
+    --primary-color: #5AA469;
+    --secondary-color: #ffffff;
+    --ac-1: #c6c6c6;
+    --ac-2: #eeeeee;
+    --shade-1: #F4FFF2;
+    --shade-2: #facfae;
+    --main-60: #f7b786;
+    --main-80: #f59f5d;
+    --main-120: #c26c2a;
+    --main-140: #915120;
+    --main-160: #613615;
+    --main-180: #301b0b;
+    --text-1: #171717;
+    --text-2: #454545;
+    --ac-black: #000000;
+
+    font-family: var(--primary-font);
+    @apply min-h-screen flex flex-col bg-white;
+}
+
+.website-layout .main {
+    @apply flex-1;
+}
+
+.website-layout * {
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+.website-layout h1,
+.website-layout h2,
+.website-layout h3,
+.website-layout h4,
+.website-layout h5 {
+    margin-top: 0;
+}
+
+.website-layout h6 {
+    font-family: var(--secondary-font);
+}
+
+.website-layout a {
+    text-decoration: none !important;
+}
+
+.website-layout p {
+    color: var(--ac-1);
+    text-align: center;
+    font-family: var(--secondary-font);
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 28.8px;
+}
+
+.website-layout ul {
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none;
+}
+
+.website-layout button {
+    border: none;
+    outline: none;
+}
+
+.website-layout input {
+    outline: none;
+}
+
+/* Webkit Scrollbar */
+.website-layout ::-webkit-scrollbar {
+    width: 10px;
+}
+
+.website-layout ::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+}
+
+.website-layout ::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    transition: 0.3s;
+    background: var(--primary-color);
+}
+
+.website-layout ::-webkit-scrollbar-thumb:hover {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Container Setup */
+.website-layout .custom-container {
+    @apply mx-auto px-4 sm:px-6 lg:px-8 max-w-[1480px] xl:max-w-[1280px] lg:max-w-[1024px] md:max-w-[768px] sm:max-w-[640px];
+}
+
+/* Output styles (merged from output.css) */
+.website-layout .output {
+    @apply text-gray-900 dark:text-gray-100;
+}

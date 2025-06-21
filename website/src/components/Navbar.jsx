@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import Logo from '../../public/icon/Logo.svg';
+import Logo from '../assets/icon/Logo.svg';
 
 const Navbar = () => {
     // State for mobile menu visibility
@@ -255,7 +255,7 @@ const Navbar = () => {
             >
                 <div className="flex justify-between items-center px-4 py-3 border-b">
                     <Link to="/" className="text-xl font-bold">
-                        <img className="w-[100px] object-contain" src="/icon/Logo.svg" alt="" />
+                        <img className="w-[100px] object-contain" src="/website/src/assets/icon/Logo.svg" alt="" />
                     </Link>
                     <button onClick={toggleMobileMenu} id="close-menu" className="text-[var(--text-1)] cursor-pointer">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

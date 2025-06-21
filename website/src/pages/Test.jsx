@@ -12,7 +12,6 @@ const Home = () => {
 
     return (
         <>
-            {/*Hero Start*/}
             <div className="hero bg-[var(--secondary-color)] overflow-hidden pt-[60px]">
                 <div className="custom-container mx-auto">
                     <div className="flex flex-wrap">
@@ -31,24 +30,22 @@ const Home = () => {
                                 <h1
                                     className="text-[38px] lg:text-[52px] text-center lg:text-left font-bold text-[var(text-1)] mb-[20px] uppercase">
                                     Innovative, Reliable, Expert
-                                    <span className="text-[var(--primary-color)]">{" "}Builders</span>,
+                                    <span className="text-[var(--primary-color)]">Builders</span>,
                                     Endless Possibilities
-                                    <span className="text-[var(--primary-color)]">{" "}!!!</span>
+                                    <span className="text-[var(--primary-color)]">!!!</span>
                                 </h1>
                                 <div className="lg:w-[92%] w-[100%] overflow-hidden rounded-[24px_0px_24px_24px]">
-                                    <img src="./public/img/home/hero-img1.png" alt="" className="w-full object-cover" />
+                                    <img src="./public/img/home/hero-img1.png" alt="" className="w-full object-cover"/>
                                 </div>
                             </div>
                         </div>
                         <div className="w-full lg:w-1/2 overflow-hidden mt-[40px] lg:mt-[0px]">
                             <div
                                 className="notice_board w-full bg-[var(--secondary-color)] border border-[var(--ac-1)] rounded-3xl overflow-hidden p-0">
-                                <h3
-                                    className="header bg-[var(--primary-color)] text-[var(--secondary-color)] font-[var(--primary-font)] text-center py-2.5 px-4 text-[28px] font-medium mb-0">
+                                <h3 className="header bg-[var(--primary-color)] text-[var(--secondary-color)] font-[var(--primary-font)] text-center py-2.5 px-4 text-[28px] font-medium mb-0">
                                     NOTICE BOARD
                                 </h3>
-
-                                <div className="notice_item h-[450px] overflow-hidden">
+                                <div className="notice_item min-h-[450px] overflow-y-auto">
                                     <ul className="notices overflow-hidden relative">
                                         {notices.map((notice) => (
                                             <li key={notice.id}
@@ -79,66 +76,67 @@ const Home = () => {
                                         ))}
                                     </ul>
                                 </div>
-
                                 <div className="button text-center">
-                                    <button
-                                        className="view_note_btn cursor-pointer relative inline-flex items-center justify-center px-8 my-5 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-0 rounded-tr-lg rounded-bl-lg rounded-br-lg group">
-                <span
-                    className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>
+                                    <Link
+                                        to="/notices"
+                                        className="view_note_btn cursor-pointer relative inline-flex items-center justify-center px-8 my-5 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-0 rounded-tr-lg rounded-bl-lg rounded-br-lg group"
+                                        aria-label="View all notices"
+                                    >
+                                        <span
+                                            className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>
                                         <span className="relative text-base font-semibold">VIEW ALL NOTICE</span>
-                                    </button>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            {}
 
             <style>
                 {`
                   @keyframes dash {
-                      to {
-                        background-position: 100% 0%, 0% 100%, 0% 0%, 100% 100%;
-                      }
+                    to {
+                      background-position: 100% 0%, 0% 100%, 0% 0%, 100% 100%;
                     }
-        
-                    .hero .notice .date {
-                      position: relative;
-                      width: 52px;
-                      height: 52px;
-                      background: linear-gradient(90deg, #5aa469 50%, transparent 50%),
-                        linear-gradient(90deg, #5aa469 50%, transparent 50%),
-                        linear-gradient(0deg, #5aa469 50%, transparent 50%),
-                        linear-gradient(0deg, #5aa469 50%, transparent 50%);
-                      background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
-                      background-size: 9px 2px, 9px 2px, 2px 9px, 2px 9px;
-                      background-position: 0% 0%, 100% 100%, 0% 100%, 100% 0px;
-                      border-radius: 12px 12px 12px 0px;
-                      padding: 10px;
-                      margin-right: 20px;
-                      margin-top: 10px;
-                      animation: dash 5s linear infinite;
-                      cursor: default;
-                      z-index: 1;
-                    }
-        
-                    .hero .notice .date::before {
-                      content: "";
-                      position: absolute;
-                      top: -10px;
-                      width: 50px;
-                      height: 50px;
-                      border-radius: 12px 12px 12px 0px;
-                      background-color: var(--primary-color) !important;
-                      display: flex;
-                      flex-direction: column;
-                      justify-content: center;
-                      align-items: center;
-                      font-size: 16px;
-                      z-index: -1;
-                      font-weight: bold;
-                    }
+                  }
+
+                  .hero .notice .date {
+                    position: relative;
+                    width: 52px;
+                    height: 52px;
+                    background: linear-gradient(90deg, #5aa469 50%, transparent 50%),
+                               linear-gradient(90deg, #5aa469 50%, transparent 50%),
+                               linear-gradient(0deg, #5aa469 50%, transparent 50%),
+                               linear-gradient(0deg, #5aa469 50%, transparent 50%);
+                    background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+                    background-size: 9px 2px, 9px 2px, 2px 9px, 2px 9px;
+                    background-position: 0% 0%, 100% 100%, 0% 100%, 100% 0px;
+                    border-radius: 12px 12px 12px 0px;
+                    padding: 10px;
+                    margin-right: 20px;
+                    margin-top: 10px;
+                    animation: dash 5s linear infinite;
+                    cursor: default;
+                    z-index: 1;
+                  }
+
+                  .hero .notice .date::before {
+                    content: "";
+                    position: absolute;
+                    top: -10px;
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 12px 12px 12px 0px;
+                    background-color: var(--primary-color, #c26c2a) !important;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    font-size: 16px;
+                    z-index: -1;
+                    font-weight: bold;
+                  }
                 `}
             </style>
         </>

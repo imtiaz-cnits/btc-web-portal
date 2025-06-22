@@ -12,6 +12,10 @@ const Home = () => {
         { id: 3, date: '22 Dec', title: 'South Asia regional conference on public procurement in Dhaka Nov 1-3', link: '/notice/3' },
         { id: 4, date: '23 Dec', title: 'South Asia regional conference on public procurement in Dhaka Nov 1-3', link: '/notice/4' },
         { id: 5, date: '27 Dec', title: 'South Asia regional conference on public procurement in Dhaka Nov 1-3', link: '/notice/5' },
+        { id: 5, date: '27 Dec', title: 'South Asia regional conference on public procurement in Dhaka Nov 1-3', link: '/notice/5' },
+        { id: 5, date: '27 Dec', title: 'South Asia regional conference on public procurement in Dhaka Nov 1-3', link: '/notice/5' },
+        { id: 5, date: '27 Dec', title: 'South Asia regional conference on public procurement in Dhaka Nov 1-3', link: '/notice/5' },
+        { id: 5, date: '27 Dec', title: 'South Asia regional conference on public procurement in Dhaka Nov 1-3', link: '/notice/5' },
     ];
 
     const noticeBoardRef = useRef(null);
@@ -102,7 +106,7 @@ const Home = () => {
 
         let triggers = []; // Store ScrollTrigger instances for cleanup
 
-        // Counter Wrapper Section Animation
+        // CounterWrapper Section Animation
         const counterNumbers = counterStatsRef.current?.querySelectorAll('.numbers');
         if (counterNumbers && counterNumbers.length > 0) {
             counterNumbers.forEach((counter) => {
@@ -219,16 +223,16 @@ const Home = () => {
                                                             {notice.date.split(' ')[1]}
                                                         </div>
                                                     </div>
-                                                    <div className="content leading-[18px]">
-                                                        <Link
-                                                            to={notice.link}
-                                                            className="link text-[var(--text-2, #666)] text-base font-[var(--secondary-font)] font-medium transition duration-300 hover:text-[var(--primary-color)]"
-                                                            aria-label={`Read more about ${notice.title}`}
-                                                        >
-                                                            {notice.title}
-                                                        </Link>
-                                                    </div>
                                                 </Link>
+                                                <div className="content leading-[18px]">
+                                                    <Link
+                                                        to={notice.link}
+                                                        className="link text-[var(--text-2, #666)] text-base font-[var(--secondary-font)] font-medium transition duration-300 hover:text-[var(--primary-color)]"
+                                                        aria-label={`Read more about ${notice.title}`}
+                                                    >
+                                                        {notice.title}
+                                                    </Link>
+                                                </div>
                                             </li>
                                         ))}
                                     </ul>

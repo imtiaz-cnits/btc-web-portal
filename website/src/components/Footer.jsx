@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import FooterLogo from '../assets/icon/Logo.svg';
 
 const Footer = () => {
     const backToTopRef = useRef(null);
@@ -61,7 +62,7 @@ const Footer = () => {
                     >
                         <div className="information">
                             <div className="mb-5">
-                                <img src="/website/src/assets/icon/Logo.svg" alt="BTC Company Logo" className="max-w-[150px]" />
+                                <img src={FooterLogo} alt="BTC Company Logo" className="max-w-[150px]" />
                             </div>
                             <h2 className="max-w-[650px] text-[28px] text-left text-[var(--primary-color)] mb-10 font-normal">
                                 IMPROVING PEOPLE'S FUTURES THROUGH BUILDING INFRASTRUCTURE

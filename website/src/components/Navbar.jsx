@@ -1,19 +1,72 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Logo from '../assets/icon/Logo.svg';
 
 const Navbar = () => {
-    // State for mobile menu visibility
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    // State for mobile dropdown visibility
     const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
-    // Ref for dropdown button and content to detect outside clicks
     const dropdownRef = useRef(null);
+    const marqueeContainerRef = useRef(null);
 
-    // Toggle mobile menu
+    // Marquee Animation
+    useEffect(() => {
+        const marqueeContainer = marqueeContainerRef.current;
+        const items = marqueeContainer?.querySelectorAll('.js_text');
+        if (!marqueeContainer || !items?.length) return;
+
+        let totalWidth = 0;
+        items.forEach((item) => {
+            const itemWidth = item.offsetWidth;
+            const itemMargin = parseInt(window.getComputedStyle(item).marginRight) || 0;
+            totalWidth += itemWidth + itemMargin;
+        });
+
+        const clones = [];
+        items.forEach((item) => {
+            const clone = item.cloneNode(true);
+            clones.push(clone);
+            marqueeContainer.appendChild(clone);
+        });
+
+        let position = 0;
+        let animationId;
+        const containerWidth = marqueeContainer.offsetWidth;
+
+        const animate = () => {
+            position -= 1;
+            if (-position >= totalWidth / 2) {
+                position = 0;
+            }
+            marqueeContainer.style.transform = `translateX(${position}px)`;
+            animationId = requestAnimationFrame(animate);
+        };
+
+        const startAnimation = () => {
+            if (!animationId) {
+                animate();
+            }
+        };
+
+        const stopAnimation = () => {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+        };
+
+        startAnimation();
+
+        marqueeContainer.addEventListener('mouseenter', stopAnimation);
+        marqueeContainer.addEventListener('mouseleave', startAnimation);
+
+        return () => {
+            stopAnimation();
+            marqueeContainer.removeEventListener('mouseenter', stopAnimation);
+            marqueeContainer.removeEventListener('mouseleave', startAnimation);
+        };
+    }, []);
+
+    // Mobile Menu and Dropdown Toggle
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
-        // Close dropdown when menu is closed
         if (isMobileMenuOpen) {
             setIsMobileDropdownOpen(false);
         }
@@ -25,26 +78,26 @@ const Navbar = () => {
         setIsMobileDropdownOpen(!isMobileDropdownOpen);
     };
 
-    // Close dropdown on outside click
+    // Close mobile menu when clicking outside
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
                 setIsMobileDropdownOpen(false);
             }
         };
-
         document.addEventListener('click', handleClickOutside);
-        return () => {
-            document.removeEventListener('click', handleClickOutside);
-        };
+        return () => document.removeEventListener('click', handleClickOutside);
     }, []);
 
     return (
         <div>
-            {/* Top Notice Board Start */}
+            {/* Top Notice Board */}
             <div className="top_notice_board bg-[var(--text-1)] py-[6px]">
                 <div className="text_marquee flex items-center overflow-x-hidden">
-                    <div className="text_single relative flex items-center whitespace-nowrap p-0 m-0 will-change-transform">
+                    <div
+                        className="text_single relative flex items-center whitespace-nowrap p-0 m-0 will-change-transform"
+                        ref={marqueeContainerRef}
+                    >
                         {Array.from({ length: 13 }, (_, i) => (
                             <Link
                                 key={i}
@@ -58,15 +111,12 @@ const Navbar = () => {
                     </div>
                 </div>
             </div>
-            {/* Top Notice Board End */}
 
-            {/* Main Top bar Start */}
+            {/* Top Bar */}
             <div className="topbar hidden lg:block">
                 <div className="custom-container mx-auto">
                     <div className="flex justify-between items-center py-2.5 border-b border-b-[var(--ac-1)]">
-                        {/* Contact Section */}
                         <div className="flex justify-between items-center">
-                            {/* Phone */}
                             <div className="flex items-center gap-1">
                                 <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -89,11 +139,7 @@ const Navbar = () => {
                                     01711010929-(Imran), 01711805086-(Shah Alom)
                                 </a>
                             </div>
-
-                            {/* Divider */}
                             <div className="text-text-1 text-xl font-normal mx-2.5">|</div>
-
-                            {/* Email */}
                             <div className="flex items-center gap-1">
                                 <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -121,8 +167,6 @@ const Navbar = () => {
                                 </a>
                             </div>
                         </div>
-
-                        {/* Social Icons */}
                         <div className="flex items-center gap-6">
                             <a href="https://www.facebook.com/share/16cBeKdBrD/" className="hover:text-[var(--primary-color)] transition duration-400">
                                 <i className="fa-brands fa-facebook-f text-text-1 text-xl hover:text-[var(--primary-color)] transition duration-400"></i>
@@ -140,9 +184,8 @@ const Navbar = () => {
                     </div>
                 </div>
             </div>
-            {/* Top bar End */}
 
-            {/* Navbar Start */}
+            {/* Navbar */}
             <nav className="bg-[var(--secondary-color)] sticky top-0 w-full z-[50]">
                 <div className="custom-container">
                     <div className="w-full border-b border-b-[var(--ac-1)]">
@@ -150,39 +193,21 @@ const Navbar = () => {
                             <Link to="/" className="text-2xl font-extrabold">
                                 <img className="w-[160px] object-contain" src={Logo} alt="" />
                             </Link>
-
-                            {/* Desktop Menu */}
                             <div className="hidden lg:flex space-x-6 items-center">
-                                <Link
-                                    to="/"
-                                    className="active:text-[var(--primary-color)] text-[var(--primary-color)] transition duration-300 font-medium"
-                                >
+                                <Link to="/" className="text-[var(--primary-color)] transition duration-300 font-medium">
                                     HOME
                                 </Link>
-                                <Link
-                                    to="/services"
-                                    className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium"
-                                >
+                                <Link to="/services" className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
                                     SERVICES
                                 </Link>
-                                <Link
-                                    to="/tender"
-                                    className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium"
-                                >
+                                <Link to="/tender" className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
                                     TENDER
                                 </Link>
-                                <Link
-                                    to="/projects"
-                                    className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium"
-                                >
+                                <Link to="/projects" className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
                                     PROJECTS
                                 </Link>
-
-                                {/* Pages Dropdown */}
                                 <div className="relative dropdown group">
-                                    <button
-                                        className="flex cursor-pointer items-center text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium"
-                                    >
+                                    <button className="flex cursor-pointer items-center text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
                                         PAGES
                                         <svg className="w-4 h-4 ml-1 rotate-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -192,7 +217,7 @@ const Navbar = () => {
                                         <Link to="/notice" className="block px-4 py-2 hover:bg-[var(--primary-color)]">
                                             NOTICE
                                         </Link>
-                                        <Link to="/gallery" className="block px-4 py-2 hover:bg-[var(--primary-color)]">
+                                        <Link to="gallery" className="block px-4 py-2 hover:bg-[var(--primary-color)]">
                                             GALLERY
                                         </Link>
                                         <Link to="/blog" className="block px-4 py-2 hover:bg-[var(--primary-color)]">
@@ -206,28 +231,19 @@ const Navbar = () => {
                                         </Link>
                                     </div>
                                 </div>
-
-                                <Link
-                                    to="/about"
-                                    className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium"
-                                >
+                                <Link to="/about" className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
                                     ABOUT US
                                 </Link>
                             </div>
-
                             <div className="hidden lg:block">
                                 <Link
                                     to="/contact"
                                     className="contact_btn cursor-pointer relative inline-flex items-center justify-center px-8 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-lg rounded-tr-lg rounded-bl-0 rounded-br-lg group"
                                 >
-                                    <span
-                                        className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"
-                                    ></span>
+                                    <span className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>
                                     <span className="relative text-base font-semibold">CONTACT US</span>
                                 </Link>
                             </div>
-
-                            {/* Mobile Menu Button */}
                             <div className="lg:hidden">
                                 <button onClick={toggleMobileMenu} id="menu-btn" className="text-[var(--text-1)] cursor-pointer">
                                     <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -246,16 +262,15 @@ const Navbar = () => {
                 </div>
             </nav>
 
-            {/* Mobile Menu Start */}
+            {/* Mobile Menu */}
             <div
                 id="mobile-menu"
-                className={`fixed overflow-auto top-0 left-0 h-full w-64 bg-[var(--secondary-color)] shadow-lg transform ${
-                    isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed overflow-auto top-0 left-0 h-full w-64 bg-[var(--secondary-color)] shadow-lg transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
                 } transition-transform duration-300 ease-in-out z-[52] lg:hidden`}
             >
                 <div className="flex justify-between items-center px-4 py-3 border-b">
                     <Link to="/" className="text-xl font-bold">
-                        <img className="w-[100px] object-contain" src="/website/src/assets/icon/Logo.svg" alt="" />
+                        <img className="w-[100px] object-contain" src={Logo} alt="" />
                     </Link>
                     <button onClick={toggleMobileMenu} id="close-menu" className="text-[var(--text-1)] cursor-pointer">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -264,10 +279,7 @@ const Navbar = () => {
                     </button>
                 </div>
                 <div className="px-4 py-2 space-y-1" ref={dropdownRef}>
-                    <Link
-                        to="/"
-                        className="block px-3 py-2 text-[var(--text-1)] bg-[var(--shade-1)] active:bg-[var(--shade-1)] rounded-lg"
-                    >
+                    <Link to="/" className="block px-3 py-2 text-[var(--text-1)] bg-[var(--shade-1)] active:bg-[var(--shade-1)] rounded-lg">
                         HOME
                     </Link>
                     <Link to="/services" className="block px-3 py-2 text-[var(--text-1)] hover:bg-[var(--shade-1)] rounded-lg">
@@ -279,8 +291,6 @@ const Navbar = () => {
                     <Link to="/projects" className="block px-3 py-2 text-[var(--text-1)] hover:bg-[var(--shade-1)] rounded-lg">
                         PROJECTS
                     </Link>
-
-                    {/* Pages Dropdown */}
                     <div>
                         <button
                             onClick={toggleMobileDropdown}
@@ -296,50 +306,30 @@ const Navbar = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
-                        <div
-                            className={`mobile-dropdown ${isMobileDropdownOpen ? 'open' : ''} bg-[var(--text-1)] rounded-lg`}
-                        >
-                            <Link
-                                to="/notice"
-                                className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]"
-                            >
+                        <div className={`mobile-dropdown ${isMobileDropdownOpen ? 'open' : ''} bg-[var(--text-1)] rounded-lg`}>
+                            <Link to="/notice" className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
                                 NOTICE
                             </Link>
-                            <Link
-                                to="/gallery"
-                                className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]"
-                            >
+                            <Link to="/gallery" className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
                                 GALLERY
                             </Link>
-                            <Link
-                                to="/blog"
-                                className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]"
-                            >
+                            <Link to="/blog" className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
                                 BLOG
                             </Link>
-                            <Link
-                                to="/privacy-policy"
-                                className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]"
-                            >
+                            <Link to="/privacy-policy" className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
                                 PRIVACY POLICY
                             </Link>
-                            <Link
-                                to="/terms-conditions"
-                                className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]"
-                            >
+                            <Link to="/terms-conditions" className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
                                 TERMS & CONDITIONS
                             </Link>
                         </div>
                     </div>
-
                     <Link to="/about" className="block px-3 py-2 text-[var(--text-1)] hover:bg-[var(--shade-1)] rounded-lg">
                         ABOUT US
                     </Link>
                 </div>
-
                 <div className="px-4 py-2">
                     <div className="border-t border-t-[var(--ac-1)]"></div>
-                    {/* Social Icons */}
                     <div className="flex items-center gap-6 my-5">
                         <a href="#" className="hover:text-[var(--primary-color)] transition duration-400">
                             <i className="fa-brands fa-facebook-f text-text-1 text-xl hover:text-[var(--primary-color)] transition duration-400"></i>
@@ -359,22 +349,17 @@ const Navbar = () => {
                             to="/contact"
                             className="contact_btn w-full cursor-pointer relative inline-flex items-center justify-center px-8 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-lg rounded-tr-lg rounded-bl-0 rounded-br-lg group"
                         >
-                            <span
-                                className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"
-                            ></span>
+                            <span className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>
                             <span className="relative text-base font-semibold">CONTACT US</span>
                         </Link>
                     </div>
                 </div>
             </div>
-
-            {/* Overlay for Mobile Menu */}
             <div
                 id="menu-overlay"
                 className={`fixed top-0 left-0 w-full h-full bg-[#00000036] z-[51] ${isMobileMenuOpen ? 'block' : 'hidden'}`}
                 onClick={toggleMobileMenu}
             ></div>
-            {/* Mobile Menu End */}
         </div>
     );
 };

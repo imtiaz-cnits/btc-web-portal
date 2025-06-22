@@ -5,7 +5,7 @@ import Home from './pages/Home.jsx';
 // import Services from './pages/Services.jsx';
 // import Tender from './pages/Tender.jsx';
 // import Projects from './pages/Projects.jsx';
-// import Notice from './pages/Notice.jsx';
+import Notice from './pages/Notice.jsx';
 // import Gallery from './pages/Gallery.jsx';
 // import Blog from './pages/Blog.jsx';
 // import PrivacyPolicy from './pages/PrivacyPolicy.jsx';
@@ -21,7 +21,7 @@ const App = () => {
                 {/*<Route path="/services" element={<Services />} />*/}
                 {/*<Route path="/tender" element={<Tender />} />*/}
                 {/*<Route path="/projects" element={<Projects />} />*/}
-                {/*<Route path="/notice" element={<Notice />} />*/}
+                <Route path="/notice" element={<Notice />} />
                 {/*<Route path="/gallery" element={<Gallery />} />*/}
                 {/*<Route path="/blog" element={<Blog />} />*/}
                 {/*<Route path="/privacy-policy" element={<PrivacyPolicy />} />*/}

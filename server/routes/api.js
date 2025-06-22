@@ -22,7 +22,7 @@ apiRouter.get("/user-data", AuthMiddleware, getUserData);
 
 // Notice CRUD routes
 apiRouter.post("/add-notice", AuthMiddleware, upload.single("file"), createNotice);
-apiRouter.get("/notices", AuthMiddleware, viewNotice);
+apiRouter.get("/notices", viewNotice);
 apiRouter.put("/notices/:id", AuthMiddleware, upload.single("file"), (req, res, next) => {
     const { id } = req.params;
     if (!id || id === ':' || !/^[a-f\d]{24}$/i.test(id)) {

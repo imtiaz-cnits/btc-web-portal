@@ -1,110 +1,81 @@
-import React, { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import React, {useEffect, useRef, useState} from 'react';
+import {Link, useNavigate} from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import api from '../../api/index.js';
 import HeroImage from '../assets/img/home/hero-img1.png';
 import AboutImage from '../assets/img/home/about-image.png';
+import {
+    useGsapAnimation,
+    gsapAnimations,
+    useVerticalNotice,
+    useClientScroller,
+    } from '../assets/js/style.js';
 
 const Home = () => {
-    const notices = [
-        { id: 1, date: '24 Dec', title: 'Call for tenders on public procurement', link: '/notice/1' },
-        { id: 2, date: '26 Dec', title: 'South Asia regional conference on public procurement in Dhaka Nov 1-3', link: '/notice/2' },
-        { id: 3, date: '22 Dec', title: 'South Asia regional conference on public procurement in Dhaka Nov 1-3', link: '/notice/3' },
-        { id: 4, date: '23 Dec', title: 'South Asia regional conference on public procurement in Dhaka Nov 1-3', link: '/notice/4' },
-        { id: 5, date: '27 Dec', title: 'South Asia regional conference on public procurement in Dhaka Nov 1-3', link: '/notice/5' },
-        { id: 5, date: '27 Dec', title: 'South Asia regional conference on public procurement in Dhaka Nov 1-3', link: '/notice/5' },
-        { id: 5, date: '27 Dec', title: 'South Asia regional conference on public procurement in Dhaka Nov 1-3', link: '/notice/5' },
-        { id: 5, date: '27 Dec', title: 'South Asia regional conference on public procurement in Dhaka Nov 1-3', link: '/notice/5' },
-        { id: 5, date: '27 Dec', title: 'South Asia regional conference on public procurement in Dhaka Nov 1-3', link: '/notice/5' },
-    ];
+    const [notices, setNotices] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
+    const navigate = useNavigate();
     const noticeBoardRef = useRef(null);
-    const noticeListRef = useRef(null);
     const heroThemeRef = useRef(null);
-
     const counterStatsRef = useRef(null);
     const aboutStatsRef = useRef(null);
 
-    // Register GSAP plugins
+    // Fetch notices from backend
     useEffect(() => {
-        // Register ScrollTrigger
-        gsap.registerPlugin(ScrollTrigger);
+        const fetchNotices = async () => {
+            try {
+                const response = await api.get('/notices');
 
-        // Notice Board Animation
-        gsap.fromTo(
-            noticeBoardRef.current,
-            { y: '30%', opacity: 0 },
-            {
-                y: '0%',
-                opacity: 1,
-                duration: 1,
-                scrollTrigger: {
-                    trigger: noticeBoardRef.current,
-                    start: 'top 80%',
-                    end: 'top 50%',
-                    toggleActions: 'play none none none',
-                },
+                if (response.data.success) {
+                    const formattedNotices = response.data.notices.map(notice => ({
+                        id: notice._id,
+                        date: notice.publishDate
+                            ? new Date(notice.publishDate).toLocaleDateString('en-US', {
+                                day: '2-digit',
+                                month: 'short',
+                            }).replace(/,/, '')
+                            : 'N/A',
+                        title: notice.title,
+                        link: `/notice/${notice._id}`,
+                    }));
+                    setNotices(formattedNotices);
+                    setLoading(false);
+                } else {
+                    throw new Error(response.data.message || 'Failed to fetch notices');
+                }
+            } catch (err) {
+                if (err.response?.status === 401) {
+                    setError('Session expired. Please log in again.');
+                    localStorage.removeItem('token');
+                    navigate('/login');
+                } else {
+                    setError(err.message || 'Failed to load notices. Please try again later.');
+                }
+                setLoading(false);
+                console.error('Error fetching notices:', err);
             }
-        );
+        };
 
-        // Hero Theme Animation
-        gsap.fromTo(
-            heroThemeRef.current,
-            { x: '-30%', opacity: 0 },
-            {
-                x: '0%',
-                opacity: 1,
-                duration: 1,
-                scrollTrigger: {
-                    trigger: heroThemeRef.current,
-                    start: 'top 80%',
-                    end: 'top 50%',
-                    toggleActions: 'play none none none',
-                },
-            }
-        );
+        fetchNotices();
+    }, [navigate]);
 
-        // Vertical Notice Board Scrolling
-        const noticeItem = noticeListRef.current;
-        const noticeItems = noticeItem?.querySelectorAll('li');
-        if (noticeItems?.length > 0) {
-            const tickerHeight = noticeItems[0].offsetHeight;
-            noticeItem.style.marginTop = `-${tickerHeight}px`;
+    // Use custom hook for vertical notice scrolling
+    const { noticeRef, handleMouseEnter, handleMouseLeave } = useVerticalNotice();
 
-            const moveTop = () => {
-                noticeItem.style.transition = 'top 600ms ease';
-                noticeItem.style.top = `-${tickerHeight}px`;
+    // Use custom hook for GSAP animations
+    useGsapAnimation(gsapAnimations);
 
-                setTimeout(() => {
-                    const firstItem = noticeItem.querySelector('li:first-child');
-                    noticeItem.appendChild(firstItem);
-                    noticeItem.style.transition = 'none';
-                    noticeItem.style.top = '0';
-                    void noticeItem.offsetHeight; // Trigger reflow
-                }, 600);
-            };
+    // Use custom hook for clients slider scroller
+    const { scrollerRefs, handleMouseEnter: handleScrollerMouseEnter, handleMouseLeave: handleScrollerMouseLeave } = useClientScroller();
 
-            const interval = setInterval(moveTop, 2000);
-
-            const parent = noticeItem.parentElement;
-            parent.addEventListener('mouseenter', () => clearInterval(interval));
-            parent.addEventListener('mouseleave', () => {
-                moveTop();
-                setInterval(moveTop, 2000);
-            });
-
-            return () => {
-                clearInterval(interval);
-                parent.removeEventListener('mouseenter', () => {});
-                parent.removeEventListener('mouseleave', () => {});
-            };
-        }
-    }, []);
-
+    // Register GSAP and ScrollTrigger plugins
     useEffect(() => {
         gsap.registerPlugin(ScrollTrigger);
 
-        let triggers = []; // Store ScrollTrigger instances for cleanup
+        let triggers = [];
 
         // CounterWrapper Section Animation
         const counterNumbers = counterStatsRef.current?.querySelectorAll('.numbers');
@@ -162,7 +133,6 @@ const Home = () => {
             });
         }
 
-        // Cleanup specific ScrollTriggers
         return () => {
             triggers.forEach((trigger) => trigger.kill());
         };
@@ -179,16 +149,13 @@ const Home = () => {
                                 <div
                                     className="flex justify-center lg:justify-start items-center gap-[10px] mb-[20px]">
                                     <h1 className="text-[16px] font-[var(--primary-font)] text-[var(text-1)] bg-[var(--shade-1)] px-[20px] py-[5px] rounded-[30px]">
-                                        CONSTRUCTION
-                                    </h1>
-                                    <h1 className="text-[16px] font-[var(--primary-font)] text-[var(text-1)] bg-[var(--shade-1)] px-[20px] py-[5px] rounded-[30px]">
-                                        TENDERING
+                                        Your Safe Innovation
                                     </h1>
                                 </div>
                                 <h1 className="text-[38px] lg:text-[52px] text-center lg:text-left font-bold text-[var(text-1)] mb-[20px] uppercase">
-                                    Innovative, Reliable, Expert
-                                    <span className="text-[var(--primary-color)]"> Builders</span>,
-                                    Endless Possibilities
+                                    Welcome to the
+                                    <span className="text-[var(--primary-color)]"> Building Technology {" "}</span>
+                                    & Consultant
                                     <span className="text-[var(--primary-color)]"> !!!</span>
                                 </h1>
                                 <div className="lg:w-[92%] w-[100%] overflow-hidden rounded-[24px_0px_24px_24px]">
@@ -200,12 +167,29 @@ const Home = () => {
                             <div
                                 className="notice_board w-full bg-[var(--secondary-color)] border border-[var(--ac-1)] rounded-3xl overflow-hidden p-0"
                                 ref={noticeBoardRef}
+                                onMouseEnter={handleMouseEnter}
+                                onMouseLeave={handleMouseLeave}
                             >
                                 <h3 className="header bg-[var(--primary-color)] text-[var(--secondary-color)] font-[var(--primary-font)] text-center py-2.5 px-4 text-[28px] font-medium mb-0">
                                     NOTICE BOARD
                                 </h3>
                                 <div className="notice_item h-[450px] overflow-hidden">
-                                    <ul className="notices overflow-hidden relative" ref={noticeListRef}>
+
+                                    {loading ? (
+                                        <div className="flex justify-center items-center h-full">
+                                            <p className="text-[var(--text-2)] text-base">Loading notices...</p>
+                                        </div>
+                                    ) : error ? (
+                                        <div className="flex justify-center items-center h-full">
+                                            <p className="text-[var(--text-2)] text-base">{error}</p>
+                                        </div>
+                                    ) : notices.length === 0 ? (
+                                            <div className="flex justify-center items-center h-full">
+                                                <p className="text-[var(--text-2)] text-base">No notices available.</p>
+                                            </div>
+                                        ) : (
+
+                                    <ul className="notices overflow-hidden relative" ref={noticeRef}>
                                         {notices.map((notice) => (
                                             <li
                                                 key={notice.id}
@@ -216,11 +200,11 @@ const Home = () => {
                                                     <div className="date relative w-[52px] h-[52px]">
                                                         <div
                                                             className="day absolute top-[-12px] left-[19px] text-[var(--secondary-color)] font-[var(--primary-font)] font-medium text-[26px] z-[2]">
-                                                            {notice.date.split(' ')[0]}
+                                                            {notice.date.split(' ')[1]}
                                                         </div>
                                                         <div
                                                             className="month absolute top-[18px] left-[22px] font-medium font-[var(--secondary-font)] text-[var(--secondary-color)] text-base z-[2]">
-                                                            {notice.date.split(' ')[1]}
+                                                            {notice.date.split(' ')[0]}
                                                         </div>
                                                     </div>
                                                 </Link>
@@ -236,6 +220,7 @@ const Home = () => {
                                             </li>
                                         ))}
                                     </ul>
+                                        )};
                                 </div>
                                 <div className="button text-center">
                                     <button
@@ -253,11 +238,6 @@ const Home = () => {
 
             <style>
                 {`
-                  @keyframes dash {
-                    to {
-                      background-position: 100% 0%, 0% 100%, 0% 0%, 100% 100%;
-                    }
-                  }
                   .hero .notice .date {
                     position: relative;
                     width: 52px;
@@ -1377,64 +1357,130 @@ const Home = () => {
             {/* Client Start */}
             <div className="our_client bg-[var(--ac-2)] py-[60px] mt-[60px]">
                 <div className="heading_wrap text-center mb-[40px]">
-                <span
-                    className="tag text-[16px] font-medium font-[var(--primary-font)] text-[var(--secondary-color)] bg-[var(--primary-color)] py-[5px] px-[20px] rounded-[30px]">
-                    OUR TOP CLIENTS
-                </span>
+          <span
+              className="tag text-[16px] font-medium font-[var(--primary-font)] text-[var(--secondary-color)] bg-[var(--primary-color)] py-[5px] px-[20px] rounded-[30px]"
+          >
+            OUR TOP CLIENTS
+          </span>
                     <h2
-                        className="title text-[32px] lg:text-[38px] font-medium font-[var(--primary-font)] text-[var(--text-1)] py-[20px] px-[10px] pt-[20px] pb-0 uppercase max-w-[680px] mx-auto">
+                        className="title text-[32px] lg:text-[38px] font-medium font-[var(--primary-font)] text-[var(--text-1)] py-[20px] px-[10px] pt-[20px] pb-0 uppercase max-w-[680px] mx-auto"
+                    >
                         Trusted by innovators, leaders, and visionaries worldwide.
                     </h2>
                 </div>
 
-                <div className="logo_slider mb-4 scroller2 max-w-full overflow-hidden" data-speed="fast" data-animated="true">
+                <div
+                    className="logo_slider mb-4 scroller2 max-w-full overflow-hidden"
+                    data-speed="fast"
+                    data-animated="true"
+                    ref={(el) => (scrollerRefs.current[0] = el)}
+                    onMouseEnter={() => handleMouseEnter(0)}
+                    onMouseLeave={() => handleMouseLeave(0)}
+                >
                     <div
-                        className="logos_slide tag-list scroller__inner2 w-max flex flex-nowrap gap-[2.4rem] items-center py-[1rem] animate-[scroll_20s_forwards_linear_infinite] hover:[animation-play-state:paused]">
-                        <Link to="#" className="logo"><img src="./src/assets/img/home/client-logo1.png"
-                                                          className="w-[247px] h-[110px] rounded-[12px]" alt=""/></Link>
-                        <Link to="#" className="logo"><img src="./src/assets/img/home/client-logo2.png"
-                                                          className="w-[247px] h-[110px] rounded-[12px]" alt=""/></Link>
-                        <Link to="#" className="logo"><img src="./src/assets/img/home/client-logo3.png"
-                                                          className="w-[247px] h-[110px] rounded-[12px]" alt=""/></Link>
-                        <Link to="#" className="logo"><img src="./src/assets/img/home/client-logo4.png"
-                                                          className="w-[247px] h-[110px] rounded-[12px]" alt=""/></Link>
-                        <Link to="#" className="logo"><img src="./src/assets/img/home/client-logo5.png"
-                                                          className="w-[247px] h-[110px] rounded-[12px]" alt=""/></Link>
-                        <Link to="#" className="logo"><img src="./src/assets/img/home/client-logo6.png"
-                                                          className="w-[247px] h-[110px] rounded-[12px]" alt=""/></Link>
+                        className="logos_slide tag-list scroller__inner2 w-max flex flex-nowrap gap-[2.4rem] items-center py-[1rem]"
+                    >
+                        <Link to="#" className="logo">
+                            <img
+                                src="./src/assets/img/home/client-logo1.png"
+                                className="w-[247px] h-[110px] rounded-[12px]"
+                                alt=""
+                            />
+                        </Link>
+                        <Link to="#" className="logo">
+                            <img
+                                src="./src/assets/img/home/client-logo2.png"
+                                className="w-[247px] h-[110px] rounded-[12px]"
+                                alt=""
+                            />
+                        </Link>
+                        <Link to="#" className="logo">
+                            <img
+                                src="./src/assets/img/home/client-logo3.png"
+                                className="w-[247px] h-[110px] rounded-[12px]"
+                                alt=""
+                            />
+                        </Link>
+                        <Link to="#" className="logo">
+                            <img
+                                src="./src/assets/img/home/client-logo4.png"
+                                className="w-[247px] h-[110px] rounded-[12px]"
+                                alt=""
+                            />
+                        </Link>
+                        <Link to="#" className="logo">
+                            <img
+                                src="./src/assets/img/home/client-logo5.png"
+                                className="w-[247px] h-[110px] rounded-[12px]"
+                                alt=""
+                            />
+                        </Link>
+                        <Link to="#" className="logo">
+                            <img
+                                src="./src/assets/img/home/client-logo6.png"
+                                className="w-[247px] h-[110px] rounded-[12px]"
+                                alt=""
+                            />
+                        </Link>
                     </div>
                 </div>
 
-                <div className="logo_slider2 scroller max-w-full overflow-hidden" data-speed="fast" data-animated="true"
-                     data-direction="right">
+                <div
+                    className="logo_slider2 scroller max-w-full overflow-hidden"
+                    data-speed="fast"
+                    data-direction="right"
+                    ref={(el) => (scrollerRefs.current[1] = el)}
+                    onMouseEnter={() => handleMouseEnter(1)}
+                    onMouseLeave={() => handleMouseLeave(1)}
+                >
                     <div
-                        className="logos_slide2 tag-list scroller__inner w-max flex flex-nowrap gap-[2.4rem] items-center py-[1rem] animate-[scroll_20s_reverse_linear_infinite] hover:[animation-play-state:paused]">
-                        <Link to="#" className="logo"><img src="./src/assets/img/home/client-logo7.png"
-                                                          className="w-[247px] h-[110px] rounded-[12px]" alt=""/></Link>
-                        <Link to="#" className="logo"><img src="./src/assets/img/home/client-logo8.png"
-                                                          className="w-[247px] h-[110px] rounded-[12px]" alt=""/></Link>
-                        <Link to="#" className="logo"><img src="./src/assets/img/home/client-logo9.png"
-                                                          className="w-[247px] h-[110px] rounded-[12px]" alt=""/></Link>
-                        <Link to="#" className="logo"><img src="./src/assets/img/home/client-logo10.png"
-                                                          className="w-[247px] h-[110px] rounded-[12px]" alt=""/></Link>
-                        <Link to="#" className="logo"><img src="./src/assets/img/home/client-logo11.png"
-                                                          className="w-[247px] h-[110px] rounded-[12px]" alt=""/></Link>
-                        <Link to="#" className="logo"><img src="./src/assets/img/home/client-logo12.png"
-                                                          className="w-[247px] h-[110px] rounded-[12px]" alt=""/></Link>
+                        className="logos_slide2 tag-list scroller__inner w-max flex flex-nowrap gap-[2.4rem] items-center py-[1rem]"
+                    >
+                        <Link to="#" className="logo">
+                            <img
+                                src="./src/assets/img/home/client-logo7.png"
+                                className="w-[247px] h-[110px] rounded-[12px]"
+                                alt=""
+                            />
+                        </Link>
+                        <Link to="#" className="logo">
+                            <img
+                                src="./src/assets/img/home/client-logo8.png"
+                                className="w-[247px] h-[110px] rounded-[12px]"
+                                alt=""
+                            />
+                        </Link>
+                        <Link to="#" className="logo">
+                            <img
+                                src="./src/assets/img/home/client-logo9.png"
+                                className="w-[247px] h-[110px] rounded-[12px]"
+                                alt=""
+                            />
+                        </Link>
+                        <Link to="#" className="logo">
+                            <img
+                                src="./src/assets/img/home/client-logo10.png"
+                                className="w-[247px] h-[110px] rounded-[12px]"
+                                alt=""
+                            />
+                        </Link>
+                        <Link to="#" className="logo">
+                            <img
+                                src="./src/assets/img/home/client-logo11.png"
+                                className="w-[247px] h-[110px] rounded-[12px]"
+                                alt=""
+                            />
+                        </Link>
+                        <Link to="#" className="logo">
+                            <img
+                                src="./src/assets/img/home/client-logo12.png"
+                                className="w-[247px] h-[110px] rounded-[12px]"
+                                alt=""
+                            />
+                        </Link>
                     </div>
                 </div>
             </div>
-
-            <style>
-                {`
-            @keyframes scroll {
-                to {
-                transform: translate(calc(-50% - 0.5rem));
-            -webkit-transform: translate(calc(-50% - 0.5rem));
-            }
-            `}
-
-            </style>
             {/* Client End */}
 
         </>

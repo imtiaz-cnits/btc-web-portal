@@ -12,14 +12,8 @@ const JavaScriptClient = () => {
         navbarScript.async = true;
         document.body.appendChild(navbarScript);
 
-        const backToTopScript = document.createElement('script');
-        backToTopScript.src = './src/assets/js/back-to-top.js';
-        backToTopScript.async = true;
-        document.body.appendChild(backToTopScript);
-
         return () => {
             document.body.removeChild(navbarScript);
-            document.body.removeChild(backToTopScript);
         };
     }, []);
 

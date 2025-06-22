@@ -1,755 +1,517 @@
-// Top Bar Notice Board JS Start....................
-const marqueeContainer = document.querySelector(".text_single");
-const items = document.querySelectorAll(".js_text");
-let marqueeAnimation;
+import { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import html2canvas from 'html2canvas';
 
-// Function to create infinite horizontal scrolling
-function createInfiniteLoop(container, items, speed = 70) {
-  // Calculate total width of all items including margins
-  let totalWidth = 0;
-  items.forEach(item => {
-    const itemWidth = item.offsetWidth;
-    const itemMargin = parseInt(window.getComputedStyle(item).marginRight) || 0;
-    totalWidth += itemWidth + itemMargin;
-  });
-
-  // Duplicate items for seamless looping
-  const clones = [];
-  items.forEach(item => {
-    const clone = item.cloneNode(true);
-    clones.push(clone);
-    container.appendChild(clone);
-  });
-
-  // Get all items including clones
-  const allItems = Array.from(items).concat(clones);
-
-  // Animation variables
-  let position = 0;
-  let animationId;
-  const containerWidth = container.offsetWidth;
-
-  // Animation function
-  function animate() {
-    position -= 1;
-    
-    // Reset position when first set of items has completely scrolled left
-    if (-position >= totalWidth / 2) {
-      position = 0;
-    }
-    
-    // Apply the transform
-    container.style.transform = `translateX(${position}px)`;
-    
-    animationId = requestAnimationFrame(animate);
-  }
-
-  // Start animation
-  function startAnimation() {
-    if (!animationId) {
-      animate();
-    }
-  }
-
-  // Stop animation
-  function stopAnimation() {
-    cancelAnimationFrame(animationId);
-    animationId = null;
-  }
-
-  // Store control functions
-  marqueeAnimation = {
-    play: startAnimation,
-    pause: stopAnimation
-  };
-
-  // Start initially
-  startAnimation();
-
-  // Return animation controls
-  return marqueeAnimation;
-}
-
-// Initialize the marquee
-marqueeAnimation = createInfiniteLoop(marqueeContainer, items);
-
-// Pause on hover
-marqueeContainer.addEventListener("mouseenter", () => {
-  marqueeAnimation.pause();
-});
-
-marqueeContainer.addEventListener("mouseleave", () => {
-  marqueeAnimation.play();
-});
-
-// Top Bar Notice Board JS End....................
-
-// Our Client Infinity Slide Start................
-const scrollers = document.querySelectorAll(".scroller, .scroller2"); // Target both scroller and scroller2
-
-// If a user hasn't opted in for reduced motion, then we add the animation
-if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  addAnimation();
-}
-
-function addAnimation() {
-  scrollers.forEach((scroller) => {
-    // Add data-animated="true" to every .scroller and .scroller2 on the page
-    scroller.setAttribute("data-animated", true);
-
-    // Make an array from the elements within .scroller__inner or .scroller__inner2
-    const scrollerInner = scroller.querySelector(
-      ".scroller__inner, .scroller__inner2"
-    ); // Ensure it works for both inner classes
-    const scrollerContent = Array.from(scrollerInner.children);
-
-    // For each item in the array, clone it
-    // Add aria-hidden to it
-    // Add it into the .scroller__inner or .scroller__inner2
-    scrollerContent.forEach((item) => {
-      const duplicatedItem = item.cloneNode(true);
-      duplicatedItem.setAttribute("aria-hidden", true);
-      scrollerInner.appendChild(duplicatedItem);
-    });
-  });
-}
-// Our Client Infinity Slide End................
-
-// Vertical Notice Board Scrolling js Start...............
-document.addEventListener('DOMContentLoaded', function() {
-  const noticeItem = document.querySelector('.notice_item ul');
-  const noticeItems = document.querySelectorAll('.notice_item ul li');
-  let tickerHeight = noticeItems[0] ? noticeItems[0].offsetHeight : 0; // Get height of first item
-  let interval;
-
-  // Move last item to the top initially
-  if (noticeItems.length > 0) {
-    const lastItem = noticeItems[noticeItems.length - 1];
-    noticeItem.insertBefore(lastItem, noticeItem.firstChild);
-    noticeItem.style.marginTop = `-${tickerHeight}px`;
-  }
-
-  function moveTop() {
-    // Apply transition
-    noticeItem.style.transition = 'top 600ms ease';
-    noticeItem.style.top = `-${tickerHeight}px`;
-
-    // After animation completes
-    setTimeout(function() {
-      // Move first item to the end
-      const firstItem = noticeItem.querySelector('li:first-child');
-      noticeItem.appendChild(firstItem);
-      
-      // Reset position without animation
-      noticeItem.style.transition = 'none';
-      noticeItem.style.top = '0';
-      
-      // Force reflow to apply the reset
-      void noticeItem.offsetHeight;
-    }, 600);
-  }
-
-  // Set up interval for auto-scrolling
-  function startInterval() {
-    interval = setInterval(moveTop, 2000);
-  }
-
-  // Start the interval initially
-  startInterval();
-
-  // Pause scrolling on hover
-  noticeItem.parentElement.addEventListener('mouseenter', function() {
-    clearInterval(interval);
-  });
-
-  noticeItem.parentElement.addEventListener('mouseleave', function() {
-    startInterval();
-  });
-});
-// Vertical Notice Board Scrolling js End...............
-
-// Home page Counter Js Start................
-document.addEventListener("DOMContentLoaded", function () {
-  // Counter animation function
-  function animateCounters() {
-    const counters = document.querySelectorAll(".numbers");
-    const duration = 4000; // Duration in milliseconds
-    const frameRate = 60; // Approx. 60 frames per second
-    const interval = duration / frameRate; // Time per frame
-
-    counters.forEach((counter) => {
-      const target = parseInt(counter.getAttribute("data-target"), 10);
-      let current = 0;
-      const increment = target / (duration / interval);
-
-      const updateCounter = () => {
-        current += increment;
-        if (current >= target) {
-          counter.textContent = target; // Ensure final value is accurate
-        } else {
-          counter.textContent = Math.floor(current);
-          setTimeout(updateCounter, interval);
-        }
-      };
-
-      updateCounter();
-    });
-  }
-
-  // Observe when the stats section enters the viewport
-  const statsSection = document.querySelector(".stats");
-  const observer = new IntersectionObserver(
-    (entries, observer) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          animateCounters(); // Start the counters
-          observer.disconnect(); // Stop observing after animation starts
-        }
-      });
-    },
-    { threshold: 1 } // Trigger when 50% of the section is visible
-  );
-
-  if (statsSection) {
-    observer.observe(statsSection);
-  }
-});
-
-// Home page Counter Js End................
-
-// About Page Counter js .................
-document.addEventListener("DOMContentLoaded", function () {
-  // Counter animation function
-  function animateCounters() {
-    const count = document.querySelectorAll(".nmbr");
-    const duration = 4000; // Duration in milliseconds
-    const frameRate = 60; // Approx. 60 frames per second
-    const interval = duration / frameRate; // Time per frame
-
-    count.forEach((counter) => {
-      const target = parseInt(counter.getAttribute("data-target"), 10);
-      let current = 0;
-      const increment = target / (duration / interval);
-
-      const formatNumber = (number) => {
-        if (number >= 1000) {
-          return (number / 1000).toFixed(1).replace(/\.0$/, "") + "K"; // Format as K
-        }
-        return number;
-      };
-
-      const updateCounter = () => {
-        current += increment;
-        if (current >= target) {
-          counter.textContent = formatNumber(target); // Ensure final value is accurate
-        } else {
-          counter.textContent = formatNumber(Math.floor(current));
-          setTimeout(updateCounter, interval);
-        }
-      };
-
-      updateCounter();
-    });
-  }
-
-  // Observe when the stats section enters the viewport
-  const statsSection = document.querySelector(".stats");
-  const observer = new IntersectionObserver(
-    (entries, observer) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          animateCounters(); // Start the counters
-          observer.disconnect(); // Stop observing after animation starts
-        }
-      });
-    },
-    { threshold: 1 } // Trigger when 50% of the section is visible
-  );
-
-  if (statsSection) {
-    observer.observe(statsSection);
-  }
-});
-// About Page Counter js .................
-
-// Home page About Section Counter Start...................
-document.addEventListener("DOMContentLoaded", () => {
-  const counters = document.querySelectorAll(".counters");
-  const counterSection = document.querySelector(".img_counter");
-  let hasAnimated = false; // To ensure animation runs only once
-
-  const formatNumber = (num, isKFormat = true) => {
-    if (isKFormat && num >= 1000) {
-      return `${(num / 1000).toFixed(1)}K`.replace(".0", ""); // Format 1000 as 1K
-    }
-    return num; // Just return the number without formatting
-  };
-
-  const startCounters = () => {
-    const duration = 4000; // Duration for all counters (in milliseconds)
-    const interval = 20; // Interval for updates (in milliseconds)
-    const steps = duration / interval; // Number of steps for the animation
-
-    counters.forEach((counter) => {
-      const target = +counter.getAttribute("data-target");
-      let current = 0; // Start value
-      const increment = target / steps; // Increment per step
-
-      // Check if it's the specific counter (e.g., counter_box3) to exclude "K" formatting
-      const isKFormat = counter.id !== "counter_box3"; // Exclude K format for counter_box3
-
-      const updateCounter = () => {
-        current += increment;
-        if (current >= target) {
-          counter.innerText = formatNumber(target, isKFormat); // Ensure final value is exact
-        } else {
-          counter.innerText = formatNumber(Math.ceil(current), isKFormat);
-          setTimeout(updateCounter, interval);
-        }
-      };
-
-      updateCounter();
-    });
-  };
-
-  const handleScroll = () => {
-    const sectionPosition = counterSection.getBoundingClientRect().top;
-    const screenHeight = window.innerHeight;
-
-    if (sectionPosition < screenHeight && !hasAnimated) {
-      hasAnimated = true; // Prevents multiple executions
-      startCounters();
-    }
-  };
-
-  window.addEventListener("scroll", handleScroll);
-});
-// Home page About Section Counter Start...................
-// ............................................................................
-// ............................................................................
-// ............................................................................
-// ............................................................................
-// ............................................................................
-// GSAP Animations for the Home About counters Start...............
-// Register the ScrollTrigger plugin
+// Register GSAP ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
 
-// Counter box 1 animation
-gsap.fromTo(
-  ".counter_box1",
-  { x: "100%", opacity: 0 },
-  {
-    x: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".counter_box1",
-      start: "top 80%",
-      end: "top 50%",
-      toggleActions: "play none none none",
-    },
-  }
-);
+// Hook for Top Bar Notice Board Marquee
+export const useMarquee = (speed = 70, items = []) => {
+    const marqueeRef = useRef(null);
+    const [animation, setAnimation] = useState(null);
 
-// Counter box 2 animation
-gsap.fromTo(
-  ".counter_box2",
-  { x: "-100%", opacity: 0 },
-  {
-    x: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".counter_box2",
-      start: "top 80%",
-      end: "top 50%",
-      toggleActions: "play none none none",
-    },
-  }
-);
+    useEffect(() => {
+        const container = marqueeRef.current;
+        if (!container) return;
 
-// Counter box 3 animation
-gsap.fromTo(
-  ".counter_box3",
-  { y: "-100%", opacity: 0 },
-  {
-    y: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".counter_box3",
-      start: "top 80%",
-      end: "top 50%",
-      toggleActions: "play none none none",
-    },
-  }
-);
-
-//  GSAP Animations for the Home About counters End................
-// About Section Counter End...................
-
-// Home Page Gsap Start....
-// Notice Animation
-gsap.fromTo(
-  ".notice_board",
-  { y: "30%", opacity: 0 },
-  {
-    y: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".notice_board",
-      start: "top 80%",
-      end: "top 50%",
-      toggleActions: "play none none none",
-    },
-  }
-);
-
-// Hero animation
-gsap.fromTo(
-  ".hero .theame",
-  { x: "-30%", opacity: 0 },
-  {
-    x: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".hero .theame",
-      start: "top 80%",
-      end: "top 50%",
-      toggleActions: "play none none none",
-    },
-  }
-);
-gsap.fromTo(
-  ".offer",
-  { y: "20%", opacity: 0 },
-  {
-    y: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".offer",
-      start: "top 100%",
-      end: "top 20%",
-      toggleActions: "play none none none",
-    },
-  }
-);
-gsap.fromTo(
-  ".Our_project",
-  { y: "20%", opacity: 0 },
-  {
-    y: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".Our_project",
-      start: "top 100%",
-      end: "top 20%",
-      toggleActions: "play none none none",
-    },
-  }
-);
-
-// Home Page Gsap End...........................
-
-// Contact Us Page Gsap Start.....................
-gsap.fromTo(
-  ".contact_us .breadcrumb",
-  { x: "-30%", opacity: 0 },
-  {
-    x: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".contact_us .breadcrumb",
-      start: "top 80%",
-      end: "top 50%",
-      toggleActions: "play none none none",
-    },
-  }
-);
-gsap.fromTo(
-  ".contact_us .contact_theame",
-  { x: "30%", opacity: 0 },
-  {
-    x: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".contact_us .contact_theame",
-      start: "top 80%",
-      end: "top 50%",
-      toggleActions: "play none none none",
-    },
-  }
-);
-gsap.fromTo(
-  ".cta_section .cta",
-  { y: "30%", opacity: 0 },
-  {
-    y: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".cta_section .cta",
-      start: "top 80%",
-      end: "top 50%",
-      toggleActions: "play none none none",
-    },
-  }
-);
-
-gsap.fromTo(
-  ".about_us .wrapper",
-  { x: "-30%", opacity: 0 },
-  {
-    x: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".contact_us .breadcrumb",
-      start: "top 80%",
-      end: "top 50%",
-      toggleActions: "play none none none",
-    },
-  }
-);
-gsap.fromTo(
-  ".about_us .contact_theame",
-  { x: "30%", opacity: 0 },
-  {
-    x: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".contact_us .contact_theame",
-      start: "top 80%",
-      end: "top 50%",
-      toggleActions: "play none none none",
-    },
-  }
-);
-
-// Contact Us Page Gsap End....
-
-
-// Notice Single Page Gsap End....
-gsap.fromTo(
-  ".single_notice",
-  { y: "30%", opacity: 0 },
-  {
-    y: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".single_notice",
-      start: "top 80%",
-      end: "top 50%",
-      toggleActions: "play none none none",
-    },
-  }
-);
-// Notice Single Page Gsap End....
-
-
-// About Page Gsap Animation Start.............
-gsap.fromTo(
-  ".our_mission .images1 .small",
-  { x: "30%", opacity: 0 },
-  {
-    x: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".our_mission .images1 .small",
-      start: "top 80%",
-      end: "top 50%",
-      toggleActions: "play none none none",
-    },
-  }
-);
-gsap.fromTo(
-  ".our_mission .images2 .small",
-  { x: "-30%", opacity: 0 },
-  {
-    x: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".our_mission .images2 .small",
-      start: "top 80%",
-      end: "top 50%",
-      toggleActions: "play none none none",
-    },
-  }
-);
-
-gsap.fromTo(
-  ".our_mission .heading_wrap",
-  { y: "30%", opacity: 0 },
-  {
-    y: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".our_mission .heading_wrap",
-      start: "top 100%",
-      end: "top 50%",
-      toggleActions: "play none none none",
-    },
-  }
-);
-
-gsap.fromTo(
-  ".our_mission .heading_wrap2",
-  { y: "30%", opacity: 0 },
-  {
-    y: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".our_mission .heading_wrap2",
-      start: "top 100%",
-      end: "top 50%",
-      toggleActions: "play none none none",
-    },
-  }
-);
-
-gsap.fromTo(
-  ".team",
-  { y: "30%", opacity: 0 },
-  {
-    y: "0%",
-    opacity: 1,
-    duration: 1,
-    scrollTrigger: {
-      trigger: ".team",
-      start: "top 100%",
-      end: "top 50%",
-      toggleActions: "play none none none",
-    },
-  }
-);
-
-// About Page Gsap Animation End.............
-
-
-
-
-// Notice Single page Functionality................
- function toggleMenu(button) {
-        document.querySelectorAll(".menu").forEach((menu) => {
-          if (!menu.contains(button)) menu.classList.add("hidden");
-        });
-        const menu = button.nextElementSibling;
-        menu.classList.toggle("hidden");
-      }
-
-      window.addEventListener("click", function (e) {
-        if (!e.target.closest(".relative")) {
-          document
-            .querySelectorAll(".menu")
-            .forEach((menu) => menu.classList.add("hidden"));
+        // Clear existing clones
+        while (container.childNodes.length > items.length) {
+            container.removeChild(container.lastChild);
         }
-      });
 
-      function downloadViewerImage(button) {
-        const viewerBox = button.closest("div").parentElement.parentElement.nextElementSibling;
-        html2canvas(viewerBox).then((canvas) => {
-          const link = document.createElement("a");
-          link.href = canvas.toDataURL("image/png");
-          link.download = "viewer-content.png";
-          link.click();
-        });
-      }
+        const itemElements = container.querySelectorAll('.js_text');
+        if (!itemElements.length) return;
 
-      document.querySelectorAll(".viewer-box").forEach((viewer) => {
-        const zoomContainer = viewer.querySelector(".zoom-container");
-        let scale = 1,
-          startX = 0,
-          startY = 0,
-          currentX = 0,
-          currentY = 0;
-        let isDragging = false,
-          initialDistance = null;
-
-        viewer.addEventListener("wheel", function (e) {
-          e.preventDefault();
-          scale += e.deltaY < 0 ? 0.1 : -0.1;
-          scale = Math.min(Math.max(scale, 0.5), 5);
-          applyTransform();
+        let totalWidth = 0;
+        itemElements.forEach(item => {
+            const itemWidth = item.offsetWidth;
+            const itemMargin = parseInt(window.getComputedStyle(item).marginRight) || 0;
+            totalWidth += itemWidth + itemMargin;
         });
 
-        viewer.addEventListener("mousedown", (e) => {
-          isDragging = true;
-          startX = e.clientX - currentX;
-          startY = e.clientY - currentY;
-          viewer.style.cursor = "grabbing";
+        // Clone items for seamless scrolling
+        const clones = [];
+        itemElements.forEach(item => {
+            const clone = item.cloneNode(true);
+            clones.push(clone);
+            container.appendChild(clone);
         });
 
-        window.addEventListener("mousemove", (e) => {
-          if (!isDragging) return;
-          currentX = e.clientX - startX;
-          currentY = e.clientY - startY;
-          applyTransform();
+        let position = 0;
+        let animationId;
+
+        const animate = () => {
+            position -= 1;
+            if (-position >= totalWidth) position = 0; // Reset when half the total width is scrolled
+            container.style.transform = `translateX(${position}px)`;
+            animationId = requestAnimationFrame(animate);
+        };
+
+        const startAnimation = () => {
+            if (!animationId) animate();
+        };
+
+        const stopAnimation = () => {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+        };
+
+        setAnimation({ play: startAnimation, pause: stopAnimation });
+        startAnimation();
+
+        return () => stopAnimation();
+    }, [speed, items]); // Re-run when items change
+
+    const handleMouseEnter = () => animation?.pause();
+    const handleMouseLeave = () => animation?.play();
+
+    return { marqueeRef, handleMouseEnter, handleMouseLeave };
+};
+
+// Hook for Client Infinity Slide
+export const useClientScroller = () => {
+    const scrollerRefs = useRef([]);
+    const animations = useRef({});
+
+    useEffect(() => {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+        scrollerRefs.current.forEach((scroller, index) => {
+            if (!scroller) return;
+
+            scroller.setAttribute('data-animated', 'true');
+            const inner = scroller.querySelector('.scroller__inner, .scroller__inner2');
+            if (!inner) return;
+
+            // Clone content for seamless looping
+            const content = Array.from(inner.children);
+            content.forEach(item => {
+                const duplicate = item.cloneNode(true);
+                duplicate.setAttribute('aria-hidden', 'true');
+                inner.appendChild(duplicate);
+            });
+
+            // Calculate total width
+            let totalWidth = 0;
+            content.forEach(item => {
+                const itemWidth = item.offsetWidth;
+                const itemMargin = parseInt(window.getComputedStyle(item).marginRight) || 0;
+                totalWidth += itemWidth + itemMargin;
+            });
+
+            // Get direction and speed from data attributes
+            const direction = scroller.dataset.direction === 'right' ? 1 : -1;
+            const speed = scroller.dataset.speed === 'fast' ? 2 : 1;
+
+            // Animation logic
+            let position = 0;
+            let animationId;
+
+            const animate = () => {
+                position += speed * direction;
+                if (direction === -1 && -position >= totalWidth) {
+                    position = 0;
+                } else if (direction === 1 && position >= 0) {
+                    position = -totalWidth;
+                }
+                inner.style.transform = `translateX(${position}px)`;
+                animationId = requestAnimationFrame(animate);
+            };
+
+            const startAnimation = () => {
+                if (!animationId) animate();
+            };
+
+            const stopAnimation = () => {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            };
+
+            animations.current[index] = { play: startAnimation, pause: stopAnimation };
+            startAnimation();
         });
 
-        window.addEventListener("mouseup", () => {
-          isDragging = false;
-          viewer.style.cursor = "grab";
+        return () => {
+            Object.values(animations.current).forEach(anim => anim.pause());
+        };
+    }, []);
+
+    const handleMouseEnter = (index) => animations.current[index]?.pause();
+    const handleMouseLeave = (index) => animations.current[index]?.play();
+
+    return { scrollerRefs, handleMouseEnter, handleMouseLeave };
+};
+
+// Hook for Vertical Notice Board Scrolling
+export const useVerticalNotice = () => {
+    const noticeRef = useRef(null);
+    const timelineRef = useRef(null);
+
+    useEffect(() => {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+        const notice = noticeRef.current;
+        if (!notice) return;
+
+        const items = notice.querySelectorAll('li');
+        if (!items.length) return;
+
+        // Calculate total height
+        let totalHeight = 0;
+        items.forEach(item => {
+            totalHeight += item.offsetHeight;
         });
 
-        viewer.addEventListener(
-          "touchstart",
-          (e) => {
-            if (e.touches.length === 1) {
-              startX = e.touches[0].clientX - currentX;
-              startY = e.touches[0].clientY - currentY;
-              isDragging = true;
-            } else if (e.touches.length === 2) {
-              initialDistance = getDistance(e.touches[0], e.touches[1]);
-            }
-          },
-          { passive: false }
+        // Clone items for seamless looping
+        const clones = [];
+        items.forEach(item => {
+            const clone = item.cloneNode(true);
+            clone.setAttribute('aria-hidden', 'true');
+            clones.push(clone);
+            notice.appendChild(clone);
+        });
+
+        // GSAP animation
+        const tl = gsap.timeline({ repeat: -1, paused: true });
+        tl.to(notice, {
+            y: -totalHeight,
+            duration: totalHeight / 50, // Adjust speed: 50px per second
+            ease: 'none', // Linear for continuous scrolling
+            onRepeat: () => {
+                gsap.set(notice, { y: 0 }); // Reset position instantly
+            },
+        });
+
+        timelineRef.current = tl;
+        tl.play();
+
+        return () => {
+            tl.kill();
+        };
+    }, []);
+
+    const handleMouseEnter = () => {
+        if (timelineRef.current) timelineRef.current.pause();
+    };
+
+    const handleMouseLeave = () => {
+        if (timelineRef.current) timelineRef.current.play();
+    };
+
+    return { noticeRef, handleMouseEnter, handleMouseLeave };
+};
+
+// Hook for Home and About Page Counters
+export const useCounter = (selector, isAboutPage = false) => {
+    const statsRef = useRef(null);
+
+    useEffect(() => {
+        const stats = statsRef.current;
+        if (!stats) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    const counters = stats.querySelectorAll(selector);
+                    const duration = 4000;
+                    const frameRate = 60;
+                    const interval = duration / frameRate;
+
+                    counters.forEach(counter => {
+                        const target = parseInt(counter.getAttribute('data-target'), 10);
+                        let current = 0;
+                        const increment = target / (duration / interval);
+
+                        const formatNumber = (number) => {
+                            if (isAboutPage && number >= 1000) {
+                                return (number / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+                            }
+                            return Math.floor(number);
+                        };
+
+                        const updateCounter = () => {
+                            current += increment;
+                            if (current >= target) {
+                                counter.textContent = formatNumber(target);
+                            } else {
+                                counter.textContent = formatNumber(current);
+                                setTimeout(updateCounter, interval);
+                            }
+                        };
+
+                        updateCounter();
+                    });
+                    observer.disconnect();
+                }
+            },
+            { threshold: 1 }
         );
 
-        viewer.addEventListener(
-          "touchmove",
-          (e) => {
-            if (e.touches.length === 1 && isDragging) {
-              currentX = e.touches[0].clientX - startX;
-              currentY = e.touches[0].clientY - startY;
-              applyTransform();
-            } else if (e.touches.length === 2 && initialDistance !== null) {
-              const newDistance = getDistance(e.touches[0], e.touches[1]);
-              scale = Math.min(
-                Math.max(scale * (newDistance / initialDistance), 0.5),
-                5
-              );
-              initialDistance = newDistance;
-              applyTransform();
-            }
-          },
-          { passive: false }
-        );
+        observer.observe(stats);
+        return () => observer.disconnect();
+    }, [selector, isAboutPage]);
 
-        viewer.addEventListener("touchend", () => {
-          isDragging = false;
-          initialDistance = null;
+    return statsRef;
+};
+
+// Hook for Home About Section Counter
+export const useAboutCounter = () => {
+    const counterSectionRef = useRef(null);
+    const [hasAnimated, setHasAnimated] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const section = counterSectionRef.current;
+            if (!section || hasAnimated) return;
+
+            const sectionPosition = section.getBoundingClientRect().top;
+            const screenHeight = window.innerHeight;
+
+            if (sectionPosition < screenHeight) {
+                setHasAnimated(true);
+                const counters = section.querySelectorAll('.counters');
+                const duration = 4000;
+                const interval = 20;
+                const steps = duration / interval;
+
+                counters.forEach(counter => {
+                    const target = +counter.getAttribute('data-target');
+                    let current = 0;
+                    const increment = target / steps;
+                    const isKFormat = counter.id !== 'counter_box3';
+
+                    const formatNumber = (num, format) => {
+                        if (format && num >= 1000) {
+                            return `${(num / 1000).toFixed(1)}K`.replace('.0', '');
+                        }
+                        return num;
+                    };
+
+                    const updateCounter = () => {
+                        current += increment;
+                        if (current >= target) {
+                            counter.innerText = formatNumber(target, isKFormat);
+                        } else {
+                            counter.innerText = formatNumber(Math.ceil(current), isKFormat);
+                            setTimeout(updateCounter, interval);
+                        }
+                    };
+
+                    updateCounter();
+                });
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [hasAnimated]);
+
+    return counterSectionRef;
+};
+
+// Hook for GSAP Animations
+export const useGsapAnimation = (animations) => {
+    useEffect(() => {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+        animations.forEach(({ selector, from, to, scrollTrigger, timeline }) => {
+            const elements = document.querySelectorAll(selector);
+            if (!elements.length) return;
+
+            if (timeline) {
+                // Handle timeline-based animations (e.g., for .icon and .date dash effect)
+                elements.forEach((element) => {
+                    const tl = gsap.timeline({ repeat: -1 });
+                    timeline(tl, element);
+                });
+            } else {
+                // Handle scroll-based animations
+                gsap.fromTo(
+                    selector,
+                    { ...from },
+                    { ...to, scrollTrigger: scrollTrigger || { trigger: selector, start: 'top 80%', end: 'top 50%', toggleActions: 'play none none none' } }
+                );
+            }
         });
 
-        function applyTransform() {
-          zoomContainer.style.transform = `scale(${scale}) translate(${currentX}px, ${currentY}px)`;
-        }
+        return () => {
+            ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+            gsap.killTweensOf('*');
+        };
+    }, [animations]);
+};
 
-        function getDistance(t1, t2) {
-          const dx = t1.clientX - t2.clientX;
-          const dy = t1.clientY - t2.clientY;
-          return Math.sqrt(dx * dx + dy * dy);
+// GSAP Animation Configurations
+export const gsapAnimations = [
+    // Home About Counters
+    { selector: '.counter_box1', from: { x: '100%', opacity: 0 }, to: { x: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.counter_box1', start: 'top 80%', end: 'top 50%', toggleActions: 'play none none none' } },
+    { selector: '.counter_box2', from: { x: '-100%', opacity: 0 }, to: { x: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.counter_box2', start: 'top 80%', end: 'top 50%', toggleActions: 'play none none none' } },
+    { selector: '.counter_box3', from: { y: '-100%', opacity: 0 }, to: { y: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.counter_box3', start: 'top 80%', end: 'top 50%', toggleActions: 'play none none none' } },
+    // Home Page
+    { selector: '.notice_board', from: { y: '30%', opacity: 0 }, to: { y: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.notice_board', start: 'top 80%', end: 'top 50%', toggleActions: 'play none none none' } },
+    { selector: '.hero .theame', from: { x: '-30%', opacity: 0 }, to: { x: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.hero .theame', start: 'top 80%', end: 'top 50%', toggleActions: 'play none none none' } },
+    { selector: '.offer', from: { y: '20%', opacity: 0 }, to: { y: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.offer', start: 'top 100%', end: 'top 20%', toggleActions: 'play none none none' } },
+    { selector: '.offer .icon', timeline: (tl, element) => {
+            tl.to(element, {
+                backgroundPosition: '100% 0%, 0% 100%, 0% 0%, 100% 100%',
+                duration: 5,
+                ease: 'linear',
+                repeat: -1,
+            });
         }
-      });
-// Notice Single page Functionality................
+    },
+    { selector: '.hero .notice .date', timeline: (tl, element) => {
+            tl.to(element, {
+                backgroundPosition: '100% 0%, 100% 100%, 0% 100%, 100% 0%',
+                duration: 5,
+                ease: 'linear',
+                repeat: -1,
+            });
+        }
+    },
+    { selector: '.Our_project', from: { y: '20%', opacity: 0 }, to: { y: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.Our_project', start: 'top 100%', end: 'top 20%', toggleActions: 'play none none none' } },
+    // Contact Us Page
+    { selector: '.contact_us .breadcrumb', from: { x: '-30%', opacity: 0 }, to: { x: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.contact_us .breadcrumb', start: 'top 80%', end: 'top 50%', toggleActions: 'play none none none' } },
+    { selector: '.contact_us .contact_theame', from: { x: '30%', opacity: 0 }, to: { x: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.contact_us .contact_theame', start: 'top 80%', end: 'top 50%', toggleActions: 'play none none none' } },
+    { selector: '.cta_section .cta', from: { y: '30%', opacity: 0 }, to: { y: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.cta_section .cta', start: 'top 80%', end: 'top 50%', toggleActions: 'play none none none' } },
+    { selector: '.about_us .wrapper', from: { x: '-30%', opacity: 0 }, to: { x: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.contact_us .breadcrumb', start: 'top 80%', end: 'top 50%', toggleActions: 'play none none none' } },
+    { selector: '.about_us .contact_theame', from: { x: '30%', opacity: 0 }, to: { x: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.contact_us .contact_theame', start: 'top 80%', end: 'top 50%', toggleActions: 'play none none none' } },
+    // Notice Single Page
+    { selector: '.single_notice', from: { y: '30%', opacity: 0 }, to: { y: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.single_notice', start: 'top 80%', end: 'top 50%', toggleActions: 'play none none none' } },
+    // About Page
+    { selector: '.our_mission .images1 .small', from: { x: '30%', opacity: 0 }, to: { x: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.our_mission .images1 .small', start: 'top 80%', end: 'top 50%', toggleActions: 'play none none none' } },
+    { selector: '.our_mission .images2 .small', from: { x: '-30%', opacity: 0 }, to: { x: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.our_mission .images2 .small', start: 'top 80%', end: 'top 50%', toggleActions: 'play none none none' } },
+    { selector: '.our_mission .heading_wrap', from: { y: '30%', opacity: 0 }, to: { y: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.our_mission .heading_wrap', start: 'top 100%', end: 'top 50%', toggleActions: 'play none none none' } },
+    { selector: '.our_mission .heading_wrap2', from: { y: '30%', opacity: 0 }, to: { y: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.our_mission .heading_wrap2', start: 'top 100%', end: 'top 50%', toggleActions: 'play none none none' } },
+    { selector: '.team', from: { y: '30%', opacity: 0 }, to: { y: '0%', opacity: 1, duration: 1 }, scrollTrigger: { trigger: '.team', start: 'top 100%', end: 'top 50%', toggleActions: 'play none none none' } },
+];
+
+// Hook for Notice Single Page Functionality
+export const useNoticeSingle = () => {
+    const viewerRefs = useRef([]);
+    const [menuOpen, setMenuOpen] = useState(null);
+
+    const toggleMenu = (index) => {
+        setMenuOpen(prev => prev === index ? null : index);
+    };
+
+    const handleClickOutside = (e) => {
+        if (!e.target.closest('.relative')) {
+            setMenuOpen(null);
+        }
+    };
+
+    const downloadViewerImage = (viewerBox) => {
+        if (viewerBox) {
+            html2canvas(viewerBox).then(canvas => {
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = 'viewer-content.png';
+                link.click();
+            });
+        }
+    };
+
+    useEffect(() => {
+        window.addEventListener('click', handleClickOutside);
+        viewerRefs.current.forEach((viewer, index) => {
+            if (!viewer) return;
+
+            const zoomContainer = viewer.querySelector('.zoom-container');
+            let scale = 1;
+            let startX = 0;
+            let startY = 0;
+            let currentX = 0;
+            let currentY = 0;
+            let isDragging = false;
+            let initialDistance = null;
+
+            const applyTransform = () => {
+                zoomContainer.style.transform = `scale(${scale}) translate(${currentX}px, ${currentY}px)`;
+            };
+
+            const getDistance = (t1, t2) => {
+                const dx = t1.clientX - t2.clientX;
+                const dy = t1.clientY - t2.clientY;
+                return Math.sqrt(dx * dx + dy * dy);
+            };
+
+            const handleWheel = (e) => {
+                e.preventDefault();
+                scale += e.deltaY > 0 ? -0.1 : 0.1;
+                scale = Math.min(Math.max(0.5, scale), 5);
+                applyTransform();
+            };
+
+            const handleMouseDown = (e) => {
+                isDragging = true;
+                startX = e.clientX - currentX;
+                startY = e.clientY - currentY;
+                viewer.style.cursor = 'grabbing';
+            };
+
+            const handleMouseMove = (e) => {
+                if (!isDragging) return;
+                currentX = e.clientX - startX;
+                currentY = e.clientY - startY;
+                applyTransform();
+            };
+
+            const handleMouseUp = () => {
+                isDragging = false;
+                viewer.style.cursor = 'grab';
+            };
+
+            const handleTouchStart = (e) => {
+                if (e.touches.length === 1) {
+                    startX = e.touches[0].clientX - currentX;
+                    startY = e.touches[0].clientY - currentY;
+                    isDragging = true;
+                } else if (e.touches.length === 2) {
+                    initialDistance = getDistance(e.touches[0], e.touches[1]);
+                }
+            };
+
+            const handleTouchMove = (e) => {
+                if (e.touches.length === 1 && isDragging) {
+                    currentX = e.touches[0].clientX - startX;
+                    currentY = e.touches[0].clientY - startY;
+                    applyTransform();
+                } else if (e.touches.length === 2 && initialDistance !== null) {
+                    const newDistance = getDistance(e.touches[0], e.touches[1]);
+                    scale = Math.min(Math.max(scale * (newDistance / initialDistance), 0.5), 5);
+                    initialDistance = newDistance;
+                    applyTransform();
+                }
+            };
+
+            const handleTouchEnd = () => {
+                isDragging = false;
+                initialDistance = null;
+            };
+
+            viewer.addEventListener('wheel', handleWheel, { passive: false });
+            viewer.addEventListener('mousedown', handleMouseDown);
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+            viewer.addEventListener('touchstart', handleTouchStart, { passive: false });
+            viewer.addEventListener('touchmove', handleTouchMove, { passive: false });
+            viewer.addEventListener('touchend', handleTouchEnd);
+
+            return () => {
+                viewer.removeEventListener('wheel', handleWheel);
+                viewer.removeEventListener('mousedown', handleMouseDown);
+                window.removeEventListener('mousemove', handleMouseMove);
+                window.removeEventListener('mouseup', handleMouseUp);
+                viewer.removeEventListener('touchstart', handleTouchStart);
+                viewer.removeEventListener('touchmove', handleTouchMove);
+                viewer.removeEventListener('touchend', handleTouchEnd);
+            };
+        });
+
+        return () => window.removeEventListener('click', handleClickOutside);
+    }, [menuOpen]);
+
+    return { viewerRefs, toggleMenu, downloadViewerImage };
+};

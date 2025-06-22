@@ -1,72 +1,49 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import api from "../../api/index.js";
 import Logo from '../assets/icon/Logo.svg';
+import { useMarquee } from '../assets/js/style.js';
 
 const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
+    const [notices, setNotices] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const dropdownRef = useRef(null);
-    const marqueeContainerRef = useRef(null);
 
-    // Marquee Animation
+    // Fetch notices from backend
     useEffect(() => {
-        const marqueeContainer = marqueeContainerRef.current;
-        const items = marqueeContainer?.querySelectorAll('.js_text');
-        if (!marqueeContainer || !items?.length) return;
-
-        let totalWidth = 0;
-        items.forEach((item) => {
-            const itemWidth = item.offsetWidth;
-            const itemMargin = parseInt(window.getComputedStyle(item).marginRight) || 0;
-            totalWidth += itemWidth + itemMargin;
-        });
-
-        const clones = [];
-        items.forEach((item) => {
-            const clone = item.cloneNode(true);
-            clones.push(clone);
-            marqueeContainer.appendChild(clone);
-        });
-
-        let position = 0;
-        let animationId;
-        const containerWidth = marqueeContainer.offsetWidth;
-
-        const animate = () => {
-            position -= 1;
-            if (-position >= totalWidth / 2) {
-                position = 0;
-            }
-            marqueeContainer.style.transform = `translateX(${position}px)`;
-            animationId = requestAnimationFrame(animate);
-        };
-
-        const startAnimation = () => {
-            if (!animationId) {
-                animate();
+        const fetchNotices = async () => {
+            try {
+                const response = await api.get('/notices');
+                if (response.data.success) {
+                    const formattedNotices = response.data.notices.map(notice => ({
+                        id: notice._id,
+                        title: notice.title,
+                        link: `/notice/${notice._id}`,
+                    }));
+                    setNotices(formattedNotices);
+                    setLoading(false);
+                } else {
+                    throw new Error(response.data.message || 'Failed to fetch notices');
+                }
+            } catch (err) {
+                setError(err.message || 'Failed to load notices.');
+                setLoading(false);
+                console.error('Error fetching notices:', err);
             }
         };
 
-        const stopAnimation = () => {
-            cancelAnimationFrame(animationId);
-            animationId = null;
-        };
-
-        startAnimation();
-
-        marqueeContainer.addEventListener('mouseenter', stopAnimation);
-        marqueeContainer.addEventListener('mouseleave', startAnimation);
-
-        return () => {
-            stopAnimation();
-            marqueeContainer.removeEventListener('mouseenter', stopAnimation);
-            marqueeContainer.removeEventListener('mouseleave', startAnimation);
-        };
+        fetchNotices();
     }, []);
 
-    // Mobile Menu and Dropdown Toggle
+    // Use marquee animation hook
+    const { marqueeRef, handleMouseEnter, handleMouseLeave } = useMarquee(70, notices);
+
+    // Toggle mobile menu
     const toggleMobileMenu = () => {
-        setIsMobileMenuOpen(!isMobileMenuOpen);
+        setIsMobileMenuOpen(prev => !prev);
         if (isMobileMenuOpen) {
             setIsMobileDropdownOpen(false);
         }
@@ -75,10 +52,10 @@ const Navbar = () => {
     // Toggle mobile dropdown
     const toggleMobileDropdown = (e) => {
         e.stopPropagation();
-        setIsMobileDropdownOpen(!isMobileDropdownOpen);
+        setIsMobileDropdownOpen(prev => !prev);
     };
 
-    // Close mobile menu when clicking outside
+    // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -94,21 +71,41 @@ const Navbar = () => {
             {/* Top Notice Board */}
             <div className="top_notice_board bg-[var(--text-1)] py-[6px]">
                 <div className="text_marquee flex items-center overflow-x-hidden">
-                    <div
-                        className="text_single relative flex items-center whitespace-nowrap p-0 m-0 will-change-transform"
-                        ref={marqueeContainerRef}
-                    >
-                        {Array.from({ length: 13 }, (_, i) => (
-                            <Link
-                                key={i}
-                                to="#"
-                                className="js_text text-[var(--secondary-color)] text-[16px] font-[400] font-[var(--primary-font)] inline-block mr-[10px] pr-[10px] relative"
-                            >
-                                Thing number {i + 1}
-                                <span className="absolute top-[3px] right-0 w-[1px] h-[75%] bg-[var(--secondary-color)]"></span>
-                            </Link>
-                        ))}
-                    </div>
+                    {loading ? (
+                        <span
+                            className="text-[var(--secondary-color)] text-[16px] font-[400] font-[var(--primary-font)] inline-block mx-auto">
+                            Loading notices...
+                        </span>
+                    ) : error ? (
+                        <span
+                            className="text-[var(--secondary-color)] text-[16px] font-[400] font-[var(--primary-font)] inline-block mx-auto">
+                            {error}
+                        </span>
+                    ) : notices.length === 0 ? (
+                        <span
+                            className="text-[var(--secondary-color)] text-[16px] font-[400] font-[var(--primary-font)] inline-block mx-auto">
+                            No notices available.
+                        </span>
+                    ) : (
+                        <div
+                            className="text_single relative flex items-center whitespace-nowrap p-0 m-0 will-change-transform"
+                            ref={marqueeRef}
+                            onMouseEnter={handleMouseEnter}
+                            onMouseLeave={handleMouseLeave}
+                        >
+                            {notices.map((notice) => (
+                                <Link
+                                    key={notice.id}
+                                    to={notice.link}
+                                    className="js_text text-[var(--secondary-color)] text-[16px] font-[400] font-[var(--primary-font)] inline-block mr-[10px] pr-[10px] relative max-w-[200px] overflow-hidden text-ellipsis"
+                                >
+                                    {notice.title}
+                                    <span
+                                        className="absolute top-[3px] right-0 w-[1px] h-[75%] bg-[var(--secondary-color)]"></span>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -118,7 +115,8 @@ const Navbar = () => {
                     <div className="flex justify-between items-center py-2.5 border-b border-b-[var(--ac-1)]">
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-1">
-                                <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <svg width="20" height="20" viewBox="0 0 32 32" fill="none"
+                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M27.75 19.8L21.8875 17.3C21.585 17.1644 21.253 17.1082 20.9227 17.1366C20.5924 17.1651 20.2749 17.2772 20 17.4625L16.8625 19.55C14.9503 18.6213 13.4021 17.0819 12.4625 15.175L14.5375 12C14.7216 11.7249 14.834 11.4081 14.8645 11.0785C14.8951 10.7488 14.8428 10.4168 14.7125 10.1125L12.2 4.25001C12.0247 3.85415 11.7278 3.52443 11.3525 3.30866C10.9771 3.0929 10.5428 3.0023 10.1125 3.05001C8.42449 3.27114 6.87421 4.09773 5.7499 5.37608C4.62559 6.65444 4.00375 8.29758 4 10C4 19.925 12.075 28 22 28C23.7024 27.9963 25.3456 27.3744 26.6239 26.2501C27.9023 25.1258 28.7289 23.5755 28.95 21.8875C28.9977 21.4572 28.9071 21.0229 28.6913 20.6475C28.4756 20.2722 28.1459 19.9753 27.75 19.8Z"
                                         fill="#171717"
@@ -141,7 +139,8 @@ const Navbar = () => {
                             </div>
                             <div className="text-text-1 text-xl font-normal mx-2.5">|</div>
                             <div className="flex items-center gap-1">
-                                <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <svg width="20" height="20" viewBox="0 0 32 32" fill="none"
+                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M21.4227 18.1333L31.6693 26.916C31.8873 26.4168 31.9999 25.878 32 25.3333V11.3987L21.4227 18.1333Z"
                                         fill="#171717"
@@ -168,7 +167,8 @@ const Navbar = () => {
                             </div>
                         </div>
                         <div className="flex items-center gap-6">
-                            <a href="https://www.facebook.com/share/16cBeKdBrD/" className="hover:text-[var(--primary-color)] transition duration-400">
+                            <a href="https://www.facebook.com/share/16cBeKdBrD/"
+                               className="hover:text-[var(--primary-color)] transition duration-400">
                                 <i className="fa-brands fa-facebook-f text-text-1 text-xl hover:text-[var(--primary-color)] transition duration-400"></i>
                             </a>
                             <a href="#" className="hover:text-[var(--primary-color)] transition duration-400">
@@ -186,34 +186,42 @@ const Navbar = () => {
             </div>
 
             {/* Navbar */}
-            <nav className="bg-[var(--secondary-color)] sticky top-0 w-full z-[50]">
+            <nav className="navBar bg-[var(--secondary-color)] sticky top-0 w-full z-[50]">
                 <div className="custom-container">
                     <div className="w-full border-b border-b-[var(--ac-1)]">
                         <div className="flex justify-between h-[80px] items-center">
                             <Link to="/" className="text-2xl font-extrabold">
-                                <img className="w-[160px] object-contain" src={Logo} alt="" />
+                                <img className="w-[160px] object-contain" src={Logo} alt=""/>
                             </Link>
                             <div className="hidden lg:flex space-x-6 items-center">
-                                <Link to="/" className="text-[var(--primary-color)] transition duration-300 font-medium">
+                                <Link to="/"
+                                      className="text-[var(--primary-color)] transition duration-300 font-medium">
                                     HOME
                                 </Link>
-                                <Link to="/services" className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
+                                <Link to="/services"
+                                      className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
                                     SERVICES
                                 </Link>
-                                <Link to="/tender" className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
+                                <Link to="/tender"
+                                      className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
                                     TENDER
                                 </Link>
-                                <Link to="/projects" className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
+                                <Link to="/projects"
+                                      className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
                                     PROJECTS
                                 </Link>
                                 <div className="relative dropdown group">
-                                    <button className="flex cursor-pointer items-center text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
+                                    <button
+                                        className="flex cursor-pointer items-center text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
                                         PAGES
-                                        <svg className="w-4 h-4 ml-1 rotate-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                        <svg className="w-4 h-4 ml-1 rotate-icon" fill="none" stroke="currentColor"
+                                             viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                                  d="M19 9l-7 7-7-7"/>
                                         </svg>
                                     </button>
-                                    <div className="dropdown-content absolute mt-2 w-56 border border-[var(--ac-2)] rounded-lg shadow-lg">
+                                    <div
+                                        className="dropdown-content absolute mt-2 w-56 border border-[var(--ac-2)] rounded-lg shadow-lg">
                                         <Link to="/notice" className="block px-4 py-2 hover:bg-[var(--primary-color)]">
                                             NOTICE
                                         </Link>
@@ -223,15 +231,18 @@ const Navbar = () => {
                                         <Link to="/blog" className="block px-4 py-2 hover:bg-[var(--primary-color)]">
                                             BLOG
                                         </Link>
-                                        <Link to="/privacy-policy" className="block px-4 py-2 hover:bg-[var(--primary-color)]">
+                                        <Link to="/privacy-policy"
+                                              className="block px-4 py-2 hover:bg-[var(--primary-color)]">
                                             PRIVACY POLICY
                                         </Link>
-                                        <Link to="/terms-conditions" className="block px-4 py-2 hover:bg-[var(--primary-color)]">
+                                        <Link to="/terms-conditions"
+                                              className="block px-4 py-2 hover:bg-[var(--primary-color)]">
                                             TERMS & CONDITIONS
                                         </Link>
                                     </div>
                                 </div>
-                                <Link to="/about" className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
+                                <Link to="/about"
+                                      className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
                                     ABOUT US
                                 </Link>
                             </div>
@@ -240,13 +251,16 @@ const Navbar = () => {
                                     to="/contact"
                                     className="contact_btn cursor-pointer relative inline-flex items-center justify-center px-8 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-lg rounded-tr-lg rounded-bl-0 rounded-br-lg group"
                                 >
-                                    <span className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>
+                                    <span
+                                        className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>
                                     <span className="relative text-base font-semibold">CONTACT US</span>
                                 </Link>
                             </div>
                             <div className="lg:hidden">
-                                <button onClick={toggleMobileMenu} id="menu-btn" className="text-[var(--text-1)] cursor-pointer">
-                                    <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <button onClick={toggleMobileMenu} id="menu-btn"
+                                        className="text-[var(--text-1)] cursor-pointer">
+                                    <svg width="44" height="44" viewBox="0 0 44 44" fill="none"
+                                         xmlns="http://www.w3.org/2000/svg">
                                         <path
                                             d="M5.5 22H38.5M5.5 11H38.5M5.5 33H27.5"
                                             stroke="#c26c2a"
@@ -270,25 +284,30 @@ const Navbar = () => {
             >
                 <div className="flex justify-between items-center px-4 py-3 border-b">
                     <Link to="/" className="text-xl font-bold">
-                        <img className="w-[100px] object-contain" src={Logo} alt="" />
+                        <img className="w-[100px] object-contain" src={Logo} alt=""/>
                     </Link>
                     <button onClick={toggleMobileMenu} id="close-menu" className="text-[var(--text-1)] cursor-pointer">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                  d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
                 </div>
                 <div className="px-4 py-2 space-y-1" ref={dropdownRef}>
-                    <Link to="/" className="block px-3 py-2 text-[var(--text-1)] bg-[var(--shade-1)] active:bg-[var(--shade-1)] rounded-lg">
+                    <Link to="/"
+                          className="block px-3 py-2 text-[var(--text-1)] bg-[var(--shade-1)] active:bg-[var(--shade-1)] rounded-lg">
                         HOME
                     </Link>
-                    <Link to="/services" className="block px-3 py-2 text-[var(--text-1)] hover:bg-[var(--shade-1)] rounded-lg">
+                    <Link to="/services"
+                          className="block px-3 py-2 text-[var(--text-1)] hover:bg-[var(--shade-1)] rounded-lg">
                         SERVICES
                     </Link>
-                    <Link to="/tender" className="block px-3 py-2 text-[var(--text-1)] hover:bg-[var(--shade-1)] rounded-lg">
+                    <Link to="/tender"
+                          className="block px-3 py-2 text-[var(--text-1)] hover:bg-[var(--shade-1)] rounded-lg">
                         TENDER
                     </Link>
-                    <Link to="/projects" className="block px-3 py-2 text-[var(--text-1)] hover:bg-[var(--shade-1)] rounded-lg">
+                    <Link to="/projects"
+                          className="block px-3 py-2 text-[var(--text-1)] hover:bg-[var(--shade-1)] rounded-lg">
                         PROJECTS
                     </Link>
                     <div>
@@ -303,28 +322,35 @@ const Navbar = () => {
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
                             >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </button>
-                        <div className={`mobile-dropdown ${isMobileDropdownOpen ? 'open' : ''} bg-[var(--text-1)] rounded-lg`}>
-                            <Link to="/notice" className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
+                        <div
+                            className={`mobile-dropdown ${isMobileDropdownOpen ? 'open' : ''} bg-[var(--text-1)] rounded-lg`}>
+                            <Link to="/notice"
+                                  className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
                                 NOTICE
                             </Link>
-                            <Link to="/gallery" className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
+                            <Link to="/gallery"
+                                  className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
                                 GALLERY
                             </Link>
-                            <Link to="/blog" className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
+                            <Link to="/blog"
+                                  className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
                                 BLOG
                             </Link>
-                            <Link to="/privacy-policy" className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
+                            <Link to="/privacy-policy"
+                                  className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
                                 PRIVACY POLICY
                             </Link>
-                            <Link to="/terms-conditions" className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
+                            <Link to="/terms-conditions"
+                                  className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
                                 TERMS & CONDITIONS
                             </Link>
                         </div>
                     </div>
-                    <Link to="/about" className="block px-3 py-2 text-[var(--text-1)] hover:bg-[var(--shade-1)] rounded-lg">
+                    <Link to="/about"
+                          className="block px-3 py-2 text-[var(--text-1)] hover:bg-[var(--shade-1)] rounded-lg">
                         ABOUT US
                     </Link>
                 </div>
@@ -349,7 +375,8 @@ const Navbar = () => {
                             to="/contact"
                             className="contact_btn w-full cursor-pointer relative inline-flex items-center justify-center px-8 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-lg rounded-tr-lg rounded-bl-0 rounded-br-lg group"
                         >
-                            <span className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>
+                            <span
+                                className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>
                             <span className="relative text-base font-semibold">CONTACT US</span>
                         </Link>
                     </div>

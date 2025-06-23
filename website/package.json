@@ -19,6 +19,7 @@
     "js-cookie": "^3.0.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-helmet": "^6.1.0",
     "react-loading": "^2.0.3",
     "react-router-dom": "^7.6.2",
     "react-shimmer-effects": "^1.0.4",

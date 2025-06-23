@@ -223,12 +223,12 @@ const Home = () => {
                                         )};
                                 </div>
                                 <div className="button text-center">
-                                    <button
+                                    <Link to="/notice"
                                         className="view_note_btn cursor-pointer relative inline-flex items-center justify-center px-8 my-5 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-0 rounded-tr-lg rounded-bl-lg rounded-br-lg group">
                                             <span
                                                 className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>
                                         <span className="relative text-base font-semibold">VIEW ALL NOTICE</span>
-                                    </button>
+                                    </Link>
                                 </div>
                             </div>
                         </div>

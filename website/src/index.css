@@ -1,5 +1,5 @@
 /* Import admin and website specific styles */
-@import "styles/input.css";
+@import "./styles/input.css";
 @import "./styles/output.css";
 @import "./styles/style.css";
 

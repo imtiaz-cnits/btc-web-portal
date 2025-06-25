@@ -2,7 +2,7 @@ import express from "express";
 import { isAuthenticated, login, logout, register, resetPassword, sendResetPasswordOTP, sendVerificationOTP, verifyEmail } from "../controllers/AuthController.js";
 import AuthMiddleware from "../middlewares/AuthMiddleware.js";
 import { getUserData } from "../controllers/UserController.js";
-import { createNotice, deleteNotice, updateNotice, viewNotice } from "../controllers/NoticesController.js";
+import { createNotice, deleteNotice, updateNotice, viewNotice, getNoticeById } from "../controllers/NoticesController.js"; // Add getNoticeById
 import upload from "../config/MulterConfig.js";
 
 const apiRouter = express.Router();
@@ -23,6 +23,14 @@ apiRouter.get("/user-data", AuthMiddleware, getUserData);
 // Notice CRUD routes
 apiRouter.post("/add-notice", AuthMiddleware, upload.single("file"), createNotice);
 apiRouter.get("/notices", viewNotice);
+apiRouter.get("/notices/:id", (req, res, next) => {
+    const { id } = req.params;
+    if (!id || id === ':' || !/^[a-f\d]{24}$/i.test(id)) {
+        console.error(`Invalid notice ID: ${id}`);
+        return res.status(400).json({ success: false, message: 'Invalid notice ID' });
+    }
+    getNoticeById(req, res, next);
+}); // Add this route
 apiRouter.put("/notices/:id", AuthMiddleware, upload.single("file"), (req, res, next) => {
     const { id } = req.params;
     if (!id || id === ':' || !/^[a-f\d]{24}$/i.test(id)) {

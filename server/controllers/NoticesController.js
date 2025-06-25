@@ -20,8 +20,8 @@ export const createNotice = async (req, res) => {
             content,
             status: status || 'active',
             createdBy: req.user._id,
-            issueDate: issueDate ? new Date(issueDate) : null, // Parse date if provided
-            publishDate: publishDate ? new Date(publishDate) : null, // Parse date if provided
+            issueDate: issueDate ? new Date(issueDate) : null,
+            publishDate: publishDate ? new Date(publishDate) : null,
         };
 
         if (file) {
@@ -43,11 +43,31 @@ export const createNotice = async (req, res) => {
 // Read all notices
 export const viewNotice = async (req, res) => {
     try {
-        const notices = await NoticesModel.find().populate('createdBy', 'name email').sort({ createdAt: -1 });
+        const notices = await NoticesModel.find()
+            .populate('createdBy', 'name email')
+            .sort({ createdAt: -1 });
         res.status(200).json({ success: true, notices });
     } catch (error) {
         console.error('Get notices error:', error);
         res.status(500).json({ success: false, message: 'Failed to fetch notices' });
+    }
+};
+
+// Read a single notice by ID (NEW)
+export const getNoticeById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const notice = await NoticesModel.findById(id).populate('createdBy', 'name email');
+        if (!notice) {
+            return res.status(404).json({ success: false, message: 'Notice not found' });
+        }
+        res.status(200).json({ success: true, notice });
+    } catch (error) {
+        console.error('Get notice by ID error:', error);
+        if (error.name === 'CastError') {
+            return res.status(400).json({ success: false, message: 'Invalid notice ID' });
+        }
+        res.status(500).json({ success: false, message: 'Failed to fetch notice' });
     }
 };
 
@@ -74,7 +94,11 @@ export const updateNotice = async (req, res) => {
             updateData.filePath = `/uploads/${file.filename}`;
         }
 
-        const notice = await NoticesModel.findByIdAndUpdate(id, { $set: updateData }, { new: true, runValidators: true });
+        const notice = await NoticesModel.findByIdAndUpdate(
+            id,
+            { $set: updateData },
+            { new: true, runValidators: true }
+        );
 
         if (!notice) {
             return res.status(404).json({ success: false, message: 'Notice not found' });

@@ -2,11 +2,17 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import useDarkMode from '../../hooks/useDarkMode';
 import api from '../../api/index.js';
 import Swal from 'sweetalert2';
+import { format, parseISO, isBefore } from 'date-fns';
 
 // Define EditModal as a separate component
-const EditModal = ({ isOpen, onClose, onSubmit, formData, handleChange, error }) => {
+const EditModal = ({ isOpen, onClose, onSubmit, formData, setFormData, handleChange, error, dateError }) => {
     const modalRef = useRef(null);
+    const issueDateRef = useRef(null);
+    const publishDateRef = useRef(null);
+    const [filePreview, setFilePreview] = useState(null);
+    const [fileType, setFileType] = useState(null);
 
+    // Handle modal open/close animations
     useEffect(() => {
         const modalEdit = modalRef.current;
         if (!modalEdit) return;
@@ -35,10 +41,48 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, handleChange, error })
         };
     }, [isOpen]);
 
+    // Handle file preview and type detection
+    useEffect(() => {
+        // Clear file preview when modal closes or formData.file changes
+        if (!isOpen || !formData.file) {
+            setFilePreview(null);
+            setFileType(null);
+            return;
+        }
+        if (formData.file) {
+            const type = formData.file.type;
+            setFileType(type);
+            if (type.startsWith('image/')) {
+                const previewUrl = URL.createObjectURL(formData.file);
+                setFilePreview(previewUrl);
+                return () => URL.revokeObjectURL(previewUrl);
+            }
+        }
+    }, [isOpen, formData.file]);
+
     if (!isOpen) return null;
 
     const handleOverlayClick = (e) => {
         if (e.target.classList.contains('modal-overlay')) onClose();
+    };
+
+    const openCalendar = (ref) => {
+        if (ref.current) {
+            ref.current.focus();
+            if (typeof ref.current.showPicker === 'function') {
+                try {
+                    ref.current.showPicker();
+                } catch (err) {
+                    console.warn('showPicker not supported:', err);
+                }
+            }
+        }
+    };
+
+    const removeFile = () => {
+        setFormData((prev) => ({ ...prev, file: null }));
+        setFilePreview(null);
+        setFileType(null);
     };
 
     return (
@@ -46,7 +90,7 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, handleChange, error })
             <div className="modal-overlay absolute inset-0 bg-[#111111a9] bg-opacity-50"></div>
             <div className="modal-container relative bg-[var(--bg)] dark:bg-[var(--dark-bg)] border border-transparent dark:border-[var(--dark-border)] rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
                 <div className="px-6 py-4 border-b border-[var(--border-color2)] dark:border-[var(--dark-border)] flex justify-between items-center">
-                    <h2 className="text-lg font-semibold !text-[var(--text-1)]">{formData.id ? 'Edit Notice' : 'Add New Notice'}</h2>
+                    <h2 className="text-lg font-semibold text-[var(--text-1)]">{formData.id ? 'Edit Notice' : 'Add New Notice'}</h2>
                     <button onClick={onClose} className="text-[var(--text-1)] dark:text-[var(--text-4)] hover:text-[var(--text-2)] focus:outline-none transition-colors duration-200 cursor-pointer">
                         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -54,7 +98,7 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, handleChange, error })
                     </button>
                 </div>
                 <div className="overflow-y-auto px-6 py-4 flex-1">
-                    <form id="editModalForm" className="modalform" onSubmit={onSubmit} encType="multipart/form-data">
+                    <form id="editModalFormData" className="modalform" onSubmit={onSubmit} encType="multipart/form-data">
                         <div className="mb-3">
                             <label htmlFor="title" className="block text-sm font-medium text-[var(--text-1)] mb-1">Notice Title</label>
                             <input
@@ -64,32 +108,46 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, handleChange, error })
                                 value={formData.title}
                                 onChange={handleChange}
                                 className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
-                                placeholder="Notice title"
+                                placeholder="Enter notice title"
                                 required
                             />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-3">
                             <div>
-                                <label htmlFor="issueDate" className="block text-sm font-medium text-[var(--text-1)] mb-1">Issue Date</label>
+                                <label htmlFor="issueDate" className="block text-sm font-medium text-[var(--text-1)] mb-1">
+                                    Issue Date
+                                    <span className="ml-1 text-gray-500" title="Format: DD/MM/YYYY">(?)</span>
+                                </label>
                                 <input
                                     type="date"
                                     id="issueDate"
                                     name="issueDate"
+                                    ref={issueDateRef}
                                     value={formData.issueDate}
                                     onChange={handleChange}
+                                    onClick={() => openCalendar(issueDateRef)}
                                     className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
+                                    placeholder="Select issue date"
                                 />
+                                {dateError?.issueDate && <div className="text-red-500 text-sm mt-1">{dateError.issueDate}</div>}
                             </div>
                             <div>
-                                <label htmlFor="publishDate" className="block text-sm font-medium text-[var(--text-1)] mb-1">Publishing Date</label>
+                                <label htmlFor="publishDate" className="block text-sm font-medium text-[var(--text-1)] mb-1">
+                                    Publish Date
+                                    <span className="ml-1 text-gray-500" title="Format: DD/MM/YYYY">(?)</span>
+                                </label>
                                 <input
                                     type="date"
                                     id="publishDate"
                                     name="publishDate"
+                                    ref={publishDateRef}
                                     value={formData.publishDate}
                                     onChange={handleChange}
+                                    onClick={() => openCalendar(publishDateRef)}
                                     className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
+                                    placeholder="Select publish date"
                                 />
+                                {dateError?.publishDate && <div className="text-red-500 text-sm mt-1">{dateError.publishDate}</div>}
                             </div>
                         </div>
                         <div className="mb-3">
@@ -136,20 +194,47 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, handleChange, error })
                             ></textarea>
                         </div>
                         <div className="file-upload mb-3">
-                            <label htmlFor="file_input" className="block mb-2 text-sm font-medium text-gray-900 dark:text-[var(--text-4)]">Upload file</label>
-                            <div className="flex items-center justify-center w-full">
-                                <label htmlFor="file_input" className="flex flex-col items-center justify-center w-full h-[80px] border-2 border-[var(--border-color)] border-dashed rounded-lg cursor-pointer bg-[var(--secondary-color)] hover:bg-gray-100 dark:border-[var(--dark-border)] dark:bg-[var(--dark-bg2)] dark:hover:bg-[var(--dark-border)]">
-                                    <div className="flex items-center gap-3">
-                                        <svg className="w-[40px] h-[40px] text-[var(--text-1)] dark:text-[var(--text-4)]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
-                                        </svg>
-                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                            <p className="text-xs text-gray-500 text-gray-400">SVG, PNG, JPG, GIF, or PDF (MAX. 10MB)</p>
+                            <label htmlFor="file_input" className="block mb-2 text-sm font-medium text-gray-900 dark:text-[var(--text-4)]">Upload File</label>
+                            <div className="flex flex-row items-center gap-4 flex-wrap">
+                                <div className="flex-1 min-w-[200px]">
+                                    <label htmlFor="file_input" className="flex flex-col items-center justify-center w-full h-[80px] border-2 border-[var(--border-color)] border-dashed rounded-lg cursor-pointer bg-[var(--secondary-color)] hover:bg-gray-100 dark:border-[var(--dark-border)] dark:bg-[var(--dark-bg2)] dark:hover:bg-[var(--dark-border)]">
+                                        <div className="flex items-center gap-3">
+                                            <svg className="w-[40px] h-[40px] text-[var(--text-1)] dark:text-[var(--text-4)]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                                            </svg>
+                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG, GIF, or PDF (MAX. 10MB)</p>
+                                            </div>
                                         </div>
+                                        <input id="file_input" type="file" name="file" onChange={handleChange} accept="image/jpeg,image/png,image/gif,application/pdf" className="hidden" />
+                                    </label>
+                                </div>
+                                {formData.file && (
+                                    <div className="flex flex-col items-center gap-1">
+                                        {fileType?.startsWith('image/') && filePreview && (
+                                            <img src={filePreview} alt="File preview" className="w-20 h-20 object-cover rounded-md border border-[var(--border-color2)]" />
+                                        )}
+                                        {fileType === 'application/pdf' && (
+                                            <>
+                                                <div className="w-20 h-20 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-md border border-[var(--border-color2)]">
+                                                    <svg className="w-10 h-10 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                    </svg>
+                                                </div>
+                                                <span className="text-sm text-[var(--text-1)] dark:text-[var(--text-4)] truncate max-w-[150px]">{formData.file.name}</span>
+                                            </>
+                                        )}
+                                        <button
+                                            type="button"
+                                            onClick={removeFile}
+                                            className="text-red-500 hover:text-red-700 text-sm"
+                                            title="Remove file"
+                                        >
+                                            Remove
+                                        </button>
                                     </div>
-                                    <input id="file_input" type="file" name="file" onChange={handleChange} accept="image/jpeg,image/png,image/gif,application/pdf" className="hidden" />
-                                </label>
+                                )}
                             </div>
                         </div>
                         {error && <div className="text-red-500 text-sm mb-3">{error}</div>}
@@ -157,7 +242,7 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, handleChange, error })
                 </div>
                 <div className="sticky bottom-0 bg-[var(--bg)] dark:bg-[var(--dark-bg)] border-t border-[var(--border-color2)] dark:border-[var(--dark-border)] px-6 py-4 flex justify-end space-x-3 z-10">
                     <button type="button" onClick={onClose} className="px-4 py-2 border border-[var(--border-color2)] dark:border-[var(--dark-border)] rounded-md text-sm font-medium text-[var(--text-1)] dark:text-[var(--text-4)] hover:bg-gray-500 focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200 cursor-pointer">Cancel</button>
-                    <button type="submit" form="editModalForm" className="px-4 py-2 bg-[var(--primary-color)] border-none rounded-md text-sm font-medium text-[var(--text-4)] hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200 cursor-pointer">Save Changes</button>
+                    <button type="submit" form="editModalFormData" className="px-4 py-2 bg-[var(--primary-color)] border-none rounded-md text-sm font-medium text-[var(--text-4)] hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200 cursor-pointer">Save Changes</button>
                 </div>
             </div>
         </div>
@@ -180,9 +265,11 @@ const Notices = () => {
     const [notices, setNotices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [dateError, setDateError] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
 
+    // Handle theme toggle icons
     useEffect(() => {
         const darkIcon = document.getElementById('theme-toggle-dark-icon');
         const lightIcon = document.getElementById('theme-toggle-light-icon');
@@ -217,6 +304,7 @@ const Notices = () => {
         return () => observer.disconnect();
     }, [dark]);
 
+    // Fetch notices on component mount
     useEffect(() => {
         const fetchNotices = async () => {
             try {
@@ -235,14 +323,19 @@ const Notices = () => {
         fetchNotices();
     }, []);
 
+    // Handle form data changes
     const handleChange = useCallback((e) => {
         const { name, value, type, files } = e.target;
         setFormData((prev) => ({
             ...prev,
             [name]: type === 'file' ? files[0] : value,
         }));
+        if (name === 'issueDate' || name === 'publishDate') {
+            setDateError((prev) => ({ ...prev, [name]: null }));
+        }
     }, []);
 
+    // Open modal for creating a new notice
     const openModal = () => {
         setFormData({
             id: null,
@@ -255,8 +348,10 @@ const Notices = () => {
         });
         setIsModalOpen(true);
         setError(null);
+        setDateError({});
     };
 
+    // Open modal for editing an existing notice
     const openEditModal = (notice) => {
         setFormData({
             id: notice._id || notice.id,
@@ -269,15 +364,39 @@ const Notices = () => {
         });
         setIsModalOpen(true);
         setError(null);
+        setDateError({});
     };
 
+    // Close modal and reset form data
     const closeModal = () => {
         setIsModalOpen(false);
         setError(null);
+        setDateError({});
+        setFormData((prev) => ({ ...prev, file: null }));
     };
 
+    // Validate issue and publish dates
+    const validateDates = (issueDate, publishDate) => {
+        const errors = {};
+        if (issueDate && publishDate) {
+            const issue = parseISO(issueDate);
+            const publish = parseISO(publishDate);
+            if (isBefore(publish, issue)) {
+                errors.publishDate = 'Publish date cannot be before issue date';
+            }
+        }
+        return errors;
+    };
+
+    // Handle form submission for creating or editing a notice
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const dateValidationErrors = validateDates(formData.issueDate, formData.publishDate);
+        if (Object.keys(dateValidationErrors).length > 0) {
+            setDateError(dateValidationErrors);
+            return;
+        }
+
         const formDataToSend = new FormData();
         formDataToSend.append('title', formData.title);
         formDataToSend.append('content', formData.content);
@@ -317,6 +436,7 @@ const Notices = () => {
         }
     };
 
+    // Handle deletion of a notice
     const handleDelete = (id) => {
         Swal.fire({
             title: 'Are you sure?',
@@ -366,12 +486,13 @@ const Notices = () => {
         });
     };
 
+    // Filter and paginate notices
     const filteredNotices = notices.filter((notice) => {
         const searchLower = search.toLowerCase();
         return (
             notice.title.toLowerCase().includes(searchLower) ||
-            (notice.issueDate && new Date(notice.issueDate).toLocaleDateString().toLowerCase().includes(searchLower)) ||
-            (notice.publishDate && new Date(notice.publishDate).toLocaleDateString().toLowerCase().includes(searchLower)) ||
+            (notice.issueDate && format(parseISO(notice.issueDate), 'dd/MM/yyyy').toLowerCase().includes(searchLower)) ||
+            (notice.publishDate && format(parseISO(notice.publishDate), 'dd/MM/yyyy').toLowerCase().includes(searchLower)) ||
             notice.status.toLowerCase().includes(searchLower) ||
             (notice.content && notice.content.toLowerCase().includes(searchLower))
         );
@@ -390,6 +511,15 @@ const Notices = () => {
 
     const handleNext = () => {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        try {
+            return format(parseISO(dateString), 'dd/MM/yyyy');
+        } catch {
+            return 'Invalid Date';
+        }
     };
 
     return (
@@ -419,7 +549,7 @@ const Notices = () => {
                         width: 60px;
                     }
                     .table th.date-column, .table td.date-column {
-                        width: 60px;
+                        width: 100px;
                     }
                     .table th.status-column, .table td.status-column {
                         width: 60px;
@@ -444,6 +574,9 @@ const Notices = () => {
                             width: 150px;
                             max-width: 150px;
                         }
+                        .table th.date-column, .table td.date-column {
+                            width: 80px;
+                        }
                     }
                 `}
             </style>
@@ -466,7 +599,7 @@ const Notices = () => {
                             <div className="wrapper">
                                 <form className="max-w-sm">
                                     <select id="entries_box" className="block w-full p-2 text-sm text-[var(--text-3)] border border-[var(--border-color)] rounded-lg bg-[var(--secondary-color)] focus:border-[var(--primary-color)] focus:outline-hidden dark:bg-[var(--dark-bg2)] dark:border-[var(--border-color)] dark:placeholder-[var(--text-2)] dark:text-[var(--text-4)] dark:focus:border-[var(--primary-color)] cursor-pointer" disabled>
-                                        <option value="10" selected>10</option>
+                                        <option defaultValue>10</option>
                                         <option value="25">25</option>
                                         <option value="50">50</option>
                                         <option value="100">100</option>
@@ -512,7 +645,7 @@ const Notices = () => {
                                     <td className="sl-column">
                                         <div className="flex items-center gap-3">
                                             <div className="flex items-center checkbox_wrap hide_content">
-                                                <input id={`checkbox-table-search-${notice._id || notice.id}`} type="checkbox" className="w-4 h-4 text-[var(--primary-color)] bg-[var(--secondary-color)] border-[var(--border-color2)] rounded-sm focus:ring-[var(--primary-color)] dark:focus:ring-[var(--primary-color)] dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-1 dark:bg-[var(--text-1)] dark:border-[var(--dark-border)]" />
+                                                <input id={`checkbox-table-search-${notice._id || notice.id}`} type="checkbox" className="w-4 h-4 text-[var(--primary-color)] bg-[var(--secondary-color)] border-[var(--border-color2)] rounded-sm focus:outline-none focus:ring-1 dark:focus:ring-[var(--primary-color)] dark:bg-[var(--dark-bg-color)] dark:border-[var(--dark-border)]" />
                                                 <label htmlFor={`checkbox-table-search-${notice._id || notice.id}`} className="sr-only">checkbox</label>
                                             </div>
                                             <span>{index + 1 + indexOfFirstNotice}</span>
@@ -522,7 +655,7 @@ const Notices = () => {
                                         <div className="flex items-center gap-1">
                                             <button className="quick-btn text-[var(--primary-color)] hover:text-blue-700 p-1 rounded-full hover:bg-blue-50 cursor-pointer" aria-label="View notice">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                                    <path d="M10 12a2 2 0 100-4 2 2 0 000-4z" />
                                                     <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
                                                 </svg>
                                             </button>
@@ -533,16 +666,16 @@ const Notices = () => {
                                             </button>
                                             <button className="delete-btn text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 cursor-pointer" onClick={() => handleDelete(notice._id || notice.id)} aria-label="Delete notice">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                                                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4h-3.382a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                                                 </svg>
                                             </button>
                                         </div>
                                     </td>
                                     <td className="title-column font-medium text-[var(--text-1)] dark:text-[var(--text-4)]">{notice.title}</td>
-                                    <td className="date-column">{notice.issueDate ? new Date(notice.issueDate).toLocaleDateString() : 'N/A'}</td>
-                                    <td className="date-column">{notice.publishDate ? new Date(notice.publishDate).toLocaleDateString() : 'N/A'}</td>
+                                    <td className="date-column">{formatDate(notice.issueDate)}</td>
+                                    <td className="date-column">{formatDate(notice.publishDate)}</td>
                                     <td className="status-column">
-                                        <button className={`${(notice.status || 'active').toLowerCase()}-status flex items-center`}>
+                                        <button className={`${(notice.status || 'active').toLowerCase()}-status flex items-center}`}>
                                             <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${notice.status === 'active' ? 'text-green-500' : 'text-red-500'} mr-1`} viewBox="0 0 20 20" fill="currentColor">
                                                 {notice.status === 'active' && (
                                                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -556,10 +689,10 @@ const Notices = () => {
                                                 </span>
                                         </button>
                                     </td>
-                                    <td className="date-column">{new Date(notice.createdAt).toLocaleDateString()}</td>
+                                    <td className="date-column">{formatDate(notice.createdAt)}</td>
                                     <td className="file-column">
                                         {notice.filePath && (
-                                            <a href={`http://localhost:3001${notice.filePath}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                                            <a href={`http://localhost:3001${notice.filePath}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                                                 View File
                                             </a>
                                         )}
@@ -576,10 +709,10 @@ const Notices = () => {
                         <ul className="flex justify-center items-center gap-2 py-2">
                             <li
                                 onClick={handlePrevious}
-                                className={`mx-1 px-3 py-2 bg-gray-200 rounded-lg font-bold ${
+                                className={`mx-1 px-3 py-2 rounded-lg font-bold bg-gray-200 dark:bg-[var(--dark-bg-gray)] ${
                                     currentPage === 1
-                                        ? 'text-gray-500 opacity-50 cursor-not-allowed'
-                                        : 'text-[var(--text-1)] hover:bg-gray-700 hover:text-gray-200 cursor-pointer'
+                                        ? 'text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                                        : 'text-[var(--text-1)] dark:text-[var(--text-4)] hover:bg-gray-600 dark:hover:bg-gray-500 hover:text-gray-200 cursor-pointer'
                                 }`}
                             >
                                 <span className="flex items-center">Previous</span>
@@ -588,10 +721,10 @@ const Notices = () => {
                                 <li
                                     key={page}
                                     onClick={() => paginate(page)}
-                                    className={`mx-1 px-3 py-2 bg-gray-200 rounded-lg font-bold ${
+                                    className={`mx-1 px-3 py-2 rounded-lg font-bold bg-gray-200 dark:bg-[var(--dark-bg-gray)] ${
                                         page === currentPage
-                                            ? 'bg-gray-700 text-gray-200'
-                                            : 'text-[var(--text-1)] hover:bg-gray-700 hover:text-gray-200 cursor-pointer'
+                                            ? 'bg-blue-600 dark:bg-gray-600 text-white'
+                                            : 'text-[var(--text-1)] dark:text-[var(--text-4)] hover:bg-gray-600 dark:hover:bg-gray-500 hover:text-gray-200 cursor-pointer'
                                     }`}
                                 >
                                     {page}
@@ -599,10 +732,10 @@ const Notices = () => {
                             ))}
                             <li
                                 onClick={handleNext}
-                                className={`mx-1 px-3 py-2 bg-gray-200 rounded-lg font-bold ${
+                                className={`mx-1 px-3 py-2 rounded-lg font-bold bg-gray-200 dark:bg-[var(--dark-bg-gray)] ${
                                     currentPage === totalPages || totalPages === 0
-                                        ? 'text-gray-500 opacity-50 cursor-not-allowed'
-                                        : 'text-[var(--text-1)] hover:bg-gray-700 hover:text-gray-200 cursor-pointer'
+                                        ? 'text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                                        : 'text-[var(--text-1)] dark:text-[var(--text-4)] hover:bg-gray-600 dark:hover:bg-gray-500 hover:text-gray-200 cursor-pointer'
                                 }`}
                             >
                                 <span className="flex items-center">Next</span>
@@ -616,8 +749,10 @@ const Notices = () => {
                 onClose={closeModal}
                 onSubmit={handleSubmit}
                 formData={formData}
+                setFormData={setFormData}
                 handleChange={handleChange}
                 error={error}
+                dateError={dateError}
             />
         </div>
     );

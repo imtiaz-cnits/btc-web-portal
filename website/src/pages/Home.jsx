@@ -1,16 +1,16 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {Link, useNavigate} from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import api from '../../api/index.js';
+import { Helmet } from 'react-helmet';
 import HeroImage from '../assets/img/home/hero-img1.png';
 import AboutImage from '../assets/img/home/about-image.png';
 import {
     useGsapAnimation,
     gsapAnimations,
-    useVerticalNotice,
     useClientScroller,
-    } from '../assets/js/style.js';
+} from '../assets/js/style.js';
 
 const Home = () => {
     const [notices, setNotices] = useState([]);
@@ -23,12 +23,68 @@ const Home = () => {
     const counterStatsRef = useRef(null);
     const aboutStatsRef = useRef(null);
 
+    // Fallback useVerticalNotice hook
+    const useVerticalNotice = (notices) => {
+        const noticeRef = useRef(null);
+        const timelineRef = useRef(null);
+
+        useEffect(() => {
+            if (!noticeRef.current || !notices || notices.length === 0) {
+                return;
+            }
+
+            const items = noticeRef.current.children;
+            if (items.length === 0) {
+                return;
+            }
+
+            // Set initial positioning
+            gsap.set(noticeRef.current, { position: 'relative', y: 0 });
+
+            const itemHeight = items[0].offsetHeight + 1; // Include border
+            const totalHeight = itemHeight * notices.length;
+
+            // Use GSAP to clone and animate instead of duplicating HTML
+            if (timelineRef.current) {
+                timelineRef.current.kill();
+            }
+            timelineRef.current = gsap.timeline({ repeat: -1 })
+                .to(noticeRef.current, {
+                    y: -totalHeight,
+                    duration: notices.length * 3,
+                    ease: 'none',
+                    modifiers: {
+                        y: gsap.utils.unitize((y) => parseFloat(y) % totalHeight),
+                    },
+                });
+
+            return () => {
+                if (timelineRef.current) {
+                    timelineRef.current.kill();
+                }
+            };
+        }, [notices]);
+
+        const handleMouseEnter = () => {
+            if (timelineRef.current) {
+                timelineRef.current.pause();
+            }
+        };
+
+        const handleMouseLeave = () => {
+            if (timelineRef.current) {
+                timelineRef.current.play();
+            }
+        };
+
+        return { noticeRef, handleMouseEnter, handleMouseLeave };
+    };
+
     // Fetch notices from backend
     useEffect(() => {
         const fetchNotices = async () => {
             try {
                 const response = await api.get('/notices');
-
                 if (response.data.success) {
                     const formattedNotices = response.data.notices.map(notice => ({
                         id: notice._id,
@@ -39,7 +95,14 @@ const Home = () => {
                             }).replace(/,/, '')
                             : 'N/A',
                         title: notice.title,
-                        link: `/notice/${notice._id}`,
+                        link: `/view-notice/${notice._id}`,
+                        filePath: notice.filePath,
+                        content: notice.content,
+                        fileType: notice.fileType || (notice.filePath && typeof notice.filePath === 'string'
+                            ? notice.filePath.toLowerCase().endsWith('.pdf') ? 'pdf'
+                                : ['.jpg', '.jpeg', '.png', '.gif'].some(ext => notice.filePath.toLowerCase().endsWith(ext)) ? 'image'
+                                    : 'unknown'
+                            : notice.content && typeof notice.content === 'string' && notice.content.trim() ? 'content' : 'none'),
                     }));
                     setNotices(formattedNotices);
                     setLoading(false);
@@ -55,21 +118,42 @@ const Home = () => {
                     setError(err.message || 'Failed to load notices. Please try again later.');
                 }
                 setLoading(false);
-                console.error('Error fetching notices:', err);
             }
         };
 
         fetchNotices();
     }, [navigate]);
 
+    // Handle viewing file or content
+    const handleViewFile = (filePath, fileType, id, content) => {
+        if (filePath) {
+            const normalizedPath = typeof filePath === 'string' ? (filePath.startsWith('/') ? filePath : `/${filePath}`).trim() : null;
+            if (normalizedPath) {
+                const fileUrl = `http://localhost:3001${normalizedPath}`;
+                const isSupported = fileType === 'pdf' || fileType === 'image' ||
+                    (normalizedPath.toLowerCase().endsWith('.pdf') ||
+                        ['.jpg', '.jpeg', '.png', '.gif'].some(ext => normalizedPath.toLowerCase().endsWith(ext)));
+                if (isSupported) {
+                    window.open(fileUrl, '_blank');
+                    return;
+                }
+            }
+        }
+        if (content && typeof content === 'string' && content.trim() && id) {
+            window.open(`/view-notice/${id}`, '_blank');
+        } else {
+            alert('No file or valid content available to view.');
+        }
+    };
+
     // Use custom hook for vertical notice scrolling
-    const { noticeRef, handleMouseEnter, handleMouseLeave } = useVerticalNotice();
+    const { noticeRef: verticalNoticeRef, handleMouseEnter, handleMouseLeave } = useVerticalNotice(notices);
 
     // Use custom hook for GSAP animations
     useGsapAnimation(gsapAnimations);
 
     // Use custom hook for clients slider scroller
-    const { scrollerRefs, handleMouseEnter: handleScrollerMouseEnter, handleMouseLeave: handleScrollerMouseLeave } = useClientScroller();
+    const { scrollerRefs } = useClientScroller();
 
     // Register GSAP and ScrollTrigger plugins
     useEffect(() => {
@@ -140,26 +224,32 @@ const Home = () => {
 
     return (
         <>
+            {/* Helmet for dynamic title and meta tags */}
+            <Helmet>
+                <title>Home | Building Technology & Consultant</title>
+                <meta name="description" content="Welcome to Building Technology & Consultant. View our latest notices and explore our services." />
+                <meta name="keywords" content="building technology, consultant, notices, services" />
+            </Helmet>
+
             {/* Hero Section Start */}
             <div className="hero bg-[var(--secondary-color)] overflow-hidden pt-[60px]">
                 <div className="custom-container mx-auto">
                     <div className="flex flex-wrap">
                         <div className="w-full lg:w-1/2">
                             <div className="theame" ref={heroThemeRef}>
-                                <div
-                                    className="flex justify-center lg:justify-start items-center gap-[10px] mb-[20px]">
-                                    <h1 className="text-[16px] font-[var(--primary-font)] text-[var(text-1)] bg-[var(--shade-1)] px-[20px] py-[5px] rounded-[30px]">
+                                <div className="flex justify-center lg:justify-start items-center gap-[10px] mb-[20px]">
+                                    <h1 className="text-[16px] font-[var(--primary-font)] text-[var(--text-1)] bg-[var(--shade-1)] px-[20px] py-[5px] rounded-[30px]">
                                         Your Safe Innovation
                                     </h1>
                                 </div>
-                                <h1 className="text-[38px] lg:text-[52px] text-center lg:text-left font-bold text-[var(text-1)] mb-[20px] uppercase">
+                                <h1 className="text-[38px] lg:text-[52px] text-center lg:text-left font-bold text-[var(--text-1)] mb-[20px] uppercase">
                                     Welcome to the
-                                    <span className="text-[var(--primary-color)]"> Building Technology {" "}</span>
+                                    <span className="text-[var(--primary-color)]"> Building Technology </span>
                                     & Consultant
                                     <span className="text-[var(--primary-color)]"> !!!</span>
                                 </h1>
                                 <div className="lg:w-[92%] w-[100%] overflow-hidden rounded-[24px_0px_24px_24px]">
-                                    <img src={HeroImage} alt="" className="w-full object-cover"/>
+                                    <img src={HeroImage} alt="Hero Image" className="w-full object-cover" />
                                 </div>
                             </div>
                         </div>
@@ -174,7 +264,6 @@ const Home = () => {
                                     NOTICE BOARD
                                 </h3>
                                 <div className="notice_item h-[450px] overflow-hidden">
-
                                     {loading ? (
                                         <div className="flex justify-center items-center h-full">
                                             <p className="text-[var(--text-2)] text-base">Loading notices...</p>
@@ -184,49 +273,53 @@ const Home = () => {
                                             <p className="text-[var(--text-2)] text-base">{error}</p>
                                         </div>
                                     ) : notices.length === 0 ? (
-                                            <div className="flex justify-center items-center h-full">
-                                                <p className="text-[var(--text-2)] text-base">No notices available.</p>
-                                            </div>
-                                        ) : (
-
-                                    <ul className="notices overflow-hidden relative" ref={noticeRef}>
-                                        {notices.map((notice) => (
-                                            <li
-                                                key={notice.id}
-                                                className="notice flex items-center border-b border-[var(--ac-1)] py-3 mx-5"
-                                            >
-                                                <Link to={notice.link} className="link flex items-center"
-                                                      aria-label={`View notice ${notice.title}`}>
-                                                    <div className="date relative w-[52px] h-[52px]">
-                                                        <div
-                                                            className="day absolute top-[-12px] left-[19px] text-[var(--secondary-color)] font-[var(--primary-font)] font-medium text-[26px] z-[2]">
+                                        <div className="flex justify-center items-center h-full">
+                                            <p className="text-[var(--text-2)] text-base">No notices available.</p>
+                                        </div>
+                                    ) : (
+                                        <ul className="notices overflow-y-hidden relative" ref={verticalNoticeRef}>
+                                            {notices.map((notice) => (
+                                                <li
+                                                    key={notice.id}
+                                                    className="notice flex items-center border-b border-[var(--ac-1)] py-4 mx-5"
+                                                >
+                                                    <div
+                                                        className="date relative w-[52px] h-[52px]"
+                                                    >
+                                                        <div className="day absolute top-[-12px] left-[12px] text-[var(--secondary-color)] font-[var(--primary-font)] font-medium text-[26px] z-[2]">
                                                             {notice.date.split(' ')[1]}
                                                         </div>
-                                                        <div
-                                                            className="month absolute top-[18px] left-[22px] font-medium font-[var(--secondary-font)] text-[var(--secondary-color)] text-base z-[2]">
+                                                        <div className="month absolute top-[18px] left-[12px] font-medium font-[var(--secondary-font)] text-[var(--secondary-color)] text-base z-[2]">
                                                             {notice.date.split(' ')[0]}
                                                         </div>
                                                     </div>
-                                                </Link>
-                                                <div className="content leading-[18px]">
-                                                    <Link
-                                                        to={notice.link}
-                                                        className="link text-[var(--text-2, #666)] text-base font-[var(--secondary-font)] font-medium transition duration-300 hover:text-[var(--primary-color)]"
+                                                    <div
+                                                        className="content leading-[18px] flex-1 cursor-pointer"
+                                                        onClick={() => handleViewFile(notice.filePath, notice.fileType, notice.id, notice.content)}
+                                                        role="button"
+                                                        tabIndex={0}
                                                         aria-label={`Read more about ${notice.title}`}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                                handleViewFile(notice.filePath, notice.fileType, notice.id, notice.content);
+                                                            }
+                                                        }}
                                                     >
-                                                        {notice.title}
-                                                    </Link>
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                        )};
+                                                        <span className="text-[var(--text-2, #666)] text-base font-[var(--secondary-font)] font-medium transition duration-300 hover:text-[var(--primary-color)] hover:underline">
+                                                            {notice.title}
+                                                        </span>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
                                 </div>
                                 <div className="button text-center">
-                                    <Link to="/notice"
-                                        className="view_note_btn cursor-pointer relative inline-flex items-center justify-center px-8 my-5 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-0 rounded-tr-lg rounded-bl-lg rounded-br-lg group">
-                                            <span
-                                                className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>
+                                    <Link
+                                        to="/notices"
+                                        className="view_note_btn cursor-pointer relative inline-flex items-center justify-center px-8 my-5 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-0 rounded-tr-lg rounded-bl-lg rounded-br-lg group"
+                                    >
+                                        <span className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>
                                         <span className="relative text-base font-semibold">VIEW ALL NOTICE</span>
                                     </Link>
                                 </div>
@@ -236,16 +329,15 @@ const Home = () => {
                 </div>
             </div>
 
-            <style>
-                {`
-                  .hero .notice .date {
+            <style>{`
+                .hero .notice .date {
                     position: relative;
                     width: 52px;
                     height: 52px;
                     background: linear-gradient(90deg, #5aa469 50%, transparent 50%),
-                      linear-gradient(90deg, #5aa469 50%, transparent 50%),
-                      linear-gradient(0deg, #5aa469 50%, transparent 50%),
-                      linear-gradient(0deg, #5aa469 50%, transparent 50%);
+                        linear-gradient(90deg, #5aa469 50%, transparent 50%),
+                        linear-gradient(0deg, #5aa469 50%, transparent 50%),
+                        linear-gradient(0deg, #5aa469 50%, transparent 50%);
                     background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
                     background-size: 9px 2px, 9px 2px, 2px 9px, 2px 9px;
                     background-position: 0% 0%, 100% 100%, 0% 100%, 100% 0px;
@@ -253,28 +345,63 @@ const Home = () => {
                     padding: 10px;
                     margin-right: 20px;
                     margin-top: 10px;
-                    animation: dash 5s linear infinite;
-                    cursor: default;
                     z-index: 1;
-                  }
-                  .hero .notice .date::before {
+                }
+                .hero .notice .date::before {
                     content: "";
                     position: absolute;
                     top: -10px;
+                    left: 12px;
                     width: 50px;
                     height: 50px;
                     border-radius: 12px 12px 12px 0px;
-                    background-color: var(--primary-color) !important;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-items: center;
-                    font-size: 16px;
+                    background-color: var(--primary-color);
                     z-index: -1;
-                    font-weight: bold;
-                  }
-                `}
-            </style>
+                }
+                .hero .notice .day {
+                    position: absolute;
+                    top: -12px;
+                    left: 12px;
+                    text-align: center;
+                    width: 100%;
+                    color: var(--secondary-color);
+                    font-family: var(--primary-font);
+                    font-medium;
+                    font-size: 26px;
+                    z-index: 2;
+                }
+                .hero .notice .month {
+                    position: absolute;
+                    top: 18px;
+                    left: 12px;
+                    text-align: center;
+                    width: 100%;
+                    color: var(--secondary-color);
+                    font-family: var(--secondary-font);
+                    font-medium;
+                    font-size: 16px;
+                    z-index: 2;
+                }
+                .notices {
+                    position: relative;
+                    width: 100%;
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+                }
+                .notice {
+                    display: flex;
+                    align-items: center;
+                    width: 100%;
+                    padding: 12px 0;
+                }
+                .content {
+                    flex: 1;
+                    padding-left: 10px;
+                    padding-right: 26px;
+                    min-width: 0;
+                }
+            `}</style>
             {/* Hero Section End */}
 
 

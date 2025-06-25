@@ -8,9 +8,12 @@ import {
     gsapAnimations,
 } from '../assets/js/style.js';
 
-// Error Boundary Component
+// Modern Error Boundary Component
 class NoticeErrorBoundary extends React.Component {
-    state = { hasError: false, error: null };
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null, errorInfo: null };
+    }
 
     static getDerivedStateFromError(error) {
         return { hasError: true, error };
@@ -18,6 +21,7 @@ class NoticeErrorBoundary extends React.Component {
 
     componentDidCatch(error, errorInfo) {
         console.error('Error in Notice component:', error, errorInfo);
+        this.setState({ errorInfo });
     }
 
     render() {
@@ -26,6 +30,15 @@ class NoticeErrorBoundary extends React.Component {
                 <div className="text-center text-[var(--text-1)] p-6">
                     <h2>Something went wrong while displaying notices.</h2>
                     <p>{this.state.error?.message || 'Please try again later.'}</p>
+                    <button
+                        className="mt-4 bg-[var(--primary-color)] text-[var(--secondary-color)] px-4 py-2 rounded-md hover:bg-green-600"
+                        onClick={() => {
+                            this.setState({ hasError: false, error: null, errorInfo: null });
+                            window.location.reload();
+                        }}
+                    >
+                        Retry
+                    </button>
                 </div>
             );
         }
@@ -52,6 +65,7 @@ const Notice = () => {
             try {
                 const response = await api.get('/notices');
                 if (response.data.success) {
+                    console.log('Fetched notices:', response.data.notices.map(n => ({ id: n._id, title: n.title })));
                     setNotices(response.data.notices || []);
                     setLoading(false);
                 } else {
@@ -83,19 +97,45 @@ const Notice = () => {
             window.open(`/view-notice/${id}`, '_blank');
         } else {
             alert('No file or valid content available to view.');
-            console.warn('No content to display:', { content, filePath, id });
+            console.warn('No content to display:', { filePath, id });
         }
     };
 
     // Pagination logic
-    const totalPages = Math.ceil(notices.length || 0);
+    const totalNotices = notices.length;
+    const totalPages = Math.ceil(totalNotices / noticesPerPage) || 1;
     const indexOfLastNotice = currentPage * noticesPerPage;
     const indexOfFirstNotice = indexOfLastNotice - noticesPerPage;
     const currentNotices = notices.slice(indexOfFirstNotice, indexOfLastNotice);
 
+    // Generate page numbers with ellipsis
+    const getPageNumbers = () => {
+        const MAX_PAGES_TO_SHOW = 5; // Renamed to satisfy ESLint rule
+        const pages = [];
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+
+        if (startPage > 1) {
+            pages.push(1);
+            if (startPage > 2) pages.push('...');
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(i);
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) pages.push('...');
+            pages.push(totalPages);
+        }
+
+        return pages;
+    };
+
     const handlePageChange = (page) => {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
 
@@ -132,7 +172,7 @@ const Notice = () => {
                                             >
                                                 <li>
                                                     <Link
-                                                        to="./index.html"
+                                                        to="/"
                                                         className="item flex justify-center items-center font-[var(--primary-font)] text-sm uppercase text-[var(--secondary-color)] cursor-pointer transition-all duration-300"
                                                     >
                                                         HOME
@@ -158,7 +198,7 @@ const Notice = () => {
                                                 </li>
                                                 <li>
                                                     <Link
-                                                        to=""
+                                                        to="/notices"
                                                         className="active_item item flex justify-center items-center font-[var(--primary-font)] text-sm uppercase text-[var(--secondary-color)] cursor-pointer"
                                                     >
                                                         NOTICE
@@ -265,8 +305,8 @@ const Notice = () => {
                                                             {notice.title || 'Untitled Notice'}
                                                         </a>
                                                         <span className="block text-sm text-[var(--text-1)] mt-1">
-                                {notice.createdAt ? new Date(notice.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
-                              </span>
+                                                                {notice.createdAt ? new Date(notice.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
+                                                            </span>
                                                     </td>
                                                     <td className="px-6 py-3 whitespace-nowrap border border-[var(--ac-1)]">
                                                         {notice.issueDate ? new Date(notice.issueDate).toLocaleDateString() : '-'}
@@ -276,7 +316,7 @@ const Notice = () => {
                                                     </td>
                                                     <td className="px-6 py-4 text-center whitespace-nowrap border border-[var(--ac-1)]">
                                                         <button
-                                                            className="bg-[var(--primary-color)] hover:bg-green-600 text-[var(--secondary-color)] px-4 py-2 rounded-md transition-colors disabled:opacity-50"
+                                                            className="bg-[var(--primary-color)] cursor-pointer hover:bg-green-600 text-[var(--secondary-color)] px-4 py-2 rounded-md transition-colors disabled:opacity-50"
                                                             onClick={() => handleViewFile(notice.filePath, fileType, notice._id, notice.content)}
                                                             disabled={isButtonDisabled}
                                                         >
@@ -292,43 +332,54 @@ const Notice = () => {
                             </div>
 
                             {/* Pagination */}
-                            {!loading && !error && notices.length > 0 && (
-                                <nav className="mt-10 flex justify-center">
-                                    <ul className="inline-flex items-center -space-x-px rounded-lg overflow-hidden border border-[var(--ac-1)]">
-                                        <li>
-                                            <button
-                                                onClick={() => handlePageChange(currentPage - 1)}
-                                                className="px-3 py-2 ml-0 leading-tight text-[var(--text-1)] bg-[var(--secondary-color)] hover:bg-[var(--primary-color)] hover:text-[var(--secondary-color)] disabled:opacity-50"
-                                                disabled={currentPage === 1}
-                                            >
-                                                Previous
-                                            </button>
-                                        </li>
-                                        {[...Array(totalPages).keys()].map((page) => (
-                                            <li key={page + 1}>
+                            {!loading && !error && totalNotices > 0 && (
+                                <div className="pagination-container mt-10">
+                                    <div className="pagination-info text-[var(--text-1)] mb-4">
+                                        Showing {indexOfFirstNotice + 1} to {Math.min(indexOfLastNotice, totalNotices)} of {totalNotices} notices
+                                    </div>
+                                    <nav className="flex justify-center">
+                                        <ul className="inline-flex items-center -space-x-px rounded-lg overflow-hidden border border-[var(--ac-1)]">
+                                            <li>
                                                 <button
-                                                    onClick={() => handlePageChange(page + 1)}
-                                                    className={`px-3 py-2 leading-tight ${
-                                                        currentPage === page + 1
-                                                            ? 'text-[var(--secondary-color)] bg-[var(--primary-color)] border-[var(--primary-color)]'
-                                                            : 'text-[var(--text-1)] bg-[var(--secondary-color)] border-[var(--ac-1)] hover:bg-[var(--primary-color)] hover:text-[var(---secondary-color)]'
-                                                    }`}
+                                                    onClick={() => handlePageChange(currentPage - 1)}
+                                                    className="px-3 py-2 leading-tight text-[var(--text-1)] bg-[var(--secondary-color)] hover:bg-[var(--primary-color)] hover:text-[var(--secondary-color)] disabled:opacity-50 cursor-pointer"
+                                                    disabled={currentPage === 1}
                                                 >
-                                                    {page + 1}
+                                                    Previous
                                                 </button>
                                             </li>
-                                        ))}
-                                        <li>
-                                            <button
-                                                onClick={() => handlePageChange(currentPage + 1)}
-                                                className="px-3 py-2 leading-tight text-[var(--text-1)] bg-[var(--secondary-color)] hover:bg-[var(--primary-color)] hover:text-[var(--secondary-color)] disabled:opacity-50"
-                                                disabled={currentPage === totalPages}
-                                            >
-                                                Next
-                                            </button>
-                                        </li>
-                                    </ul>
-                                </nav>
+                                            {getPageNumbers().map((page, index) => (
+                                                <li key={index}>
+                                                    {page === '...' ? (
+                                                        <span className="px-3 py-2 leading-tight text-[var(--text-1)] bg-[var(--secondary-color)]">
+                                                            ...
+                                                        </span>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => handlePageChange(page)}
+                                                            className={`px-3 py-2 leading-tight ${
+                                                                currentPage === page
+                                                                    ? 'text-[var(--secondary-color)] bg-[var(--primary-color)] border-[var(--primary-color)] cursor-pointer'
+                                                                    : 'text-[var(--text-1)] bg-[var(--secondary-color)] cursor-pointer border-[var(--ac-1)] hover:bg-[var(--primary-color)] hover:text-[var(--secondary-color)]'
+                                                            }`}
+                                                        >
+                                                            {page}
+                                                        </button>
+                                                    )}
+                                                </li>
+                                            ))}
+                                            <li>
+                                                <button
+                                                    onClick={() => handlePageChange(currentPage + 1)}
+                                                    className="px-3 py-2 leading-tight text-[var(--text-1)] bg-[var(--secondary-color)] cursor-pointer hover:bg-[var(--primary-color)] hover:text-[var(--secondary-color)] disabled:opacity-50"
+                                                    disabled={currentPage === totalPages}
+                                                >
+                                                    Next
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
                             )}
                         </div>
                     </div>

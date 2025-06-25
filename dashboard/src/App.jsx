@@ -1,13 +1,13 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
-import AdminLayout from './pages/admin/AdminLayout.jsx';
-import Auth from './pages/admin/Auth.jsx';
-import VerifyEmail from './pages/admin/VerifyEmail.jsx';
-import ResetPassword from './pages/admin/ResetPassword.jsx';
+import AdminLayout from './pages/AdminLayout.jsx';
+import Auth from './pages/Auth.jsx';
+import VerifyEmail from './pages/VerifyEmail.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
-import Dashboard from './pages/admin/Dashboard.jsx';
-import Notices from './pages/admin/Notices.jsx';
+import Dashboard from './pages/Dashboard.jsx';
+import Notices from './pages/Notices.jsx';
 import { SidebarProvider } from './contexts/SidebarContext.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 

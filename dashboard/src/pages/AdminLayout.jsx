@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import Navbar from "../../components/Navbar.jsx";
-import Sidebar from "../../components/Sidebar.jsx";
-import JavaScriptClient from "../../components/JavaScriptClient/JavaScriptClient.jsx";
-import Footer from "../../components/Footer.jsx";
+import Navbar from "../components/Navbar.jsx";
+import Sidebar from "../components/Sidebar.jsx";
+import JavaScriptClient from "../components/JavaScriptClient/JavaScriptClient.jsx";
+import Footer from "../components/Footer.jsx";
 import { Outlet } from "react-router-dom";
 
 const AdminLayout = () => {

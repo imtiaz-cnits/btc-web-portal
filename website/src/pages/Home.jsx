@@ -4,13 +4,34 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import api from '../../api/index.js';
 import { Helmet } from 'react-helmet';
-import HeroImage from '../assets/img/home/hero-img1.png';
-import AboutImage from '../assets/img/home/about-image.png';
 import {
     useGsapAnimation,
     gsapAnimations,
     useClientScroller,
 } from '../assets/js/style.js';
+import HeroImage from '../assets/img/home/hero-img1.png';
+import AboutImage from '../assets/img/home/about-image.png';
+import ProjectImage1 from '../assets/img/home/project-img1.png';
+import ProjectImage2 from '../assets/img/home/project-img2.png';
+import ProjectImage3 from '../assets/img/home/project-img3.png';
+import ProjectImage4 from '../assets/img/home/project-img4.png';
+import ProjectImage5 from '../assets/img/home/project-img5.png';
+import ProjectImage6 from '../assets/img/home/project-img6.png';
+import ProjectImage7 from '../assets/img/home/project-img7.png';
+import ProjectImage8 from '../assets/img/home/project-img8.png';
+import ProjectImage9 from '../assets/img/home/project-img9.png';
+import ClientLogo1 from '../assets/img/home/client-logo1.png';
+import ClientLogo2 from '../assets/img/home/client-logo2.png';
+import ClientLogo3 from '../assets/img/home/client-logo3.png';
+import ClientLogo4 from '../assets/img/home/client-logo4.png';
+import ClientLogo5 from '../assets/img/home/client-logo5.png';
+import ClientLogo6 from '../assets/img/home/client-logo6.png';
+import ClientLogo7 from '../assets/img/home/client-logo7.png';
+import ClientLogo8 from '../assets/img/home/client-logo8.png';
+import ClientLogo9 from '../assets/img/home/client-logo9.png';
+import ClientLogo10 from '../assets/img/home/client-logo10.png';
+import ClientLogo11 from '../assets/img/home/client-logo11.png';
+import ClientLogo12 from '../assets/img/home/client-logo12.png';
 
 const Home = () => {
     const [notices, setNotices] = useState([]);
@@ -1155,7 +1176,7 @@ const Home = () => {
                             <div className="flex items-stretch">
                                 <div className="project_item w-full transition duration-400">
                                     <div className="image relative w-full aspect-[16/11] rounded-[24px] overflow-hidden">
-                                        <img src="./src/assets/img/home/project-img1.png" alt=""
+                                        <img src={ProjectImage1} alt=""
                                              className="w-full h-full object-cover transition duration-400 group-hover:scale-[1.08]" />
                                         <span
                                             className="tag absolute bottom-[14px] left-[14px] bg-[var(--shade-1)] text-[var(--text-1)] font-[var(--primary-font)] font-medium text-[16px] rounded-[30px] py-[5px] px-[20px]">
@@ -1191,7 +1212,7 @@ const Home = () => {
                             <div className="flex items-stretch">
                                 <div className="project_item w-full transition duration-400">
                                     <div className="image relative w-full aspect-[16/11] rounded-[24px] overflow-hidden">
-                                        <img src="./src/assets/img/home/project-img2.png" alt=""
+                                        <img src={ProjectImage2} alt=""
                                              className="w-full h-full object-cover transition duration-400 group-hover:scale-[1.08]" />
                                         <span
                                             className="tag absolute bottom-[14px] left-[14px] bg-[var(--shade-1)] text-[var(--text-1)] font-[var(--primary-font)] font-medium text-[16px] rounded-[30px] py-[5px] px-[20px]">
@@ -1227,7 +1248,7 @@ const Home = () => {
                             <div className="flex items-stretch">
                                 <div className="project_item w-full transition duration-400">
                                     <div className="image relative w-full aspect-[16/11] rounded-[24px] overflow-hidden">
-                                        <img src="./src/assets/img/home/project-img3.png" alt=""
+                                        <img src={ProjectImage3} alt=""
                                              className="w-full h-full object-cover transition duration-400 group-hover:scale-[1.08]" />
                                         <span
                                             className="tag absolute bottom-[14px] left-[14px] bg-[var(--shade-1)] text-[var(--text-1)] font-[var(--primary-font)] font-medium text-[16px] rounded-[30px] py-[5px] px-[20px]">
@@ -1263,7 +1284,7 @@ const Home = () => {
                             <div className="flex items-stretch">
                                 <div className="project_item w-full transition duration-400">
                                     <div className="image relative w-full aspect-[16/11] rounded-[24px] overflow-hidden">
-                                        <img src="./src/assets/img/home/project-img4.png" alt=""
+                                        <img src={ProjectImage4} alt=""
                                              className="w-full h-full object-cover transition duration-400 group-hover:scale-[1.08]" />
                                         <span
                                             className="tag absolute bottom-[14px] left-[14px] bg-[var(--shade-1)] text-[var(--text-1)] font-[var(--primary-font)] font-medium text-[16px] rounded-[30px] py-[5px] px-[20px]">
@@ -1299,7 +1320,7 @@ const Home = () => {
                             <div className="flex items-stretch">
                                 <div className="project_item w-full transition duration-400">
                                     <div className="image relative w-full aspect-[16/11] rounded-[24px] overflow-hidden">
-                                        <img src="./src/assets/img/home/project-img5.png" alt=""
+                                        <img src={ProjectImage5} alt=""
                                              className="w-full h-full object-cover transition duration-400 group-hover:scale-[1.08]" />
                                         <span
                                             className="tag absolute bottom-[14px] left-[14px] bg-[var(--shade-1)] text-[var(--text-1)] font-[var(--primary-font)] font-medium text-[16px] rounded-[30px] py-[5px] px-[20px]">
@@ -1335,7 +1356,7 @@ const Home = () => {
                             <div className="flex items-stretch">
                                 <div className="project_item w-full transition duration-400">
                                     <div className="image relative w-full aspect-[16/11] rounded-[24px] overflow-hidden">
-                                        <img src="./src/assets/img/home/project-img6.png" alt=""
+                                        <img src={ProjectImage6} alt=""
                                              className="w-full h-full object-cover transition duration-400 group-hover:scale-[1.08]" />
                                         <span
                                             className="tag absolute bottom-[14px] left-[14px] bg-[var(--shade-1)] text-[var(--text-1)] font-[var(--primary-font)] font-medium text-[16px] rounded-[30px] py-[5px] px-[20px]">
@@ -1371,7 +1392,7 @@ const Home = () => {
                             <div className="flex items-stretch">
                                 <div className="project_item w-full transition duration-400">
                                     <div className="image relative w-full aspect-[16/11] rounded-[24px] overflow-hidden">
-                                        <img src="./src/assets/img/home/project-img7.png" alt=""
+                                        <img src={ProjectImage7} alt=""
                                              className="w-full h-full object-cover transition duration-400 group-hover:scale-[1.08]" />
                                         <span
                                             className="tag absolute bottom-[14px] left-[14px] bg-[var(--shade-1)] text-[var(--text-1)] font-[var(--primary-font)] font-medium text-[16px] rounded-[30px] py-[5px] px-[20px]">
@@ -1407,7 +1428,7 @@ const Home = () => {
                             <div className="flex items-stretch">
                                 <div className="project_item w-full transition duration-400">
                                     <div className="image relative w-full aspect-[16/11] rounded-[24px] overflow-hidden">
-                                        <img src="./src/assets/img/home/project-img8.png" alt=""
+                                        <img src={ProjectImage8} alt=""
                                              className="w-full h-full object-cover transition duration-400 group-hover:scale-[1.08]" />
                                         <span
                                             className="tag absolute bottom-[14px] left-[14px] bg-[var(--shade-1)] text-[var(--text-1)] font-[var(--primary-font)] font-medium text-[16px] rounded-[30px] py-[5px] px-[20px]">
@@ -1443,7 +1464,7 @@ const Home = () => {
                             <div className="flex items-stretch">
                                 <div className="project_item w-full transition duration-400">
                                     <div className="image relative w-full aspect-[16/11] rounded-[24px] overflow-hidden">
-                                        <img src="./src/assets/img/home/project-img9.png" alt=""
+                                        <img src={ProjectImage9} alt=""
                                              className="w-full h-full object-cover transition duration-400 group-hover:scale-[1.08]" />
                                         <span
                                             className="tag absolute bottom-[14px] left-[14px] bg-[var(--shade-1)] text-[var(--text-1)] font-[var(--primary-font)] font-medium text-[16px] rounded-[30px] py-[5px] px-[20px]">
@@ -1509,42 +1530,42 @@ const Home = () => {
                     >
                         <Link to="#" className="logo">
                             <img
-                                src="./src/assets/img/home/client-logo1.png"
+                                src={ClientLogo1}
                                 className="w-[247px] h-[110px] rounded-[12px]"
                                 alt=""
                             />
                         </Link>
                         <Link to="#" className="logo">
                             <img
-                                src="./src/assets/img/home/client-logo2.png"
+                                src={ClientLogo2}
                                 className="w-[247px] h-[110px] rounded-[12px]"
                                 alt=""
                             />
                         </Link>
                         <Link to="#" className="logo">
                             <img
-                                src="./src/assets/img/home/client-logo3.png"
+                                src={ClientLogo3}
                                 className="w-[247px] h-[110px] rounded-[12px]"
                                 alt=""
                             />
                         </Link>
                         <Link to="#" className="logo">
                             <img
-                                src="./src/assets/img/home/client-logo4.png"
+                                src={ClientLogo4}
                                 className="w-[247px] h-[110px] rounded-[12px]"
                                 alt=""
                             />
                         </Link>
                         <Link to="#" className="logo">
                             <img
-                                src="./src/assets/img/home/client-logo5.png"
+                                src={ClientLogo5}
                                 className="w-[247px] h-[110px] rounded-[12px]"
                                 alt=""
                             />
                         </Link>
                         <Link to="#" className="logo">
                             <img
-                                src="./src/assets/img/home/client-logo6.png"
+                                src={ClientLogo6}
                                 className="w-[247px] h-[110px] rounded-[12px]"
                                 alt=""
                             />
@@ -1565,42 +1586,42 @@ const Home = () => {
                     >
                         <Link to="#" className="logo">
                             <img
-                                src="./src/assets/img/home/client-logo7.png"
+                                src={ClientLogo7}
                                 className="w-[247px] h-[110px] rounded-[12px]"
                                 alt=""
                             />
                         </Link>
                         <Link to="#" className="logo">
                             <img
-                                src="./src/assets/img/home/client-logo8.png"
+                                src={ClientLogo8}
                                 className="w-[247px] h-[110px] rounded-[12px]"
                                 alt=""
                             />
                         </Link>
                         <Link to="#" className="logo">
                             <img
-                                src="./src/assets/img/home/client-logo9.png"
+                                src={ClientLogo9}
                                 className="w-[247px] h-[110px] rounded-[12px]"
                                 alt=""
                             />
                         </Link>
                         <Link to="#" className="logo">
                             <img
-                                src="./src/assets/img/home/client-logo10.png"
+                                src={ClientLogo10}
                                 className="w-[247px] h-[110px] rounded-[12px]"
                                 alt=""
                             />
                         </Link>
                         <Link to="#" className="logo">
                             <img
-                                src="./src/assets/img/home/client-logo11.png"
+                                src={ClientLogo11}
                                 className="w-[247px] h-[110px] rounded-[12px]"
                                 alt=""
                             />
                         </Link>
                         <Link to="#" className="logo">
                             <img
-                                src="./src/assets/img/home/client-logo12.png"
+                                src={ClientLogo12}
                                 className="w-[247px] h-[110px] rounded-[12px]"
                                 alt=""
                             />

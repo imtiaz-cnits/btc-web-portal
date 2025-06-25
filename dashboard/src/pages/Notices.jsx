@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import useDarkMode from '../../hooks/useDarkMode';
-import api from '../../api/index.js';
+import useDarkMode from '../hooks/useDarkMode.jsx';
+import api from '../api/index.js';
 import Swal from 'sweetalert2';
 import { format, parseISO, isBefore } from 'date-fns';
 

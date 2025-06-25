@@ -134,10 +134,28 @@ const Navbar = () => {
                                     href="tel:01711010929"
                                     className="text-text-1 text-base font-normal font-secondary ml-0.5 hover:text-[var(--primary-color)] transition duration-300"
                                 >
-                                    01711010929-(Imran), 01711805086-(Shah Alom)
+                                    01711010929(Imran), 01711805086(Shah Alom)
                                 </a>
                             </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <a href="https://www.facebook.com/egpbtc"
+                               className="hover:text-[var(--primary-color)] transition duration-400"
+                            style={{ marginTop: '4px', marginBottom: '-4px' }}>
+                                <i className="fa-brands fa-facebook-f text-text-1 text-xl hover:text-[var(--primary-color)] transition duration-400"></i>
+                            </a>
+                            {/*<a href="#" className="hover:text-[var(--primary-color)] transition duration-400">*/}
+                            {/*    <i className="fa-brands fa-instagram text-text-1 text-xl hover:text-[var(--primary-color)] transition duration-400"></i>*/}
+                            {/*</a>*/}
+                            {/*<a href="#" className="hover:text-[var(--primary-color)] transition duration-400">*/}
+                            {/*    <i className="fa-brands fa-x-twitter text-text-1 text-xl hover:text-[var(--primary-color)] transition duration-400"></i>*/}
+                            {/*</a>*/}
+                            {/*<a href="#" className="hover:text-[var(--primary-color)] transition duration-400">*/}
+                            {/*    <i className="fa-brands fa-linkedin-in text-text-1 text-xl hover:text-[var(--primary-color)] transition duration-400"></i>*/}
+                            {/*</a>*/}
+
                             <div className="text-text-1 text-xl font-normal mx-2.5">|</div>
+
                             <div className="flex items-center gap-1">
                                 <svg width="20" height="20" viewBox="0 0 32 32" fill="none"
                                      xmlns="http://www.w3.org/2000/svg">
@@ -166,21 +184,7 @@ const Navbar = () => {
                                 </a>
                             </div>
                         </div>
-                        <div className="flex items-center gap-6">
-                            <a href="https://www.facebook.com/share/16cBeKdBrD/"
-                               className="hover:text-[var(--primary-color)] transition duration-400">
-                                <i className="fa-brands fa-facebook-f text-text-1 text-xl hover:text-[var(--primary-color)] transition duration-400"></i>
-                            </a>
-                            <a href="#" className="hover:text-[var(--primary-color)] transition duration-400">
-                                <i className="fa-brands fa-instagram text-text-1 text-xl hover:text-[var(--primary-color)] transition duration-400"></i>
-                            </a>
-                            <a href="#" className="hover:text-[var(--primary-color)] transition duration-400">
-                                <i className="fa-brands fa-x-twitter text-text-1 text-xl hover:text-[var(--primary-color)] transition duration-400"></i>
-                            </a>
-                            <a href="#" className="hover:text-[var(--primary-color)] transition duration-400">
-                                <i className="fa-brands fa-linkedin-in text-text-1 text-xl hover:text-[var(--primary-color)] transition duration-400"></i>
-                            </a>
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -198,15 +202,11 @@ const Navbar = () => {
                                       className="text-[var(--primary-color)] transition duration-300 font-medium">
                                     HOME
                                 </Link>
-                                <Link to="/services"
+                                <Link to=""
                                       className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
                                     SERVICES
                                 </Link>
-                                <Link to="/tender"
-                                      className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
-                                    TENDER
-                                </Link>
-                                <Link to="/projects"
+                                <Link to=""
                                       className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
                                     PROJECTS
                                 </Link>
@@ -216,7 +216,7 @@ const Navbar = () => {
                                         PAGES
                                         <svg className="w-4 h-4 ml-1 rotate-icon" fill="none" stroke="currentColor"
                                              viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                   d="M19 9l-7 7-7-7"/>
                                         </svg>
                                     </button>
@@ -225,17 +225,17 @@ const Navbar = () => {
                                         <Link to="/notice" className="block px-4 py-2 hover:bg-[var(--primary-color)]">
                                             NOTICE
                                         </Link>
-                                        <Link to="gallery" className="block px-4 py-2 hover:bg-[var(--primary-color)]">
+                                        <Link to="" className="block px-4 py-2 hover:bg-[var(--primary-color)]">
                                             GALLERY
                                         </Link>
-                                        <Link to="/blog" className="block px-4 py-2 hover:bg-[var(--primary-color)]">
+                                        <Link to="" className="block px-4 py-2 hover:bg-[var(--primary-color)]">
                                             BLOG
                                         </Link>
-                                        <Link to="/privacy-policy"
+                                        <Link to=""
                                               className="block px-4 py-2 hover:bg-[var(--primary-color)]">
                                             PRIVACY POLICY
                                         </Link>
-                                        <Link to="/terms-conditions"
+                                        <Link to=""
                                               className="block px-4 py-2 hover:bg-[var(--primary-color)]">
                                             TERMS & CONDITIONS
                                         </Link>

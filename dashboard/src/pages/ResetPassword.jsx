@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../api/index.js';
+import api from '../api/index.js';
 import { toast } from 'sonner';
-import useDarkMode from '../../hooks/useDarkMode';
+import useDarkMode from '../hooks/useDarkMode.jsx';
 
 const ResetPassword = () => {
     const [dark, setDark] = useDarkMode();
@@ -102,7 +102,7 @@ const ResetPassword = () => {
             <div className="w-full lg:w-1/2 flex items-center justify-center px-8 md:py-[20px] relative bg-[var(--bg)] dark:bg-[var(--dark-bg)]">
                 <div className="w-full h-screen max-w-md flex flex-col items-center justify-between py-[20px]">
                     <div className="w-full">
-                        <a href="/auth" className="breadcrumb inline-flex items-center text-[var(--text-3)] dark:text-[var(--text-4)] hover:text-[var(--primary-color)] dark:hover:text-[var(--primary-color)] transition-colors duration-300">
+                        <a href="/dashboard/src/pages/Auth" className="breadcrumb inline-flex items-center text-[var(--text-3)] dark:text-[var(--text-4)] hover:text-[var(--primary-color)] dark:hover:text-[var(--primary-color)] transition-colors duration-300">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                             </svg>

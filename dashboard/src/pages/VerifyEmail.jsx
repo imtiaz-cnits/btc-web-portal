@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useDarkMode from '../../hooks/useDarkMode';
+import useDarkMode from '../hooks/useDarkMode.jsx';
 import { toast } from 'sonner';
-import api from '../../api/index.js';
-import { AuthContext } from '../../contexts/AuthContext';
+import api from '../api/index.js';
+import { AuthContext } from '../contexts/AuthContext.jsx';
 import Cookies from 'js-cookie';
 
 const VerifyEmail = () => {
@@ -121,7 +121,7 @@ const VerifyEmail = () => {
             <div className="w-full lg:w-1/2 flex items-center justify-center px-8 md:py-[20px] relative bg-[var(--bg)] dark:bg-[var(--dark-bg)]">
                 <div className="w-full h-screen max-w-md flex flex-col items-center justify-between py-[20px]">
                     <div className="w-full">
-                        <a href='/auth'
+                        <a href='/dashboard/src/pages/Auth'
                            className="breadcrumb inline-flex items-center text-[var(--text-3)] dark:text-[var(--text-4)] hover:text-[var(--primary-color)] dark:hover:text-[var(--primary-color)] transition-colors duration-400">
                             <svg xmlns="http://www.w3.org/2000/svg"
                                  className="h-5 w-5 mr-2"

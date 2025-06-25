@@ -115,43 +115,43 @@ const Sidebar = ({ width, toggleSidebar }) => {
                         )}
                     </li>
 
-                    <li className="nav-item dropdown-container">
-                        {isLoading ? (
-                            <ShimmerText line={1} gap={10} />
-                        ) : (
-                            <>
-                                <Link to="/tables" className="nav-link dropdown-toggle">
-                                    <span className="w-[24px]">
-                                        <svg width="24" height="24" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <g clipPath="url(#clip0_402_2896)">
-                                                <path d="M7.46683 10.7333H7.70016C8.5985 10.7333 9.3335 11.4683 9.3335 12.3667V20.5333C9.3335 21.4317 8.5985 22.1667 7.70016 22.1667H7.46683C6.5685 22.1667 5.8335 21.4317 5.8335 20.5333V12.3667C5.8335 11.4683 6.5685 10.7333 7.46683 10.7333V10.7333ZM14.0002 5.83334C14.8985 5.83334 15.6335 6.56834 15.6335 7.46668V20.5333C15.6335 21.4317 14.8985 22.1667 14.0002 22.1667C13.1018 22.1667 12.3668 21.4317 12.3668 20.5333V7.46668C12.3668 6.56834 13.1018 5.83334 14.0002 5.83334ZM20.5335 15.1667C21.4318 15.1667 22.1668 15.9017 22.1668 16.8V20.5333C22.1668 21.4317 21.4318 22.1667 20.5335 22.1667C19.6352 22.1667 18.9002 21.4317 18.9002 20.5333V16.8C18.9002 15.9017 19.6352 15.1667 20.5335 15.1667V15.1667Z" fill="#A3AED0" />
-                                            </g>
-                                            <defs><clipPath id="clip0_402_2896"><rect width="28" height="28" fill="white" /></clipPath></defs>
-                                        </svg>
-                                    </span>
-                                    <span className="nav-label dark:text-[var(--text-4)]">Tables</span>
-                                    <i className="dropdown-icon fa-solid fa-angle-down"></i>
-                                </Link>
-                                <ul className="dropdown-menu">
-                                    <li className="nav-item">
-                                        <Link to="/tables/1" className="nav-link dropdown-link">
-                                            <i className="fa-solid fa-circle"></i> <span>Table-1</span>
-                                        </Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link to="/tables/2" className="nav-link dropdown-link">
-                                            <i className="fa-solid fa-circle"></i> <span>Table-2</span>
-                                        </Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link to="/tables/3" className="nav-link dropdown-link">
-                                            <i className="fa-solid fa-circle"></i> <span>Table-3</span>
-                                        </Link>
-                                    </li>
-                                </ul>
-                            </>
-                        )}
-                    </li>
+                    {/*<li className="nav-item dropdown-container">*/}
+                    {/*    {isLoading ? (*/}
+                    {/*        <ShimmerText line={1} gap={10} />*/}
+                    {/*    ) : (*/}
+                    {/*        <>*/}
+                    {/*            <Link to="/tables" className="nav-link dropdown-toggle">*/}
+                    {/*                <span className="w-[24px]">*/}
+                    {/*                    <svg width="24" height="24" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">*/}
+                    {/*                        <g clipPath="url(#clip0_402_2896)">*/}
+                    {/*                            <path d="M7.46683 10.7333H7.70016C8.5985 10.7333 9.3335 11.4683 9.3335 12.3667V20.5333C9.3335 21.4317 8.5985 22.1667 7.70016 22.1667H7.46683C6.5685 22.1667 5.8335 21.4317 5.8335 20.5333V12.3667C5.8335 11.4683 6.5685 10.7333 7.46683 10.7333V10.7333ZM14.0002 5.83334C14.8985 5.83334 15.6335 6.56834 15.6335 7.46668V20.5333C15.6335 21.4317 14.8985 22.1667 14.0002 22.1667C13.1018 22.1667 12.3668 21.4317 12.3668 20.5333V7.46668C12.3668 6.56834 13.1018 5.83334 14.0002 5.83334ZM20.5335 15.1667C21.4318 15.1667 22.1668 15.9017 22.1668 16.8V20.5333C22.1668 21.4317 21.4318 22.1667 20.5335 22.1667C19.6352 22.1667 18.9002 21.4317 18.9002 20.5333V16.8C18.9002 15.9017 19.6352 15.1667 20.5335 15.1667V15.1667Z" fill="#A3AED0" />*/}
+                    {/*                        </g>*/}
+                    {/*                        <defs><clipPath id="clip0_402_2896"><rect width="28" height="28" fill="white" /></clipPath></defs>*/}
+                    {/*                    </svg>*/}
+                    {/*                </span>*/}
+                    {/*                <span className="nav-label dark:text-[var(--text-4)]">Tables</span>*/}
+                    {/*                <i className="dropdown-icon fa-solid fa-angle-down"></i>*/}
+                    {/*            </Link>*/}
+                    {/*            <ul className="dropdown-menu">*/}
+                    {/*                <li className="nav-item">*/}
+                    {/*                    <Link to="/tables/1" className="nav-link dropdown-link">*/}
+                    {/*                        <i className="fa-solid fa-circle"></i> <span>Table-1</span>*/}
+                    {/*                    </Link>*/}
+                    {/*                </li>*/}
+                    {/*                <li className="nav-item">*/}
+                    {/*                    <Link to="/tables/2" className="nav-link dropdown-link">*/}
+                    {/*                        <i className="fa-solid fa-circle"></i> <span>Table-2</span>*/}
+                    {/*                    </Link>*/}
+                    {/*                </li>*/}
+                    {/*                <li className="nav-item">*/}
+                    {/*                    <Link to="/tables/3" className="nav-link dropdown-link">*/}
+                    {/*                        <i className="fa-solid fa-circle"></i> <span>Table-3</span>*/}
+                    {/*                    </Link>*/}
+                    {/*                </li>*/}
+                    {/*            </ul>*/}
+                    {/*        </>*/}
+                    {/*    )}*/}
+                    {/*</li>*/}
 
                     <li className="nav-item">
                         {isLoading ? (
@@ -171,23 +171,23 @@ const Sidebar = ({ width, toggleSidebar }) => {
                         )}
                     </li>
 
-                    <li className="nav-item">
-                        {isLoading ? (
-                            <ShimmerText line={1} gap={10} />
-                        ) : (
-                            <Link to="/profile" className="nav-link">
-                                <span className="w-[24px]">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <g clipPath="url(#clip0_402_2884)">
-                                            <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V19C4 19.55 4.45 20 5 20H19C19.55 20 20 19.55 20 19V18C20 15.34 14.67 14 12 14Z" fill="#A3AED0" />
-                                        </g>
-                                        <defs><clipPath id="clip0_402_2884"><rect width="24" height="24" fill="white" /></clipPath></defs>
-                                    </svg>
-                                </span>
-                                <span className="nav-label dark:text-[var(--text-4)]">Profile</span>
-                            </Link>
-                        )}
-                    </li>
+                    {/*<li className="nav-item">*/}
+                    {/*    {isLoading ? (*/}
+                    {/*        <ShimmerText line={1} gap={10} />*/}
+                    {/*    ) : (*/}
+                    {/*        <Link to="/profile" className="nav-link">*/}
+                    {/*            <span className="w-[24px]">*/}
+                    {/*                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">*/}
+                    {/*                    <g clipPath="url(#clip0_402_2884)">*/}
+                    {/*                        <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V19C4 19.55 4.45 20 5 20H19C19.55 20 20 19.55 20 19V18C20 15.34 14.67 14 12 14Z" fill="#A3AED0" />*/}
+                    {/*                    </g>*/}
+                    {/*                    <defs><clipPath id="clip0_402_2884"><rect width="24" height="24" fill="white" /></clipPath></defs>*/}
+                    {/*                </svg>*/}
+                    {/*            </span>*/}
+                    {/*            <span className="nav-label dark:text-[var(--text-4)]">Profile</span>*/}
+                    {/*        </Link>*/}
+                    {/*    )}*/}
+                    {/*</li>*/}
 
                     <li className="nav-item">
                         {isLoading ? (

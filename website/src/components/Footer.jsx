@@ -69,7 +69,7 @@ const Footer = () => {
                             </h2>
                             <div className="flex gap-2.5 mb-[30px]">
                                 <a
-                                    href="https://www.facebook.com/share/16cBeKdBrD/"
+                                    href="https://www.facebook.com/egpbtc"
                                     className="relative w-10 h-10 rounded-full bg-[var(--text-1)] text-[var(--secondary-color)] flex justify-center items-center text-xl transition duration-400 group"
                                     aria-label="Visit our Facebook page"
                                 >
@@ -78,36 +78,36 @@ const Footer = () => {
                                         className="absolute w-0 h-0 transition-all duration-400 bg-[var(--primary-color)] rounded-full group-hover:w-10 group-hover:h-10"
                                     ></span>
                                 </a>
-                                <a
-                                    href="https://www.instagram.com/your-profile"
-                                    className="relative w-10 h-10 rounded-full bg-[var(--text-1)] text-[var(--secondary-color)] flex justify-center items-center text-xl transition duration-400 group"
-                                    aria-label="Visit our Instagram page"
-                                >
-                                    <i className="fa-brands fa-instagram z-[1] group-hover:text-[var(--secondary-color)]"></i>
-                                    <span
-                                        className="absolute w-0 h-0 transition-all duration-400 bg-[var(--primary-color)] rounded-full group-hover:w-10 group-hover:h-10"
-                                    ></span>
-                                </a>
-                                <a
-                                    href="https://twitter.com/your-profile"
-                                    className="relative w-10 h-10 rounded-full bg-[var(--text-1)] text-[var(--secondary-color)] flex justify-center items-center text-xl transition duration-400 group"
-                                    aria-label="Visit our Twitter page"
-                                >
-                                    <i className="fa-brands fa-x-twitter z-[1] group-hover:text-[var(--secondary-color)]"></i>
-                                    <span
-                                        className="absolute w-0 h-0 transition-all duration-400 bg-[var(--primary-color)] rounded-full group-hover:w-10 group-hover:h-10"
-                                    ></span>
-                                </a>
-                                <a
-                                    href="https://www.linkedin.com/your-profile"
-                                    className="relative w-10 h-10 rounded-full bg-[var(--text-1)] text-[var(--secondary-color)] flex justify-center items-center text-xl transition duration-400 group"
-                                    aria-label="Visit our LinkedIn page"
-                                >
-                                    <i className="fa-brands fa-linkedin-in z-[1] group-hover:text-[var(--secondary-color)]"></i>
-                                    <span
-                                        className="absolute w-0 h-0 transition-all duration-400 bg-[var(--primary-color)] rounded-full group-hover:w-10 group-hover:h-10"
-                                    ></span>
-                                </a>
+                                {/*<a*/}
+                                {/*    href="https://www.instagram.com/your-profile"*/}
+                                {/*    className="relative w-10 h-10 rounded-full bg-[var(--text-1)] text-[var(--secondary-color)] flex justify-center items-center text-xl transition duration-400 group"*/}
+                                {/*    aria-label="Visit our Instagram page"*/}
+                                {/*>*/}
+                                {/*    <i className="fa-brands fa-instagram z-[1] group-hover:text-[var(--secondary-color)]"></i>*/}
+                                {/*    <span*/}
+                                {/*        className="absolute w-0 h-0 transition-all duration-400 bg-[var(--primary-color)] rounded-full group-hover:w-10 group-hover:h-10"*/}
+                                {/*    ></span>*/}
+                                {/*</a>*/}
+                                {/*<a*/}
+                                {/*    href="https://twitter.com/your-profile"*/}
+                                {/*    className="relative w-10 h-10 rounded-full bg-[var(--text-1)] text-[var(--secondary-color)] flex justify-center items-center text-xl transition duration-400 group"*/}
+                                {/*    aria-label="Visit our Twitter page"*/}
+                                {/*>*/}
+                                {/*    <i className="fa-brands fa-x-twitter z-[1] group-hover:text-[var(--secondary-color)]"></i>*/}
+                                {/*    <span*/}
+                                {/*        className="absolute w-0 h-0 transition-all duration-400 bg-[var(--primary-color)] rounded-full group-hover:w-10 group-hover:h-10"*/}
+                                {/*    ></span>*/}
+                                {/*</a>*/}
+                                {/*<a*/}
+                                {/*    href="https://www.linkedin.com/your-profile"*/}
+                                {/*    className="relative w-10 h-10 rounded-full bg-[var(--text-1)] text-[var(--secondary-color)] flex justify-center items-center text-xl transition duration-400 group"*/}
+                                {/*    aria-label="Visit our LinkedIn page"*/}
+                                {/*>*/}
+                                {/*    <i className="fa-brands fa-linkedin-in z-[1] group-hover:text-[var(--secondary-color)]"></i>*/}
+                                {/*    <span*/}
+                                {/*        className="absolute w-0 h-0 transition-all duration-400 bg-[var(--primary-color)] rounded-full group-hover:w-10 group-hover:h-10"*/}
+                                {/*    ></span>*/}
+                                {/*</a>*/}
                             </div>
                         </div>
                         <div className="contact_wrapper">

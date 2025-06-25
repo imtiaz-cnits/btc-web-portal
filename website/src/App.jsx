@@ -11,8 +11,8 @@ import ViewNotice from "./pages/ViewNotice.jsx";
 // import Blog from './pages/Blog.jsx';
 // import PrivacyPolicy from './pages/PrivacyPolicy.jsx';
 // import TermsConditions from './pages/TermsConditions.jsx';
-// import About from './pages/About.jsx';
-// import Contact from './pages/Contact.jsx';
+import About from './pages/About.jsx';
+import Contact from './pages/Contact.jsx';
 
 const App = () => {
     return (
@@ -28,8 +28,8 @@ const App = () => {
                 {/*<Route path="/blog" element={<Blog />} />*/}
                 {/*<Route path="/privacy-policy" element={<PrivacyPolicy />} />*/}
                 {/*<Route path="/terms-conditions" element={<TermsConditions />} />*/}
-                {/*<Route path="/about" element={<About />} />*/}
-                {/*<Route path="/contact" element={<Contact />} />*/}
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
             </Route>
         </Routes>
     );

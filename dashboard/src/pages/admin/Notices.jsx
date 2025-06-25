@@ -1,7 +1,168 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import useDarkMode from '../../hooks/useDarkMode';
 import api from '../../api/index.js';
 import Swal from 'sweetalert2';
+
+// Define EditModal as a separate component
+const EditModal = ({ isOpen, onClose, onSubmit, formData, handleChange, error }) => {
+    const modalRef = useRef(null);
+
+    useEffect(() => {
+        const modalEdit = modalRef.current;
+        if (!modalEdit) return;
+
+        const modalOverlay = modalEdit.querySelector('.modal-overlay');
+        const modalContainer = modalEdit.querySelector('.modal-container');
+
+        if (!modalOverlay || !modalContainer) return;
+
+        if (isOpen) {
+            modalOverlay.classList.add('active');
+            modalContainer.classList.add('active');
+            void modalEdit.offsetHeight;
+        } else {
+            modalOverlay.classList.remove('active');
+            modalContainer.classList.remove('active');
+        }
+
+        return () => {
+            if (!isOpen) {
+                setTimeout(() => {
+                    modalOverlay.classList.remove('active');
+                    modalContainer.classList.remove('active');
+                }, 300);
+            }
+        };
+    }, [isOpen]);
+
+    if (!isOpen) return null;
+
+    const handleOverlayClick = (e) => {
+        if (e.target.classList.contains('modal-overlay')) onClose();
+    };
+
+    return (
+        <div ref={modalRef} id="editModal" className="fixed inset-0 flex items-center justify-center p-4" onClick={handleOverlayClick} style={{ zIndex: 100 }}>
+            <div className="modal-overlay absolute inset-0 bg-[#111111a9] bg-opacity-50"></div>
+            <div className="modal-container relative bg-[var(--bg)] dark:bg-[var(--dark-bg)] border border-transparent dark:border-[var(--dark-border)] rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                <div className="px-6 py-4 border-b border-[var(--border-color2)] dark:border-[var(--dark-border)] flex justify-between items-center">
+                    <h2 className="text-lg font-semibold !text-[var(--text-1)]">{formData.id ? 'Edit Notice' : 'Add New Notice'}</h2>
+                    <button onClick={onClose} className="text-[var(--text-1)] dark:text-[var(--text-4)] hover:text-[var(--text-2)] focus:outline-none transition-colors duration-200 cursor-pointer">
+                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div className="overflow-y-auto px-6 py-4 flex-1">
+                    <form id="editModalForm" className="modalform" onSubmit={onSubmit} encType="multipart/form-data">
+                        <div className="mb-3">
+                            <label htmlFor="title" className="block text-sm font-medium text-[var(--text-1)] mb-1">Notice Title</label>
+                            <input
+                                type="text"
+                                id="title"
+                                name="title"
+                                value={formData.title}
+                                onChange={handleChange}
+                                className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
+                                placeholder="Notice title"
+                                required
+                            />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-3">
+                            <div>
+                                <label htmlFor="issueDate" className="block text-sm font-medium text-[var(--text-1)] mb-1">Issue Date</label>
+                                <input
+                                    type="date"
+                                    id="issueDate"
+                                    name="issueDate"
+                                    value={formData.issueDate}
+                                    onChange={handleChange}
+                                    className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="publishDate" className="block text-sm font-medium text-[var(--text-1)] mb-1">Publishing Date</label>
+                                <input
+                                    type="date"
+                                    id="publishDate"
+                                    name="publishDate"
+                                    value={formData.publishDate}
+                                    onChange={handleChange}
+                                    className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
+                                />
+                            </div>
+                        </div>
+                        <div className="mb-3">
+                            <label className="block text-sm font-medium text-[var(--text-1)] mb-1">Status</label>
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <label className="inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        id="radioOption1"
+                                        name="status"
+                                        value="active"
+                                        checked={formData.status === 'active'}
+                                        onChange={handleChange}
+                                        className="form-radio text-[var(--primary-color)] focus:ring-[var(--primary-color)]"
+                                        required
+                                    />
+                                    <span className="ml-2 text-[var(--text-1)] dark:text-[var(--text-4)]">Active</span>
+                                </label>
+                                <label className="inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        id="radioOption2"
+                                        name="status"
+                                        value="inactive"
+                                        checked={formData.status === 'inactive'}
+                                        onChange={handleChange}
+                                        className="form-radio text-[var(--primary-color)] focus:ring-[var(--primary-color)]"
+                                    />
+                                    <span className="ml-2 text-[var(--text-1)] dark:text-[var(--text-4)]">Inactive</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div className="mb-3">
+                            <label htmlFor="content" className="block text-sm font-medium text-[var(--text-1)] mb-1">Notice Content</label>
+                            <textarea
+                                id="content"
+                                rows="4"
+                                name="content"
+                                value={formData.content}
+                                onChange={handleChange}
+                                className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
+                                placeholder="Enter notice content here..."
+                                required
+                            ></textarea>
+                        </div>
+                        <div className="file-upload mb-3">
+                            <label htmlFor="file_input" className="block mb-2 text-sm font-medium text-gray-900 dark:text-[var(--text-4)]">Upload file</label>
+                            <div className="flex items-center justify-center w-full">
+                                <label htmlFor="file_input" className="flex flex-col items-center justify-center w-full h-[80px] border-2 border-[var(--border-color)] border-dashed rounded-lg cursor-pointer bg-[var(--secondary-color)] hover:bg-gray-100 dark:border-[var(--dark-border)] dark:bg-[var(--dark-bg2)] dark:hover:bg-[var(--dark-border)]">
+                                    <div className="flex items-center gap-3">
+                                        <svg className="w-[40px] h-[40px] text-[var(--text-1)] dark:text-[var(--text-4)]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                                        </svg>
+                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                            <p className="text-xs text-gray-500 text-gray-400">SVG, PNG, JPG, GIF, or PDF (MAX. 10MB)</p>
+                                        </div>
+                                    </div>
+                                    <input id="file_input" type="file" name="file" onChange={handleChange} accept="image/jpeg,image/png,image/gif,application/pdf" className="hidden" />
+                                </label>
+                            </div>
+                        </div>
+                        {error && <div className="text-red-500 text-sm mb-3">{error}</div>}
+                    </form>
+                </div>
+                <div className="sticky bottom-0 bg-[var(--bg)] dark:bg-[var(--dark-bg)] border-t border-[var(--border-color2)] dark:border-[var(--dark-border)] px-6 py-4 flex justify-end space-x-3 z-10">
+                    <button type="button" onClick={onClose} className="px-4 py-2 border border-[var(--border-color2)] dark:border-[var(--dark-border)] rounded-md text-sm font-medium text-[var(--text-1)] dark:text-[var(--text-4)] hover:bg-gray-500 focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200 cursor-pointer">Cancel</button>
+                    <button type="submit" form="editModalForm" className="px-4 py-2 bg-[var(--primary-color)] border-none rounded-md text-sm font-medium text-[var(--text-4)] hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200 cursor-pointer">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const Notices = () => {
     const [dark] = useDarkMode();
@@ -74,13 +235,13 @@ const Notices = () => {
         fetchNotices();
     }, []);
 
-    const handleChange = (e) => {
+    const handleChange = useCallback((e) => {
         const { name, value, type, files } = e.target;
         setFormData((prev) => ({
             ...prev,
             [name]: type === 'file' ? files[0] : value,
         }));
-    };
+    }, []);
 
     const openModal = () => {
         setFormData({
@@ -205,166 +366,6 @@ const Notices = () => {
         });
     };
 
-    const EditModal = ({ isOpen, onClose, onSubmit }) => {
-        const modalRef = useRef(null);
-
-        useEffect(() => {
-            const modalEdit = modalRef.current;
-            if (!modalEdit) return;
-
-            const modalOverlay = modalEdit.querySelector('.modal-overlay');
-            const modalContainer = modalEdit.querySelector('.modal-container');
-
-            if (!modalOverlay || !modalContainer) return;
-
-            if (isOpen) {
-                modalOverlay.classList.add('active');
-                modalContainer.classList.add('active');
-                void modalEdit.offsetHeight;
-            } else {
-                modalOverlay.classList.remove('active');
-                modalContainer.classList.remove('active');
-            }
-
-            return () => {
-                if (!isOpen) {
-                    setTimeout(() => {
-                        modalOverlay.classList.remove('active');
-                        modalContainer.classList.remove('active');
-                    }, 300);
-                }
-            };
-        }, [isOpen]);
-
-        if (!isOpen) return null;
-
-        const handleOverlayClick = (e) => {
-            if (e.target.classList.contains('modal-overlay')) onClose();
-        };
-
-        return (
-            <div ref={modalRef} id="editModal" className="fixed inset-0 flex items-center justify-center p-4" onClick={handleOverlayClick} style={{ zIndex: 100 }}>
-                <div className="modal-overlay absolute inset-0 bg-[#111111a9] bg-opacity-50"></div>
-                <div className="modal-container relative bg-[var(--bg)] dark:bg-[var(--dark-bg)] border border-transparent dark:border-[var(--dark-border)] rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-                    <div className="px-6 py-4 border-b border-[var(--border-color2)] dark:border-[var(--dark-border)] flex justify-between items-center">
-                        <h2 className="text-lg font-semibold !text-[var(--text-1)]">{formData.id ? 'Edit Notice' : 'Add New Notice'}</h2>
-                        <button onClick={onClose} className="text-[var(--text-1)] dark:text-[var(--text-4)] hover:text-[var(--text-2)] focus:outline-none transition-colors duration-200 cursor-pointer">
-                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-                    <div className="overflow-y-auto px-6 py-4 flex-1">
-                        <form id="editModalForm" className="modalform" onSubmit={onSubmit} encType="multipart/form-data">
-                            <div className="mb-3">
-                                <label htmlFor="title" className="block text-sm font-medium text-[var(--text-1)] mb-1">Notice Title</label>
-                                <input
-                                    type="text"
-                                    id="title"
-                                    name="title"
-                                    value={formData.title}
-                                    onChange={handleChange}
-                                    className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
-                                    placeholder="Notice title"
-                                    required
-                                />
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-3">
-                                <div>
-                                    <label htmlFor="issueDate" className="block text-sm font-medium text-[var(--text-1)] mb-1">Issue Date</label>
-                                    <input
-                                        type="date"
-                                        id="issueDate"
-                                        name="issueDate"
-                                        value={formData.issueDate}
-                                        onChange={handleChange}
-                                        className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="publishDate" className="block text-sm font-medium text-[var(--text-1)] mb-1">Publishing Date</label>
-                                    <input
-                                        type="date"
-                                        id="publishDate"
-                                        name="publishDate"
-                                        value={formData.publishDate}
-                                        onChange={handleChange}
-                                        className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
-                                    />
-                                </div>
-                            </div>
-                            <div className="mb-3">
-                                <label className="block text-sm font-medium text-[var(--text-1)] mb-1">Status</label>
-                                <div className="flex flex-col sm:flex-row gap-3">
-                                    <label className="inline-flex items-center cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            id="radioOption1"
-                                            name="status"
-                                            value="active"
-                                            checked={formData.status === 'active'}
-                                            onChange={handleChange}
-                                            className="form-radio text-[var(--primary-color)] focus:ring-[var(--primary-color)]"
-                                            required
-                                        />
-                                        <span className="ml-2 text-[var(--text-1)] dark:text-[var(--text-4)]">Active</span>
-                                    </label>
-                                    <label className="inline-flex items-center cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            id="radioOption2"
-                                            name="status"
-                                            value="inactive"
-                                            checked={formData.status === 'inactive'}
-                                            onChange={handleChange}
-                                            className="form-radio text-[var(--primary-color)] focus:ring-[var(--primary-color)]"
-                                        />
-                                        <span className="ml-2 text-[var(--text-1)] dark:text-[var(--text-4)]">Inactive</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div className="mb-3">
-                                <label htmlFor="content" className="block text-sm font-medium text-[var(--text-1)] mb-1">Notice Content</label>
-                                <textarea
-                                    id="content"
-                                    rows="4"
-                                    name="content"
-                                    value={formData.content}
-                                    onChange={handleChange}
-                                    className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
-                                    placeholder="Enter notice content here..."
-                                    required
-                                ></textarea>
-                            </div>
-                            <div className="file-upload mb-3">
-                                <label htmlFor="file_input" className="block mb-2 text-sm font-medium text-gray-900 dark:text-[var(--text-4)]">Upload file</label>
-                                <div className="flex items-center justify-center w-full">
-                                    <label htmlFor="file_input" className="flex flex-col items-center justify-center w-full h-[80px] border-2 border-[var(--border-color)] border-dashed rounded-lg cursor-pointer bg-[var(--secondary-color)] hover:bg-gray-100 dark:border-[var(--dark-border)] dark:bg-[var(--dark-bg2)] dark:hover:bg-[var(--dark-border)]">
-                                        <div className="flex items-center gap-3">
-                                            <svg className="w-[40px] h-[40px] text-[var(--text-1)] dark:text-[var(--text-4)]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
-                                            </svg>
-                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG, GIF, or PDF (MAX. 10MB)</p>
-                                            </div>
-                                        </div>
-                                        <input id="file_input" type="file" name="file" onChange={handleChange} accept="image/jpeg,image/png,image/gif,application/pdf" className="hidden" />
-                                    </label>
-                                </div>
-                            </div>
-                            {error && <div className="text-red-500 text-sm mb-3">{error}</div>}
-                        </form>
-                    </div>
-                    <div className="sticky bottom-0 bg-[var(--bg)] dark:bg-[var(--dark-bg)] border-t border-[var(--border-color2)] dark:border-[var(--dark-border)] px-6 py-4 flex justify-end space-x-3 z-10">
-                        <button type="button" onClick={onClose} className="px-4 py-2 border border-[var(--border-color2)] dark:border-[var(--dark-border)] rounded-md text-sm font-medium text-[var(--text-1)] dark:text-[var(--text-4)] hover:bg-gray-500 focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200 cursor-pointer">Cancel</button>
-                        <button type="submit" form="editModalForm" className="px-4 py-2 bg-[var(--primary-color)] border-none rounded-md text-sm font-medium text-[var(--text-4)] hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200 cursor-pointer">Save Changes</button>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
     const filteredNotices = notices.filter((notice) => {
         const searchLower = search.toLowerCase();
         return (
@@ -409,7 +410,7 @@ const Notices = () => {
                         max-width: 300px;
                         overflow: hidden;
                         text-overflow: ellipsis;
-                        white-space: nowrap; /* Changed to nowrap for single-line truncation */
+                        white-space: nowrap;
                     }
                     .table th.sl-column, .table td.sl-column {
                         width: 60px;
@@ -488,7 +489,7 @@ const Notices = () => {
                 </div>
                 <div className="table_wrapper overflow-x-auto">
                     <table className="table w-full text-sm text-left rtl:text-right text-[var(--text-1)] dark:text-[var(--text-4)]">
-                        <thead className="text-xs text-[var(--text-1)] dark:text-[var(--text-4)] uppercase bg-[var(--secondary-color)] dark:bg-[var(--dark-bg3)]">
+                        <thead className="text-xs font-medium text-[var(--text-1)] dark:text-[var(--text-4)] uppercase bg-[var(--secondary-color)] dark:bg-[var(--dark-bg3)]">
                         <tr>
                             <th className="sl-column">Sl</th>
                             <th className="action-column hide_content">Action</th>
@@ -496,7 +497,7 @@ const Notices = () => {
                             <th className="date-column">Issue Date</th>
                             <th className="date-column">Publish Date</th>
                             <th className="status-column">Status</th>
-                            <th className="date-column">Date</th>
+                            <th className="date-column">Created Date</th>
                             <th className="file-column">File</th>
                         </tr>
                         </thead>
@@ -507,7 +508,7 @@ const Notices = () => {
                             <tr><td colSpan="8" className="text-center py-4">No notices found</td></tr>
                         ) : (
                             currentNotices.map((notice, index) => (
-                                <tr key={notice._id || notice.id} className="dark:border-[var(--dark-border)] border-[var(--border-color2)] border-b">
+                                <tr key={notice._id || notice.id || index} className="dark:border-[var(--dark-border)] border-[var(--border-color2)] border-b">
                                     <td className="sl-column">
                                         <div className="flex items-center gap-3">
                                             <div className="flex items-center checkbox_wrap hide_content">
@@ -532,7 +533,7 @@ const Notices = () => {
                                             </button>
                                             <button className="delete-btn text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 cursor-pointer" onClick={() => handleDelete(notice._id || notice.id)} aria-label="Delete notice">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 00-1-1z" clipRule="evenodd" />
+                                                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                                                 </svg>
                                             </button>
                                         </div>
@@ -574,9 +575,7 @@ const Notices = () => {
                     <div className="pagination">
                         <ul className="flex justify-center items-center gap-2 py-2">
                             <li
-                                onClick={() => {
-                                    if (currentPage !== 1) handlePrevious();
-                                }}
+                                onClick={handlePrevious}
                                 className={`mx-1 px-3 py-2 bg-gray-200 rounded-lg font-bold ${
                                     currentPage === 1
                                         ? 'text-gray-500 opacity-50 cursor-not-allowed'
@@ -599,9 +598,7 @@ const Notices = () => {
                                 </li>
                             ))}
                             <li
-                                onClick={() => {
-                                    if (currentPage !== totalPages && totalPages !== 0) handleNext();
-                                }}
+                                onClick={handleNext}
                                 className={`mx-1 px-3 py-2 bg-gray-200 rounded-lg font-bold ${
                                     currentPage === totalPages || totalPages === 0
                                         ? 'text-gray-500 opacity-50 cursor-not-allowed'
@@ -614,7 +611,14 @@ const Notices = () => {
                     </div>
                 </div>
             </div>
-            <EditModal isOpen={isModalOpen} onClose={closeModal} onSubmit={handleSubmit} />
+            <EditModal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                onSubmit={handleSubmit}
+                formData={formData}
+                handleChange={handleChange}
+                error={error}
+            />
         </div>
     );
 };

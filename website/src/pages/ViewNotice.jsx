@@ -6,42 +6,60 @@ import api from '../../api/index.js';
 const ViewNotice = () => {
     const { id } = useParams();
     const [notice, setNotice] = useState(null);
+    const [contentType, setContentType] = useState(null); // 'notice' or 'winner'
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const isMountedRef = useRef(true);
 
-    // Fetch notice by ID
+    // Fetch notice or winner by ID
     useEffect(() => {
         isMountedRef.current = true;
 
-        const fetchNotice = async () => {
+        const fetchContent = async () => {
             try {
-                console.log('Fetching notice with ID:', id);
-                const response = await api.get(`/notices/${id}`);
-                console.log('API response:', JSON.stringify(response.data, null, 2));
-                if (isMountedRef.current) {
-                    if (response.data?.success) {
-                        const noticeData = response.data.notice || {};
-                        console.log('Setting notice:', JSON.stringify(noticeData, null, 2));
-                        setNotice(noticeData);
+                console.log('Fetching content with ID:', id);
+
+                // Try fetching notice first
+                let response = await api.get(`/notices/${id}`);
+                console.log('Notice API response:', JSON.stringify(response.data, null, 2));
+                if (isMountedRef.current && response.data?.success) {
+                    const noticeData = response.data.notice || {};
+                    console.log('Setting notice:', JSON.stringify(noticeData, null, 2));
+                    setNotice(noticeData);
+                    setContentType('notice');
+                    setLoading(false);
+                    return;
+                }
+
+                // If notice fetch fails with 404, try winner list
+                if (response.data?.status === 404 || !response.data?.success) {
+                    console.log('Notice not found, trying winner list...');
+                    response = await api.get(`/winner-list/${id}`);
+                    console.log('Winner API response:', JSON.stringify(response.data, null, 2));
+                    if (isMountedRef.current && response.data?.success) {
+                        const winnerData = response.data.winner || response.data.data || {};
+                        console.log('Setting winner:', JSON.stringify(winnerData, null, 2));
+                        setNotice(winnerData);
+                        setContentType('winner');
                         setLoading(false);
-                    } else {
-                        throw new Error(response.data?.message || 'Failed to fetch notice');
+                        return;
                     }
                 }
+
+                throw new Error(response.data?.message || 'Content not found');
             } catch (err) {
                 if (isMountedRef.current) {
                     const errorMessage = err.response
                         ? `Server responded with: ${err.response.status} - ${err.response.data?.message || 'Not Found'}`
-                        : err.message || 'Failed to load notice';
-                    console.error('Error fetching notice:', err);
+                        : err.message || 'Failed to load content';
+                    console.error('Error fetching content:', err);
                     setError(errorMessage);
                     setLoading(false);
                 }
             }
         };
 
-        fetchNotice();
+        fetchContent();
 
         return () => {
             isMountedRef.current = false;
@@ -54,29 +72,32 @@ const ViewNotice = () => {
         console.log('Current state:', {
             loading,
             error,
+            contentType,
             notice: notice ? JSON.stringify(notice, null, 2) : null,
         });
         console.log('Render path:', loading ? 'loading' : error ? 'error' : !notice || notice.content == null ? 'no-content' : 'content');
         console.log('Computed page title:', title);
         // Fallback title update
         document.title = `${title} | Building Technology & Consultant`;
-    }, [loading, error, notice]);
+    }, [loading, error, notice, contentType]);
 
     // Dynamic meta description and title
     const getMetaDescription = () => {
-        if (loading) return 'Loading notice details...';
-        if (error) return 'An error occurred while fetching the notice.';
-        if (!notice || notice.content == null) return 'No content available for this notice.';
+        if (loading) return 'Loading content details...';
+        if (error) return 'An error occurred while fetching the content.';
+        if (!notice || notice.content == null) return 'No content available for this item.';
         return notice.content.length > 160
             ? `${notice.content.substring(0, 157)}...`
             : notice.content;
     };
 
     const getPageTitle = () => {
-        if (loading) return 'Loading Notice...';
+        if (loading) return 'Loading Content...';
         if (error) return 'Error';
         if (!notice || notice.content == null) return 'No Content Available';
-        return `${notice.title || 'Untitled Notice'}`;
+        return contentType === 'winner'
+            ? `${notice.title || 'Untitled Winner'} - Winner Details`
+            : `${notice.title || 'Untitled Notice'} - Notice Details`;
     };
 
     return (
@@ -84,25 +105,34 @@ const ViewNotice = () => {
             <Helmet key={`${id}-${loading}-${error ? 'error' : 'no-error'}`}>
                 <title>{`${getPageTitle()} | Building Technology & Consultant`}</title>
                 <meta name="description" content={getMetaDescription()} />
-                <meta name="keywords" content={`notice, ${notice?.title || 'untitled'}, Building Technology & Consultant`} />
+                <meta
+                    name="keywords"
+                    content={`${
+                        contentType === 'winner' ? 'winner list' : 'notice'
+                    }, ${notice?.title || 'untitled'}, Building Technology & Consultant`}
+                />
             </Helmet>
             {loading ? (
-                <p>Loading notice...</p>
+                <p>Loading content...</p>
             ) : error ? (
                 <>
-                    <h1>Error</h1>
+                    <h1 className="title error-title">Error</h1>
                     <p>{error}</p>
-                    <p>Notice ID: {id}</p>
+                    <p>Content ID: {id}</p>
                 </>
             ) : !notice || notice.content == null ? (
                 <>
-                    <h1>No Content Available</h1>
-                    <p>This notice has no content to display.</p>
-                    <p>Notice ID: {id}</p>
+                    <h1 className="title no-content-title">No Content Available</h1>
+                    <p>This item has no content to display.</p>
+                    <p>Content ID: {id}</p>
                 </>
             ) : (
                 <>
-                    <h1 className="title">{notice.title || 'Untitled Notice'}</h1>
+                    <h1 className={`title ${contentType === 'winner' ? 'winner-title' : 'notice-title'}`}>
+                        {contentType === 'winner'
+                            ? notice.title || 'Untitled Winner'
+                            : notice.title || 'Untitled Notice'}
+                    </h1>
                     <div className="content">{notice.content}</div>
                 </>
             )}
@@ -119,8 +149,19 @@ const ViewNotice = () => {
                 .title {
                     font-size: 28px;
                     font-weight: 600;
-                    color: #1a0dab;
                     margin-bottom: 1.5rem;
+                }
+                .notice-title {
+                    color: #1a0dab; /* Blue for notices */
+                }
+                .winner-title {
+                    color: #2e7d32; /* Green for winners */
+                }
+                .error-title {
+                    color: #d32f2f; /* Red for errors */
+                }
+                .no-content-title {
+                    color: #555; /* Gray for no content */
                 }
                 .content {
                     font-size: 16px;

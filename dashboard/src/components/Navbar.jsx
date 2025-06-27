@@ -1,6 +1,7 @@
 import React from "react";
 import useDarkMode from "../hooks/useDarkMode.jsx";
 import { useSidebar } from "../contexts/SidebarContext.jsx";
+import NavbarProfileImage from "../assets/icon/navbar-profile.png";
 
 const DarkModeToggle = () => {
     const [dark, setDark] = useDarkMode();
@@ -126,7 +127,7 @@ const Navbar = () => {
                             className="w-[40px] h-[40px] rounded-full flex items-center overflow-hidden focus:outline-none relative z-30 dropdown-toggle cursor-pointer"
                         >
                             <img
-                                src="/icon/navbar-profile.png"
+                                src={NavbarProfileImage}
                                 alt="User Avatar"
                                 className="w-full h-full object-cover"
                             />

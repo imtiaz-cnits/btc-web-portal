@@ -90,7 +90,7 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, setFormData, handleCha
             <div className="modal-overlay absolute inset-0 bg-[#111111a9] bg-opacity-50"></div>
             <div className="modal-container relative bg-[var(--bg)] dark:bg-[var(--dark-bg)] border border-transparent dark:border-[var(--dark-border)] rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
                 <div className="px-6 py-4 border-b border-[var(--border-color2)] dark:border-[var(--dark-border)] flex justify-between items-center">
-                    <h2 className="text-lg font-semibold text-[var(--text-1)]">{formData.id ? 'Edit Notice' : 'Add New Notice'}</h2>
+                    <h2 className="text-lg font-semibold text-[var(--text-1)]">{formData.id ? 'Edit Winner' : 'Add New Winner'}</h2>
                     <button onClick={onClose} className="text-[var(--text-1)] dark:text-[var(--text-4)] hover:text-[var(--text-2)] focus:outline-none transition-colors duration-200 cursor-pointer">
                         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -100,7 +100,7 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, setFormData, handleCha
                 <div className="overflow-y-auto px-6 py-4 flex-1">
                     <form id="editModalFormData" className="modalform" onSubmit={onSubmit} encType="multipart/form-data">
                         <div className="mb-3">
-                            <label htmlFor="title" className="block text-sm font-medium text-[var(--text-1)] mb-1">Notice Title</label>
+                            <label htmlFor="title" className="block text-sm font-medium text-[var(--text-1)] mb-1">Winner Title</label>
                             <input
                                 type="text"
                                 id="title"
@@ -108,7 +108,7 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, setFormData, handleCha
                                 value={formData.title}
                                 onChange={handleChange}
                                 className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
-                                placeholder="Enter notice title"
+                                placeholder="Enter winner title"
                                 required
                             />
                         </div>
@@ -181,7 +181,7 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, setFormData, handleCha
                             </div>
                         </div>
                         <div className="mb-3">
-                            <label htmlFor="content" className="block text-sm font-medium text-[var(--text-1)] mb-1">Notice Content</label>
+                            <label htmlFor="content" className="block text-sm font-medium text-[var(--text-1)] mb-1">Winner Content</label>
                             <textarea
                                 id="content"
                                 rows="4"
@@ -189,7 +189,7 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, setFormData, handleCha
                                 value={formData.content}
                                 onChange={handleChange}
                                 className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
-                                placeholder="Enter notice content here..."
+                                placeholder="Enter winner content here..."
                                 required
                             ></textarea>
                         </div>
@@ -249,7 +249,7 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, setFormData, handleCha
     );
 };
 
-const Notices = () => {
+const WinnerList = () => {
     const [dark] = useDarkMode();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
@@ -262,7 +262,7 @@ const Notices = () => {
         file: null,
     });
     const [search, setSearch] = useState('');
-    const [notices, setNotices] = useState([]);
+    const [winners, setWinners] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [dateError, setDateError] = useState({});
@@ -304,23 +304,30 @@ const Notices = () => {
         return () => observer.disconnect();
     }, [dark]);
 
-    // Fetch notices on component mount
+    // Fetch winners on component mount
     useEffect(() => {
-        const fetchNotices = async () => {
+        const fetchWinners = async () => {
             try {
                 setLoading(true);
-                const response = await api.get('/notices');
+                const response = await api.get('/winner-list');
+                console.log('Winner list response:', JSON.stringify(response.data, null, 2));
                 if (response.data.success) {
-                    setNotices(response.data.notices);
+                    const winners = response.data.notices || response.data.data || [];
+                    if (!Array.isArray(winners)) {
+                        throw new Error('Winners data is not an array');
+                    }
+                    setWinners(winners);
+                } else {
+                    throw new Error(response.data.message || 'Failed to load winner list');
                 }
             } catch (error) {
-                console.error('Error fetching notices:', error);
-                setError('Failed to load notices');
+                console.error('Error fetching winner list:', error);
+                setError('Failed to load winner list');
             } finally {
                 setLoading(false);
             }
         };
-        fetchNotices();
+        fetchWinners();
     }, []);
 
     // Handle form data changes
@@ -335,7 +342,7 @@ const Notices = () => {
         }
     }, []);
 
-    // Open modal for creating a new notice
+    // Open modal for creating a new winner
     const openModal = () => {
         setFormData({
             id: null,
@@ -351,15 +358,15 @@ const Notices = () => {
         setDateError({});
     };
 
-    // Open modal for editing an existing notice
-    const openEditModal = (notice) => {
+    // Open modal for editing an existing winner
+    const openEditModal = (winner) => {
         setFormData({
-            id: notice._id || notice.id,
-            title: notice.title || '',
-            issueDate: notice.issueDate ? new Date(notice.issueDate).toISOString().split('T')[0] : '',
-            publishDate: notice.publishDate ? new Date(notice.publishDate).toISOString().split('T')[0] : '',
-            status: notice.status || 'active',
-            content: notice.content || '',
+            id: winner._id || winner.id,
+            title: winner.title || '',
+            issueDate: winner.issueDate ? new Date(winner.issueDate).toISOString().split('T')[0] : '',
+            publishDate: winner.publishDate ? new Date(winner.publishDate).toISOString().split('T')[0] : '',
+            status: winner.status || 'active',
+            content: winner.content || '',
             file: null,
         });
         setIsModalOpen(true);
@@ -388,7 +395,7 @@ const Notices = () => {
         return errors;
     };
 
-    // Handle form submission for creating or editing a notice
+    // Handle form submission for creating or editing a winner
     const handleSubmit = async (e) => {
         e.preventDefault();
         const dateValidationErrors = validateDates(formData.issueDate, formData.publishDate);
@@ -406,24 +413,24 @@ const Notices = () => {
         if (formData.file) formDataToSend.append('file', formData.file);
 
         try {
-            const url = formData.id ? `/notices/${formData.id}` : '/add-notice';
+            const url = formData.id ? `/winner-list/${formData.id}` : '/add-winner';
             const method = formData.id ? 'put' : 'post';
             const response = await api[method](url, formDataToSend, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 
             if (response.data.success) {
-                const newNotice = response.data.notice;
-                if (newNotice) {
-                    setNotices((prevNotices) =>
+                const newWinner = response.data.winner || response.data.notice;
+                if (newWinner) {
+                    setWinners((prevWinners) =>
                         formData.id
-                            ? prevNotices.map((notice) => (notice._id === newNotice._id ? newNotice : notice))
-                            : [newNotice, ...prevNotices]
+                            ? prevWinners.map((winner) => (winner._id === newWinner._id ? newWinner : winner))
+                            : [newWinner, ...prevWinners]
                     );
                 } else {
-                    const fetchResponse = await api.get('/notices');
+                    const fetchResponse = await api.get('/winner-list');
                     if (fetchResponse.data.success) {
-                        setNotices(fetchResponse.data.notices);
+                        setWinners(fetchResponse.data.notices);
                     }
                 }
                 closeModal();
@@ -431,16 +438,16 @@ const Notices = () => {
                 setError(response.data.message || 'Submission failed');
             }
         } catch (error) {
-            console.error('Error submitting notice:', error);
-            setError('An error occurred while saving the notice');
+            console.error('Error submitting winner:', error);
+            setError('An error occurred while saving the winner');
         }
     };
 
-    // Handle deletion of a notice
+    // Handle deletion of a winner
     const handleDelete = (id) => {
         Swal.fire({
             title: 'Are you sure?',
-            text: 'This action cannot be undone! This will permanently delete the notice.',
+            text: 'This action cannot be undone! This will permanently delete the winner.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
@@ -466,42 +473,42 @@ const Notices = () => {
             },
         }).then((result) => {
             if (result.isConfirmed) {
-                api.delete(`/notices/${id}`)
+                api.delete(`/winner-list/${id}`)
                     .then((response) => {
                         if (response.data.success) {
-                            setNotices((prevNotices) => prevNotices.filter((notice) => notice._id !== id));
-                            Swal.fire('Deleted!', 'The notice has been deleted.', 'success');
+                            setWinners((prevWinners) => prevWinners.filter((winner) => winner._id !== id));
+                            Swal.fire('Deleted!', 'The winner has been deleted.', 'success');
                             setError(null);
                         } else {
-                            setError(response.data.message || 'Failed to delete notice');
-                            Swal.fire('Error!', 'Failed to delete the notice.', 'error');
+                            setError(response.data.message || 'Failed to delete winner');
+                            Swal.fire('Error!', 'Failed to delete the winner.', 'error');
                         }
                     })
                     .catch((error) => {
-                        console.error('Error deleting notice:', error);
-                        setError('An error occurred while deleting the notice');
-                        Swal.fire('Error!', 'An error occurred while deleting the notice.', 'error');
+                        console.error('Error deleting winner:', error);
+                        setError('An error occurred while deleting the winner');
+                        Swal.fire('Error!', 'An error occurred while deleting the winner.', 'error');
                     });
             }
         });
     };
 
-    // Filter and paginate notices
-    const filteredNotices = notices.filter((notice) => {
+    // Filter and paginate winners
+    const filteredWinners = winners.filter((winner) => {
         const searchLower = search.toLowerCase();
         return (
-            notice.title.toLowerCase().includes(searchLower) ||
-            (notice.issueDate && format(parseISO(notice.issueDate), 'dd/MM/yyyy').toLowerCase().includes(searchLower)) ||
-            (notice.publishDate && format(parseISO(notice.publishDate), 'dd/MM/yyyy').toLowerCase().includes(searchLower)) ||
-            notice.status.toLowerCase().includes(searchLower) ||
-            (notice.content && notice.content.toLowerCase().includes(searchLower))
+            winner.title.toLowerCase().includes(searchLower) ||
+            (winner.issueDate && format(parseISO(winner.issueDate), 'dd/MM/yyyy').toLowerCase().includes(searchLower)) ||
+            (winner.publishDate && format(parseISO(winner.publishDate), 'dd/MM/yyyy').toLowerCase().includes(searchLower)) ||
+            winner.status.toLowerCase().includes(searchLower) ||
+            (winner.content && winner.content.toLowerCase().includes(searchLower))
         );
     });
 
-    const indexOfLastNotice = currentPage * rowsPerPage;
-    const indexOfFirstNotice = indexOfLastNotice - rowsPerPage;
-    const currentNotices = filteredNotices.slice(indexOfFirstNotice, indexOfLastNotice);
-    const totalPages = Math.ceil(filteredNotices.length / rowsPerPage);
+    const indexOfLastWinner = currentPage * rowsPerPage;
+    const indexOfFirstWinner = indexOfLastWinner - rowsPerPage;
+    const currentWinners = filteredWinners.slice(indexOfFirstWinner, indexOfLastWinner);
+    const totalPages = Math.ceil(filteredWinners.length / rowsPerPage);
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -614,9 +621,9 @@ const Notices = () => {
                                         <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"></path>
                                     </svg>
                                 </div>
-                                <input type="text" id="table-search" value={search} onChange={(e) => setSearch(e.target.value)} className="block ps-10 p-2 text-sm text-[var(--text-3)] border border-[var(--border-color)] rounded-lg bg-[var(--secondary-color)] focus:border-[var(--primary-color)] focus:outline-hidden dark:bg-[var(--dark-bg2)] dark:border-[var(--border-color)] dark:placeholder-[var(--text-2)] dark:text-[var(--text-4)] dark:focus:border-[var(--primary-color)]" placeholder="Search for items" />
+                                <input type="text" id="table-search" value={search} onChange={(e) => setSearch(e.target.value)} className="block ps-10 p-2 text-sm text-[var(--text-3)] border border-[var(--border-color)] rounded-lg bg-[var(--secondary-color)] focus:border-[var(--primary-color)] focus:outline-hidden dark:bg-[var(--dark-bg2)] dark:border-[var(--border-color)] dark:placeholder-[var(--text-2)] dark:text-[var(--text-4)] dark:focus:border-[var(--primary-color)]" placeholder="Search for winners" />
                             </div>
-                            <button className="sign_in_btn w-full bg-[var(--primary-color)] text-[var(--text-4)] py-2 px-4 rounded-[12px] hover:bg-[var(--text-1)] transition duration-400 mb-[20px] shadow-md cursor-pointer" onClick={openModal}>Create New Notice</button>
+                            <button className="sign_in_btn w-full bg-[var(--primary-color)] text-[var(--text-4)] py-2 px-4 rounded-[12px] hover:bg-[var(--text-1)] transition duration-400 mb-[20px] shadow-md cursor-pointer" onClick={openModal}>Create New Winner</button>
                         </div>
                     </div>
                 </div>
@@ -626,7 +633,7 @@ const Notices = () => {
                         <tr>
                             <th className="sl-column">Sl</th>
                             <th className="action-column hide_content">Action</th>
-                            <th className="title-column">Title</th>
+                            <th className="title-column">Winner Title</th>
                             <th className="date-column">Issue Date</th>
                             <th className="date-column">Publish Date</th>
                             <th className="status-column">Status</th>
@@ -637,62 +644,62 @@ const Notices = () => {
                         <tbody>
                         {loading ? (
                             <tr><td colSpan="8" className="text-center py-4">Loading...</td></tr>
-                        ) : currentNotices.length === 0 ? (
-                            <tr><td colSpan="8" className="text-center py-4">No notices found</td></tr>
+                        ) : currentWinners.length === 0 ? (
+                            <tr><td colSpan="8" className="text-center py-4">No winners found</td></tr>
                         ) : (
-                            currentNotices.map((notice, index) => (
-                                <tr key={notice._id || notice.id || index} className="dark:border-[var(--dark-border)] border-[var(--border-color2)] border-b">
+                            currentWinners.map((winner, index) => (
+                                <tr key={winner._id || winner.id || index} className="dark:border-[var(--dark-border)] border-[var(--border-color2)] border-b">
                                     <td className="sl-column">
                                         <div className="flex items-center gap-3">
                                             <div className="flex items-center checkbox_wrap hide_content">
-                                                <input id={`checkbox-table-search-${notice._id || notice.id}`} type="checkbox" className="w-4 h-4 text-[var(--primary-color)] bg-[var(--secondary-color)] border-[var(--border-color2)] rounded-sm focus:outline-none focus:ring-1 dark:focus:ring-[var(--primary-color)] dark:bg-[var(--dark-bg-color)] dark:border-[var(--dark-border)]" />
-                                                <label htmlFor={`checkbox-table-search-${notice._id || notice.id}`} className="sr-only">checkbox</label>
+                                                <input id={`checkbox-table-search-${winner._id || winner.id}`} type="checkbox" className="w-4 h-4 text-[var(--primary-color)] bg-[var(--secondary-color)] border-[var(--border-color2)] rounded-sm focus:outline-none focus:ring-1 dark:focus:ring-[var(--primary-color)] dark:bg-[var(--dark-bg-color)] dark:border-[var(--dark-border)]" />
+                                                <label htmlFor={`checkbox-table-search-${winner._id || winner.id}`} className="sr-only">checkbox</label>
                                             </div>
-                                            <span>{index + 1 + indexOfFirstNotice}</span>
+                                            <span>{index + 1 + indexOfFirstWinner}</span>
                                         </div>
                                     </td>
                                     <td className="action-column hide_content font-medium text-[var(--text-1)] whitespace-nowrap dark:text-[var(--text-4)]">
                                         <div className="flex items-center gap-1">
-                                            <button className="quick-btn text-[var(--primary-color)] hover:text-blue-700 p-1 rounded-full hover:bg-blue-50 cursor-pointer" aria-label="View notice">
+                                            <button className="quick-btn text-[var(--primary-color)] hover:text-blue-700 p-1 rounded-full hover:bg-blue-50 cursor-pointer" aria-label="View winner">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                                     <path d="M10 12a2 2 0 100-4 2 2 0 000-4z" />
                                                     <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
                                                 </svg>
                                             </button>
-                                            <button className="edit-btn text-yellow-500 hover:text-yellow-700 p-1 rounded-full hover:bg-yellow-50 cursor-pointer" onClick={() => openEditModal(notice)} aria-label="Edit notice">
+                                            <button className="edit-btn text-yellow-500 hover:text-yellow-700 p-1 rounded-full hover:bg-yellow-50 cursor-pointer" onClick={() => openEditModal(winner)} aria-label="Edit winner">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                                     <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                                 </svg>
                                             </button>
-                                            <button className="delete-btn text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 cursor-pointer" onClick={() => handleDelete(notice._id || notice.id)} aria-label="Delete notice">
+                                            <button className="delete-btn text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 cursor-pointer" onClick={() => handleDelete(winner._id || winner.id)} aria-label="Delete winner">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                                     <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4h-3.382a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                                                 </svg>
                                             </button>
                                         </div>
                                     </td>
-                                    <td className="title-column font-medium text-[var(--text-1)] dark:text-[var(--text-4)]">{notice.title}</td>
-                                    <td className="date-column">{formatDate(notice.issueDate)}</td>
-                                    <td className="date-column">{formatDate(notice.publishDate)}</td>
+                                    <td className="title-column font-medium text-[var(--text-1)] dark:text-[var(--text-4)]">{winner.title}</td>
+                                    <td className="date-column">{formatDate(winner.issueDate)}</td>
+                                    <td className="date-column">{formatDate(winner.publishDate)}</td>
                                     <td className="status-column">
-                                        <button className={`${(notice.status || 'active').toLowerCase()}-status flex items-center}`}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${notice.status === 'active' ? 'text-green-500' : 'text-red-500'} mr-1`} viewBox="0 0 20 20" fill="currentColor">
-                                                {notice.status === 'active' && (
+                                        <button className={`${(winner.status || 'active').toLowerCase()}-status flex items-center}`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${winner.status === 'active' ? 'text-green-500' : 'text-red-500'} mr-1`} viewBox="0 0 20 20" fill="currentColor">
+                                                {winner.status === 'active' && (
                                                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                                 )}
-                                                {notice.status === 'inactive' && (
+                                                {winner.status === 'inactive' && (
                                                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                                                 )}
                                             </svg>
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${notice.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                                    {notice.status === 'active' ? 'Active' : 'Inactive'}
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${winner.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                    {winner.status === 'active' ? 'Active' : 'Inactive'}
                                                 </span>
                                         </button>
                                     </td>
-                                    <td className="date-column">{formatDate(notice.createdAt)}</td>
+                                    <td className="date-column">{formatDate(winner.createdAt)}</td>
                                     <td className="file-column">
-                                        {notice.filePath && (
-                                            <a href={`http://localhost:3001${notice.filePath}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                        {winner.filePath && (
+                                            <a href={`https://egpbtc.com${winner.filePath}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                                                 View File
                                             </a>
                                         )}
@@ -703,7 +710,7 @@ const Notices = () => {
                         </tbody>
                     </table>
                     <p className="entries pt-2">
-                        Showing {currentNotices.length} of {filteredNotices.length} entries
+                        Showing {currentWinners.length} of {filteredWinners.length} entries
                     </p>
                     <div className="pagination">
                         <ul className="flex justify-center items-center gap-2 py-2">
@@ -758,4 +765,4 @@ const Notices = () => {
     );
 };
 
-export default Notices;
+export default WinnerList;

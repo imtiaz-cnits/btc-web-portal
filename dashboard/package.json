@@ -6,7 +6,7 @@
   "proxy": "http://localhost:3001",
   "scripts": {
     "dev": "concurrently \"vite --port 3002\"",
-    "build": "vite build && mv dist ../build/dashboard",
+    "build": "vite build && if not exist ..\\build mkdir ..\\build && move dist ..\\build\\dashboard",
     "tailwind": "npx tailwindcss -i ./src/styles/input.css -o ./src/styles/output.css --watch",
     "lint": "eslint .",
     "preview": "vite preview"

@@ -34,18 +34,20 @@ import ClientLogo11 from '../assets/img/home/client-logo11.png';
 import ClientLogo12 from '../assets/img/home/client-logo12.png';
 
 const Home = () => {
-    const [notices, setNotices] = useState([]);
+    const [tenderNotices, setTenderNotices] = useState([]);
+    const [winnerNotices, setWinnerNotices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     const navigate = useNavigate();
-    const noticeBoardRef = useRef(null);
+    const tenderNoticeBoardRef = useRef(null);
+    const winnerNoticeBoardRef = useRef(null);
     const heroThemeRef = useRef(null);
     const counterStatsRef = useRef(null);
     const aboutStatsRef = useRef(null);
 
-    // Fallback useVerticalNotice hook
-    const useVerticalNotice = (notices) => {
+    // Updated useVerticalNotice hook for infinite scrolling
+    const useVerticalNotice = (notices, boardType) => {
         const noticeRef = useRef(null);
         const timelineRef = useRef(null);
 
@@ -59,23 +61,30 @@ const Home = () => {
                 return;
             }
 
-            // Set initial positioning
-            gsap.set(noticeRef.current, { position: 'relative', y: 0 });
+            // Clone items for seamless infinite scrolling
+            const container = noticeRef.current;
 
+            // Calculate heights
             const itemHeight = items[0].offsetHeight + 1; // Include border
             const totalHeight = itemHeight * notices.length;
 
-            // Use GSAP to clone and animate instead of duplicating HTML
+            // Set initial positioning
+            gsap.set(container, { position: 'relative', y: 0 });
+
+            // Create GSAP timeline for infinite scrolling
             if (timelineRef.current) {
                 timelineRef.current.kill();
             }
             timelineRef.current = gsap.timeline({ repeat: -1 })
-                .to(noticeRef.current, {
+                .to(container, {
                     y: -totalHeight,
                     duration: notices.length * 3,
                     ease: 'none',
                     modifiers: {
-                        y: gsap.utils.unitize((y) => parseFloat(y) % totalHeight),
+                        y: gsap.utils.unitize((y) => {
+                            const value = parseFloat(y) % totalHeight;
+                            return value <= -totalHeight ? 0 : value;
+                        }),
                     },
                 });
 
@@ -83,8 +92,12 @@ const Home = () => {
                 if (timelineRef.current) {
                     timelineRef.current.kill();
                 }
+                // Clean up clones
+                while (container.children.length > notices.length) {
+                    container.removeChild(container.lastChild);
+                }
             };
-        }, [notices]);
+        }, [notices, boardType]);
 
         const handleMouseEnter = () => {
             if (timelineRef.current) {
@@ -101,13 +114,20 @@ const Home = () => {
         return { noticeRef, handleMouseEnter, handleMouseLeave };
     };
 
-    // Fetch notices from backend
+    // Fetch tender notices and winner notices from backend
     useEffect(() => {
-        const fetchNotices = async () => {
+        const fetchTenderNotices = async () => {
             try {
                 const response = await api.get('/notices');
+                if (!response.data || typeof response.data !== 'object') {
+                    throw new Error('Invalid response format from /notices');
+                }
                 if (response.data.success) {
-                    const formattedNotices = response.data.notices.map(notice => ({
+                    const notices = response.data.notices || response.data.data || [];
+                    if (!Array.isArray(notices)) {
+                        throw new Error('Notices data is not an array');
+                    }
+                    const formattedNotices = notices.map(notice => ({
                         id: notice._id,
                         date: notice.publishDate
                             ? new Date(notice.publishDate).toLocaleDateString('en-US', {
@@ -115,7 +135,7 @@ const Home = () => {
                                 month: 'short',
                             }).replace(/,/, '')
                             : 'N/A',
-                        title: notice.title,
+                        title: notice.title || 'Untitled Notice',
                         link: `/view-notice/${notice._id}`,
                         filePath: notice.filePath,
                         content: notice.content,
@@ -125,28 +145,66 @@ const Home = () => {
                                     : 'unknown'
                             : notice.content && typeof notice.content === 'string' && notice.content.trim() ? 'content' : 'none'),
                     }));
-                    setNotices(formattedNotices);
-                    setLoading(false);
+                    setTenderNotices(formattedNotices);
                 } else {
-                    throw new Error(response.data.message || 'Failed to fetch notices');
+                    throw new Error(response.data.message || 'Failed to fetch tender notices');
                 }
             } catch (err) {
-                if (err.response?.status === 401) {
-                    setError('Session expired. Please log in again.');
-                    localStorage.removeItem('token');
-                    navigate('/login');
-                } else {
-                    setError(err.message || 'Failed to load notices. Please try again later.');
-                }
-                setLoading(false);
+                console.error('Error fetching tender notices:', err.message);
+                setError(err.message || 'Failed to load tender notices. Please try again later.');
             }
         };
 
-        fetchNotices();
+        const fetchWinnerNotices = async () => {
+            try {
+                const response = await api.get('/winner-list');
+                if (!response.data || typeof response.data !== 'object') {
+                    throw new Error('Invalid response format from /winner-list');
+                }
+                if (response.data.success) {
+                    const winners = response.data.notices || response.data.data || [];
+                    if (!Array.isArray(winners)) {
+                        throw new Error('Winners data is not an array');
+                    }
+                    const formattedWinners = winners.map(winner => ({
+                        id: winner._id,
+                        date: winner.issueDate
+                            ? new Date(winner.issueDate).toLocaleDateString('en-US', {
+                                day: '2-digit',
+                                month: 'short',
+                            }).replace(/,/, '')
+                            : 'N/A',
+                        title: winner.title || 'Untitled Winner',
+                        link: `/view-winner/${winner._id}`,
+                        filePath: winner.filePath,
+                        content: winner.content,
+                        fileType: winner.fileType || (winner.filePath && typeof winner.filePath === 'string'
+                            ? winner.filePath.toLowerCase().endsWith('.pdf') ? 'pdf'
+                                : ['.jpg', '.jpeg', '.png', '.gif'].some(ext => winner.filePath.toLowerCase().endsWith(ext)) ? 'image'
+                                    : 'unknown'
+                            : winner.content && typeof winner.content === 'string' && winner.content.trim() ? 'content' : 'none'),
+                    }));
+                    setWinnerNotices(formattedWinners);
+                } else {
+                    throw new Error(response.data.message || 'Failed to fetch winner notices');
+                }
+            } catch (err) {
+                console.error('Error fetching winner notices:', err.message);
+                setError(err.message || 'Failed to load winner notices. Please try again later.');
+            }
+        };
+
+        const fetchAll = async () => {
+            setLoading(true);
+            await Promise.all([fetchTenderNotices(), fetchWinnerNotices()]);
+            setLoading(false);
+        };
+
+        fetchAll();
     }, [navigate]);
 
     // Handle viewing file or content
-    const handleViewFile = (filePath, fileType, id, content) => {
+    const handleViewFile = (filePath, fileType, id, content, contentType) => {
         if (filePath) {
             const normalizedPath = typeof filePath === 'string' ? (filePath.startsWith('/') ? filePath : `/${filePath}`).trim() : null;
             if (normalizedPath) {
@@ -161,14 +219,16 @@ const Home = () => {
             }
         }
         if (content && typeof content === 'string' && content.trim() && id) {
-            window.open(`/view-notice/${id}`, '_blank');
+            const route = contentType === 'winner' ? `/view-winner/${id}` : `/view-notice/${id}`;
+            window.open(route, '_blank');
         } else {
             alert('No file or valid content available to view.');
         }
     };
 
-    // Use custom hook for vertical notice scrolling
-    const { noticeRef: verticalNoticeRef, handleMouseEnter, handleMouseLeave } = useVerticalNotice(notices);
+    // Use separate hooks for each notice board
+    const { noticeRef: tenderNoticeRef, handleMouseEnter: tenderMouseEnter, handleMouseLeave: tenderMouseLeave } = useVerticalNotice(tenderNotices, 'tender');
+    const { noticeRef: winnerNoticeRef, handleMouseEnter: winnerMouseEnter, handleMouseLeave: winnerMouseLeave } = useVerticalNotice(winnerNotices, 'winner');
 
     // Use custom hook for GSAP animations
     useGsapAnimation(gsapAnimations);
@@ -275,16 +335,17 @@ const Home = () => {
                             </div>
                         </div>
                         <div className="w-full lg:w-1/2 overflow-hidden mt-[40px] lg:mt-[0px]">
+                            {/* EGP Tender Notices */}
                             <div
-                                className="notice_board w-full bg-[var(--secondary-color)] border border-[var(--ac-1)] rounded-3xl overflow-hidden p-0"
-                                ref={noticeBoardRef}
-                                onMouseEnter={handleMouseEnter}
-                                onMouseLeave={handleMouseLeave}
+                                className="tender-notice-board w-full bg-[var(--secondary-color)] border border-[var(--ac-1)] rounded-3xl overflow-hidden p-0"
+                                ref={tenderNoticeBoardRef}
+                                onMouseEnter={tenderMouseEnter}
+                                onMouseLeave={tenderMouseLeave}
                             >
-                                <h3 className="header bg-[var(--primary-color)] text-[var(--secondary-color)] font-[var(--primary-font)] text-center py-2.5 px-4 text-[28px] font-medium mb-0">
-                                    NOTICE BOARD
+                                <h3 className="header bg-[var(--primary-color)] text-[var(--secondary-color)] font-[var(--primary-font)] text-center py-2.5 px-4 text-[22px] font-medium mb-0">
+                                    EGP TENDER NOTICES
                                 </h3>
-                                <div className="notice_item h-[450px] overflow-hidden">
+                                <div className="notice_item h-[250px] overflow-hidden">
                                     {loading ? (
                                         <div className="flex justify-center items-center h-full">
                                             <p className="text-[var(--text-2)] text-base">Loading notices...</p>
@@ -293,20 +354,18 @@ const Home = () => {
                                         <div className="flex justify-center items-center h-full">
                                             <p className="text-[var(--text-2)] text-base">{error}</p>
                                         </div>
-                                    ) : notices.length === 0 ? (
+                                    ) : tenderNotices.length === 0 ? (
                                         <div className="flex justify-center items-center h-full">
-                                            <p className="text-[var(--text-2)] text-base">No notices available.</p>
+                                            <p className="text-[var(--text-2)] text-base">No tender notices available.</p>
                                         </div>
                                     ) : (
-                                        <ul className="notices overflow-y-hidden relative" ref={verticalNoticeRef}>
-                                            {notices.map((notice) => (
+                                        <ul className="tender-notices overflow-y-hidden relative" ref={tenderNoticeRef}>
+                                            {tenderNotices.map((notice) => (
                                                 <li
                                                     key={notice.id}
                                                     className="notice flex items-center border-b border-[var(--ac-1)] py-4 mx-5"
                                                 >
-                                                    <div
-                                                        className="date relative w-[52px] h-[52px]"
-                                                    >
+                                                    <div className="date relative w-[52px] h-[52px]">
                                                         <div className="day absolute top-[-12px] left-[12px] text-[var(--secondary-color)] font-[var(--primary-font)] font-medium text-[26px] z-[2]">
                                                             {notice.date.split(' ')[1]}
                                                         </div>
@@ -316,13 +375,13 @@ const Home = () => {
                                                     </div>
                                                     <div
                                                         className="content leading-[18px] flex-1 cursor-pointer"
-                                                        onClick={() => handleViewFile(notice.filePath, notice.fileType, notice.id, notice.content)}
+                                                        onClick={() => handleViewFile(notice.filePath, notice.fileType, notice.id, notice.content, 'notice')}
                                                         role="button"
                                                         tabIndex={0}
                                                         aria-label={`Read more about ${notice.title}`}
                                                         onKeyDown={(e) => {
                                                             if (e.key === 'Enter' || e.key === ' ') {
-                                                                handleViewFile(notice.filePath, notice.fileType, notice.id, notice.content);
+                                                                handleViewFile(notice.filePath, notice.fileType, notice.id, notice.content, 'notice');
                                                             }
                                                         }}
                                                     >
@@ -335,13 +394,83 @@ const Home = () => {
                                         </ul>
                                     )}
                                 </div>
-                                <div className="button text-center">
+                                <div className="button text-center py-3">
                                     <Link
                                         to="/notice"
-                                        className="view_note_btn cursor-pointer relative inline-flex items-center justify-center px-8 my-5 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-0 rounded-tr-lg rounded-bl-lg rounded-br-lg group"
+                                        className="view_note_btn cursor-pointer relative inline-flex items-center justify-center px-8 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-0 rounded-tr-lg rounded-bl-lg rounded-br-lg group"
                                     >
                                         <span className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>
                                         <span className="relative text-base font-semibold">VIEW ALL NOTICE</span>
+                                    </Link>
+                                </div>
+                            </div>
+
+                            {/* Winner List */}
+                            <div
+                                className="winner-notice-board w-full bg-[var(--secondary-color)] border border-[var(--ac-1)] rounded-3xl overflow-hidden p-0 mt-3"
+                                ref={winnerNoticeBoardRef}
+                                onMouseEnter={winnerMouseEnter}
+                                onMouseLeave={winnerMouseLeave}
+                            >
+                                <h3 className="header bg-[var(--primary-color)] text-[var(--secondary-color)] font-[var(--primary-font)] text-center py-2.5 px-4 text-[22px] font-medium mb-0">
+                                    WINNER LIST
+                                </h3>
+                                <div className="notice_item h-[250px] overflow-hidden">
+                                    {loading ? (
+                                        <div className="flex justify-center items-center h-full">
+                                            <p className="text-[var(--text-2)] text-base">Loading winners...</p>
+                                        </div>
+                                    ) : error ? (
+                                        <div className="flex justify-center items-center h-full">
+                                            <p className="text-[var(--text-2)] text-base">{error}</p>
+                                        </div>
+                                    ) : winnerNotices.length === 0 ? (
+                                        <div className="flex justify-center items-center h-full">
+                                            <p className="text-[var(--text-2)] text-base">No winners available.</p>
+                                        </div>
+                                    ) : (
+                                        <ul className="winner-notices overflow-y-hidden relative" ref={winnerNoticeRef}>
+                                            {winnerNotices.map((winner) => (
+                                                <li
+                                                    key={winner.id}
+                                                    className="notice flex items-center border-b border-[var(--ac-1)] py-4 mx-5"
+                                                >
+                                                    <div className="date relative w-[52px] h-[52px]">
+                                                        <div className="day absolute top-[-12px] left-[12px] text-[var(--secondary-color)] font-[var(--primary-font)] font-medium text-[26px] z-[2]">
+                                                            {winner.date.split(' ')[1]}
+                                                        </div>
+                                                        <div className="month absolute top-[18px] left-[12px] font-medium font-[var(--secondary-font)] text-[var(--secondary-color)] text-base z-[2]">
+                                                            {winner.date.split(' ')[0]}
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        className="content leading-[18px] flex-1 cursor-pointer"
+                                                        onClick={() => handleViewFile(winner.filePath, winner.fileType, winner.id, winner.content, 'winner')}
+                                                        role="button"
+                                                        tabIndex={0}
+                                                        aria-label={`Read more about ${winner.title}`}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                                handleViewFile(winner.filePath, winner.fileType, winner.id, winner.content, 'winner');
+                                                            }
+                                                        }}
+                                                    >
+                                                        <span className="text-[var(--text-2, #666)] text-base font-[var(--secondary-font)] font-medium transition duration-300 hover:text-[var(--primary-color)] hover:underline">
+                                                            {winner.title}
+                                                        </span>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                                <div className="button text-center py-3">
+                                    <Link
+                                        to="/winner"
+                                        className="view_note_btn cursor-pointer relative inline-flex items-center justify-center px-8 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-0 rounded-tr-lg rounded-bl-lg rounded-br-lg group"
+                                    >
+                                        <span className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>
+                                        <span className="relative text-base font-semibold">VIEW ALL WINNERS</span>
                                     </Link>
                                 </div>
                             </div>
@@ -351,7 +480,8 @@ const Home = () => {
             </div>
 
             <style>{`
-                .hero .notice .date {
+                .tender-notice-board .notice .date,
+                .winner-notice-board .notice .date {
                     position: relative;
                     width: 52px;
                     height: 52px;
@@ -368,7 +498,8 @@ const Home = () => {
                     margin-top: 10px;
                     z-index: 1;
                 }
-                .hero .notice .date::before {
+                .tender-notice-board .notice .date::before,
+                .winner-notice-board .notice .date::before {
                     content: "";
                     position: absolute;
                     top: -10px;
@@ -379,7 +510,8 @@ const Home = () => {
                     background-color: var(--primary-color);
                     z-index: -1;
                 }
-                .hero .notice .day {
+                .tender-notice-board .notice .day,
+                .winner-notice-board .notice .day {
                     position: absolute;
                     top: -12px;
                     left: 12px;
@@ -387,11 +519,12 @@ const Home = () => {
                     width: 100%;
                     color: var(--secondary-color);
                     font-family: var(--primary-font);
-                    font-medium;
+                    font-weight: medium;
                     font-size: 26px;
                     z-index: 2;
                 }
-                .hero .notice .month {
+                .tender-notice-board .notice .month,
+                .winner-notice-board .notice .month {
                     position: absolute;
                     top: 18px;
                     left: 12px;
@@ -399,24 +532,27 @@ const Home = () => {
                     width: 100%;
                     color: var(--secondary-color);
                     font-family: var(--secondary-font);
-                    font-medium;
+                    font-weight: medium;
                     font-size: 16px;
                     z-index: 2;
                 }
-                .notices {
+                .tender-notices,
+                .winner-notices {
                     position: relative;
                     width: 100%;
                     list-style: none;
                     padding: 0;
                     margin: 0;
                 }
-                .notice {
+                .tender-notice-board .notice,
+                .winner-notice-board .notice {
                     display: flex;
                     align-items: center;
                     width: 100%;
                     padding: 12px 0;
                 }
-                .content {
+                .tender-notice-board .content,
+                .winner-notice-board .content {
                     flex: 1;
                     padding-left: 10px;
                     padding-right: 26px;

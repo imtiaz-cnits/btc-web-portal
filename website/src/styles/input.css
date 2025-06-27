@@ -1,5 +1,6 @@
 /* Font imports for website */
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Albert+Sans:ital,wght@0,100..900;1,100..900&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@100..900&display=swap');
 
 /* Import Tailwind */
 @import "tailwindcss";
@@ -8,6 +9,7 @@
 .website-layout {
     --primary-font: "Space Grotesk";
     --secondary-font: "Albert Sans";
+    --bangla-font: "Noto Sans Bengali";
     --primary-color: #5AA469;
     --secondary-color: #ffffff;
     --ac-1: #c6c6c6;

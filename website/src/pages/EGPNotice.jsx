@@ -20,7 +20,7 @@ class NoticeErrorBoundary extends React.Component {
     }
 
     componentDidCatch(error, errorInfo) {
-        console.error('Error in Notice component:', error, errorInfo);
+        console.error('Error in EGPNotice component:', error, errorInfo);
         this.setState({ errorInfo });
     }
 
@@ -46,7 +46,7 @@ class NoticeErrorBoundary extends React.Component {
     }
 }
 
-const Notice = () => {
+const EGPNotice = () => {
     // Use custom hook for GSAP animations
     useGsapAnimation(gsapAnimations);
 
@@ -144,7 +144,7 @@ const Notice = () => {
             <>
                 {/* Helmet for dynamic title and meta tags */}
                 <Helmet>
-                    <title>All Notices | Building Technology & Consultant</title>
+                    <title>EGP Tender Notices | Building Technology & Consultant</title>
                     <meta name="description" content="View the latest notices and announcements from Your Site Name." />
                     <meta name="keywords" content="notices, announcements, Your Site Name, updates" />
                 </Helmet>
@@ -390,4 +390,4 @@ const Notice = () => {
     );
 };
 
-export default Notice;
+export default EGPNotice;

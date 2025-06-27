@@ -10,8 +10,24 @@ const Navbar = () => {
     const [notices, setNotices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isFixed, setIsFixed] = useState(false); // New state for fixed navbar
     const dropdownRef = useRef(null);
-    const location = useLocation(); // Get current location
+    const location = useLocation();
+
+    // Handle scroll to toggle fixed class
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollThreshold = 100; // Pixels to scroll before fixing navbar
+            if (window.scrollY > scrollThreshold) {
+                setIsFixed(true);
+            } else {
+                setIsFixed(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     // Fetch notices from backend
     useEffect(() => {
@@ -70,21 +86,21 @@ const Navbar = () => {
     return (
         <div>
             {/* Top Notice Board */}
-            <div className="top_notice_board bg-[var(--text-1)] py-[6px]">
+            <div className="top_notice_board py-[6px]" style={{ backgroundColor: 'oklch(58.6% 0.253 17.585)' }}>
                 <div className="text_marquee flex items-center overflow-x-hidden">
                     {loading ? (
                         <span
-                            className="text-[var(--secondary-color)] text-[16px] font-[400] font-[var(--primary-font)] inline-block mx-auto">
+                            className="text-[var(--secondary-color)] text-[16px] font-[400] !font-[var(--bangla-font)] inline-block mx-auto">
                             Loading notices...
                         </span>
                     ) : error ? (
                         <span
-                            className="text-[var(--secondary-color)] text-[16px] font-[400] font-[var(--primary-font)] inline-block mx-auto">
+                            className="text-[var(--secondary-color)] text-[16px] font-[400] !font-[var(--bangla-font)] inline-block mx-auto">
                             {error}
                         </span>
                     ) : notices.length === 0 ? (
                         <span
-                            className="text-[var(--secondary-color)] text-[16px] font-[400] font-[var(--primary-font)] inline-block mx-auto">
+                            className="text-[var(--secondary-color)] text-[16px] font-[400] !font-[var(--bangla-font)] inline-block mx-auto">
                             No notices available.
                         </span>
                     ) : (
@@ -98,7 +114,7 @@ const Navbar = () => {
                                 <Link
                                     key={notice.id}
                                     to={notice.link}
-                                    className="js_text text-[var(--secondary-color)] text-[16px] font-[400] font-[var(--primary-font)] inline-block mr-[10px] pr-[10px] relative max-w-[200px] overflow-hidden text-ellipsis"
+                                    className="js_text text-[var(--secondary-color)] text-[16px] font-[400] !font-[var(--bangla-font)] inline-block mr-[10px] pr-[10px] relative max-w-[200px] overflow-hidden text-ellipsis"
                                 >
                                     {notice.title}
                                     <span
@@ -113,7 +129,7 @@ const Navbar = () => {
             {/* Top Bar */}
             <div className="topbar hidden lg:block">
                 <div className="custom-container mx-auto">
-                    <div className="flex justify-between items-center py-2.5 border-b border-b-[var(--ac-1)]">
+                    <div className="flex justify-between items-center py-2.5">
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-1">
                                 <svg width="20" height="20" viewBox="0 0 32 32" fill="none"
@@ -135,7 +151,7 @@ const Navbar = () => {
                                     href="tel:01711010929"
                                     className="text-text-1 text-base font-normal font-secondary ml-0.5 hover:text-[var(--primary-color)] transition duration-300"
                                 >
-                                    01711010929(Imran), 01711805086(Shah Alom)
+                                    01711805086(Shah Alom) , 01711010929(Imran)
                                 </a>
                             </div>
                         </div>
@@ -190,10 +206,10 @@ const Navbar = () => {
             </div>
 
             {/* Navbar */}
-            <nav className="navBar bg-[var(--secondary-color)] sticky top-0 w-full z-[50]">
+            <nav className={`navBar ${isFixed ? 'fixed top-0' : 'relative'} w-full z-[50]`}>
                 <div className="custom-container">
-                    <div className="w-full border-b border-b-[var(--ac-1)]">
-                        <div className="flex justify-between h-[80px] items-center">
+                    <div className="w-full bg-[var(--shade-1)] rounded-xl border border-[var(--primary-color)]">
+                        <div className="flex justify-between h-[80px] items-center px-3">
                             <Link to="/" className="text-2xl font-extrabold">
                                 <img className="w-[160px] object-contain" src={Logo} alt=""/>
                             </Link>
@@ -219,7 +235,7 @@ const Navbar = () => {
                                 <div className="relative dropdown group">
                                     <button
                                         className={`flex cursor-pointer items-center transition duration-400 font-medium ${
-                                            ['/notice', '/winner'].some(path => location.pathname === path)
+                                            ['/egp-notice', '/winner-list'].some(path => location.pathname === path)
                                                 ? 'text-[var(--primary-color)]'
                                                 : 'text-[var(--text-1)] hover:text-[var(--primary-color)]'
                                         }`}>
@@ -232,13 +248,13 @@ const Navbar = () => {
                                     </button>
                                     <div
                                         className="dropdown-content absolute mt-2 w-56 border border-[var(--ac-2)] rounded-lg shadow-lg">
-                                        <Link to="/notice" className={`block px-4 py-2 ${
-                                            location.pathname === '/notice' ? 'bg-[var(--primary-color)] text-[var(--secondary-color)]' : 'hover:bg-[var(--primary-color)]'
+                                        <Link to="/egp-notice" className={`block px-4 py-2 ${
+                                            location.pathname === '/egp-notice' ? 'bg-[var(--primary-color)] text-[var(--secondary-color)]' : 'hover:bg-[var(--primary-color)]'
                                         }`}>
                                             EGP TENDER NOTICE
                                         </Link>
-                                        <Link to="/winner" className={`block px-4 py-2 ${
-                                            location.pathname === '/winner' ? 'bg-[var(--primary-color)] text-[var(--secondary-color)]' : 'hover:bg-[var(--primary-color)]'
+                                        <Link to="/winner-list" className={`block px-4 py-2 ${
+                                            location.pathname === '/winner-list' ? 'bg-[var(--primary-color)] text-[var(--secondary-color)]' : 'hover:bg-[var(--primary-color)]'
                                         }`}>
                                             WINNER LIST
                                         </Link>

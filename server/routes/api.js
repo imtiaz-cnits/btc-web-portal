@@ -4,6 +4,12 @@ import AuthMiddleware from "../middlewares/AuthMiddleware.js";
 import { getUserData } from "../controllers/UserController.js";
 import { createNotice, deleteNotice, updateNotice, viewNotice, getNoticeById } from "../controllers/NoticesController.js"; // Add getNoticeById
 import upload from "../config/MulterConfig.js";
+import {
+    createWinnerList, deleteWinnerList,
+    getWinnerListById,
+    updateWinnerList,
+    viewWinnerList
+} from "../controllers/WinnerListController.js";
 
 const apiRouter = express.Router();
 
@@ -47,5 +53,36 @@ apiRouter.delete("/notices/:id", AuthMiddleware, (req, res, next) => {
     }
     deleteNotice(req, res, next);
 });
+
+// Winner List routes
+apiRouter.post("/add-winner", AuthMiddleware, upload.single("file"), createWinnerList);
+apiRouter.get("/winner-list", viewWinnerList);
+apiRouter.get("/winner-list/:id", (req, res, next) => {
+    const { id } = req.params;
+    if (!id || id === ':' || !/^[a-f\d]{24}$/i.test(id)) {
+        console.error(`Invalid notice ID: ${id}`);
+        return res.status(400).json({ success: false, message: 'Invalid notice ID' });
+    }
+    getWinnerListById(req, res, next);
+});
+apiRouter.put("/winner-list/:id", AuthMiddleware, upload.single("file"), (req, res, next) => {
+    const { id } = req.params;
+    if (!id || id === ':' || !/^[a-f\d]{24}$/i.test(id)) {
+        console.error(`Invalid notice ID: ${id}`);
+        return res.status(400).json({ success: false, message: 'Invalid notice ID' });
+    }
+    updateWinnerList(req, res, next);
+});
+apiRouter.delete("/winner-list/:id", AuthMiddleware, (req, res, next) => {
+    const { id } = req.params;
+    if (!id || id === ':' || !/^[a-f\d]{24}$/i.test(id)) {
+        console.error(`Invalid notice ID: ${id}`);
+        return res.status(400).json({ success: false, message: 'Invalid notice ID' });
+    }
+    deleteWinnerList(req, res, next);
+});
+
+
+
 
 export default apiRouter;

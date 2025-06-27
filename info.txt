@@ -34,3 +34,8 @@ Login Details for Postman
 
 
 ====================================
+
+Command for Find in use Ports - netstat -aon | findstr :3000
+
+Command for Kill Process - Stop-Process -Id 18660 -Force
+

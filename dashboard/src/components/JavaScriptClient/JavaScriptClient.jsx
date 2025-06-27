@@ -4,12 +4,12 @@ import React, { useEffect } from "react";
 const JavaScriptClient = () => {
     useEffect(() => {
         const scriptApp = document.createElement("script");
-        scriptApp.src = "/js/app.js";
+        scriptApp.src = "/admin/js/app.js"; // Updated to include /admin
         scriptApp.async = true;
         document.body.appendChild(scriptApp);
 
         const scriptSidebar = document.createElement("script");
-        scriptSidebar.src = "/js/sidebar.js";
+        scriptSidebar.src = "/admin/js/sidebar.js"; // Updated to include /admin
         scriptSidebar.async = true;
         document.body.appendChild(scriptSidebar);
 

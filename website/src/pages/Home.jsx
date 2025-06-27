@@ -150,7 +150,7 @@ const Home = () => {
         if (filePath) {
             const normalizedPath = typeof filePath === 'string' ? (filePath.startsWith('/') ? filePath : `/${filePath}`).trim() : null;
             if (normalizedPath) {
-                const fileUrl = `http://localhost:3001${normalizedPath}`;
+                const fileUrl = `https://egpbtc.com${normalizedPath}`;
                 const isSupported = fileType === 'pdf' || fileType === 'image' ||
                     (normalizedPath.toLowerCase().endsWith('.pdf') ||
                         ['.jpg', '.jpeg', '.png', '.gif'].some(ext => normalizedPath.toLowerCase().endsWith(ext)));
@@ -337,7 +337,7 @@ const Home = () => {
                                 </div>
                                 <div className="button text-center">
                                     <Link
-                                        to="/notices"
+                                        to="/notice"
                                         className="view_note_btn cursor-pointer relative inline-flex items-center justify-center px-8 my-5 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-0 rounded-tr-lg rounded-bl-lg rounded-br-lg group"
                                     >
                                         <span className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>

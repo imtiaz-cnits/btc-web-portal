@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Link } from "react-router-dom";
 import { Helmet } from 'react-helmet';
 import api from '../../api/index.js';
-
 import {
     useGsapAnimation,
     gsapAnimations,
 } from '../assets/js/style.js';
+import NoticeHeroImage from '../assets/img/contact/contact-theame-image.png';
 
 // Modern Error Boundary Component
 class NoticeErrorBoundary extends React.Component {
@@ -85,7 +85,7 @@ const Notice = () => {
     const handleViewFile = (filePath, fileType, id, content) => {
         console.log('handleViewFile called with:', { filePath, fileType, id, content });
         if (filePath && typeof filePath === 'string') {
-            const fileUrl = `http://localhost:3001${filePath}`;
+            const fileUrl = `https://egpbtc.com${filePath}`;
             const isImage = ['.jpg', '.jpeg', '.png', '.gif'].some(ext => filePath.toLowerCase().endsWith(ext));
             const inferredType = fileType || (filePath.toLowerCase().endsWith('.pdf') ? 'pdf' : isImage ? 'image' : 'unknown');
             if (inferredType === 'pdf' || inferredType === 'image') {
@@ -216,7 +216,7 @@ const Notice = () => {
                                     className="contact_theame w-full rounded-[24px_25px_24px_0px] overflow-hidden"
                                 >
                                     <img
-                                        src="./src/assets/img/contact/contact-theame-image.png"
+                                        src={NoticeHeroImage}
                                         alt=""
                                         className="w-full h-full object-cover bg-center bg-cover"
                                     />

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import api from "../../api/index.js";
 import Logo from '../assets/icon/Logo.svg';
 import { useMarquee } from '../assets/js/style.js';
@@ -11,6 +11,7 @@ const Navbar = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const dropdownRef = useRef(null);
+    const location = useLocation(); // Get current location
 
     // Fetch notices from backend
     useEffect(() => {
@@ -141,7 +142,7 @@ const Navbar = () => {
                         <div className="flex items-center gap-2">
                             <a href="https://www.facebook.com/egpbtc"
                                className="hover:text-[var(--primary-color)] transition duration-400"
-                            style={{ marginTop: '4px', marginBottom: '-4px' }}>
+                               style={{ marginTop: '4px', marginBottom: '-4px' }}>
                                 <i className="fa-brands fa-facebook-f text-text-1 text-xl hover:text-[var(--primary-color)] transition duration-400"></i>
                             </a>
                             {/*<a href="#" className="hover:text-[var(--primary-color)] transition duration-400">*/}
@@ -184,7 +185,6 @@ const Navbar = () => {
                                 </a>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -199,57 +199,64 @@ const Navbar = () => {
                             </Link>
                             <div className="hidden lg:flex space-x-6 items-center">
                                 <Link to="/"
-                                      className="text-[var(--primary-color)] transition duration-300 font-medium">
+                                      className={`transition duration-400 font-medium ${
+                                          location.pathname === '/' ? 'text-[var(--primary-color)]' : 'text-[var(--text-1)] hover:text-[var(--primary-color)]'
+                                      }`}>
                                     HOME
                                 </Link>
-                                <Link to=""
-                                      className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
+                                <Link to="/services"
+                                      className={`transition duration-400 font-medium ${
+                                          location.pathname === '/services' ? 'text-[var(--primary-color)]' : 'text-[var(--text-1)] hover:text-[var(--primary-color)]'
+                                      }`}>
                                     SERVICES
                                 </Link>
-                                <Link to=""
-                                      className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
+                                <Link to="/projects"
+                                      className={`transition duration-400 font-medium ${
+                                          location.pathname === '/projects' ? 'text-[var(--primary-color)]' : 'text-[var(--text-1)] hover:text-[var(--primary-color)]'
+                                      }`}>
                                     PROJECTS
                                 </Link>
                                 <div className="relative dropdown group">
                                     <button
-                                        className="flex cursor-pointer items-center text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
-                                        PAGES
+                                        className={`flex cursor-pointer items-center transition duration-400 font-medium ${
+                                            ['/notice', '/winner'].some(path => location.pathname === path)
+                                                ? 'text-[var(--primary-color)]'
+                                                : 'text-[var(--text-1)] hover:text-[var(--primary-color)]'
+                                        }`}>
+                                        NOTICES
                                         <svg className="w-4 h-4 ml-1 rotate-icon" fill="none" stroke="currentColor"
                                              viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                   d="M19 9l-7 7-7-7"/>
                                         </svg>
                                     </button>
                                     <div
                                         className="dropdown-content absolute mt-2 w-56 border border-[var(--ac-2)] rounded-lg shadow-lg">
-                                        <Link to="/notice" className="block px-4 py-2 hover:bg-[var(--primary-color)]">
-                                            NOTICE
+                                        <Link to="/notice" className={`block px-4 py-2 ${
+                                            location.pathname === '/notice' ? 'bg-[var(--primary-color)] text-[var(--secondary-color)]' : 'hover:bg-[var(--primary-color)]'
+                                        }`}>
+                                            EGP TENDER NOTICE
                                         </Link>
-                                        <Link to="" className="block px-4 py-2 hover:bg-[var(--primary-color)]">
-                                            GALLERY
-                                        </Link>
-                                        <Link to="" className="block px-4 py-2 hover:bg-[var(--primary-color)]">
-                                            BLOG
-                                        </Link>
-                                        <Link to=""
-                                              className="block px-4 py-2 hover:bg-[var(--primary-color)]">
-                                            PRIVACY POLICY
-                                        </Link>
-                                        <Link to=""
-                                              className="block px-4 py-2 hover:bg-[var(--primary-color)]">
-                                            TERMS & CONDITIONS
+                                        <Link to="/winner" className={`block px-4 py-2 ${
+                                            location.pathname === '/winner' ? 'bg-[var(--primary-color)] text-[var(--secondary-color)]' : 'hover:bg-[var(--primary-color)]'
+                                        }`}>
+                                            WINNER LIST
                                         </Link>
                                     </div>
                                 </div>
                                 <Link to="/about"
-                                      className="text-[var(--text-1)] hover:text-[var(--primary-color)] transition duration-400 font-medium">
+                                      className={`transition duration-400 font-medium ${
+                                          location.pathname === '/about' ? 'text-[var(--primary-color)]' : 'text-[var(--text-1)] hover:text-[var(--primary-color)]'
+                                      }`}>
                                     ABOUT US
                                 </Link>
                             </div>
                             <div className="hidden lg:block">
                                 <Link
                                     to="/contact"
-                                    className="contact_btn cursor-pointer relative inline-flex items-center justify-center px-8 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-lg rounded-tr-lg rounded-bl-0 rounded-br-lg group"
+                                    className={`contact_btn cursor-pointer relative inline-flex items-center justify-center px-8 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-lg rounded-tr-lg rounded-bl-0 rounded-br-lg group ${
+                                        location.pathname === '/contact' ? 'ring-2 ring-[var(--primary-color)]' : ''
+                                    }`}
                                 >
                                     <span
                                         className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>
@@ -295,25 +302,37 @@ const Navbar = () => {
                 </div>
                 <div className="px-4 py-2 space-y-1" ref={dropdownRef}>
                     <Link to="/"
-                          className="block px-3 py-2 text-[var(--text-1)] bg-[var(--shade-1)] active:bg-[var(--shade-1)] rounded-lg">
+                          className={`block px-3 py-2 rounded-lg ${
+                              location.pathname === '/' ? 'text-[var(--primary-color)] bg-[var(--shade-1)]' : 'text-[var(--text-1)] bg-[var(--shade-1)] active:bg-[var(--shade-1)]'
+                          }`}>
                         HOME
                     </Link>
                     <Link to="/services"
-                          className="block px-3 py-2 text-[var(--text-1)] hover:bg-[var(--shade-1)] rounded-lg">
+                          className={`block px-3 py-2 rounded-lg ${
+                              location.pathname === '/services' ? 'text-[var(--primary-color)] hover:bg-[var(--shade-1)]' : 'text-[var(--text-1)] hover:bg-[var(--shade-1)]'
+                          }`}>
                         SERVICES
                     </Link>
                     <Link to="/tender"
-                          className="block px-3 py-2 text-[var(--text-1)] hover:bg-[var(--shade-1)] rounded-lg">
+                          className={`block px-3 py-2 rounded-lg ${
+                              location.pathname === '/tender' ? 'text-[var(--primary-color)] hover:bg-[var(--shade-1)]' : 'text-[var(--text-1)] hover:bg-[var(--shade-1)]'
+                          }`}>
                         TENDER
                     </Link>
                     <Link to="/projects"
-                          className="block px-3 py-2 text-[var(--text-1)] hover:bg-[var(--shade-1)] rounded-lg">
+                          className={`block px-3 py-2 rounded-lg ${
+                              location.pathname === '/projects' ? 'text-[var(--primary-color)] hover:bg-[var(--shade-1)]' : 'text-[var(--text-1)] hover:bg-[var(--shade-1)]'
+                          }`}>
                         PROJECTS
                     </Link>
                     <div>
                         <button
                             onClick={toggleMobileDropdown}
-                            className="mobile-dropdown-btn flex justify-between items-center w-full px-3 py-2 text-[var(--text-1)] hover:bg-[var(--shade-1)] rounded-lg"
+                            className={`mobile-dropdown-btn flex justify-between items-center w-full px-3 py-2 rounded-lg ${
+                                ['/notice', '/gallery', '/blog', '/privacy-policy', '/terms-conditions'].some(path => location.pathname === path)
+                                    ? 'text-[var(--primary-color)] hover:bg-[var(--shade-1)]'
+                                    : 'text-[var(--text-1)] hover:bg-[var(--shade-1)]'
+                            }`}
                         >
                             PAGES
                             <svg
@@ -328,29 +347,41 @@ const Navbar = () => {
                         <div
                             className={`mobile-dropdown ${isMobileDropdownOpen ? 'open' : ''} bg-[var(--text-1)] rounded-lg`}>
                             <Link to="/notice"
-                                  className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
+                                  className={`block px-3 py-2 text-[14px] ${
+                                      location.pathname === '/notice' ? 'text-[var(--primary-color)] bg-[var(--shade-1)]' : 'text-[var(--secondary-color)] hover:bg-[var(--primary-color)]'
+                                  }`}>
                                 NOTICE
                             </Link>
                             <Link to="/gallery"
-                                  className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
+                                  className={`block px-3 py-2 text-[14px] ${
+                                      location.pathname === '/gallery' ? 'text-[var(--primary-color)] bg-[var(--shade-1)]' : 'text-[var(--secondary-color)] hover:bg-[var(--primary-color)]'
+                                  }`}>
                                 GALLERY
                             </Link>
                             <Link to="/blog"
-                                  className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
+                                  className={`block px-3 py-2 text-[14px] ${
+                                      location.pathname === '/blog' ? 'text-[var(--primary-color)] bg-[var(--shade-1)]' : 'text-[var(--secondary-color)] hover:bg-[var(--primary-color)]'
+                                  }`}>
                                 BLOG
                             </Link>
                             <Link to="/privacy-policy"
-                                  className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
+                                  className={`block px-3 py-2 text-[14px] ${
+                                      location.pathname === '/privacy-policy' ? 'text-[var(--primary-color)] bg-[var(--shade-1)]' : 'text-[var(--secondary-color)] hover:bg-[var(--primary-color)]'
+                                  }`}>
                                 PRIVACY POLICY
                             </Link>
                             <Link to="/terms-conditions"
-                                  className="block px-3 py-2 text-[14px] text-[var(--secondary-color)] hover:bg-[var(--primary-color)]">
+                                  className={`block px-3 py-2 text-[14px] ${
+                                      location.pathname === '/terms-conditions' ? 'text-[var(--primary-color)] bg-[var(--shade-1)]' : 'text-[var(--secondary-color)] hover:bg-[var(--primary-color)]'
+                                  }`}>
                                 TERMS & CONDITIONS
                             </Link>
                         </div>
                     </div>
                     <Link to="/about"
-                          className="block px-3 py-2 text-[var(--text-1)] hover:bg-[var(--shade-1)] rounded-lg">
+                          className={`block px-3 py-2 rounded-lg ${
+                              location.pathname === '/about' ? 'text-[var(--primary-color)] hover:bg-[var(--shade-1)]' : 'text-[var(--text-1)] hover:bg-[var(--shade-1)]'
+                          }`}>
                         ABOUT US
                     </Link>
                 </div>
@@ -373,7 +404,9 @@ const Navbar = () => {
                     <div className="block lg:hidden">
                         <Link
                             to="/contact"
-                            className="contact_btn w-full cursor-pointer relative inline-flex items-center justify-center px-8 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-lg rounded-tr-lg rounded-bl-0 rounded-br-lg group"
+                            className={`contact_btn w-full cursor-pointer relative inline-flex items-center justify-center px-8 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-lg rounded-tr-lg rounded-bl-0 rounded-br-lg group ${
+                                location.pathname === '/contact' ? 'ring-2 ring-[var(--primary-color)]' : ''
+                            }`}
                         >
                             <span
                                 className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>

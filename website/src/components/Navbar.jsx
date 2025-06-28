@@ -329,12 +329,6 @@ const Navbar = () => {
                           }`}>
                         SERVICES
                     </Link>
-                    <Link to="/tender"
-                          className={`block px-3 py-2 rounded-lg ${
-                              location.pathname === '/tender' ? 'text-[var(--primary-color)] hover:bg-[var(--shade-1)]' : 'text-[var(--text-1)] hover:bg-[var(--shade-1)]'
-                          }`}>
-                        TENDER
-                    </Link>
                     <Link to="/projects"
                           className={`block px-3 py-2 rounded-lg ${
                               location.pathname === '/projects' ? 'text-[var(--primary-color)] hover:bg-[var(--shade-1)]' : 'text-[var(--text-1)] hover:bg-[var(--shade-1)]'
@@ -345,12 +339,12 @@ const Navbar = () => {
                         <button
                             onClick={toggleMobileDropdown}
                             className={`mobile-dropdown-btn flex justify-between items-center w-full px-3 py-2 rounded-lg ${
-                                ['/notice', '/gallery', '/blog', '/privacy-policy', '/terms-conditions'].some(path => location.pathname === path)
+                                ['/egp-notice', '/winner-list'].some(path => location.pathname === path)
                                     ? 'text-[var(--primary-color)] hover:bg-[var(--shade-1)]'
                                     : 'text-[var(--text-1)] hover:bg-[var(--shade-1)]'
                             }`}
                         >
-                            PAGES
+                            NOTICES
                             <svg
                                 className={`mobile-dropdown-icon w-4 h-4 ml-2 ${isMobileDropdownOpen ? 'open' : ''}`}
                                 fill="none"
@@ -362,35 +356,17 @@ const Navbar = () => {
                         </button>
                         <div
                             className={`mobile-dropdown ${isMobileDropdownOpen ? 'open' : ''} bg-[var(--text-1)] rounded-lg`}>
-                            <Link to="/notice"
+                            <Link to="/egp-notice"
                                   className={`block px-3 py-2 text-[14px] ${
                                       location.pathname === '/notice' ? 'text-[var(--primary-color)] bg-[var(--shade-1)]' : 'text-[var(--secondary-color)] hover:bg-[var(--primary-color)]'
                                   }`}>
-                                NOTICE
+                                EGP TENDER NOTICE
                             </Link>
-                            <Link to="/gallery"
+                            <Link to="/winner-list"
                                   className={`block px-3 py-2 text-[14px] ${
                                       location.pathname === '/gallery' ? 'text-[var(--primary-color)] bg-[var(--shade-1)]' : 'text-[var(--secondary-color)] hover:bg-[var(--primary-color)]'
                                   }`}>
-                                GALLERY
-                            </Link>
-                            <Link to="/blog"
-                                  className={`block px-3 py-2 text-[14px] ${
-                                      location.pathname === '/blog' ? 'text-[var(--primary-color)] bg-[var(--shade-1)]' : 'text-[var(--secondary-color)] hover:bg-[var(--primary-color)]'
-                                  }`}>
-                                BLOG
-                            </Link>
-                            <Link to="/privacy-policy"
-                                  className={`block px-3 py-2 text-[14px] ${
-                                      location.pathname === '/privacy-policy' ? 'text-[var(--primary-color)] bg-[var(--shade-1)]' : 'text-[var(--secondary-color)] hover:bg-[var(--primary-color)]'
-                                  }`}>
-                                PRIVACY POLICY
-                            </Link>
-                            <Link to="/terms-conditions"
-                                  className={`block px-3 py-2 text-[14px] ${
-                                      location.pathname === '/terms-conditions' ? 'text-[var(--primary-color)] bg-[var(--shade-1)]' : 'text-[var(--secondary-color)] hover:bg-[var(--primary-color)]'
-                                  }`}>
-                                TERMS & CONDITIONS
+                                WINNER LIST
                             </Link>
                         </div>
                     </div>

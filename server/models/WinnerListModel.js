@@ -6,8 +6,8 @@ const winnerListSchema = new mongoose.Schema({
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true },
     filePath: { type: String, default: null },
     status: { type: String, enum: ['active', 'inactive'], default: 'active' },
-    issueDate: { type: Date, default: null },
     publishDate: { type: Date, default: null },
+    lastDate: { type: Date, default: null },
 }, {
     timestamps: true,
 });

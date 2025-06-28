@@ -15,7 +15,7 @@ const Contact = () => {
         <>
             {/* Helmet for dynamic title and meta tags */}
             <Helmet>
-                <title>About Us | Building Technology & Consultant</title>
+                <title>Contact Us | Building Technology & Consultant</title>
                 <meta name="description" content="Welcome to Building Technology & Consultant. View our latest notices and explore our services." />
                 <meta name="keywords" content="building technology, consultant, notices, services" />
             </Helmet>
@@ -100,8 +100,8 @@ const Contact = () => {
                                         </svg>
                                     </div>
                                     <div className="number flex flex-col">
-                                        <a href="tel:+8801711805086" className="text-sm leading-5 text-left text-[var(--text-2)]"> <strong>Engr. Md. Shah Alom (Abir)</strong> +88 01711 805 086, +88 01911 282 307</a>
-                                        <a href="tel:+8801711010929" className="text-sm leading-5 text-left text-[var(--text-2)]"> <strong>Md. Imran Hossain</strong> +88 01711 010 929, +88 01938 707 176</a>
+                                        <a href="tel:+8801711805086" className="text-sm leading-5 text-left text-[var(--text-2)]"> <strong>Engr. Md. Shah Alom (Abir)</strong> +88 01711 805 086</a>
+                                        <a href="tel:+8801711010929" className="text-sm leading-5 text-left text-[var(--text-2)]"> <strong>Md. Imran Hossain</strong> +88 01711 010 929</a>
                                     </div>
                                 </div>
 
@@ -201,10 +201,10 @@ const Contact = () => {
 
 
             {/* Map Start */}
-            <div className="map mx-5 mt-[80px] rounded-xl overflow-hidden">
+            <div className="map mx-5 mt-[80px] rounded-xl overflow-hidden h-[650px] lg:h-[800px]">
                 <iframe
                     src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d276.16306301292224!2d89.23473346889256!3d24.0050804316098!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39fe9b5f6483c075%3A0x1393742004b5e76f!2sBUILDING%20TECNOLOGY%20%26%20CONSULTANT!5e0!3m2!1sen!2sbd!4v1750881488098!5m2!1sen!2sbd"
-                    width="1920" height="450" style={{ border: '0' }} allowFullScreen="" loading="lazy"
+                    width="1920" style={{ border: '0', height: '350px' }} allowFullScreen="" loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"></iframe>
 
                 <style>{`

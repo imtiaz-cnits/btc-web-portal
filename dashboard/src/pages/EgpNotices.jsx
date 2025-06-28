@@ -7,8 +7,8 @@ import { format, parseISO, isBefore } from 'date-fns';
 // Define EditModal as a separate component
 const EditModal = ({ isOpen, onClose, onSubmit, formData, setFormData, handleChange, error, dateError }) => {
     const modalRef = useRef(null);
-    const issueDateRef = useRef(null);
     const publishDateRef = useRef(null);
+    const lastDateRef = useRef(null);
     const [filePreview, setFilePreview] = useState(null);
     const [fileType, setFileType] = useState(null);
 
@@ -114,26 +114,8 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, setFormData, handleCha
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-3">
                             <div>
-                                <label htmlFor="issueDate" className="block text-sm font-medium text-[var(--text-1)] mb-1">
-                                    Issue Date
-                                    <span className="ml-1 text-gray-500" title="Format: DD/MM/YYYY">(?)</span>
-                                </label>
-                                <input
-                                    type="date"
-                                    id="issueDate"
-                                    name="issueDate"
-                                    ref={issueDateRef}
-                                    value={formData.issueDate}
-                                    onChange={handleChange}
-                                    onClick={() => openCalendar(issueDateRef)}
-                                    className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
-                                    placeholder="Select issue date"
-                                />
-                                {dateError?.issueDate && <div className="text-red-500 text-sm mt-1">{dateError.issueDate}</div>}
-                            </div>
-                            <div>
                                 <label htmlFor="publishDate" className="block text-sm font-medium text-[var(--text-1)] mb-1">
-                                    Publish Date
+                                    Issue Date
                                     <span className="ml-1 text-gray-500" title="Format: DD/MM/YYYY">(?)</span>
                                 </label>
                                 <input
@@ -145,9 +127,27 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, setFormData, handleCha
                                     onChange={handleChange}
                                     onClick={() => openCalendar(publishDateRef)}
                                     className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
-                                    placeholder="Select publish date"
+                                    placeholder="Select issue date"
                                 />
                                 {dateError?.publishDate && <div className="text-red-500 text-sm mt-1">{dateError.publishDate}</div>}
+                            </div>
+                            <div>
+                                <label htmlFor="lastDate" className="block text-sm font-medium text-[var(--text-1)] mb-1">
+                                    Publish Date
+                                    <span className="ml-1 text-gray-500" title="Format: DD/MM/YYYY">(?)</span>
+                                </label>
+                                <input
+                                    type="date"
+                                    id="lastDate"
+                                    name="lastDate"
+                                    ref={lastDateRef}
+                                    value={formData.lastDate}
+                                    onChange={handleChange}
+                                    onClick={() => openCalendar(lastDateRef)}
+                                    className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
+                                    placeholder="Select publish date"
+                                />
+                                {dateError?.lastDate && <div className="text-red-500 text-sm mt-1">{dateError.lastDate}</div>}
                             </div>
                         </div>
                         <div className="mb-3">
@@ -255,8 +255,8 @@ const EgpNotices = () => {
     const [formData, setFormData] = useState({
         id: null,
         title: '',
-        issueDate: '',
         publishDate: '',
+        lastDate: '',
         status: 'active',
         content: '',
         file: null,
@@ -330,7 +330,7 @@ const EgpNotices = () => {
             ...prev,
             [name]: type === 'file' ? files[0] : value,
         }));
-        if (name === 'issueDate' || name === 'publishDate') {
+        if (name === 'publishDate' || name === 'lastDate') {
             setDateError((prev) => ({ ...prev, [name]: null }));
         }
     }, []);
@@ -340,8 +340,8 @@ const EgpNotices = () => {
         setFormData({
             id: null,
             title: '',
-            issueDate: '',
             publishDate: '',
+            lastDate: '',
             status: 'active',
             content: '',
             file: null,
@@ -356,8 +356,8 @@ const EgpNotices = () => {
         setFormData({
             id: notice._id || notice.id,
             title: notice.title || '',
-            issueDate: notice.issueDate ? new Date(notice.issueDate).toISOString().split('T')[0] : '',
             publishDate: notice.publishDate ? new Date(notice.publishDate).toISOString().split('T')[0] : '',
+            lastDate: notice.lastDate ? new Date(notice.lastDate).toISOString().split('T')[0] : '',
             status: notice.status || 'active',
             content: notice.content || '',
             file: null,
@@ -376,13 +376,13 @@ const EgpNotices = () => {
     };
 
     // Validate issue and publish dates
-    const validateDates = (issueDate, publishDate) => {
+    const validateDates = (publishDate, lastDate) => {
         const errors = {};
-        if (issueDate && publishDate) {
-            const issue = parseISO(issueDate);
-            const publish = parseISO(publishDate);
+        if (publishDate && lastDate) {
+            const issue = parseISO(publishDate);
+            const publish = parseISO(lastDate);
             if (isBefore(publish, issue)) {
-                errors.publishDate = 'Publish date cannot be before issue date';
+                errors.lastDate = 'Publish date cannot be before issue date';
             }
         }
         return errors;
@@ -391,7 +391,7 @@ const EgpNotices = () => {
     // Handle form submission for creating or editing a notice
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const dateValidationErrors = validateDates(formData.issueDate, formData.publishDate);
+        const dateValidationErrors = validateDates(formData.publishDate, formData.lastDate);
         if (Object.keys(dateValidationErrors).length > 0) {
             setDateError(dateValidationErrors);
             return;
@@ -401,8 +401,8 @@ const EgpNotices = () => {
         formDataToSend.append('title', formData.title);
         formDataToSend.append('content', formData.content);
         formDataToSend.append('status', formData.status);
-        if (formData.issueDate) formDataToSend.append('issueDate', formData.issueDate);
         if (formData.publishDate) formDataToSend.append('publishDate', formData.publishDate);
+        if (formData.lastDate) formDataToSend.append('lastDate', formData.lastDate);
         if (formData.file) formDataToSend.append('file', formData.file);
 
         try {
@@ -491,8 +491,8 @@ const EgpNotices = () => {
         const searchLower = search.toLowerCase();
         return (
             notice.title.toLowerCase().includes(searchLower) ||
-            (notice.issueDate && format(parseISO(notice.issueDate), 'dd/MM/yyyy').toLowerCase().includes(searchLower)) ||
             (notice.publishDate && format(parseISO(notice.publishDate), 'dd/MM/yyyy').toLowerCase().includes(searchLower)) ||
+            (notice.lastDate && format(parseISO(notice.lastDate), 'dd/MM/yyyy').toLowerCase().includes(searchLower)) ||
             notice.status.toLowerCase().includes(searchLower) ||
             (notice.content && notice.content.toLowerCase().includes(searchLower))
         );
@@ -627,8 +627,8 @@ const EgpNotices = () => {
                             <th className="sl-column">Sl</th>
                             <th className="action-column hide_content">Action</th>
                             <th className="title-column">Title</th>
-                            <th className="date-column">Issue Date</th>
                             <th className="date-column">Publish Date</th>
+                            <th className="date-column">Last Date</th>
                             <th className="status-column">Status</th>
                             <th className="date-column">Created Date</th>
                             <th className="file-column">File</th>
@@ -672,8 +672,8 @@ const EgpNotices = () => {
                                         </div>
                                     </td>
                                     <td className="title-column font-medium text-[var(--text-1)] dark:text-[var(--text-4)]">{notice.title}</td>
-                                    <td className="date-column">{formatDate(notice.issueDate)}</td>
-                                    <td className="date-column">{formatDate(notice.publishDate)}</td>
+                                    <td className="date-column">{formatDate(notice.lastDate)}</td>
+                                    <td className="date-column">{formatDate(notice.lastDate)}</td>
                                     <td className="status-column">
                                         <button className={`${(notice.status || 'active').toLowerCase()}-status flex items-center}`}>
                                             <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${notice.status === 'active' ? 'text-green-500' : 'text-red-500'} mr-1`} viewBox="0 0 20 20" fill="currentColor">

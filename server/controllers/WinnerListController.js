@@ -3,7 +3,7 @@ import WinnerListModel from "../models/WinnerListModel.js";
 // Create a new winner list notice
 export const createWinnerList = async (req, res) => {
     try {
-        const { title, content, status, issueDate, publishDate } = req.body;
+        const { title, content, status, publishDate, lastDate } = req.body;
         const file = req.file;
 
         if (!req.user || !req.user._id) {
@@ -20,8 +20,8 @@ export const createWinnerList = async (req, res) => {
             content,
             status: status || 'active',
             createdBy: req.user._id,
-            issueDate: issueDate ? new Date(issueDate) : null,
             publishDate: publishDate ? new Date(publishDate) : null,
+            lastDate: lastDate ? new Date(lastDate) : null,
         };
 
         if (file) {
@@ -75,7 +75,7 @@ export const getWinnerListById = async (req, res) => {
 export const updateWinnerList = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, content, status, issueDate, publishDate } = req.body;
+        const { title, content, status, publishDate, lastDate } = req.body;
         const file = req.file;
 
         if (!req.user || !req.user._id) {
@@ -86,8 +86,8 @@ export const updateWinnerList = async (req, res) => {
             title,
             content,
             status,
-            issueDate: issueDate ? new Date(issueDate) : undefined,
             publishDate: publishDate ? new Date(publishDate) : undefined,
+            lastDate: lastDate ? new Date(lastDate) : undefined,
         };
 
         if (file) {

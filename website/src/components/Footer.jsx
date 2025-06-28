@@ -5,6 +5,7 @@ import FooterLogo from '../assets/icon/Logo.svg';
 const Footer = () => {
     const backToTopRef = useRef(null);
 
+    // Show the back to top button when scrolled down
     useEffect(() => {
         const backToTopButton = backToTopRef.current;
 
@@ -150,8 +151,8 @@ const Footer = () => {
                                         </svg>
                                     </div>
                                     <div className="number flex flex-col">
-                                        <a href="tel:01711010929" className="text-[var(--text-1)]">01711010929-(Imran)</a>
                                         <a href="tel:01711805086" className="text-[var(--text-1)]">01711805086-(Shah Alom)</a>
+                                        <a href="tel:01711010929" className="text-[var(--text-1)]">01711010929-(Imran)</a>
                                     </div>
                                 </div>
                                 <div className="contact_item flex items-center gap-2.5">
@@ -166,8 +167,8 @@ const Footer = () => {
                                     </div>
                                     <div className="flex flex-col">
                                         <a href="mailto:info@egpbtc.com" className="text-[var(--text-1)]">info@egpbtc.com</a>
-                                        <a href="mailto:imran@egpbtc.com" className="text-[var(--text-1)]">imran@egpbtc.com</a>
                                         <a href="mailto:salom@egpbtc.com" className="text-[var(--text-1)]">salom@egpbtc.com</a>
+                                        <a href="mailto:imran@egpbtc.com" className="text-[var(--text-1)]">imran@egpbtc.com</a>
                                     </div>
                                 </div>
                             </div>
@@ -178,50 +179,15 @@ const Footer = () => {
                 <div className="custom-container">
                     <div className="flex flex-col-reverse md:flex-row justify-between border-t border-t-[var(--ac-2)] py-6 gap-2.5">
                         <span className="m-0 leading-5 text-left text-[var(--text-1)]">© 2025 BTC. All Rights Reserved</span>
-                        <div className="flex flex-wrap justify-start md:justify-end gap-x-[15px]">
+                        <span className="flex flex-wrap justify-start md:justify-end gap-x-1.5">
+                            Designed by {" -  "}
                             <Link
-                                to="/services"
-                                className="text-[var(--text-1)] no-underline transition duration-300 uppercase text-sm font-medium hover:text-[var(--primary-color)]"
+                                to="https://www.codenextit.com/"
+                                className="text-bold text-[var(--text-1)]"
                             >
-                                Services
+                                 CodeNext IT
                             </Link>
-                            <Link
-                                to="/tender"
-                                className="text-[var(--text-1)] no-underline transition duration-300 uppercase text-sm font-medium hover:text-[var(--primary-color)]"
-                            >
-                                Tender
-                            </Link>
-                            <Link
-                                to="/projects"
-                                className="text-[var(--text-1)] no-underline transition duration-300 uppercase text-sm font-medium hover:text-[var(--primary-color)]"
-                            >
-                                Projects
-                            </Link>
-                            <Link
-                                to="/about"
-                                className="text-[var(--text-1)] no-underline transition duration-300 uppercase font-[var(--primary-font)] text-sm font-medium hover:text-[var(--primary-color)]"
-                            >
-                                About Us
-                            </Link>
-                            <Link
-                                to="/contact"
-                                className="text-[var(--text-1)] no-underline transition duration-300 uppercase font-[var(--primary-font)] text-sm font-medium hover:text-[var(--primary-color)]"
-                            >
-                                Contact Us
-                            </Link>
-                            <Link
-                                to="/privacy-policy"
-                                className="text-[var(--text-1)] no-underline transition duration-300 uppercase font-[var(--primary-font)] text-sm font-medium hover:text-[var(--primary-color)]"
-                            >
-                                Privacy Policy
-                            </Link>
-                            <Link
-                                to="/terms-conditions"
-                                className="text-[var(--text-1)] no-underline transition duration-300 uppercase font-[var(--primary-font)] text-sm font-medium hover:text-[var(--primary-color)]"
-                            >
-                                Terms & Conditions
-                            </Link>
-                        </div>
+                        </span>
                     </div>
                 </div>
             </footer>

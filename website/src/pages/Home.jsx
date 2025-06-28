@@ -4,11 +4,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import api from '../../api/index.js';
 import { Helmet } from 'react-helmet';
-import {
-    useGsapAnimation,
-    gsapAnimations,
-    useClientScroller,
-} from '../assets/js/style.js';
+import { useGsapAnimation, gsapAnimations, useClientScroller } from '../assets/js/style.js';
 import HeroImage from '../assets/img/home/hero-img1.png';
 import AboutImage from '../assets/img/home/about-image.png';
 import ProjectImage1 from '../assets/img/home/project-img1.png';
@@ -136,7 +132,7 @@ const Home = () => {
                             }).replace(/,/, '')
                             : 'N/A',
                         title: notice.title || 'Untitled Notice',
-                        link: `/view-notice/${notice._id}`,
+                        link: `/view-egp-notice/${notice._id}`,
                         filePath: notice.filePath,
                         content: notice.content,
                         fileType: notice.fileType || (notice.filePath && typeof notice.filePath === 'string'
@@ -168,14 +164,14 @@ const Home = () => {
                     }
                     const formattedWinners = winners.map(winner => ({
                         id: winner._id,
-                        date: winner.issueDate
-                            ? new Date(winner.issueDate).toLocaleDateString('en-US', {
+                        date: winner.publishDate
+                            ? new Date(winner.publishDate).toLocaleDateString('en-US', {
                                 day: '2-digit',
                                 month: 'short',
                             }).replace(/,/, '')
                             : 'N/A',
                         title: winner.title || 'Untitled Winner',
-                        link: `/view-winner/${winner._id}`,
+                        link: `/view-winner-notice/${winner._id}`,
                         filePath: winner.filePath,
                         content: winner.content,
                         fileType: winner.fileType || (winner.filePath && typeof winner.filePath === 'string'
@@ -219,7 +215,7 @@ const Home = () => {
             }
         }
         if (content && typeof content === 'string' && content.trim() && id) {
-            const route = contentType === 'winner' ? `/view-winner/${id}` : `/view-notice/${id}`;
+            const route = contentType === 'winner' ? `/view-winner-notice/${id}` : `/view-egp-notice/${id}`;
             window.open(route, '_blank');
         } else {
             alert('No file or valid content available to view.');
@@ -337,7 +333,7 @@ const Home = () => {
                         <div className="w-full lg:w-1/2 overflow-hidden mt-[40px] lg:mt-[0px]">
                             {/* EGP Tender Notices */}
                             <div
-                                className="tender-notice-board w-full bg-[var(--secondary-color)] border border-[var(--ac-1)] rounded-3xl overflow-hidden p-0"
+                                className="tender-notice-board w-full bg-[var(--secondary-color)] border border-[var(--ac-1)] rounded-3xl overflow-hidden p-0 h-[350px] flex flex-col"
                                 ref={tenderNoticeBoardRef}
                                 onMouseEnter={tenderMouseEnter}
                                 onMouseLeave={tenderMouseLeave}
@@ -345,7 +341,7 @@ const Home = () => {
                                 <h3 className="header bg-[var(--primary-color)] text-[var(--secondary-color)] font-[var(--primary-font)] text-center py-2.5 px-4 text-[22px] font-medium mb-0">
                                     EGP TENDER NOTICES
                                 </h3>
-                                <div className="notice_item h-[250px] overflow-hidden">
+                                <div className="notice_item h-[calc(350px-80px)] overflow-y-auto">
                                     {loading ? (
                                         <div className="flex justify-center items-center h-full">
                                             <p className="text-[var(--text-2)] text-base">Loading notices...</p>
@@ -394,9 +390,9 @@ const Home = () => {
                                         </ul>
                                     )}
                                 </div>
-                                <div className="button text-center py-3">
+                                <div className="button text-center py-3 bg-[var(--secondary-color)]">
                                     <Link
-                                        to="/notice"
+                                        to="/egp-notice"
                                         className="view_note_btn cursor-pointer relative inline-flex items-center justify-center px-8 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-0 rounded-tr-lg rounded-bl-lg rounded-br-lg group"
                                     >
                                         <span className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>
@@ -407,7 +403,7 @@ const Home = () => {
 
                             {/* Winner List */}
                             <div
-                                className="winner-notice-board w-full bg-[var(--secondary-color)] border border-[var(--ac-1)] rounded-3xl overflow-hidden p-0 mt-3"
+                                className="winner-notice-board w-full bg-[var(--secondary-color)] border border-[var(--ac-1)] rounded-3xl overflow-hidden p-0 mt-3 h-[350px] flex flex-col"
                                 ref={winnerNoticeBoardRef}
                                 onMouseEnter={winnerMouseEnter}
                                 onMouseLeave={winnerMouseLeave}
@@ -415,7 +411,7 @@ const Home = () => {
                                 <h3 className="header bg-[var(--primary-color)] text-[var(--secondary-color)] font-[var(--primary-font)] text-center py-2.5 px-4 text-[22px] font-medium mb-0">
                                     WINNER LIST
                                 </h3>
-                                <div className="notice_item h-[250px] overflow-hidden">
+                                <div className="notice_item h-[calc(350px-80px)] overflow-y-auto">
                                     {loading ? (
                                         <div className="flex justify-center items-center h-full">
                                             <p className="text-[var(--text-2)] text-base">Loading winners...</p>
@@ -464,9 +460,9 @@ const Home = () => {
                                         </ul>
                                     )}
                                 </div>
-                                <div className="button text-center py-3">
+                                <div className="button text-center py-3 bg-[var(--secondary-color)]">
                                     <Link
-                                        to="/winner"
+                                        to="/winner-list"
                                         className="view_note_btn cursor-pointer relative inline-flex items-center justify-center px-8 py-2.5 overflow-hidden tracking-tighter text-[var(--secondary-color)] bg-[var(--primary-color)] rounded-tl-0 rounded-tr-lg rounded-bl-lg rounded-br-lg group"
                                     >
                                         <span className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-[var(--text-1)] group-hover:h-full"></span>
@@ -480,6 +476,21 @@ const Home = () => {
             </div>
 
             <style>{`
+                .tender-notice-board, .winner-notice-board {
+                    display: flex;
+                    flex-direction: column;
+                    height: 350px;
+                }
+                .tender-notice-board .notice_item, .winner-notice-board .notice_item {
+                    flex: 1;
+                    overflow-y: hidden;
+                    overflow-x: hidden;
+                }
+                .tender-notice-board .button, .winner-notice-board .button {
+                    flex-shrink: 0;
+                    background-color: var(--secondary-color);
+                    padding: 12px 0;
+                }
                 .tender-notice-board .notice .date,
                 .winner-notice-board .notice .date {
                     position: relative;
@@ -497,13 +508,14 @@ const Home = () => {
                     margin-right: 20px;
                     margin-top: 10px;
                     z-index: 1;
+                    animation: dash 5s linear infinite;
                 }
                 .tender-notice-board .notice .date::before,
                 .winner-notice-board .notice .date::before {
                     content: "";
                     position: absolute;
                     top: -10px;
-                    left: 12px;
+                    left: 10px;
                     width: 50px;
                     height: 50px;
                     border-radius: 12px 12px 12px 0px;

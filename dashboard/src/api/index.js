@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:3001/api', // https://egpbtc.com/api
+    baseURL: 'https://egpbtc.com/api', // http://localhost:3001/api
     withCredentials: true, // Include cookies in requests
 });
 

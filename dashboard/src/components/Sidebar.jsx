@@ -163,15 +163,10 @@ const Sidebar = ({ width, toggleSidebar }) => {
                         ) : (
                             <Link to="/admin/egp-notices" className="nav-link">
                                 <span className="w-[24px]">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                         xmlns="http://www.w3.org/2000/svg">
-                                        <g clipPath="url(#clip0_402_2890)">
-                                            <path
-                                                d="M4 13H10C10.55 13 11 12.55 11 12V4C11 3.45 10.55 3 10 3H4C3.45 3 3 3.45 3 4V12C3 12.55 3.45 13 4 13ZM4 21H10C10.55 21 11 20.55 11 20V16C11 15.45 10.55 15 10 15H4C3.45 15 3 15.45 3 16V20C3 20.55 3.45 21 4 21ZM14 21H20C20.55 21 21 20.55 21 20V12C21 11.45 20.55 11 20 11H14C13.45 11 13 11.45 13 12V20C13 20.55 13.45 21 14 21ZM13 4V8C13 8.55 13.45 9 14 9H20C20.55 9 21 8.55 21 8V4C21 3.45 20.55 3 20 3H14C13.45 3 13 3.45 13 4Z"
-                                                fill="#A3AED0"/>
-                                        </g>
-                                        <defs><clipPath id="clip0_402_2890"><rect width="24" height="24" fill="white"/></clipPath></defs>
-                                    </svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M21.4001 17.02L21.2601 17.5C20.8701 18.82 19.8601 19.84 18.6301 20.15L18.4001 20.21C16.3001 20.73 14.1401 21 11.9801 21C9.8201 21 7.6601 20.73 5.5601 20.21L5.4001 20.17C4.1101 19.84 3.0801 18.77 2.7301 17.36C1.8201 13.78 1.7701 10.04 2.5501 6.49L2.6601 6.03C3.0501 4.25 4.4901 3 6.1701 3H7.9601C9.2001 3 10.3301 3.68 11.0001 4.81L11.1901 5.14C11.3801 5.46 11.8001 6 12.4401 6H15.5401C15.2001 6.59 15.0001 7.27 15.0001 8C15.0001 10.21 16.7901 12 19.0001 12C20.1101 12 21.1201 11.54 21.8501 10.81C22.1501 12.88 22.0001 15 21.4001 17.02Z" fill="#A3AED0"/>
+                                        <path d="M19 11C20.6569 11 22 9.65685 22 8C22 6.34315 20.6569 5 19 5C17.3431 5 16 6.34315 16 8C16 9.65685 17.3431 11 19 11Z" fill="#A3AED0"/>
+                                      </svg>
                                 </span>
                                 <span className="nav-label dark:text-[var(--text-4)]">EGP Notices</span>
                             </Link>
@@ -184,101 +179,15 @@ const Sidebar = ({ width, toggleSidebar }) => {
                         ) : (
                             <Link to="/admin/winner-list" className="nav-link">
                                 <span className="w-[24px]">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                         xmlns="http://www.w3.org/2000/svg">
-                                        <g clipPath="url(#clip0_402_2890)">
-                                            <path
-                                                d="M4 13H10C10.55 13 11 12.55 11 12V4C11 3.45 10.55 3 10 3H4C3.45 3 3 3.45 3 4V12C3 12.55 3.45 13 4 13ZM4 21H10C10.55 21 11 20.55 11 20V16C11 15.45 10.55 15 10 15H4C3.45 15 3 15.45 3 16V20C3 20.55 3.45 21 4 21ZM14 21H20C20.55 21 21 20.55 21 20V12C21 11.45 20.55 11 20 11H14C13.45 11 13 11.45 13 12V20C13 20.55 13.45 21 14 21ZM13 4V8C13 8.55 13.45 9 14 9H20C20.55 9 21 8.55 21 8V4C21 3.45 20.55 3 20 3H14C13.45 3 13 3.45 13 4Z"
-                                                fill="#A3AED0"/>
-                                        </g>
-                                        <defs><clipPath id="clip0_402_2890"><rect width="24" height="24" fill="white"/></clipPath></defs>
-                                    </svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M7.39782 14.6613H2.29976C2.13421 14.6613 2 14.8031 2 14.9778V21.3085C2 21.4832 2.13421 21.625 2.29976 21.625H7.39751C7.56337 21.625 7.69758 21.4832 7.69758 21.3085V14.9778C7.69758 14.8031 7.56337 14.6613 7.39782 14.6613ZM14.9778 11.8125H8.64718C8.47245 11.8125 8.33065 11.9543 8.33065 12.129V21.3085C8.33065 21.4832 8.47245 21.625 8.64718 21.625H14.9778C15.1525 21.625 15.2944 21.4832 15.2944 21.3085V12.129C15.2944 11.9543 15.1525 11.8125 14.9778 11.8125ZM21.3252 16.5605H16.2272C16.0616 16.5605 15.9274 16.7023 15.9274 16.877V21.3085C15.9274 21.4832 16.0616 21.625 16.2272 21.625H21.3249C21.4908 21.625 21.625 21.4832 21.625 21.3085V16.877C21.625 16.7023 21.4908 16.5605 21.3252 16.5605ZM15.9274 2.9496C15.9274 2.7755 15.785 2.63306 15.6109 2.63306H14.3448V2.31653C14.3448 2.14244 14.2023 2 14.0282 2H9.59677C9.42268 2 9.28024 2.14244 9.28024 2.31653V2.63306H8.01411C7.84002 2.63306 7.69758 2.7755 7.69758 2.9496V4.21573C7.69758 5.15583 8.38129 5.93766 9.28024 6.08643V6.11492C9.28024 6.99804 9.79935 7.76089 10.5464 8.1154V9.59677H9.91331C9.56512 9.59677 9.28024 9.88165 9.28024 10.2298V10.8629C9.28024 11.037 9.42268 11.1794 9.59677 11.1794H14.0282C14.2023 11.1794 14.3448 11.037 14.3448 10.8629V10.2298C14.3448 9.88165 14.0599 9.59677 13.7117 9.59677H13.0786V8.1154C13.8256 7.76089 14.3448 6.99804 14.3448 6.11492V6.08643C15.2437 5.93766 15.9274 5.15583 15.9274 4.21573V2.9496ZM9.28024 5.44071C8.73264 5.30143 8.33065 4.80448 8.33065 4.21573V3.26613H9.28024V5.44071ZM15.2944 4.21573C15.2944 4.80448 14.8924 5.30143 14.3448 5.44071V3.26613H15.2944V4.21573Z" fill="#A3AED0"/>
+                                      </svg>
                                 </span>
                                 <span className="nav-label dark:text-[var(--text-4)]">Winner List</span>
                             </Link>
                         )}
                     </li>
 
-                    {/*<li className="nav-item">*/}
-                    {/*    {isLoading ? (*/}
-                    {/*        <ShimmerText line={1} gap={10} />*/}
-                    {/*    ) : (*/}
-                    {/*        <Link to="/profile" className="nav-link">*/}
-                    {/*            <span className="w-[24px]">*/}
-                    {/*                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">*/}
-                    {/*                    <g clipPath="url(#clip0_402_2884)">*/}
-                    {/*                        <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V19C4 19.55 4.45 20 5 20H19C19.55 20 20 19.55 20 19V18C20 15.34 14.67 14 12 14Z" fill="#A3AED0" />*/}
-                    {/*                    </g>*/}
-                    {/*                    <defs><clipPath id="clip0_402_2884"><rect width="24" height="24" fill="white" /></clipPath></defs>*/}
-                    {/*                </svg>*/}
-                    {/*            </span>*/}
-                    {/*            <span className="nav-label dark:text-[var(--text-4)]">Profile</span>*/}
-                    {/*        </Link>*/}
-                    {/*    )}*/}
-                    {/*</li>*/}
-
-                    <li className="nav-item">
-                        {isLoading ? (
-                            <ShimmerText line={1} gap={10}/>
-                        ) : (
-                            <Link to="/auth" className="nav-link">
-                                <span className="w-[24px]">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                         xmlns="http://www.w3.org/2000/svg">
-                                        <g clipPath="url(#clip0_402_2876)">
-                                            <path
-                                                d="M18 8H17V6C17 3.24 14.76 1 12 1C9.24 1 7 3.24 7 6V8H6C4.9 8 4 8.9 4 10V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V10C20 8.9 19.1 8 18 8ZM12 17C10.9 17 10 16.1 10 15C10 13.9 10.9 13 12 13C13.1 13 14 13.9 14 15C14 16.1 13.1 17 12 17ZM9 8V6C9 4.34 10.34 3 12 3C13.66 3 15 4.34 15 6V8H9Z"
-                                                fill="#A3AED0"/>
-                                        </g>
-                                        <defs><clipPath id="clip0_402_2876"><rect width="24" height="24" fill="white"/></clipPath></defs>
-                                    </svg>
-                                </span>
-                                <span className="nav-label dark:text-[var(--text-4)]">Sign In</span>
-                            </Link>
-                        )}
-                    </li>
-
-                    <li className="nav-item">
-                        {isLoading ? (
-                            <ShimmerText line={1} gap={10}/>
-                        ) : (
-                            <Link to="/verify-email" className="nav-link">
-                                <span className="w-[24px]">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                         xmlns="http://www.w3.org/2000/svg">
-                                        <g clipPath="url(#clip0_402_2876)">
-                                            <path
-                                                d="M18 8H17V6C17 3.24 14.76 1 12 1C9.24 1 7 3.24 7 6V8H6C4.9 8 4 8.9 4 10V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V10C20 8.9 19.1 8 18 8ZM12 17C10.9 17 10 16.1 10 15C10 13.9 10.9 13 12 13C13.1 13 14 13.9 14 15C14 16.1 13.1 17 12 17ZM9 8V6C9 4.34 10.34 3 12 3C13.66 3 15 4.34 15 6V8H9Z"
-                                                fill="#A3AED0"/>
-                                        </g>
-                                        <defs><clipPath id="clip0_402_2876"><rect width="24" height="24" fill="white"/></clipPath></defs>
-                                    </svg>
-                                </span>
-                                <span className="nav-label dark:text-[var(--text-4)]">Verify Email</span>
-                            </Link>
-                        )}
-                    </li>
-
-                    <li className="nav-item">
-                        {isLoading ? (
-                            <ShimmerText line={1} gap={10}/>
-                        ) : (
-                            <Link to="/reset-password" className="nav-link">
-                                <span className="w-[24px]">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                         xmlns="http://www.w3.org/2000/svg">
-                                        <g clipPath="url(#clip0_402_2876)">
-                                            <path
-                                                d="M18 8H17V6C17 3.24 14.76 1 12 1C9.24 1 7 3.24 7 6V8H6C4.9 8 4 8.9 4 10V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V10C20 8.9 19.1 8 18 8ZM12 17C10.9 17 10 16.1 10 15C10 13.9 10.9 13 12 13C13.1 13 14 13.9 14 15C14 16.1 13.1 17 12 17ZM9 8V6C9 4.34 10.34 3 12 3C13.66 3 15 4.34 15 6V8H9Z"
-                                                fill="#A3AED0"/>
-                                        </g>
-                                        <defs><clipPath id="clip0_402_2876"><rect width="24" height="24" fill="white"/></clipPath></defs>
-                                    </svg>
-                                </span>
-                                <span className="nav-label dark:text-[var(--text-4)]">Reset Password</span>
-                            </Link>
-                        )}
-                    </li>
                 </ul>
 
                 <ul className="nav-list secondary-nav dark:!bg-[var(--dark-bg2)]">

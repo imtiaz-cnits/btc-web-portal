@@ -2,6 +2,7 @@ import React from "react";
 import useDarkMode from "../hooks/useDarkMode.jsx";
 import { useSidebar } from "../contexts/SidebarContext.jsx";
 import NavbarProfileImage from "../assets/icon/navbar-profile.png";
+import { Link, useLocation } from "react-router-dom";
 
 const DarkModeToggle = () => {
     const [dark, setDark] = useDarkMode();
@@ -12,7 +13,7 @@ const DarkModeToggle = () => {
                 type="button"
                 aria-label="Toggle dark mode"
                 onClick={() => setDark(!dark)}
-                className="text-[var(--text-2)] hover:text-[var(--text-1)] focus:outline-none hover:bg-[var(--secondary-color)] rounded-full text-sm p-2.5 cursor-pointer transition-colors duration-300" // Added transition
+                className="text-[var(--text-2)] hover:text-[var(--text-1)] focus:outline-none hover:bg-[var(--secondary-color)] rounded-full text-sm p-2.5 cursor-pointer transition-colors duration-300"
             >
                 {dark ? (
                     // Sun icon for light mode
@@ -35,7 +36,38 @@ const DarkModeToggle = () => {
 };
 
 const Navbar = () => {
-    const { toggleSidebar } = useSidebar(); // Add useSidebar to handle mobile toggle
+    const { toggleSidebar } = useSidebar();
+    const location = useLocation();
+
+    // Breadcrumb and title mapping
+    const breadcrumbMap = {
+        '/dashboard': { title: 'Main Dashboard', breadcrumb: 'Dashboard' },
+        '/egp-notices': { title: 'EGP Notices', breadcrumb: 'EGP Notices' },
+        '/winner-list': { title: 'Winner List', breadcrumb: 'Winner List' },
+    };
+
+    // Get current page info
+    const getPageInfo = () => {
+        const path = location.pathname;
+        // Check for exact match first
+        if (breadcrumbMap[path]) {
+            return breadcrumbMap[path];
+        }
+        // Fallback for unknown routes or sub-routes
+        const pathSegments = path.split('/').filter(segment => segment);
+        const lastSegment = pathSegments[pathSegments.length - 1] || 'Unknown';
+        // Convert kebab-case to Title Case for fallback
+        const title = lastSegment
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+        return {
+            title,
+            breadcrumb: title,
+        };
+    };
+
+    const { title, breadcrumb } = getPageInfo();
 
     return (
         <nav
@@ -54,65 +86,23 @@ const Navbar = () => {
                         <div className="flex flex-col gap-[4px]">
                             <div className="flex items-center space-x-2 text-[var(--ac2)]">
                                 <span className="page text-base dark:text-[var(--text-4)]">Pages /</span>
-                                <span className="page text-base dark:text-[var(--text-4)] font-medium">Dashboard</span>
+                                <span className="page text-base dark:text-[var(--text-4)] font-medium">{breadcrumb}</span>
                             </div>
                             <div className="bredcrumb-title lg:text-2xl text-[18px] font-bold text-[var(--text-1)]">
-                                <h1>Main Dashboard</h1>
+                                <h1>{title}</h1>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div className="nav-icon-menu flex bg-[var(--bg)] dark:bg-[var(--dark-bg2)] items-center px-[8px] py-[6px] space-x-4 rounded-[30px] gap-2">
-                    {/* Search Box */}
-                    <div className="search-box relative group m-0">
-                        <input
-                            type="text"
-                            placeholder="Search"
-                            className="pl-10 pr-4 py-2 rounded-full bg-[var(--secondary-color)] dark:bg-[var(--dark-bg)] outline-hidden text-sm w-64 dark:text-[var(--text-4)] lg:block hidden"
-                        />
-                        <svg
-                            className="w-5 h-5 lg:block hidden text-[var(--text-1)] absolute left-3 top-1/2 transform -translate-y-1/2"
-                            fill="none"
-                            stroke="#A3AED0"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                            ></path>
-                        </svg>
-                        <button
-                            className="lg:hidden block text-[var(--accent)] dark:text-[var(--text-2)] hover:text-[var(--text-1)] focus:outline-none p-2 rounded-full hover:bg-[var(--secondary-color)] search-toggle-button"
-                        >
-                            <svg
-                                className="w-5 h-5 lg:hidden block text-[var(--text-primary)]"
-                                fill="none"
-                                stroke="#A3AED0"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                ></path>
-                            </svg>
-                        </button>
-                        <div
-                            className="dropdown-box w-64 absolute -left-[8px] mt-2 max-w-sm bg-[var(--bg)] rounded-md border border-[var(--border-color2)] py-1 z-[100] hidden group-hover:block"
-                        >
-                            <input
-                                type="text"
-                                placeholder="Search"
-                                className="block w-full px-4 py-2 bg-[var(--secondary-color)] dark:bg-[var(--dark-bg)] outline-none text-sm dark:text-[var(--text-4)]"
-                            />
-                        </div>
-                    </div>
+                    {/* Website Link */}
+                    <Link
+                        to="https://egpbtc.com/"
+                        className="bg-[var(--primary-color)] px-3 py-2 rounded-full text-white hover:bg-[var(--text-1)] transition-colors duration-300 cursor-pointer"
+                    >
+                        Visit Website
+                    </Link>
 
                     {/* Dark Toggle Button */}
                     <DarkModeToggle />

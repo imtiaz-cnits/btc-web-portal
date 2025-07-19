@@ -60,7 +60,6 @@ const EgpNotices = () => {
             try {
                 const response = await api.get('/notices');
                 if (response.data.success) {
-                    console.log('Fetched notices:', response.data.notices.map(n => ({ id: n._id, title: n.title })));
                     setNotices(response.data.notices || []);
                     setLoading(false);
                 } else {
@@ -77,7 +76,6 @@ const EgpNotices = () => {
     }, []);
 
     const handleViewFile = useCallback((filePath, fileType, id, content) => {
-        console.log('handleViewFile called with:', { filePath, fileType, id, content });
         if (filePath && typeof filePath === 'string') {
             const fileUrl = `${BASE_URL}${filePath}`;
             const isImage = ['.jpg', '.jpeg', '.png', '.gif'].some(ext => filePath.toLowerCase().endsWith(ext));

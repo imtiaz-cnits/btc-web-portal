@@ -8,8 +8,7 @@ import Cookies from 'js-cookie';
 
 const Auth = () => {
     const navigate = useNavigate();
-    const location = useLocation();
-    const { updateToken } = useContext(AuthContext); // Access updateToken from context
+    const { updateToken } = useContext(AuthContext);
     const [showSignup, setShowSignup] = useState(false);
     const [dark, setDark] = useDarkMode();
     const [formData, setFormData] = useState({
@@ -178,28 +177,28 @@ const Auth = () => {
                         {error && <p className="text-red-500 mb-4">{error}</p>}
                         {success && <p className="text-green-500 mb-4">{success}</p>}
 
-                        <button className="google_btn w-full gap-2 flex items-center justify-start rounded-[12px] py-[10px] px-[20px] bg-[var(--secondary-color)] text-[var(--text-1)] transition duration-400 cursor-pointer">
-                            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <g clipPath="url(#clip0_402_2989)">
-                                    <path d="M19.7874 10.225C19.7874 9.56668 19.7291 8.94168 19.6291 8.33334H10.2124V12.0917H15.6041C15.3624 13.325 14.6541 14.3667 13.6041 15.075V17.575H16.8207C18.7041 15.8333 19.7874 13.2667 19.7874 10.225Z" fill="#4285F4" />
-                                    <path d="M10.2126 20C12.9126 20 15.1709 19.1 16.8209 17.575L13.6043 15.075C12.7043 15.675 11.5626 16.0417 10.2126 16.0417C7.60427 16.0417 5.39593 14.2833 4.60427 11.9083H1.2876V14.4833C2.92926 17.75 6.30427 20 10.2126 20Z" fill="#34A853" />
-                                    <path d="M4.60407 11.9083C4.39574 11.3083 4.2874 10.6667 4.2874 9.99999C4.2874 9.33333 4.40407 8.69166 4.60407 8.09166V5.51666H1.2874C0.604068 6.86666 0.212402 8.38333 0.212402 9.99999C0.212402 11.6167 0.604068 13.1333 1.2874 14.4833L4.60407 11.9083Z" fill="#FBBC05" />
-                                    <path d="M10.2126 3.95833C11.6876 3.95833 13.0043 4.46667 14.0459 5.45834L16.8959 2.60833C15.1709 0.991667 12.9126 0 10.2126 0C6.30427 0 2.92926 2.25 1.2876 5.51667L4.60427 8.09167C5.39593 5.71667 7.60427 3.95833 10.2126 3.95833Z" fill="#EA4335" />
-                                </g>
-                                <defs>
-                                    <clipPath id="clip0_402_2989">
-                                        <rect width="20" height="20" fill="white" />
-                                    </clipPath>
-                                </defs>
-                            </svg>
-                            Sign in with Google
-                        </button>
+                        {/*<button className="google_btn w-full gap-2 flex items-center justify-start rounded-[12px] py-[10px] px-[20px] bg-[var(--secondary-color)] text-[var(--text-1)] transition duration-400 cursor-pointer">*/}
+                        {/*    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">*/}
+                        {/*        <g clipPath="url(#clip0_402_2989)">*/}
+                        {/*            <path d="M19.7874 10.225C19.7874 9.56668 19.7291 8.94168 19.6291 8.33334H10.2124V12.0917H15.6041C15.3624 13.325 14.6541 14.3667 13.6041 15.075V17.575H16.8207C18.7041 15.8333 19.7874 13.2667 19.7874 10.225Z" fill="#4285F4" />*/}
+                        {/*            <path d="M10.2126 20C12.9126 20 15.1709 19.1 16.8209 17.575L13.6043 15.075C12.7043 15.675 11.5626 16.0417 10.2126 16.0417C7.60427 16.0417 5.39593 14.2833 4.60427 11.9083H1.2876V14.4833C2.92926 17.75 6.30427 20 10.2126 20Z" fill="#34A853" />*/}
+                        {/*            <path d="M4.60407 11.9083C4.39574 11.3083 4.2874 10.6667 4.2874 9.99999C4.2874 9.33333 4.40407 8.69166 4.60407 8.09166V5.51666H1.2874C0.604068 6.86666 0.212402 8.38333 0.212402 9.99999C0.212402 11.6167 0.604068 13.1333 1.2874 14.4833L4.60407 11.9083Z" fill="#FBBC05" />*/}
+                        {/*            <path d="M10.2126 3.95833C11.6876 3.95833 13.0043 4.46667 14.0459 5.45834L16.8959 2.60833C15.1709 0.991667 12.9126 0 10.2126 0C6.30427 0 2.92926 2.25 1.2876 5.51667L4.60427 8.09167C5.39593 5.71667 7.60427 3.95833 10.2126 3.95833Z" fill="#EA4335" />*/}
+                        {/*        </g>*/}
+                        {/*        <defs>*/}
+                        {/*            <clipPath id="clip0_402_2989">*/}
+                        {/*                <rect width="20" height="20" fill="white" />*/}
+                        {/*            </clipPath>*/}
+                        {/*        </defs>*/}
+                        {/*    </svg>*/}
+                        {/*    Sign in with Google*/}
+                        {/*</button>*/}
 
-                        <div className="flex items-center my-[20px]">
-                            <div className="flex-grow border-t border-[var(--border-color2)]"></div>
-                            <span className="flex-shrink mx-4 text-[var(--accent)]">or</span>
-                            <div className="flex-grow border-t border-[var(--border-color2)]"></div>
-                        </div>
+                        {/*<div className="flex items-center my-[20px]">*/}
+                        {/*    <div className="flex-grow border-t border-[var(--border-color2)]"></div>*/}
+                        {/*    <span className="flex-shrink mx-4 text-[var(--accent)]">or</span>*/}
+                        {/*    <div className="flex-grow border-t border-[var(--border-color2)]"></div>*/}
+                        {/*</div>*/}
 
                         <div className="form_grp mb-4">
                             <label htmlFor="email" className="block text-[var(--text-1)] font-semibold mb-2">Email*</label>
@@ -258,15 +257,15 @@ const Auth = () => {
                         </div>
 
                         <div className="flex items-center justify-between my-[20px]">
-                            <div className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    id="keep-logged-in"
-                                    className="h-4 w-4 text-[var(--primary-color)] border-[var(--border-color2)] rounded focus:ring-[var(--primary-color)] cursor-pointer"
-                                />
-                                <label htmlFor="keep-logged-in" className="ml-2 text-[var(--text-1)] cursor-pointer">Keep me logged in</label>
-                            </div>
-                            <Link to="/reset-password" className="text-[var(--primary-color)] dark:text-[#6D80E7] font-semibold hover:underline transition duration-400">Forgot password?</Link>
+                            {/*<div className="flex items-center">*/}
+                            {/*    <input*/}
+                            {/*        type="checkbox"*/}
+                            {/*        id="keep-logged-in"*/}
+                            {/*        className="h-4 w-4 text-[var(--primary-color)] border-[var(--border-color2)] rounded focus:ring-[var(--primary-color)] cursor-pointer"*/}
+                            {/*    />*/}
+                            {/*    <label htmlFor="keep-logged-in" className="ml-2 text-[var(--text-1)] cursor-pointer">Keep me logged in</label>*/}
+                            {/*</div>*/}
+                            {/*<Link to="/reset-password" className="text-[var(--primary-color)] dark:text-[#6D80E7] font-semibold hover:underline transition duration-400">Forgot password?</Link>*/}
                         </div>
 
                         <button
@@ -276,16 +275,16 @@ const Auth = () => {
                             Sign In
                         </button>
 
-                        <p className="text-[var(--text-3)]">
-                            Not registered yet?{' '}
-                            <button
-                                type="button"
-                                onClick={handleSignupClick}
-                                className="create_account_btn text-[var(--primary-color)] dark:text-[#6D80E7] font-semibold hover:underline transition duration-400 cursor-pointer"
-                            >
-                                Create an Account
-                            </button>
-                        </p>
+                        {/*<p className="text-[var(--text-3)]">*/}
+                        {/*    Not registered yet?{' '}*/}
+                        {/*    <button*/}
+                        {/*        type="button"*/}
+                        {/*        onClick={handleSignupClick}*/}
+                        {/*        className="create_account_btn text-[var(--primary-color)] dark:text-[#6D80E7] font-semibold hover:underline transition duration-400 cursor-pointer"*/}
+                        {/*    >*/}
+                        {/*        Create an Account*/}
+                        {/*    </button>*/}
+                        {/*</p>*/}
                     </form>
 
                     {/* Sign Up Form */}
@@ -429,7 +428,7 @@ const Auth = () => {
                         </form>
                     </div>
 
-                    <p className="copyright w-full text-[var(--text-3)]">© 2025 BTC. All Rights Reserved. by CodeNext IT</p>
+                    <p className="copyright w-full text-[var(--text-3)]">© 2025 | Building Technology & Consultant</p>
                 </div>
             </div>
 
@@ -512,10 +511,12 @@ const Auth = () => {
 
                 <div className="absolute bottom-8 w-full flex justify-center text-[var(--text-4)]">
                     <ul className="flex space-x-6">
-                        <li><a href="#" className="hover:underline transition duration-400"><p>Marketplace</p></a></li>
-                        <li><a href="#" className="hover:underline transition duration-400"><p>License</p></a></li>
-                        <li><a href="#" className="hover:underline transition duration-400"><p>Terms of Use</p></a></li>
-                        <li><a href="#" className="hover:underline transition duration-400"><p>Blog</p></a></li>
+                        <li><a href="https://www.codenextit.com/" className="hover:underline transition duration-400">
+                            <p>Developed by CodeNext IT</p></a></li>
+                        {/*<li><a href="#" className="hover:underline transition duration-400"><p>Marketplace</p></a></li>*/}
+                        {/*<li><a href="#" className="hover:underline transition duration-400"><p>License</p></a></li>*/}
+                        {/*<li><a href="#" className="hover:underline transition duration-400"><p>Terms of Use</p></a></li>*/}
+                        {/*<li><a href="#" className="hover:underline transition duration-400"><p>Blog</p></a></li>*/}
                     </ul>
 
                     <div className="dark_button_box flex justify-end p-4 absolute right-8 bottom-[-20px]">

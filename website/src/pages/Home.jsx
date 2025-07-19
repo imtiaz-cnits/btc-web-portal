@@ -575,7 +575,7 @@ const Home = () => {
 
 
             {/* We Offer Start */}
-            <div className="offer pt-[80px]">
+            <div id="services" className="offer pt-[80px]">
                 <div className="custom-container mx-auto px-4">
                     <div
                         className="offer_wrapper relative bg-[var(--shade-1)] lg:rounded-[80px] rounded-[40px] lg:py-[40px] py-[20px] lg:px-[20px] overflow-hidden">
@@ -1293,7 +1293,7 @@ const Home = () => {
 
 
             {/* Our_project Start */}
-            <div className="Our_project bg-[var(--secondary-color)] mt-[80px] lg:mt-[140px]">
+            <div id="projects" className="Our_project bg-[var(--secondary-color)] mt-[80px] lg:mt-[140px]">
                 <div className="custom-container">
                     <div className="top_section flex justify-between items-end max-md:flex-col max-md:items-start">
                         <div className="heading_wrap text-left">

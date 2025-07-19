@@ -1,7 +1,7 @@
 import React from 'react';
 import { format, parseISO } from 'date-fns';
 
-const NoticeTable = ({ notices, loading, error, currentPage, noticesPerPage, handlePageChange, handleViewFile }) => {
+const NoticeTable = ({ notices, loading, error, currentPage, noticesPerPage, handlePageChange, handleViewFile, noticeType }) => {
     const totalNotices = notices.length;
     const totalPages = Math.ceil(totalNotices / noticesPerPage) || 1;
     const indexOfLastNotice = currentPage * noticesPerPage;
@@ -18,7 +18,7 @@ const NoticeTable = ({ notices, loading, error, currentPage, noticesPerPage, han
     };
 
     const getPageNumbers = () => {
-        const maxPagesToShow = 5;
+        const MAX_PAGES_TO_SHOW = 5; // Renamed to follow ESLint convention (uppercase for constants)
         const pages = [];
         const startPage = Math.max(1, currentPage - 2);
         const endPage = Math.min(totalPages, currentPage + 2);
@@ -40,11 +40,13 @@ const NoticeTable = ({ notices, loading, error, currentPage, noticesPerPage, han
         return pages;
     };
 
+    // Determine the header text based on noticeType
+    const lastDateHeader = noticeType === 'Winner List' ? 'Lottery Date' : 'Last Date';
+
     return (
         <div className="all-notice">
-            <div className="mt-6 w-full md:overflow-x-auto overflow-x-auto"
-            style={{ overflowX: 'auto' }}>
-                <table className=" w-full border border-[var(--ac-1)]">
+            <div className="mt-6 w-full md:overflow-x-auto overflow-x-auto" style={{ overflowX: 'auto' }}>
+                <table className="w-full border border-[var(--ac-1)]">
                     <thead className="bg-[var(--primary-color)]">
                     <tr>
                         <th className="px-4 py-3 text-left text-sm font-medium text-[var(--secondary-color)] uppercase tracking-wider border border-[var(--ac-1)]">
@@ -57,7 +59,7 @@ const NoticeTable = ({ notices, loading, error, currentPage, noticesPerPage, han
                             Publish Date
                         </th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-[var(--secondary-color)] uppercase tracking-wider border border-[var(--ac-1)]">
-                            Last Date
+                            {lastDateHeader}
                         </th>
                         <th className="px-4 py-3 text-center text-sm font-medium text-[var(--secondary-color)] uppercase tracking-wider border border-[var(--ac-1)]">
                             Action
@@ -107,8 +109,8 @@ const NoticeTable = ({ notices, loading, error, currentPage, noticesPerPage, han
                                             {notice.title || 'Untitled Notice'}
                                         </a>
                                         <span className="block text-sm text-[var(--text-1)] mt-1">
-                                            {notice.createdAt ? format(parseISO(notice.createdAt), 'dd/MM/yyyy HH:mm') : '-'}
-                                        </span>
+                                                {notice.createdAt ? format(parseISO(notice.createdAt), 'dd/MM/yyyy HH:mm') : '-'}
+                                            </span>
                                     </td>
                                     <td className="px-4 py-3 whitespace-nowrap border border-[var(--ac-1)] text-sm">
                                         {formatDate(notice.publishDate)}
@@ -134,8 +136,7 @@ const NoticeTable = ({ notices, loading, error, currentPage, noticesPerPage, han
             </div>
 
             {!loading && !error && totalNotices > 0 && (
-                <div className="pagination-container mt-6"
-                style={{ marginTop: '2.5rem' }}>
+                <div className="pagination-container mt-6" style={{ marginTop: '2.5rem' }}>
                     <nav className="flex justify-center">
                         <ul className="inline-flex items-center flex-wrap rounded-lg overflow-hidden border border-[var(--ac-1)]">
                             <li>
@@ -156,7 +157,7 @@ const NoticeTable = ({ notices, loading, error, currentPage, noticesPerPage, han
                                     ) : (
                                         <button
                                             onClick={() => handlePageChange(page)}
-                                            className={`px-4 py-2 cursor-pointer  ${
+                                            className={`px-4 py-2 cursor-pointer ${
                                                 currentPage === page
                                                     ? 'text-[var(--secondary-color)] bg-[var(--primary-color)] border-[var(--primary-color)]'
                                                     : 'text-[var(--text-1)] bg-[var(--secondary-color)] border-[var(--ac-1)] hover:bg-[var(--primary-color)] hover:text-[var(--secondary-color)]'

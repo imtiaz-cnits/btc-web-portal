@@ -56,17 +56,36 @@ const Sidebar = ({ width, toggleSidebar }) => {
     return (
         <aside
             className="sidebar fixed top-0 left-0 h-screen bg-[var(--bg)] dark:!bg-[var(--dark-bg2)] transition-all duration-[0.4s] ease"
-            style={{ width: `${width}px` }}
+            style={{width: `${width}px`}}
         >
+            <style>
+                {`
+                    .nav-link.active {
+                        background-color: var(--primary-color, #007bff);
+                        color: #464646 !important;
+                        border-radius: 4px;
+                    }
+                    .nav-link.active svg path {
+                        fill: white;
+                    }
+                    .nav-link.active .nav-label {
+                        color: var(--primary-color, #007bff) !important;
+                    }
+                    .dark .nav-link.active .nav-label {
+                        color: var(--text-4, #ffffff) !important;
+                    }
+                `}
+            </style>
+
             <header className="sidebar-header shadow-sm dark:!border-[var(--border-color2)]">
                 {/* Light mode logos with shimmer */}
                 <div className={`light-logo-box ${dark ? 'hidden' : 'block'}`}>
                     {isLoading ? (
-                        <ShimmerThumbnail height={50} width={200} /> // Shimmer for logo area
+                        <ShimmerThumbnail height={50} width={200}/> // Shimmer for logo area
                     ) : (
                         <Link to="/admin" className="header-logo">
-                            <img className="sidebar-logo" src={sidebarLogo} alt="Logo" />
-                            <img className="sidebar-brandname-logo" src={sidebarBrandNameLogo} alt="Brand Logo" />
+                            <img className="sidebar-logo" src={sidebarLogo} alt="Logo"/>
+                            <img className="sidebar-brandname-logo" src={sidebarBrandNameLogo} alt="Brand Logo"/>
                         </Link>
                     )}
                 </div>
@@ -74,16 +93,17 @@ const Sidebar = ({ width, toggleSidebar }) => {
                 {/* Dark mode logos with shimmer */}
                 <div className={`dark-logo-box ${dark ? 'block' : 'hidden'}`}>
                     {isLoading ? (
-                        <ShimmerThumbnail height={50} width={200} />
+                        <ShimmerThumbnail height={50} width={200}/>
                     ) : (
                         <Link to="/" className="dark-header-logo">
-                            <img className="sidebar-logo" src={darkSidebarLogo} alt="Logo" />
-                            <img className="sidebar-brandname-logo" src={darkSidebarBrandNameLogo} alt="Brand Logo" />
+                            <img className="sidebar-logo" src={darkSidebarLogo} alt="Logo"/>
+                            <img className="sidebar-brandname-logo" src={darkSidebarBrandNameLogo} alt="Brand Logo"/>
                         </Link>
                     )}
                 </div>
 
-                <button className="sidebar-toggler text-[var(--text-2)] dark:text-[var(--text-4)]" onClick={toggleSidebar}>
+                <button className="sidebar-toggler text-[var(--text-2)] dark:text-[var(--text-4)]"
+                        onClick={toggleSidebar}>
                     <i className="fa-solid fa-chevron-left"></i>
                 </button>
             </header>
@@ -95,7 +115,10 @@ const Sidebar = ({ width, toggleSidebar }) => {
                             <ShimmerText line={1} gap={10}/>
                         ) : (
                             <>
-                                <Link to="/admin" className="nav-link">
+                                <Link
+                                    to="/admin/dashboard"
+                                    className={`nav-link ${location.pathname.startsWith('/admin/dashboard') ? 'active' : ''}`}
+                                >
                                     <span className="w-[24px]">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
@@ -161,11 +184,19 @@ const Sidebar = ({ width, toggleSidebar }) => {
                         {isLoading ? (
                             <ShimmerText line={1} gap={10}/>
                         ) : (
-                            <Link to="/admin/egp-notices" className="nav-link">
+                            <Link
+                                to="/admin/egp-notices"
+                                className={`nav-link ${location.pathname.startsWith('/admin/egp-notices') ? 'active' : ''}`}
+                            >
                                 <span className="w-[24px]">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <path d="M21.4001 17.02L21.2601 17.5C20.8701 18.82 19.8601 19.84 18.6301 20.15L18.4001 20.21C16.3001 20.73 14.1401 21 11.9801 21C9.8201 21 7.6601 20.73 5.5601 20.21L5.4001 20.17C4.1101 19.84 3.0801 18.77 2.7301 17.36C1.8201 13.78 1.7701 10.04 2.5501 6.49L2.6601 6.03C3.0501 4.25 4.4901 3 6.1701 3H7.9601C9.2001 3 10.3301 3.68 11.0001 4.81L11.1901 5.14C11.3801 5.46 11.8001 6 12.4401 6H15.5401C15.2001 6.59 15.0001 7.27 15.0001 8C15.0001 10.21 16.7901 12 19.0001 12C20.1101 12 21.1201 11.54 21.8501 10.81C22.1501 12.88 22.0001 15 21.4001 17.02Z" fill="#A3AED0"/>
-                                        <path d="M19 11C20.6569 11 22 9.65685 22 8C22 6.34315 20.6569 5 19 5C17.3431 5 16 6.34315 16 8C16 9.65685 17.3431 11 19 11Z" fill="#A3AED0"/>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                         fill="none">
+                                        <path
+                                            d="M21.4001 17.02L21.2601 17.5C20.8701 18.82 19.8601 19.84 18.6301 20.15L18.4001 20.21C16.3001 20.73 14.1401 21 11.9801 21C9.8201 21 7.6601 20.73 5.5601 20.21L5.4001 20.17C4.1101 19.84 3.0801 18.77 2.7301 17.36C1.8201 13.78 1.7701 10.04 2.5501 6.49L2.6601 6.03C3.0501 4.25 4.4901 3 6.1701 3H7.9601C9.2001 3 10.3301 3.68 11.0001 4.81L11.1901 5.14C11.3801 5.46 11.8001 6 12.4401 6H15.5401C15.2001 6.59 15.0001 7.27 15.0001 8C15.0001 10.21 16.7901 12 19.0001 12C20.1101 12 21.1201 11.54 21.8501 10.81C22.1501 12.88 22.0001 15 21.4001 17.02Z"
+                                            fill="#A3AED0"/>
+                                        <path
+                                            d="M19 11C20.6569 11 22 9.65685 22 8C22 6.34315 20.6569 5 19 5C17.3431 5 16 6.34315 16 8C16 9.65685 17.3431 11 19 11Z"
+                                            fill="#A3AED0"/>
                                       </svg>
                                 </span>
                                 <span className="nav-label dark:text-[var(--text-4)]">EGP Notices</span>
@@ -177,10 +208,16 @@ const Sidebar = ({ width, toggleSidebar }) => {
                         {isLoading ? (
                             <ShimmerText line={1} gap={10}/>
                         ) : (
-                            <Link to="/admin/winner-list" className="nav-link">
+                            <Link
+                                to="/admin/winner-list"
+                                className={`nav-link ${location.pathname.startsWith('/admin/winner-list') ? 'active' : ''}`}
+                            >
                                 <span className="w-[24px]">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <path d="M7.39782 14.6613H2.29976C2.13421 14.6613 2 14.8031 2 14.9778V21.3085C2 21.4832 2.13421 21.625 2.29976 21.625H7.39751C7.56337 21.625 7.69758 21.4832 7.69758 21.3085V14.9778C7.69758 14.8031 7.56337 14.6613 7.39782 14.6613ZM14.9778 11.8125H8.64718C8.47245 11.8125 8.33065 11.9543 8.33065 12.129V21.3085C8.33065 21.4832 8.47245 21.625 8.64718 21.625H14.9778C15.1525 21.625 15.2944 21.4832 15.2944 21.3085V12.129C15.2944 11.9543 15.1525 11.8125 14.9778 11.8125ZM21.3252 16.5605H16.2272C16.0616 16.5605 15.9274 16.7023 15.9274 16.877V21.3085C15.9274 21.4832 16.0616 21.625 16.2272 21.625H21.3249C21.4908 21.625 21.625 21.4832 21.625 21.3085V16.877C21.625 16.7023 21.4908 16.5605 21.3252 16.5605ZM15.9274 2.9496C15.9274 2.7755 15.785 2.63306 15.6109 2.63306H14.3448V2.31653C14.3448 2.14244 14.2023 2 14.0282 2H9.59677C9.42268 2 9.28024 2.14244 9.28024 2.31653V2.63306H8.01411C7.84002 2.63306 7.69758 2.7755 7.69758 2.9496V4.21573C7.69758 5.15583 8.38129 5.93766 9.28024 6.08643V6.11492C9.28024 6.99804 9.79935 7.76089 10.5464 8.1154V9.59677H9.91331C9.56512 9.59677 9.28024 9.88165 9.28024 10.2298V10.8629C9.28024 11.037 9.42268 11.1794 9.59677 11.1794H14.0282C14.2023 11.1794 14.3448 11.037 14.3448 10.8629V10.2298C14.3448 9.88165 14.0599 9.59677 13.7117 9.59677H13.0786V8.1154C13.8256 7.76089 14.3448 6.99804 14.3448 6.11492V6.08643C15.2437 5.93766 15.9274 5.15583 15.9274 4.21573V2.9496ZM9.28024 5.44071C8.73264 5.30143 8.33065 4.80448 8.33065 4.21573V3.26613H9.28024V5.44071ZM15.2944 4.21573C15.2944 4.80448 14.8924 5.30143 14.3448 5.44071V3.26613H15.2944V4.21573Z" fill="#A3AED0"/>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                         fill="none">
+                                        <path
+                                            d="M7.39782 14.6613H2.29976C2.13421 14.6613 2 14.8031 2 14.9778V21.3085C2 21.4832 2.13421 21.625 2.29976 21.625H7.39751C7.56337 21.625 7.69758 21.4832 7.69758 21.3085V14.9778C7.69758 14.8031 7.56337 14.6613 7.39782 14.6613ZM14.9778 11.8125H8.64718C8.47245 11.8125 8.33065 11.9543 8.33065 12.129V21.3085C8.33065 21.4832 8.47245 21.625 8.64718 21.625H14.9778C15.1525 21.625 15.2944 21.4832 15.2944 21.3085V12.129C15.2944 11.9543 15.1525 11.8125 14.9778 11.8125ZM21.3252 16.5605H16.2272C16.0616 16.5605 15.9274 16.7023 15.9274 16.877V21.3085C15.9274 21.4832 16.0616 21.625 16.2272 21.625H21.3249C21.4908 21.625 21.625 21.4832 21.625 21.3085V16.877C21.625 16.7023 21.4908 16.5605 21.3252 16.5605ZM15.9274 2.9496C15.9274 2.7755 15.785 2.63306 15.6109 2.63306H14.3448V2.31653C14.3448 2.14244 14.2023 2 14.0282 2H9.59677C9.42268 2 9.28024 2.14244 9.28024 2.31653V2.63306H8.01411C7.84002 2.63306 7.69758 2.7755 7.69758 2.9496V4.21573C7.69758 5.15583 8.38129 5.93766 9.28024 6.08643V6.11492C9.28024 6.99804 9.79935 7.76089 10.5464 8.1154V9.59677H9.91331C9.56512 9.59677 9.28024 9.88165 9.28024 10.2298V10.8629C9.28024 11.037 9.42268 11.1794 9.59677 11.1794H14.0282C14.2023 11.1794 14.3448 11.037 14.3448 10.8629V10.2298C14.3448 9.88165 14.0599 9.59677 13.7117 9.59677H13.0786V8.1154C13.8256 7.76089 14.3448 6.99804 14.3448 6.11492V6.08643C15.2437 5.93766 15.9274 5.15583 15.9274 4.21573V2.9496ZM9.28024 5.44071C8.73264 5.30143 8.33065 4.80448 8.33065 4.21573V3.26613H9.28024V5.44071ZM15.2944 4.21573C15.2944 4.80448 14.8924 5.30143 14.3448 5.44071V3.26613H15.2944V4.21573Z"
+                                            fill="#A3AED0"/>
                                       </svg>
                                 </span>
                                 <span className="nav-label dark:text-[var(--text-4)]">Winner List</span>

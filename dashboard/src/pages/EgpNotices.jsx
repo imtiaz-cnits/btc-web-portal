@@ -115,8 +115,7 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, setFormData, handleCha
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-3">
                             <div>
                                 <label htmlFor="publishDate" className="block text-sm font-medium text-[var(--text-1)] mb-1">
-                                    Issue Date
-                                    <span className="ml-1 text-gray-500" title="Format: DD/MM/YYYY">(?)</span>
+                                    Publish Date
                                 </label>
                                 <input
                                     type="date"
@@ -133,8 +132,7 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, setFormData, handleCha
                             </div>
                             <div>
                                 <label htmlFor="lastDate" className="block text-sm font-medium text-[var(--text-1)] mb-1">
-                                    Publish Date
-                                    <span className="ml-1 text-gray-500" title="Format: DD/MM/YYYY">(?)</span>
+                                    Last Date
                                 </label>
                                 <input
                                     type="date"
@@ -672,7 +670,7 @@ const EgpNotices = () => {
                                         </div>
                                     </td>
                                     <td className="title-column font-medium text-[var(--text-1)] dark:text-[var(--text-4)]">{notice.title}</td>
-                                    <td className="date-column">{formatDate(notice.lastDate)}</td>
+                                    <td className="date-column">{formatDate(notice.publishDate)}</td>
                                     <td className="date-column">{formatDate(notice.lastDate)}</td>
                                     <td className="status-column">
                                         <button className={`${(notice.status || 'active').toLowerCase()}-status flex items-center}`}>

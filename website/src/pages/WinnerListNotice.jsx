@@ -60,7 +60,6 @@ const WinnerListNotice = () => {
             try {
                 const response = await api.get('/winner-list');
                 if (response.data.success) {
-                    console.log('Fetched notices:', response.data.notices.map(n => ({ id: n._id, title: n.title })));
                     setNotices(response.data.notices || []);
                     setLoading(false);
                 } else {
@@ -161,6 +160,7 @@ const WinnerListNotice = () => {
                             handlePageChange={setCurrentPage}
                             handleViewFile={handleViewFile}
                             baseUrl={BASE_URL}
+                            noticeType="Winner List" // or "EGP Notice"
                         />
                     </div>
                 </div>

@@ -115,8 +115,7 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, setFormData, handleCha
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-3">
                             <div>
                                 <label htmlFor="publishDate" className="block text-sm font-medium text-[var(--text-1)] mb-1">
-                                    Issue Date
-                                    <span className="ml-1 text-gray-500" title="Format: DD/MM/YYYY">(?)</span>
+                                    Publish Date
                                 </label>
                                 <input
                                     type="date"
@@ -127,14 +126,13 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, setFormData, handleCha
                                     onChange={handleChange}
                                     onClick={() => openCalendar(publishDateRef)}
                                     className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
-                                    placeholder="Select issue date"
+                                    placeholder="Select publish date"
                                 />
                                 {dateError?.publishDate && <div className="text-red-500 text-sm mt-1">{dateError.publishDate}</div>}
                             </div>
                             <div>
                                 <label htmlFor="lastDate" className="block text-sm font-medium text-[var(--text-1)] mb-1">
-                                    Publish Date
-                                    <span className="ml-1 text-gray-500" title="Format: DD/MM/YYYY">(?)</span>
+                                    Lottery Date
                                 </label>
                                 <input
                                     type="date"
@@ -145,7 +143,7 @@ const EditModal = ({ isOpen, onClose, onSubmit, formData, setFormData, handleCha
                                     onChange={handleChange}
                                     onClick={() => openCalendar(lastDateRef)}
                                     className="w-full px-3 py-2 border border-[var(--border-color2)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)] transition duration-200"
-                                    placeholder="Select publish date"
+                                    placeholder="Select lottery date"
                                 />
                                 {dateError?.lastDate && <div className="text-red-500 text-sm mt-1">{dateError.lastDate}</div>}
                             </div>
@@ -634,8 +632,8 @@ const WinnerList = () => {
                             <th className="sl-column">Sl</th>
                             <th className="action-column hide_content">Action</th>
                             <th className="title-column">Winner Title</th>
-                            <th className="date-column">Issue Date</th>
                             <th className="date-column">Publish Date</th>
+                            <th className="date-column">Lottery Date</th>
                             <th className="status-column">Status</th>
                             <th className="date-column">Created Date</th>
                             <th className="file-column">File</th>

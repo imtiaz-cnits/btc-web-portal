@@ -10,14 +10,15 @@ const Navbar = () => {
     const [notices, setNotices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isFixed, setIsFixed] = useState(false); // New state for fixed navbar
+    const [isFixed, setIsFixed] = useState(false);
     const dropdownRef = useRef(null);
     const location = useLocation();
+    const isInitialMount = useRef(true);
 
     // Handle scroll to toggle fixed class
     useEffect(() => {
         const handleScroll = () => {
-            const scrollThreshold = 100; // Pixels to scroll before fixing navbar
+            const scrollThreshold = 100;
             if (window.scrollY > scrollThreshold) {
                 setIsFixed(true);
             } else {
@@ -28,6 +29,17 @@ const Navbar = () => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+
+    // Handle hash navigation for smooth scrolling
+    useEffect(() => {
+        if (location.pathname === '/' && location.hash) {
+            const sectionId = location.hash.replace('#', '');
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    }, [location]);
 
     // Fetch notices from backend
     useEffect(() => {
@@ -82,6 +94,15 @@ const Navbar = () => {
         document.addEventListener('click', handleClickOutside);
         return () => document.removeEventListener('click', handleClickOutside);
     }, []);
+
+    // Scroll to top on route change, but not on initial mount (page reload)
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+        } else {
+            window.scrollTo(0, 0);
+        }
+    }, [location.pathname]);
 
     return (
         <div>
@@ -161,18 +182,7 @@ const Navbar = () => {
                                style={{ marginTop: '4px', marginBottom: '-4px' }}>
                                 <i className="fa-brands fa-facebook-f text-text-1 text-xl hover:text-[var(--primary-color)] transition duration-400"></i>
                             </a>
-                            {/*<a href="#" className="hover:text-[var(--primary-color)] transition duration-400">*/}
-                            {/*    <i className="fa-brands fa-instagram text-text-1 text-xl hover:text-[var(--primary-color)] transition duration-400"></i>*/}
-                            {/*</a>*/}
-                            {/*<a href="#" className="hover:text-[var(--primary-color)] transition duration-400">*/}
-                            {/*    <i className="fa-brands fa-x-twitter text-text-1 text-xl hover:text-[var(--primary-color)] transition duration-400"></i>*/}
-                            {/*</a>*/}
-                            {/*<a href="#" className="hover:text-[var(--primary-color)] transition duration-400">*/}
-                            {/*    <i className="fa-brands fa-linkedin-in text-text-1 text-xl hover:text-[var(--primary-color)] transition duration-400"></i>*/}
-                            {/*</a>*/}
-
                             <div className="text-text-1 text-xl font-normal mx-2.5">|</div>
-
                             <div className="flex items-center gap-1">
                                 <svg width="20" height="20" viewBox="0 0 32 32" fill="none"
                                      xmlns="http://www.w3.org/2000/svg">
@@ -216,19 +226,19 @@ const Navbar = () => {
                             <div className="hidden lg:flex space-x-6 items-center">
                                 <Link to="/"
                                       className={`transition duration-400 font-medium ${
-                                          location.pathname === '/' ? 'text-[var(--primary-color)]' : 'text-[var(--text-1)] hover:text-[var(--primary-color)]'
+                                          location.pathname === '/' && !location.hash ? 'text-[var(--primary-color)]' : 'text-[var(--text-1)] hover:text-[var(--primary-color)]'
                                       }`}>
                                     HOME
                                 </Link>
-                                <Link to="/services"
+                                <Link to="/#services"
                                       className={`transition duration-400 font-medium ${
-                                          location.pathname === '/services' ? 'text-[var(--primary-color)]' : 'text-[var(--text-1)] hover:text-[var(--primary-color)]'
+                                          location.pathname === '/' && location.hash === '#services' ? 'text-[var(--primary-color)]' : 'text-[var(--text-1)] hover:text-[var(--primary-color)]'
                                       }`}>
                                     SERVICES
                                 </Link>
-                                <Link to="/projects"
+                                <Link to="/#projects"
                                       className={`transition duration-400 font-medium ${
-                                          location.pathname === '/projects' ? 'text-[var(--primary-color)]' : 'text-[var(--text-1)] hover:text-[var(--primary-color)]'
+                                          location.pathname === '/' && location.hash === '#projects' ? 'text-[var(--primary-color)]' : 'text-[var(--text-1)] hover:text-[var(--primary-color)]'
                                       }`}>
                                     PROJECTS
                                 </Link>
@@ -319,19 +329,19 @@ const Navbar = () => {
                 <div className="px-4 py-2 space-y-1" ref={dropdownRef}>
                     <Link to="/"
                           className={`block px-3 py-2 rounded-lg ${
-                              location.pathname === '/' ? 'text-[var(--primary-color)] bg-[var(--shade-1)]' : 'text-[var(--text-1)] bg-[var(--shade-1)] active:bg-[var(--shade-1)]'
+                              location.pathname === '/' && !location.hash ? 'text-[var(--primary-color)] bg-[var(--shade-1)]' : 'text-[var(--text-1)] bg-[var(--shade-1)] active:bg-[var(--shade-1)]'
                           }`}>
                         HOME
                     </Link>
-                    <Link to="/services"
+                    <Link to="/#services"
                           className={`block px-3 py-2 rounded-lg ${
-                              location.pathname === '/services' ? 'text-[var(--primary-color)] hover:bg-[var(--shade-1)]' : 'text-[var(--text-1)] hover:bg-[var(--shade-1)]'
+                              location.pathname === '/' && location.hash === '#services' ? 'text-[var(--primary-color)] hover:bg-[var(--shade-1)]' : 'text-[var(--text-1)] hover:bg-[var(--shade-1)]'
                           }`}>
                         SERVICES
                     </Link>
-                    <Link to="/projects"
+                    <Link to="/#projects"
                           className={`block px-3 py-2 rounded-lg ${
-                              location.pathname === '/projects' ? 'text-[var(--primary-color)] hover:bg-[var(--shade-1)]' : 'text-[var(--text-1)] hover:bg-[var(--shade-1)]'
+                              location.pathname === '/' && location.hash === '#projects' ? 'text-[var(--primary-color)] hover:bg-[var(--shade-1)]' : 'text-[var(--text-1)] hover:bg-[var(--shade-1)]'
                           }`}>
                         PROJECTS
                     </Link>
@@ -358,13 +368,13 @@ const Navbar = () => {
                             className={`mobile-dropdown ${isMobileDropdownOpen ? 'open' : ''} bg-[var(--text-1)] rounded-lg`}>
                             <Link to="/egp-notice"
                                   className={`block px-3 py-2 text-[14px] ${
-                                      location.pathname === '/notice' ? 'text-[var(--primary-color)] bg-[var(--shade-1)]' : 'text-[var(--secondary-color)] hover:bg-[var(--primary-color)]'
+                                      location.pathname === '/egp-notice' ? 'text-[var(--primary-color)] bg-[var(--shade-1)]' : 'text-[var(--secondary-color)] hover:bg-[var(--primary-color)]'
                                   }`}>
                                 EGP TENDER NOTICE
                             </Link>
                             <Link to="/winner-list"
                                   className={`block px-3 py-2 text-[14px] ${
-                                      location.pathname === '/gallery' ? 'text-[var(--primary-color)] bg-[var(--shade-1)]' : 'text-[var(--secondary-color)] hover:bg-[var(--primary-color)]'
+                                      location.pathname === '/winner-list' ? 'text-[var(--primary-color)] bg-[var(--shade-1)]' : 'text-[var(--secondary-color)] hover:bg-[var(--primary-color)]'
                                   }`}>
                                 WINNER LIST
                             </Link>

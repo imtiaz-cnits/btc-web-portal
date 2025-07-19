@@ -180,11 +180,12 @@ const Footer = () => {
                     <div className="flex flex-col-reverse md:flex-row justify-between border-t border-t-[var(--ac-2)] py-6 gap-2.5">
                         <span className="m-0 leading-5 text-left text-[var(--text-1)]">© 2025 BTC. All Rights Reserved</span>
                         <span className="flex flex-wrap justify-start md:justify-end gap-x-1.5">
-                            Designed by {" -  "}
+                            Designed by
                             <Link
                                 to="https://www.codenextit.com/"
                                 className="text-bold text-[var(--text-1)]"
-                            >
+                                style={{ fontWeight: '700' }}
+                            > &nbsp;
                                  CodeNext IT
                             </Link>
                         </span>

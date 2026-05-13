@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(cuid())
+  name              String
+  email             String    @unique
+  password          String
+  verifyOtp         String    @default("")
+  verifyOtpExpireAt BigInt    @default(0)
+  isAccountVerified Boolean   @default(false)
+  resetOtp          String    @default("")
+  resetOtpExpireAt  BigInt    @default(0)
+  notices           Notice[]
+  winnerLists       WinnerList[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("users")
+}
+
+enum NoticeCategory {
+  LTM
+  OTM
+  LOTTERY
+}
+
+enum Status {
+  active
+  inactive
+}
+
+model Notice {
+  id          String         @id @default(cuid())
+  title       String
+  content     String         @db.Text
+  category    NoticeCategory @default(LTM)
+  createdBy   User           @relation(fields: [authorId], references: [id])
+  authorId    String
+  filePath    String?
+  status      Status         @default(active)
+  publishDate DateTime?
+  lastDate    DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([createdAt(sort: Desc)])
+  @@map("notices")
+}
+
+model WinnerList {
+  id          String    @id @default(cuid())
+  title       String
+  content     String    @db.Text
+  createdBy   User      @relation(fields: [authorId], references: [id])
+  authorId    String
+  filePath    String?
+  status      Status    @default(active)
+  publishDate DateTime?
+  lastDate    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([createdAt(sort: Desc)])
+  @@map("winner_lists")
+}

@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #5AA469;
+  --color-secondary: #ffffff;
+  --color-shade-1: #F4FFF2;
+  --color-text-1: #171717;
+  --color-text-2: #454545;
+  --color-ac-1: #c6c6c6;
+  --color-ac-2: #eeeeee;
+
+  --font-primary: "Space Grotesk", sans-serif;
+  --font-secondary: "Albert Sans", sans-serif;
+}
+
+:root {
+  --primary-color: #5AA469;
+  --secondary-color: #ffffff;
+  --ac-1: #c6c6c6;
+  --ac-2: #eeeeee; 
+  --shade-1: #F4FFF2;
+  --text-1: #171717;
+  --text-2: #454545;
+}
+
+/* Force global font */
+html, body, * {
+  font-family: "Space Grotesk", sans-serif !important;
+}
+
+/* Specific font utilities */
+.font-primary {
+  font-family: "Space Grotesk", sans-serif !important;
+}
+
+.font-secondary {
+  font-family: "Albert Sans", sans-serif !important;
+}
+
+/* Global Reset */
+* {
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--secondary-color) !important;
+  color: var(--text-1);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Space Grotesk", sans-serif !important;
+  font-weight: 700;
+  margin: 0;
+}
+
+p, span, div, a, li, input, button, textarea {
+  font-family: inherit;
+}
+
+/* Container Scaling */
+.custom-container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem; /* px-4 */
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) { 
+  .custom-container { 
+    max-width: 640px; 
+    padding-left: 1.5rem; /* px-6 */
+    padding-right: 1.5rem;
+  } 
+}
+@media (min-width: 768px) { .custom-container { max-width: 768px; } }
+@media (min-width: 1024px) { 
+  .custom-container { 
+    max-width: 1024px; 
+    padding-left: 2rem; /* px-8 */
+    padding-right: 2rem;
+  } 
+}
+@media (min-width: 1280px) { .custom-container { max-width: 1280px; } }
+@media (min-width: 1480px) { .custom-container { max-width: 1280px; } }
+
+/* Marquee & Animations */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-33.33%); }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-50% - 1.2rem)); }
+}
+.animate-scroll {
+  animation: scroll 30s linear infinite;
+}
+.animate-scroll-reverse {
+  animation: scroll 30s linear infinite reverse;
+}
+
+@keyframes dash {
+  to { background-position: 100% 0%, 0% 100%, 0% 0%, 100% 100%; }
+}
+.animate-dash {
+  background: linear-gradient(90deg, #5aa469 50%, transparent 50%),
+              linear-gradient(90deg, #5aa469 50%, transparent 50%),
+              linear-gradient(0deg, #5aa469 50%, transparent 50%),
+              linear-gradient(0deg, #5aa469 50%, transparent 50%);
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-size: 9px 2px, 9px 2px, 2px 9px, 2px 9px;
+  background-position: 0% 0%, 100% 100%, 0% 100%, 100% 0px;
+  animation: dash 5s linear infinite;
+}

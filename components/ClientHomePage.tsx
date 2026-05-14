@@ -39,65 +39,82 @@ export default function ClientHomePage() {
   const counterStatsRef = useRef<HTMLDivElement>(null);
   const aboutStatsRef = useRef<HTMLDivElement>(null);
 
-  // Vertical Notice Scrolling Hook
-  const useVerticalNotice = (notices: any[], boardType: string) => {
+  // Vertical Notice Scrolling Hook - Vanilla JS for smoothest loop
+  const useVerticalNotice = (notices: any[]) => {
     const noticeRef = useRef<HTMLUListElement>(null);
-    const timelineRef = useRef<gsap.core.Timeline | null>(null);
+    const requestRef = useRef<number | null>(null);
+    const posRef = useRef(0);
+    const isPaused = useRef(false);
+    const speed = 40; // Pixels per second
 
     useEffect(() => {
-      if (!noticeRef.current || !notices || notices.length === 0) return;
-
       const container = noticeRef.current;
-      const items = Array.from(container.children) as HTMLElement[];
+      if (!container || !notices || notices.length === 0) return;
+
+      const items = Array.from(container.querySelectorAll('li.js_notice_item')) as HTMLElement[];
       if (items.length === 0) return;
+
+      // Cleanup
+      const clones = container.querySelectorAll('.js_notice_clone');
+      clones.forEach(clone => clone.remove());
 
       const itemHeight = items[0].offsetHeight;
       const totalHeight = itemHeight * notices.length;
 
-      gsap.set(container, { position: 'relative', y: 0 });
+      // Clone items for seamless loop
+      items.forEach((item: any) => {
+        const clone = item.cloneNode(true) as HTMLElement;
+        clone.classList.add('js_notice_clone');
+        clone.classList.remove('js_notice_item');
+        container.appendChild(clone);
+      });
 
-      if (timelineRef.current) timelineRef.current.kill();
-      
-      timelineRef.current = gsap.timeline({ repeat: -1 })
-        .to(container, {
-          y: -totalHeight,
-          duration: notices.length * 3,
-          ease: 'none',
-          modifiers: {
-            y: gsap.utils.unitize((y) => {
-              const value = parseFloat(y) % totalHeight;
-              return value <= -totalHeight ? 0 : value;
-            }),
-          },
-        });
+      let lastTime = performance.now();
+
+      const animate = (time: number) => {
+        if (!isPaused.current) {
+          const deltaTime = (time - lastTime) / 1000;
+          posRef.current -= speed * deltaTime;
+
+          if (Math.abs(posRef.current) >= totalHeight) {
+            posRef.current += totalHeight;
+          }
+
+          container.style.transform = `translate3d(0, ${posRef.current}px, 0)`;
+        }
+        lastTime = time;
+        requestRef.current = requestAnimationFrame(animate);
+      };
+
+      requestRef.current = requestAnimationFrame(animate);
 
       return () => {
-        if (timelineRef.current) timelineRef.current.kill();
+        if (requestRef.current) cancelAnimationFrame(requestRef.current);
       };
     }, [notices]);
 
-    const handleMouseEnter = () => timelineRef.current?.pause();
-    const handleMouseLeave = () => timelineRef.current?.play();
+    const handleMouseEnter = () => { isPaused.current = true; };
+    const handleMouseLeave = () => { isPaused.current = false; };
 
     return { noticeRef, handleMouseEnter, handleMouseLeave };
   };
 
-  // Mock data for now (since we are restoring design first)
+  // Mock data for now
   useEffect(() => {
     const mockNotices = [
-      { id: 1, date: '12 May', title: 'Construction of New Office Building in Pabna' },
-      { id: 2, date: '10 May', title: 'Tender for Interior Decoration of BTC HQ' },
-      { id: 3, date: '08 May', title: 'Winner List for Project A-124 Announced' },
-      { id: 4, date: '05 May', title: 'Land Surveying Contract Opportunity' },
-      { id: 5, date: '01 May', title: 'Annual Maintenance Tender 2024' },
+      { id: 1, date: '১২ মে', title: 'পাবনায় নতুন অফিস ভবন নির্মাণ কাজ ও দরপত্র বিজ্ঞপ্তি' },
+      { id: 2, date: '১০ মে', title: 'বিটিসি সদর দপ্তরের অভ্যন্তরীণ সাজসজ্জার জন্য দরপত্র' },
+      { id: 3, date: '০৮ মে', title: 'প্রকল্প এ-১২৪ এর বিজয়ী তালিকা ঘোষণা করা হয়েছে' },
+      { id: 4, date: '০৫ মে', title: 'ভূমি জরিপ চুক্তির সুযোগ - দ্রুত আবেদন করুন' },
+      { id: 5, date: '০১ মে', title: 'বার্ষিক রক্ষণাবেক্ষণ টেন্ডার ২০২৪ প্রকাশিত' },
     ];
     setTenderNotices(mockNotices);
     setWinnerNotices(mockNotices);
     setLoading(false);
   }, []);
 
-  const { noticeRef: tenderNoticeRef, handleMouseEnter: tenderMouseEnter, handleMouseLeave: tenderMouseLeave } = useVerticalNotice(tenderNotices, 'tender');
-  const { noticeRef: winnerNoticeRef, handleMouseEnter: winnerMouseEnter, handleMouseLeave: winnerMouseLeave } = useVerticalNotice(winnerNotices, 'winner');
+  const { noticeRef: tenderNoticeRef, handleMouseEnter: tenderMouseEnter, handleMouseLeave: tenderMouseLeave } = useVerticalNotice(tenderNotices);
+  const { noticeRef: winnerNoticeRef, handleMouseEnter: winnerMouseEnter, handleMouseLeave: winnerMouseLeave } = useVerticalNotice(winnerNotices);
 
   // Register GSAP Counter Animations
   useEffect(() => {
@@ -136,17 +153,17 @@ export default function ClientHomePage() {
   }, []);
 
   return (
-    <div className="bg-[var(--secondary-color)]">
+    <div className="bg-secondary">
       {/* Hero Section */}
       <div className="hero pt-[60px] pb-[80px]">
         <div className="custom-container">
           <div className="flex flex-wrap lg:flex-nowrap gap-10">
             <div className="w-full lg:w-1/2">
               <div className="flex justify-center lg:justify-start mb-6">
-                <span className="bg-[var(--shade-1)] text-[var(--text-1)] px-5 py-1.5 rounded-full text-sm font-medium">Your Safe Innovation</span>
+                <span className="bg-shade-1 text-text-1 px-5 py-1.5 rounded-full text-sm font-medium">Your Safe Innovation</span>
               </div>
-              <h1 className="text-4xl lg:text-5xl font-bold text-[var(--text-1)] mb-8 uppercase leading-tight text-center lg:text-left">
-                Welcome to the <span className="text-[var(--primary-color)]">Building Technology</span> & Consultant <span className="text-[var(--primary-color)]">!!!</span>
+              <h1 className="text-4xl lg:text-5xl font-bold text-text-1 mb-8 uppercase leading-tight text-center lg:text-left">
+                Welcome to the <span className="text-primary">Building Technology</span> & Consultant <span className="text-primary">!!!</span>
               </h1>
               <div className="rounded-3xl overflow-hidden shadow-2xl">
                 <Image src={HeroImage} alt="Hero" className="w-full object-cover" />
@@ -154,45 +171,44 @@ export default function ClientHomePage() {
             </div>
 
             <div className="w-full lg:w-1/2 flex flex-col gap-4">
-              {/* Tender Notice Board */}
-              <div className="bg-white border border-[var(--ac-1)] rounded-3xl overflow-hidden h-[350px] flex flex-col shadow-sm" onMouseEnter={tenderMouseEnter} onMouseLeave={tenderMouseLeave}>
-                <h3 className="bg-[var(--primary-color)] text-white text-center py-3 font-bold text-xl uppercase">EGP TENDER NOTICES</h3>
+              <div className="bg-white border border-ac-1 rounded-3xl overflow-hidden h-[350px] flex flex-col shadow-sm" onMouseEnter={tenderMouseEnter} onMouseLeave={tenderMouseLeave}>
+                <h3 className="bg-primary text-white text-center py-3 font-bold text-xl uppercase">ইজিপি দরপত্র বিজ্ঞপ্তি</h3>
                 <div className="flex-1 overflow-hidden relative">
                   <ul className="notice-list" ref={tenderNoticeRef}>
                     {tenderNotices.map((notice) => (
-                      <li key={notice.id} className="flex items-center gap-5 p-4 border-b border-[var(--ac-1)] hover:bg-[var(--shade-1)] transition cursor-pointer">
-                        <div className="notice-date flex-shrink-0 w-14 h-14 bg-[var(--primary-color)] text-white rounded-xl flex flex-col items-center justify-center font-bold">
+                      <li key={notice.id} className="js_notice_item flex items-center gap-5 p-4 border-b border-ac-1 hover:bg-shade-1 transition cursor-pointer">
+                        <div className="notice-date flex-shrink-0 w-14 h-14 bg-primary text-white rounded-xl flex flex-col items-center justify-center font-bold">
                            <span className="text-xl leading-none">{notice.date.split(' ')[0]}</span>
                            <span className="text-[10px] uppercase opacity-80">{notice.date.split(' ')[1]}</span>
                         </div>
-                        <span className="text-[var(--text-2)] font-medium text-sm line-clamp-2">{notice.title}</span>
+                        <span className="text-text-2 font-medium text-sm line-clamp-2">{notice.title}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
                 <div className="p-4 text-center">
-                  <Link href="/notices" className="bg-[var(--primary-color)] text-white px-8 py-2 rounded-tr-xl rounded-br-xl rounded-bl-xl font-bold text-sm uppercase hover:bg-[var(--text-1)] transition">View All Notice</Link>
+                  <Link href="/egp-notice" className="bg-primary text-white !text-white px-8 py-2 rounded-tr-xl rounded-br-xl rounded-bl-xl font-bold text-sm uppercase hover:bg-text-1 transition inline-block">সব দেখুন</Link>
                 </div>
               </div>
 
               {/* Winner Notice Board */}
-              <div className="bg-white border border-[var(--ac-1)] rounded-3xl overflow-hidden h-[350px] flex flex-col shadow-sm" onMouseEnter={winnerMouseEnter} onMouseLeave={winnerMouseLeave}>
-                <h3 className="bg-[var(--primary-color)] text-white text-center py-3 font-bold text-xl uppercase">WINNER LIST</h3>
+              <div className="bg-white border border-ac-1 rounded-3xl overflow-hidden h-[350px] flex flex-col shadow-sm" onMouseEnter={winnerMouseEnter} onMouseLeave={winnerMouseLeave}>
+                <h3 className="bg-primary text-white text-center py-3 font-bold text-xl uppercase">বিজয়ী তালিকা</h3>
                 <div className="flex-1 overflow-hidden relative">
                   <ul className="notice-list" ref={winnerNoticeRef}>
                     {winnerNotices.map((winner) => (
-                      <li key={winner.id} className="flex items-center gap-5 p-4 border-b border-[var(--ac-1)] hover:bg-[var(--shade-1)] transition cursor-pointer">
-                        <div className="notice-date flex-shrink-0 w-14 h-14 bg-[var(--primary-color)] text-white rounded-xl flex flex-col items-center justify-center font-bold">
+                      <li key={winner.id} className="js_notice_item flex items-center gap-5 p-4 border-b border-ac-1 hover:bg-shade-1 transition cursor-pointer">
+                        <div className="notice-date flex-shrink-0 w-14 h-14 bg-primary text-white rounded-xl flex flex-col items-center justify-center font-bold">
                            <span className="text-xl leading-none">{winner.date.split(' ')[0]}</span>
                            <span className="text-[10px] uppercase opacity-80">{winner.date.split(' ')[1]}</span>
                         </div>
-                        <span className="text-[var(--text-2)] font-medium text-sm line-clamp-2">{winner.title}</span>
+                        <span className="text-text-2 font-medium text-sm line-clamp-2">{winner.title}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
                 <div className="p-4 text-center">
-                  <Link href="/winners" className="bg-[var(--primary-color)] text-white px-8 py-2 rounded-tr-xl rounded-br-xl rounded-bl-xl font-bold text-sm uppercase hover:bg-[var(--text-1)] transition">View All Winners</Link>
+                  <Link href="/winner-list" className="bg-primary text-white !text-white px-8 py-2 rounded-tr-xl rounded-br-xl rounded-bl-xl font-bold text-sm uppercase hover:bg-text-1 transition inline-block">সব দেখুন</Link>
                 </div>
               </div>
             </div>
@@ -203,10 +219,10 @@ export default function ClientHomePage() {
       {/* Services Section */}
       <div id="services" className="py-20">
         <div className="custom-container">
-          <div className="bg-[var(--shade-1)] rounded-[60px] p-10 lg:p-20 relative overflow-hidden">
+          <div className="bg-shade-1 rounded-[60px] p-10 lg:p-20 relative overflow-hidden">
             <div className="text-center mb-16 relative z-10">
-              <span className="bg-[var(--primary-color)] text-white px-6 py-1.5 rounded-full font-bold text-sm uppercase">What We Offer</span>
-              <h2 className="text-3xl lg:text-4xl font-bold text-[var(--text-1)] mt-6 uppercase leading-tight max-w-2xl mx-auto">We Provide Excellent Service To Our Customers</h2>
+              <span className="bg-primary text-white px-6 py-1.5 rounded-full font-bold text-sm uppercase">What We Offer</span>
+              <h2 className="text-3xl lg:text-4xl font-bold text-text-1 mt-6 uppercase leading-tight max-w-2xl mx-auto">We Provide Excellent Service To Our Customers</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -220,13 +236,13 @@ export default function ClientHomePage() {
                ].map((service, i) => (
                  <div key={i} className="text-center group">
                    <div className="mb-6 flex justify-center">
-                     <div className="w-16 h-16 bg-[var(--primary-color)] rounded-xl animate-dash flex items-center justify-center">
+                     <div className="w-16 h-16 bg-primary rounded-xl animate-dash flex items-center justify-center">
                         <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                      </div>
                    </div>
-                   <h3 className="text-xl font-bold text-[var(--text-1)] uppercase mb-4">{service.title}</h3>
-                   <p className="text-[var(--text-2)] font-secondary leading-relaxed">{service.desc}</p>
-                   <button className="mt-6 bg-[var(--text-1)] text-white px-8 py-2 rounded-tr-xl rounded-br-xl rounded-bl-xl font-bold text-sm uppercase group-hover:bg-[var(--primary-color)] transition">Read More</button>
+                   <h3 className="text-xl font-bold text-text-1 uppercase mb-4">{service.title}</h3>
+                   <p className="text-text-2 font-secondary leading-relaxed">{service.desc}</p>
+                   <button className="mt-6 bg-text-1 text-white px-8 py-2 rounded-tr-xl rounded-br-xl rounded-bl-xl font-bold text-sm uppercase group-hover:bg-primary transition">Read More</button>
                  </div>
                ))}
             </div>
@@ -245,11 +261,11 @@ export default function ClientHomePage() {
               { label: 'Success Rate', val: 86, suffix: '%' }
             ].map((stat, i) => (
               <div key={i}>
-                <div className="text-5xl lg:text-6xl font-bold text-[var(--text-1)] mb-2 flex justify-center items-baseline">
+                <div className="text-5xl lg:text-6xl font-bold text-text-1 mb-2 flex justify-center items-baseline">
                   <span className="numbers" data-target={stat.val}>0</span>
-                  <span className="text-[var(--primary-color)]">{stat.suffix}</span>
+                  <span className="text-primary">{stat.suffix}</span>
                 </div>
-                <div className="text-sm font-bold text-[var(--text-2)] uppercase tracking-widest">{stat.label}</div>
+                <div className="text-sm font-bold text-text-2 uppercase tracking-widest">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -265,33 +281,33 @@ export default function ClientHomePage() {
                  <Image src={AboutImage} alt="About" className="w-full" />
               </div>
               <div className="absolute top-10 -left-10 bg-white p-6 rounded-2xl shadow-xl text-center hidden md:block">
-                 <div className="text-3xl font-bold text-[var(--text-1)]"><span className="counters" data-target="1000">0</span>+</div>
-                 <div className="text-xs font-bold text-[var(--text-2)] uppercase">Tenderer</div>
+                 <div className="text-3xl font-bold text-text-1"><span className="counters" data-target="1000">0</span>+</div>
+                 <div className="text-xs font-bold text-text-2 uppercase">Tenderer</div>
               </div>
               <div className="absolute bottom-20 -right-10 bg-white p-6 rounded-2xl shadow-xl text-center hidden md:block">
-                 <div className="text-3xl font-bold text-[var(--text-1)]"><span className="counters" data-target="700">0</span>+</div>
-                 <div className="text-xs font-bold text-[var(--text-2)] uppercase">Design Clients</div>
+                 <div className="text-3xl font-bold text-text-1"><span className="counters" data-target="700">0</span>+</div>
+                 <div className="text-xs font-bold text-text-2 uppercase">Design Clients</div>
               </div>
             </div>
             <div className="w-full lg:w-1/2">
-              <span className="bg-[var(--primary-color)] text-white px-6 py-1.5 rounded-full font-bold text-sm uppercase">About Us</span>
-              <h2 className="text-3xl lg:text-4xl font-bold text-[var(--text-1)] mt-6 uppercase leading-tight mb-8">Precision, Quality, and Excellence in Every Project</h2>
-              <p className="text-lg text-[var(--text-2)] font-secondary leading-relaxed mb-10">We specialize in delivering top-tier construction services, including soil testing, architectural design, interior design, land surveys, and more. Our expert team is committed to ensuring the success of your projects with precision and creativity.</p>
-              <button className="bg-[var(--primary-color)] text-white px-10 py-3 rounded-tr-xl rounded-br-xl rounded-bl-xl font-bold text-sm uppercase hover:bg-[var(--text-1)] transition">Read More</button>
+              <span className="bg-primary text-white px-6 py-1.5 rounded-full font-bold text-sm uppercase">About Us</span>
+              <h2 className="text-3xl lg:text-4xl font-bold text-text-1 mt-6 uppercase leading-tight mb-8">Precision, Quality, and Excellence in Every Project</h2>
+              <p className="text-lg text-text-2 font-secondary leading-relaxed mb-10">We specialize in delivering top-tier construction services, including soil testing, architectural design, interior design, land surveys, and more. Our expert team is committed to ensuring the success of your projects with precision and creativity.</p>
+              <button className="bg-primary text-white px-10 py-3 rounded-tr-xl rounded-br-xl rounded-bl-xl font-bold text-sm uppercase hover:bg-text-1 transition">Read More</button>
             </div>
           </div>
         </div>
       </div>
 
       {/* Projects Section */}
-      <div id="projects" className="py-20 bg-[var(--shade-1)] rounded-[80px_80px_0_0]">
+      <div id="projects" className="py-20 bg-shade-1 rounded-[80px_80px_0_0]">
         <div className="custom-container">
           <div className="flex justify-between items-end mb-16">
             <div>
-              <span className="bg-[var(--primary-color)] text-white px-6 py-1.5 rounded-full font-bold text-sm uppercase">Our Best Projects</span>
-              <h2 className="text-3xl lg:text-4xl font-bold text-[var(--text-1)] mt-6 uppercase leading-tight">Showcasing excellence in every build.</h2>
+              <span className="bg-primary text-white px-6 py-1.5 rounded-full font-bold text-sm uppercase">Our Best Projects</span>
+              <h2 className="text-3xl lg:text-4xl font-bold text-text-1 mt-6 uppercase leading-tight">Showcasing excellence in every build.</h2>
             </div>
-            <button className="hidden md:block bg-[var(--primary-color)] text-white px-10 py-3 rounded-tr-xl rounded-br-xl rounded-bl-xl font-bold text-sm uppercase hover:bg-[var(--text-1)] transition">Browse All Projects</button>
+            <button className="hidden md:block bg-primary text-white px-10 py-3 rounded-tr-xl rounded-br-xl rounded-bl-xl font-bold text-sm uppercase hover:bg-text-1 transition">Browse All Projects</button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -306,16 +322,16 @@ export default function ClientHomePage() {
                <div key={i} className="group">
                  <div className="rounded-[32px] overflow-hidden relative aspect-[16/11] mb-6 shadow-lg">
                     <Image src={project.img} alt={project.title} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" />
-                    <span className="absolute bottom-5 left-5 bg-white text-[var(--text-1)] px-5 py-1 rounded-full font-bold text-xs uppercase">{project.tag}</span>
+                    <span className="absolute bottom-5 left-5 bg-white text-text-1 px-5 py-1 rounded-full font-bold text-xs uppercase">{project.tag}</span>
                  </div>
-                 <h3 className="text-xl font-bold text-[var(--text-1)] uppercase mb-4 hover:text-[var(--primary-color)] transition cursor-pointer">{project.title}</h3>
+                 <h3 className="text-xl font-bold text-text-1 uppercase mb-4 hover:text-primary transition cursor-pointer">{project.title}</h3>
                  <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
-                       <svg className="w-5 h-5 text-[var(--primary-color)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                       <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     </div>
                     <div>
-                       <div className="text-[var(--primary-color)] font-bold text-xs">Project Duration</div>
-                       <div className="text-[var(--text-1)] font-bold text-sm opacity-60">2023-2024</div>
+                       <div className="text-primary font-bold text-xs">Project Duration</div>
+                       <div className="text-text-1 font-bold text-sm opacity-60">2023-2024</div>
                     </div>
                  </div>
                </div>
@@ -325,10 +341,10 @@ export default function ClientHomePage() {
       </div>
 
       {/* Client Logo Slider */}
-      <div className="py-20 bg-[var(--ac-2)]">
+      <div className="py-20 bg-ac-2">
         <div className="text-center mb-16">
-          <span className="bg-[var(--primary-color)] text-white px-6 py-1.5 rounded-full font-bold text-sm uppercase">Our Top Clients</span>
-          <h2 className="text-3xl lg:text-4xl font-bold text-[var(--text-1)] mt-6 uppercase leading-tight max-w-2xl mx-auto">Trusted by innovators and leaders worldwide.</h2>
+          <span className="bg-primary text-white px-6 py-1.5 rounded-full font-bold text-sm uppercase">Our Top Clients</span>
+          <h2 className="text-3xl lg:text-4xl font-bold text-text-1 mt-6 uppercase leading-tight max-w-2xl mx-auto">Trusted by innovators and leaders worldwide.</h2>
         </div>
 
         <div className="overflow-hidden mb-6">
@@ -351,9 +367,9 @@ export default function ClientHomePage() {
       {/* CTA Section */}
       <section className="py-20 bg-white text-center">
         <div className="custom-container">
-           <div className="bg-[var(--primary-color)] rounded-[40px] p-12 lg:p-20 shadow-2xl relative z-10 -mb-40">
+           <div className="bg-primary rounded-[40px] p-12 lg:p-20 shadow-2xl relative z-10 -mb-40">
              <h2 className="text-3xl lg:text-5xl font-bold text-white uppercase leading-tight mb-10">Looking for someone who can transform ideas?</h2>
-             <Link href="/contact" className="bg-white text-[var(--text-1)] px-12 py-4 rounded-tr-xl rounded-br-xl rounded-bl-xl font-bold text-lg uppercase hover:bg-[var(--text-1)] hover:text-white transition inline-block">Let's Discuss</Link>
+             <Link href="/contact" className="bg-white text-text-1 px-12 py-4 rounded-tr-xl rounded-br-xl rounded-bl-xl font-bold text-lg uppercase hover:bg-text-1 hover:text-white transition inline-block">Let's Discuss</Link>
            </div>
         </div>
       </section>

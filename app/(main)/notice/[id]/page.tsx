@@ -2,10 +2,23 @@ import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 
 export default async function SingleNoticePage({ params }: { params: { id: string } }) {
+  // Mocked data for frontend preview
+  const notice = {
+    id: params.id,
+    title: "Sample Notice Title",
+    category: "LTM",
+    content: "This is a sample notice content for frontend preview purposes.",
+    publishDate: new Date(),
+    lastDate: new Date(),
+    createdBy: { name: "Admin" },
+    filePath: null
+  };
+  /*
   const notice = await prisma.notice.findUnique({
     where: { id: params.id },
     include: { createdBy: { select: { name: true } } }
   });
+  */
 
   if (!notice) {
     notFound();

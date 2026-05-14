@@ -26,40 +26,40 @@ export default function ContactForm() {
   }
 
   return (
-    <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100">
-      <h3 className="text-2xl font-bold text-gray-900 uppercase mb-8 text-center">Send Us a Message</h3>
+    <div className="bg-white p-8 rounded-[32px] shadow-sm border border-shade-1">
+      <h3 className="text-2xl font-bold text-text-1 uppercase mb-8 text-center">Send Us a Message</h3>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-600">Full Name</label>
+          <label className="text-sm font-semibold text-text-2">Full Name</label>
           <input 
             type="text" 
             name="name" 
             required 
             placeholder="Your name"
-            className="w-full bg-gray-50 border-b-2 border-gray-100 px-4 py-3 outline-none focus:border-[var(--primary-color)] transition"
+            className="w-full bg-shade-1/20 border-b-2 border-shade-1 px-4 py-3 outline-none focus:border-primary transition"
           />
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-600">Email Address</label>
+          <label className="text-sm font-semibold text-text-2">Email Address</label>
           <input 
             type="email" 
             name="email" 
             required 
             placeholder="Your email"
-            className="w-full bg-gray-50 border-b-2 border-gray-100 px-4 py-3 outline-none focus:border-[var(--primary-color)] transition"
+            className="w-full bg-shade-1/20 border-b-2 border-shade-1 px-4 py-3 outline-none focus:border-primary transition"
           />
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-600">Message</label>
+          <label className="text-sm font-semibold text-text-2">Message</label>
           <textarea 
             name="message" 
             required 
             rows={4}
             placeholder="How can we help you?"
-            className="w-full bg-gray-50 border-b-2 border-gray-100 px-4 py-3 outline-none focus:border-[var(--primary-color)] transition resize-none"
+            className="w-full bg-shade-1/20 border-b-2 border-shade-1 px-4 py-3 outline-none focus:border-primary transition resize-none"
           ></textarea>
         </div>
 
@@ -78,7 +78,7 @@ export default function ContactForm() {
         <button 
           type="submit" 
           disabled={loading}
-          className="w-full bg-[var(--text-1)] text-white font-bold py-4 rounded-2xl hover:bg-[var(--primary-color)] transition duration-300 shadow-lg shadow-gray-200 disabled:opacity-50"
+          className="w-full bg-text-1 text-white font-bold py-4 rounded-2xl hover:bg-primary transition duration-300 shadow-lg disabled:opacity-50"
         >
           {loading ? "SENDING..." : "SEND MESSAGE"}
         </button>

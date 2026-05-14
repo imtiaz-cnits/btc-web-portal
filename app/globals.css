@@ -1,123 +1,229 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #5AA469;
+  /* Colors */
+  --color-primary: #5aa469;
   --color-secondary: #ffffff;
-  --color-shade-1: #F4FFF2;
-  --color-text-1: #171717;
-  --color-text-2: #454545;
   --color-ac-1: #c6c6c6;
   --color-ac-2: #eeeeee;
+  --color-shade-1: #f4fff2;
+  --color-shade-2: #facfae;
+  --color-text-1: #171717;
+  --color-text-2: #454545;
+  --color-bg: #000000;
 
+  /* Fonts */
   --font-primary: "Space Grotesk", sans-serif;
   --font-secondary: "Albert Sans", sans-serif;
+  --font-bangla: "Baloo Bhai 2", cursive;
 }
+
+@source "../components/**/*.{js,ts,jsx,tsx}";
+@source "../app/**/*.{js,ts,jsx,tsx}";
 
 :root {
-  --primary-color: #5AA469;
+  /* Standard CSS Variables for backward compatibility and non-tailwind use */
+  --primary-color: #5aa469;
   --secondary-color: #ffffff;
   --ac-1: #c6c6c6;
-  --ac-2: #eeeeee; 
-  --shade-1: #F4FFF2;
+  --ac-2: #eeeeee;
+  --shade-1: #f4fff2;
+  --shade-2: #facfae;
   --text-1: #171717;
   --text-2: #454545;
+  --primary-font: "Space Grotesk", sans-serif;
+  --secondary-font: "Albert Sans", sans-serif;
+  --bangla-font: "Baloo Bhai 2", cursive;
 }
 
-/* Force global font */
-html, body, * {
-  font-family: "Space Grotesk", sans-serif !important;
+/* Explicit Navigation Classes for fallback */
+.nav-link-item {
+  color: #171717 !important;
+  transition: color 0.3s ease;
+  font-family: var(--primary-font);
 }
 
-/* Specific font utilities */
-.font-primary {
-  font-family: "Space Grotesk", sans-serif !important;
+.nav-link-item:hover,
+.nav-link-item.active {
+  color: #5aa469 !important;
 }
 
-.font-secondary {
-  font-family: "Albert Sans", sans-serif !important;
+.white-text-important {
+  color: #ffffff !important;
+}
+
+/* Dropdown Styles */
+.dropdown-content {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 14rem;
+  background-color: var(--secondary-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  max-height: 0;
+  visibility: hidden;
+  transition: all 0.4s ease;
+  z-index: 10;
+  overflow: hidden;
+  border: 1px solid var(--ac-2);
+}
+
+.dropdown:hover .dropdown-content {
+  opacity: 1;
+  max-height: 500px;
+  visibility: visible;
+}
+
+.dropdown-content a {
+  display: block;
+  padding: 12px 20px;
+  color: var(--text-1);
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.dropdown-content a:hover,
+.dropdown-content a.active {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+}
+
+.rotate-icon {
+  transition: transform 0.3s ease;
+}
+
+.dropdown:hover .rotate-icon {
+  transform: rotate(180deg);
 }
 
 /* Global Reset */
 * {
-  box-sizing: border-box;
   scroll-behavior: smooth;
 }
 
 body {
-  background: var(--secondary-color) !important;
+  background: var(--secondary-color);
   color: var(--text-1);
-  margin: 0;
-  padding: 0;
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: "Space Grotesk", sans-serif !important;
+h1,
+h2,
+h3,
+h4,
+h5 {
+  margin-top: 0;
   font-weight: 700;
+}
+
+h6 {
+  font-family: var(--secondary-font);
+}
+
+a {
+  text-decoration: none !important;
+  color: inherit;
+}
+
+p {
+  color: var(--text-2);
+  font-family: var(--secondary-font);
+  font-size: 16px;
+  line-height: 28.8px;
+}
+
+ul {
+  list-style: none;
   margin: 0;
+  padding: 0;
 }
 
-p, span, div, a, li, input, button, textarea {
-  font-family: inherit;
-}
-
-/* Container Scaling */
 .custom-container {
   width: 100%;
   margin-left: auto;
   margin-right: auto;
-  padding-left: 1rem; /* px-4 */
+  padding-left: 1rem;
   padding-right: 1rem;
 }
 
-@media (min-width: 640px) { 
-  .custom-container { 
-    max-width: 640px; 
-    padding-left: 1.5rem; /* px-6 */
-    padding-right: 1.5rem;
-  } 
+@media (min-width: 640px) {
+  .custom-container {
+    max-width: 640px;
+  }
 }
-@media (min-width: 768px) { .custom-container { max-width: 768px; } }
-@media (min-width: 1024px) { 
-  .custom-container { 
-    max-width: 1024px; 
-    padding-left: 2rem; /* px-8 */
+@media (min-width: 768px) {
+  .custom-container {
+    max-width: 768px;
+  }
+}
+@media (min-width: 1024px) {
+  .custom-container {
+    max-width: 1024px;
+    padding-left: 2rem;
     padding-right: 2rem;
-  } 
+  }
 }
-@media (min-width: 1280px) { .custom-container { max-width: 1280px; } }
-@media (min-width: 1480px) { .custom-container { max-width: 1280px; } }
-
-/* Marquee & Animations */
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-33.33%); }
+@media (min-width: 1280px) {
+  .custom-container {
+    max-width: 1280px;
+  }
 }
-.animate-marquee {
-  animation: marquee 30s linear infinite;
-}
-
-@keyframes scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(calc(-50% - 1.2rem)); }
-}
-.animate-scroll {
-  animation: scroll 30s linear infinite;
-}
-.animate-scroll-reverse {
-  animation: scroll 30s linear infinite reverse;
+@media (min-width: 1480px) {
+  .custom-container {
+    max-width: 1480px;
+  }
 }
 
+/* Services Section Specific Dash Animation */
 @keyframes dash {
-  to { background-position: 100% 0%, 0% 100%, 0% 0%, 100% 100%; }
+  to {
+    background-position:
+      100% 0%,
+      0% 100%,
+      0% 0%,
+      100% 100%;
+  }
 }
-.animate-dash {
-  background: linear-gradient(90deg, #5aa469 50%, transparent 50%),
-              linear-gradient(90deg, #5aa469 50%, transparent 50%),
-              linear-gradient(0deg, #5aa469 50%, transparent 50%),
-              linear-gradient(0deg, #5aa469 50%, transparent 50%);
+
+.service-icon-box {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  background:
+    linear-gradient(90deg, #5aa469 50%, transparent 50%),
+    linear-gradient(90deg, #5aa469 50%, transparent 50%),
+    linear-gradient(0deg, #5aa469 50%, transparent 50%),
+    linear-gradient(0deg, #5aa469 50%, transparent 50%);
   background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
-  background-size: 9px 2px, 9px 2px, 2px 9px, 2px 9px;
-  background-position: 0% 0%, 100% 100%, 0% 100%, 100% 0px;
+  background-size:
+    9px 2px,
+    9px 2px,
+    2px 9px,
+    2px 9px;
+  background-position:
+    0% 0%,
+    100% 100%,
+    0% 100%,
+    100% 0%;
+  border-radius: 12px 12px 12px 0px;
+  padding: 10px;
   animation: dash 5s linear infinite;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.service-icon-box::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  width: 50px;
+  height: 50px;
+  border-radius: 12px 12px 12px 0px;
+  background-color: var(--primary-color);
+  z-index: -1;
 }

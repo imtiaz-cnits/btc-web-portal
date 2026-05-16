@@ -26,41 +26,63 @@ const AboutPage: React.FC = () => {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
-    let triggers: ScrollTrigger[] = [];
-
-    const counterNumbers = counterStatsRef.current?.querySelectorAll(".nmbr");
-    if (counterNumbers && counterNumbers.length > 0) {
-      counterNumbers.forEach((counter) => {
-        const target = parseInt(counter.getAttribute("data-target") || "0");
-        const trigger = ScrollTrigger.create({
-          trigger: counterStatsRef.current,
-          start: "top 80%",
-          toggleActions: "play none none none",
-          onEnter: () => {
-            gsap.fromTo(
-              counter,
-              { innerText: 0 },
-              {
+    let ctx = gsap.context(() => {
+      // Counter Counting logic
+      const counterNumbers = counterStatsRef.current?.querySelectorAll(".nmbr");
+      if (counterNumbers && counterNumbers.length > 0) {
+        counterNumbers.forEach((counter) => {
+          const target = parseInt(counter.getAttribute("data-target") || "0");
+          ScrollTrigger.create({
+            trigger: counterStatsRef.current,
+            start: "top 80%",
+            toggleActions: "play none none none",
+            onEnter: () => {
+              gsap.fromTo(counter, { innerText: 0 }, {
                 innerText: target,
                 duration: 2,
                 ease: "power1.out",
                 snap: { innerText: 1 },
                 onUpdate: function () {
-                  counter.textContent = Math.floor(
-                    parseFloat(this.targets()[0].innerText),
-                  ).toString();
+                  counter.textContent = Math.floor(parseFloat(this.targets()[0].innerText)).toString();
                 },
-              },
-            );
+              });
+            },
+          });
+        });
+      }
+
+      // Simple Fade Up for all sections
+      const items = [
+        ".about_us .wrapper",
+        ".about_us .contact_theame",
+        ".counter_box1",
+        ".counter_box2",
+        ".counter_box3",
+        ".counter_box4",
+        ".our_mission .heading_wrap",
+        ".our_mission .heading_wrap2",
+        ".our_mission .images1",
+        ".our_mission .images2",
+        ".team"
+      ];
+
+      items.forEach(sel => {
+        gsap.fromTo(sel, { y: 50, opacity: 0 }, {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          scrollTrigger: {
+            trigger: sel,
+            start: "top 90%",
+            toggleActions: "play none none none",
           },
         });
-        triggers.push(trigger);
       });
-    }
 
-    return () => {
-      triggers.forEach((trigger) => trigger.kill());
-    };
+      setTimeout(() => ScrollTrigger.refresh(), 500);
+    });
+
+    return () => ctx.revert();
   }, []);
 
   return (
@@ -123,13 +145,13 @@ const AboutPage: React.FC = () => {
                 </h3>
               </div>
             </div>
-            <div className="w-full flex items-stretch">
-              <div className="contact_theame w-full rounded-[24px_25px_24px_0px] overflow-hidden mt-5 lg:mt-0 relative min-h-[300px]">
+            <div className="w-full lg:w-1/2 flex items-stretch mt-5 lg:mt-0">
+              <div className="contact_theame w-full rounded-[24px_25px_24px_0px] overflow-hidden relative min-h-[300px]">
                 <Image
                   src={AboutHeroImage}
                   alt="About Hero"
                   fill
-                  className="object-cover"
+                  className="w-full h-full object-cover bg-center bg-cover"
                 />
               </div>
             </div>
@@ -148,7 +170,7 @@ const AboutPage: React.FC = () => {
                   ref={counterStatsRef}
                   className="stats grid grid-cols-2 gap-5 max-w-full"
                 >
-                  <div className="stats_item flex flex-col items-center justify-center bg-[var(--secondary-color)] py-6 px-2 rounded-md text-center shadow-md">
+                  <div className="stats_item counter_box1 flex flex-col items-center justify-center bg-[var(--secondary-color)] py-6 px-2 rounded-md text-center shadow-md">
                     <h2 className="count flex items-center gap-1 text-[48px] font-primary font-bold">
                       <span
                         className="nmbr font-primary text-[var(--text-1)]"
@@ -164,7 +186,7 @@ const AboutPage: React.FC = () => {
                       Total Tenders
                     </p>
                   </div>
-                  <div className="stats_item flex flex-col items-center justify-center bg-[var(--secondary-color)] py-5 rounded-md text-center shadow-md">
+                  <div className="stats_item counter_box2 flex flex-col items-center justify-center bg-[var(--secondary-color)] py-5 rounded-md text-center shadow-md">
                     <h2 className="count flex items-center gap-1 text-[48px] font-primary font-bold">
                       <span
                         className="nmbr font-primary text-[var(--text-1)]"
@@ -180,7 +202,7 @@ const AboutPage: React.FC = () => {
                       Design Clients
                     </p>
                   </div>
-                  <div className="stats_item flex flex-col items-center justify-center bg-[var(--secondary-color)] py-5 rounded-md text-center shadow-md">
+                  <div className="stats_item counter_box3 flex flex-col items-center justify-center bg-[var(--secondary-color)] py-5 rounded-md text-center shadow-md">
                     <h2 className="count flex items-center gap-1 text-[48px] font-primary font-bold">
                       <span
                         className="nmbr font-primary text-[var(--text-1)]"
@@ -196,7 +218,7 @@ const AboutPage: React.FC = () => {
                       Success Rate
                     </p>
                   </div>
-                  <div className="stats_item flex flex-col items-center justify-center bg-[var(--secondary-color)] py-5 rounded-md text-center shadow-md">
+                  <div className="stats_item counter_box4 flex flex-col items-center justify-center bg-[var(--secondary-color)] py-5 rounded-md text-center shadow-md">
                     <h2 className="count flex items-center gap-1 text-[48px] font-primary font-bold">
                       <span
                         className="nmbr font-primary text-[var(--text-1)]"

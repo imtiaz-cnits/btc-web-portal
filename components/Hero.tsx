@@ -61,14 +61,16 @@ const Hero: React.FC<HeroProps> = ({
             <div className="theame">
               <div className="flex justify-center lg:justify-start items-center gap-[10px] mb-[20px]">
                 <h1 className="text-[16px] font-primary text-text-1 bg-shade-1 px-[20px] py-[5px] rounded-[30px]">
-                  Your Safe Innovation
+                  Welcome to
                 </h1>
               </div>
+              <h1 className="text-[38px] lg:text-[52px] text-center lg:text-left font-bold text-text-1 mb-[0px] uppercase font-primary">
+                Building Technology &
+                <span className="text-primary"> Consultant. </span>
+              </h1>
               <h1 className="text-[38px] lg:text-[52px] text-center lg:text-left font-bold text-text-1 mb-[20px] uppercase font-primary">
-                Welcome to the
-                <span className="text-primary"> Building Technology </span>&
-                Consultant
-                <span className="text-primary"> !!!</span>
+                S. Alom EGP
+                <span className="text-primary"> Tender & Consultant.</span>
               </h1>
               <div className="lg:w-[92%] w-[100%] overflow-hidden rounded-[24px_0px_24px_24px]">
                 <Image

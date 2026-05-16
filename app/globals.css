@@ -15,7 +15,7 @@
   /* Fonts */
   --font-primary: "Space Grotesk", sans-serif;
   --font-secondary: "Albert Sans", sans-serif;
-  --font-bangla: "Baloo Bhai 2", cursive;
+  --font-bangla: "Tiro Bangla", serif;
 }
 
 @source "../components/**/*.{js,ts,jsx,tsx}";
@@ -33,7 +33,7 @@
   --text-2: #454545;
   --primary-font: "Space Grotesk", sans-serif;
   --secondary-font: "Albert Sans", sans-serif;
-  --bangla-font: "Baloo Bhai 2", cursive;
+  --bangla-font: "Tiro Bangla", serif;
 }
 
 /* Explicit Navigation Classes for fallback */

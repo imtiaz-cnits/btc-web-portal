@@ -1,14 +1,44 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 // Assets
 import ContactHeroImage from "@/assets/img/contact/contact-theame-image.png";
 import ContactBg from "@/assets/img/contact/contact-bg.png";
 
 const ContactPage: React.FC = () => {
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    
+    let ctx = gsap.context(() => {
+      const selectors = [
+        ".contact_us .breadcrumb",
+        ".contact_us .contact_theame"
+      ];
+
+      selectors.forEach(sel => {
+        gsap.fromTo(sel, { y: 50, opacity: 0 }, {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          scrollTrigger: {
+            trigger: sel,
+            start: "top 90%",
+            toggleActions: "play none none none",
+          },
+        });
+      });
+
+      setTimeout(() => ScrollTrigger.refresh(), 500);
+    });
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <div className="contact_page_wrapper pb-20">
       {/* Contact Start */}

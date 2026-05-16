@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import NoticeTable from "@/components/NoticeTable";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 // Assets
 import NoticeHeroImage from "@/assets/img/contact/contact-theame-image.png";
@@ -12,6 +14,41 @@ import ContactBg from "@/assets/img/contact/contact-bg.png";
 const WinnerListPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const noticesPerPage = 10;
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    
+    let ctx = gsap.context(() => {
+      // Hero Animations
+    gsap.from(".breadcrumb .title, .breadcrumb .wrap, .contact_theame", {
+      y: 50,
+      opacity: 0,
+      duration: 1,
+      stagger: 0.2,
+      ease: "power3.out"
+    });
+
+    // Content Animations
+    const animateOnScroll = (selector: string, vars: gsap.TweenVars) => {
+      const elements = gsap.utils.toArray(selector);
+      elements.forEach((el: any) => {
+        const trigger = ScrollTrigger.create({
+          trigger: el,
+          start: "top 85%",
+          onEnter: () => gsap.fromTo(el, vars.from || { opacity: 0, y: 50 }, { ...vars, opacity: 1, y: 0, x: 0 })
+        });
+      });
+    };
+
+    animateOnScroll(".single_notice", { duration: 1, ease: "power2.out" });
+
+      setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 500);
+    });
+
+    return () => ctx.revert();
+  }, []);
 
   // Mock data (will be replaced by TinaCMS later)
   const notices = [

@@ -9,6 +9,7 @@ import FooterLogo from "@/assets/icon/Logo.svg";
 
 const Footer: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
   // Show the back to top button when scrolled down
   useEffect(() => {
@@ -16,6 +17,7 @@ const Footer: React.FC = () => {
       setIsVisible(window.scrollY > 100);
     };
     window.addEventListener("scroll", handleScroll);
+    setCurrentYear(new Date().getFullYear());
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -199,14 +201,14 @@ const Footer: React.FC = () => {
           <div className="custom-container py-5">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-text-2 font-secondary text-sm">
               <p>
-                © {new Date().getFullYear()} Building Technology & Consultant.
-                All rights reserved.
+                © {currentYear} Building Technology & Consultant. All rights
+                reserved.
               </p>
               <p>
                 Design & Developed by{" "}
                 <a
                   href="https://codenextit.com/"
-                  className="text-primary font-bold hover:underline"
+                  className="!text-primary font-bold hover:underline"
                 >
                   CODENEXT IT
                 </a>

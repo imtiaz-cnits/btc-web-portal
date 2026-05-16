@@ -1,169 +1,159 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import NoticeTable from "@/components/NoticeTable";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 // Assets
 import NoticeHeroImage from "@/assets/img/contact/contact-theame-image.png";
 import ContactBg from "@/assets/img/contact/contact-bg.png";
 
-const EgpNoticePage: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState("All");
-  const noticesPerPage = 10;
+// Mock Data
+const MOCK_NOTICES = [
+  {
+    id: "1",
+    no: "01",
+    title: "গণপূর্ত বিভাগ, পাবনা। ২ গ্রুপ",
+    date: "09 Apr 2026",
+    fileUrl: "/assets/img/notice/notice.pdf",
+    category: "OTM",
+  },
+  {
+    id: "2",
+    no: "02",
+    title: "গণপূর্ত বিভাগ, পাবনা। ১ গ্রুপ",
+    date: "16 Apr 2026",
+    fileUrl: "/assets/img/notice/notice.pdf",
+    category: "OTM",
+  },
+  {
+    id: "3",
+    no: "03",
+    title: "স্থানীয় সরকার প্রকৌশল অধিদপ্তর, পাবনা। ১০ গ্রুপ",
+    date: "14 May 2026",
+    fileUrl: "/assets/img/notice/notice.pdf",
+    category: "LTM",
+  },
+  {
+    id: "4",
+    no: "04",
+    title: "শিক্ষা প্রকৌশল বিভাগ, পাবনা জেলা। (Social LTM) ১৩ গ্রুপ",
+    date: "14 May 2026",
+    fileUrl: "/assets/img/notice/notice.pdf",
+    category: "LTM",
+  },
+  {
+    id: "5",
+    no: "05",
+    title: "গণপূর্ত বিভাগ, পাবনা। ৩ গ্রুপ",
+    date: "14 May 2026",
+    fileUrl: "/assets/img/notice/notice.pdf",
+    category: "Lottery Pending",
+  },
+  {
+    id: "6",
+    no: "06",
+    title: "গণপূর্ত বিভাগ, পাবনা। ১ গ্রুপ",
+    date: "14 May 2026",
+    fileUrl: "/assets/img/notice/notice.pdf",
+    category: "Lottery Pending",
+  },
+  {
+    id: "7",
+    no: "07",
+    title: "স্থানীয় সরকার প্রকৌশল অধিদপ্তর, পাবনা সদর, পাবনা। ১৬ গ্রুপ",
+    date: "14 May 2026",
+    fileUrl: "/assets/img/notice/notice.pdf",
+    category: "Lottery Result",
+  },
+  {
+    id: "8",
+    no: "08",
+    title:
+      "স্থানীয় সরকার প্রকৌশল অধিদপ্তর, পাবনা সদর, পাবনা। (Social LTM) ৬ গ্রুপ",
+    date: "14 May 2026",
+    fileUrl: "/assets/img/notice/notice.pdf",
+    category: "Lottery Result",
+  },
+  {
+    id: "9",
+    no: "09",
+    title:
+      "বরেন্দ্র বহুমুখী উন্নয়ন কর্তৃপক্ষ, ইআইডিবি প্রজেক্ট (২য় পর্যায়), রাজশাহী। ৪ গ্রুপ",
+    date: "14 May 2026",
+    fileUrl: "/assets/img/notice/notice.pdf",
+    category: "Lottery Result",
+  },
+];
 
-  // Mock data (will be replaced by TinaCMS later)
-  const notices = [
-    {
-      _id: "1",
-      title:
-        "Local Government Engineering Department (LGED) - Road Construction at Pabna Sadar",
-      publishDate: "2024-05-10T10:00:00Z",
-      lastDate: "2024-05-25T17:00:00Z",
-      createdAt: "2024-05-10T09:00:00Z",
-      category: "OTM",
-      filePath: "/sample.pdf",
-    },
-    {
-      _id: "2",
-      title:
-        "Public Works Department (PWD) - Building Renovation Project Phase 1",
-      publishDate: "2024-05-12T11:00:00Z",
-      lastDate: "2024-05-30T16:00:00Z",
-      createdAt: "2024-05-12T10:00:00Z",
-      category: "LTM",
-      filePath: "/sample.pdf",
-    },
-    {
-      _id: "3",
-      title: "Water Development Board - Embankment Repair Works at Ishwardi",
-      publishDate: "2024-05-14T09:00:00Z",
-      lastDate: "2024-06-05T15:00:00Z",
-      createdAt: "2024-05-14T08:30:00Z",
-      category: "LOTTERY",
-      filePath: "/sample.pdf",
-    },
-  ];
+const EgpNoticePage: React.FC = () => {
+  const [activeTab, setActiveTab] = useState("All");
+  const tabs = ["All", "OTM", "LTM", "Lottery Pending", "Lottery Result"];
 
   const filteredNotices =
     activeTab === "All"
-      ? notices
-      : notices.filter((n) => n.category === activeTab);
+      ? MOCK_NOTICES
+      : MOCK_NOTICES.filter((n) => n.category === activeTab);
 
-  const handleViewFile = (
-    filePath?: string,
-    fileType?: string,
-    id?: string,
-    content?: string,
-  ) => {
-    if (filePath) {
-      window.open(filePath, "_blank");
-    } else if (id) {
-      window.open(`/view-egp-notice/${id}`, "_blank");
-    }
-  };
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    setCurrentPage(1);
-  };
+    let ctx = gsap.context(() => {
+      const selectors = [
+        ".breadcrumb_section",
+        ".tab_section",
+        ".table_section",
+      ];
+
+      selectors.forEach((sel) => {
+        gsap.fromTo(
+          sel,
+          { y: 50, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            scrollTrigger: {
+              trigger: sel,
+              start: "top 90%",
+              toggleActions: "play none none none",
+            },
+          },
+        );
+      });
+
+      setTimeout(() => ScrollTrigger.refresh(), 500);
+    });
+
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <div className="notices_page_wrapper pb-20">
-      {/* Contact Start (Hero) */}
-      <div className="contact_us bg-[var(--secondary-color)] text-center pt-5 overflow-hidden">
-        <div className="custom-container">
-          <div className="flex gap-4 flex-col lg:flex-row">
-            <div className="w-full lg:w-1/2 flex items-stretch">
-              <div
-                className="breadcrumb flex flex-col justify-center w-full rounded-[24px_0px_24px_24px] p-6 m-0 bg-no-repeat bg-center bg-cover relative overflow-hidden"
-                style={{ backgroundColor: "var(--primary-color)" }}
-              >
-                <div
-                  className="absolute inset-0 opacity-20 pointer-events-none bg-center bg-no-repeat bg-cover"
-                  style={{ backgroundImage: `url(${ContactBg.src})` }}
-                ></div>
-                <div className="wrapper inline-block relative z-10">
-                  <h2 className="title text-[48px] lg:text-[32px] font-medium font-primary text-[var(--secondary-color)] uppercase mb-2.5">
-                    EGP Notices
-                  </h2>
-                  <div className="wrap inline-block bg-[var(--text-1)] px-6 py-1.5 lg:px-4 lg:py-1 rounded-[30px]">
-                    <ul className="breadcrumb_item flex items-center justify-center gap-2.5">
-                      <li>
-                        <Link
-                          href="/"
-                          className="item flex justify-center items-center font-primary text-sm uppercase text-[var(--secondary-color)] cursor-pointer transition-all duration-300"
-                        >
-                          HOME
-                        </Link>
-                      </li>
-                      <li>
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="var(--primary-color)"
-                          strokeWidth="3"
-                        >
-                          <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                      </li>
-                      <li>
-                        <span className="item flex justify-center items-center font-primary text-sm uppercase text-[var(--secondary-color)]">
-                          NOTICES
-                        </span>
-                      </li>
-                      <li>
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="var(--primary-color)"
-                          strokeWidth="3"
-                        >
-                          <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                      </li>
-                      <li>
-                        <span className="active_item item flex justify-center items-center font-primary text-sm uppercase text-[var(--secondary-color)] cursor-pointer">
-                          EGP NOTICES
-                        </span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="w-full lg:w-1/2 flex items-stretch mt-5 lg:mt-0">
-              <div className="contact_theame w-full rounded-[24px_25px_24px_0px] overflow-hidden relative min-h-[300px]">
-                <Image
-                  src={NoticeHeroImage}
-                  alt="Notice Hero"
-                  fill
-                  className="w-full h-full object-cover bg-center bg-cover"
-                />
-              </div>
-            </div>
+    <div className="egp_notice_page bg-secondary overflow-hidden">
+      {/* Tabs System */}
+      <div className="tab_section mt-16 mb-10">
+        <div className="custom-container text-center">
+          <div className="text-center mb-10">
+            <h3 className="text-primary font-bold uppercase tracking-widest text-sm mb-2">
+              Tender Information
+            </h3>
+            <h2 className="text-3xl lg:text-4xl font-bold text-text-1 uppercase">
+              Browse Notices by Category
+            </h2>
           </div>
-        </div>
-      </div>
 
-      {/* Tabs */}
-      <div className="tabs mt-12 lg:mt-16">
-        <div className="custom-container pt-2">
-          <div className="flex justify-center space-x-6">
-            {["All", "LTM", "OTM", "LOTTERY"].map((tab) => (
+          <div className="inline-flex flex-wrap justify-center gap-3 bg-white p-3 rounded-2xl border border-ac-2 shadow-sm">
+            {tabs.map((tab) => (
               <button
                 key={tab}
-                onClick={() => handleTabChange(tab)}
-                className={`px-6 py-2 rounded-md font-medium transition-colors duration-300 ${
+                onClick={() => setActiveTab(tab)}
+                className={`px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 uppercase tracking-wide ${
                   activeTab === tab
-                    ? "bg-[var(--primary-color)] text-[var(--secondary-color)]"
-                    : "bg-[var(--shade-1)] text-[var(--text-1)] hover:bg-[var(--primary-color)] hover:text-[var(--secondary-color)]"
+                    ? "bg-primary text-white shadow-lg scale-105"
+                    : "bg-transparent text-text-2 hover:bg-shade-1"
                 }`}
               >
                 {tab}
@@ -173,19 +163,29 @@ const EgpNoticePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Notice List */}
-      <div className="single_notice mt-[60px]">
+      {/* Notices Table */}
+      <div className="table_section">
         <div className="custom-container">
-          <NoticeTable
-            notices={filteredNotices}
-            loading={false}
-            error={null}
-            currentPage={currentPage}
-            noticesPerPage={noticesPerPage}
-            handlePageChange={setCurrentPage}
-            handleViewFile={handleViewFile}
-            noticeType="EGP Notice"
-          />
+          <NoticeTable notices={filteredNotices} />
+
+          {/* Pagination Placeholder */}
+          <div className="mt-10 flex justify-center items-center gap-3">
+            <button className="w-10 h-10 rounded-full border border-ac-2 flex items-center justify-center hover:bg-primary hover:text-white transition group">
+              <i className="fa-solid fa-arrow-left"></i>
+            </button>
+            <button className="w-10 h-10 rounded-full bg-primary text-white font-bold">
+              1
+            </button>
+            <button className="w-10 h-10 rounded-full border border-ac-2 font-bold hover:bg-shade-1 transition text-text-2">
+              2
+            </button>
+            <button className="w-10 h-10 rounded-full border border-ac-2 font-bold hover:bg-shade-1 transition text-text-2">
+              3
+            </button>
+            <button className="w-10 h-10 rounded-full border border-ac-2 flex items-center justify-center hover:bg-primary hover:text-white transition group">
+              <i className="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>

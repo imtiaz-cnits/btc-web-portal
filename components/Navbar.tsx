@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -21,10 +21,8 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ initialNotices = [] }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [isFixed, setIsFixed] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
   // Default Bangla Notices
@@ -141,30 +139,11 @@ const Navbar: React.FC<NavbarProps> = ({ initialNotices = [] }) => {
   // Toggle mobile menu
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen((prev) => !prev);
-    if (isMobileMenuOpen) {
-      setIsMobileDropdownOpen(false);
-    }
+
   };
 
-  // Toggle mobile dropdown
-  const toggleMobileDropdown = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsMobileDropdownOpen((prev) => !prev);
-  };
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
-        setIsMobileDropdownOpen(false);
-      }
-    };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
+
 
   const isLinkActive = (path: string, sectionId?: string) => {
     if (pathname !== "/") return pathname === path;
@@ -328,44 +307,14 @@ const Navbar: React.FC<NavbarProps> = ({ initialNotices = [] }) => {
                 >
                   PROJECTS
                 </Link>
-                <div className="relative dropdown group h-full flex items-center">
-                  <button
-                    className={`nav-link-item flex cursor-pointer items-center transition duration-400 font-medium ${
-                      pathname.includes("notice") || pathname.includes("winner")
-                        ? "active"
-                        : ""
-                    }`}
-                  >
-                    NOTICES
-                    <svg
-                      className="w-4 h-4 ml-1 rotate-icon"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </button>
-                  <div className="dropdown-content">
-                    <Link
-                      href="/egp-notice"
-                      className={pathname === "/egp-notice" ? "active" : ""}
-                    >
-                      EGP TENDER NOTICE
-                    </Link>
-                    <Link
-                      href="/winner-list"
-                      className={pathname === "/winner-list" ? "active" : ""}
-                    >
-                      WINNER LIST
-                    </Link>
-                  </div>
-                </div>
+                <Link
+                  href="/egp-notice"
+                  className={`nav-link-item transition duration-400 font-medium ${
+                    pathname.includes("notice") ? "active" : ""
+                  }`}
+                >
+                  NOTICES
+                </Link>
                 <Link
                   href="/about"
                   className={`nav-link-item transition duration-400 font-medium ${
@@ -446,7 +395,7 @@ const Navbar: React.FC<NavbarProps> = ({ initialNotices = [] }) => {
             </svg>
           </button>
         </div>
-        <div className="px-4 py-2 space-y-1" ref={dropdownRef}>
+        <div className="px-4 py-2 space-y-1">
           <Link
             href="/"
             className={`block px-3 py-2 rounded-lg transition-all duration-300 ${
@@ -480,57 +429,17 @@ const Navbar: React.FC<NavbarProps> = ({ initialNotices = [] }) => {
           >
             PROJECTS
           </Link>
-          <div>
-            <button
-              onClick={toggleMobileDropdown}
-              className={`flex justify-between items-center w-full px-3 py-2 rounded-lg transition-all duration-300 ${
-                pathname.includes("notice") || pathname.includes("winner")
-                  ? "text-primary hover:bg-shade-1"
-                  : "text-text-1 hover:text-primary hover:bg-shade-1"
-              }`}
-            >
-              NOTICES
-              <svg
-                className={`w-4 h-4 ml-2 transition-transform ${isMobileDropdownOpen ? "rotate-180" : ""}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-            <div
-              className={`transition-all duration-300 overflow-hidden ${isMobileDropdownOpen ? "max-h-40 bg-shade-1 rounded-lg mt-1 py-2 border border-primary/20" : "max-h-0"}`}
-            >
-              <Link
-                href="/egp-notice"
-                className={`block px-4 py-2 text-[14px] transition-all duration-300 ${
-                  pathname === "/egp-notice"
-                    ? "text-primary bg-white"
-                    : "text-text-1 hover:text-primary hover:bg-white"
-                }`}
-                onClick={toggleMobileMenu}
-              >
-                EGP TENDER NOTICE
-              </Link>
-              <Link
-                href="/winner-list"
-                className={`block px-4 py-2 text-[14px] transition-all duration-300 ${
-                  pathname === "/winner-list"
-                    ? "text-primary bg-white"
-                    : "text-text-1 hover:text-primary hover:bg-white"
-                }`}
-                onClick={toggleMobileMenu}
-              >
-                WINNER LIST
-              </Link>
-            </div>
-          </div>
+          <Link
+            href="/egp-notice"
+            className={`block px-3 py-2 rounded-lg transition-all duration-300 ${
+              pathname.includes("notice")
+                ? "text-primary bg-shade-1"
+                : "text-text-1 hover:text-primary hover:bg-shade-1"
+            }`}
+            onClick={toggleMobileMenu}
+          >
+            NOTICES
+          </Link>
           <Link
             href="/about"
             className={`block px-3 py-2 rounded-lg transition-all duration-300 ${

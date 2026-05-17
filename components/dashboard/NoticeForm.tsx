@@ -404,77 +404,90 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   // ----------------------------------------------------
   // Form Submission
   // ----------------------------------------------------
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, forceStatus?: string) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>, forceStatus?: string) => {
     if (e) e.preventDefault();
     setLoading(true);
     setErrorMessage("");
     setSuccessMessage("");
 
-    // Validation checks
-    if (!enableFile && !enableText && (!enableTables || tablesList.length === 0)) {
-      setErrorMessage("Please enable and configure at least one notice module (Attachment, Text Description, or Tables).");
+    try {
+      // Validation checks
+      if (!enableFile && !enableText && (!enableTables || tablesList.length === 0)) {
+        setErrorMessage("Please enable and configure at least one notice module (Attachment, Text Description, or Tables).");
+        setLoading(false);
+        return;
+      }
+
+      const formEl = (e.currentTarget.tagName === "FORM" ? e.currentTarget : e.currentTarget.closest("form")) as HTMLFormElement;
+      if (!formEl) {
+        setErrorMessage("Notice form element not found.");
+        setLoading(false);
+        return;
+      }
+
+      const formData = new FormData(formEl);
+      
+      // Add additional attributes manually
+      formData.append("year", year);
+      formData.append("category", category);
+      formData.append("status", forceStatus || status);
+
+      // Save combinable attachments or fallbacks
+      if (!enableFile) {
+        formData.set("file", ""); // Clear file
+        formData.append("clearFile", "true");
+      }
+
+      if (enableText) {
+        formData.append("content", content);
+      } else {
+        formData.append("content", "");
+      }
+
+      if (enableTables && tablesList.length > 0) {
+        const serializedData = JSON.stringify({
+          version: "v2",
+          tables: tablesList
+        });
+        formData.append("tableData", serializedData);
+      } else {
+        formData.append("tableData", "");
+      }
+
+      // Assign Primary Type descriptor based on active content for DB compatibility
+      let primaryType = "TEXT";
+      if (enableFile) primaryType = "FILE";
+      else if (enableTables && tablesList.length > 0) primaryType = "TABLE";
+      formData.append("type", primaryType);
+
+      if (isEdit) {
+        formData.append("existingFilePath", notice.filePath || "");
+        const res = await updateNotice(notice.id, formData);
+        if (res.success) {
+          setSuccessMessage(res.message);
+          setTimeout(() => {
+            router.push("/admin/egp-notices");
+          }, 1500);
+        } else {
+          setErrorMessage(res.message);
+        }
+      } else {
+        const res = await createNotice(formData);
+        if (res.success) {
+          setSuccessMessage(res.message);
+          setTimeout(() => {
+            router.push("/admin/egp-notices");
+          }, 1500);
+        } else {
+          setErrorMessage(res.message);
+        }
+      }
+    } catch (err: any) {
+      console.error("Form submit error:", err);
+      setErrorMessage(err.message || "An unexpected error occurred.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const formData = new FormData(e.currentTarget);
-    
-    // Add additional attributes manually
-    formData.append("year", year);
-    formData.append("category", category);
-    formData.append("status", forceStatus || status);
-
-    // Save combinable attachments or fallbacks
-    if (!enableFile) {
-      formData.set("file", ""); // Clear file
-      formData.append("clearFile", "true");
-    }
-
-    if (enableText) {
-      formData.append("content", content);
-    } else {
-      formData.append("content", "");
-    }
-
-    if (enableTables && tablesList.length > 0) {
-      const serializedData = JSON.stringify({
-        version: "v2",
-        tables: tablesList
-      });
-      formData.append("tableData", serializedData);
-    } else {
-      formData.append("tableData", "");
-    }
-
-    // Assign Primary Type descriptor based on active content for DB compatibility
-    let primaryType = "TEXT";
-    if (enableFile) primaryType = "FILE";
-    else if (enableTables && tablesList.length > 0) primaryType = "TABLE";
-    formData.append("type", primaryType);
-
-    if (isEdit) {
-      formData.append("existingFilePath", notice.filePath || "");
-      const res = await updateNotice(notice.id, formData);
-      if (res.success) {
-        setSuccessMessage(res.message);
-        setTimeout(() => {
-          router.push("/admin/egp-notices");
-        }, 1500);
-      } else {
-        setErrorMessage(res.message);
-      }
-    } else {
-      const res = await createNotice(formData);
-      if (res.success) {
-        setSuccessMessage(res.message);
-        setTimeout(() => {
-          router.push("/admin/egp-notices");
-        }, 1500);
-      } else {
-        setErrorMessage(res.message);
-      }
-    }
-    setLoading(false);
   };
 
   // Generate Year Array
@@ -601,7 +614,14 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
               <input 
                 type="checkbox"
                 checked={enableFile}
-                onChange={(e) => setEnableFile(e.target.checked)}
+                onChange={(e) => {
+                  const val = e.target.checked;
+                  setEnableFile(val);
+                  if (val) {
+                    setEnableText(false);
+                    setEnableTables(false);
+                  }
+                }}
                 className="w-4.5 h-4.5 rounded text-green-600 focus:ring-green-500 border-slate-300 cursor-pointer accent-green-600"
               />
               <span className="text-xs uppercase tracking-wider">📎 Attach File</span>
@@ -618,7 +638,14 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
               <input 
                 type="checkbox"
                 checked={enableText}
-                onChange={(e) => setEnableText(e.target.checked)}
+                onChange={(e) => {
+                  const val = e.target.checked;
+                  setEnableText(val);
+                  if (val) {
+                    setEnableFile(false);
+                    setEnableTables(false);
+                  }
+                }}
                 className="w-4.5 h-4.5 rounded text-green-600 focus:ring-green-500 border-slate-300 cursor-pointer accent-green-600"
               />
               <span className="text-xs uppercase tracking-wider">📝 Rich Description</span>
@@ -636,9 +663,14 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                 type="checkbox"
                 checked={enableTables}
                 onChange={(e) => {
-                  setEnableTables(e.target.checked);
-                  if (e.target.checked && tablesList.length === 0) {
-                    addPwdTableBlock();
+                  const val = e.target.checked;
+                  setEnableTables(val);
+                  if (val) {
+                    setEnableFile(false);
+                    setEnableText(false);
+                    if (tablesList.length === 0) {
+                      addPwdTableBlock();
+                    }
                   }
                 }}
                 className="w-4.5 h-4.5 rounded text-green-600 focus:ring-green-500 border-slate-300 cursor-pointer accent-green-600"

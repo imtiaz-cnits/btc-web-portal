@@ -20,12 +20,26 @@ interface EgpNoticeClientProps {
 
 export default function EgpNoticeClient({ initialNotices }: EgpNoticeClientProps) {
   const [activeTab, setActiveTab] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const tabs = ["All", "OTM", "LTM", "Lottery Pending", "Lottery Result"];
 
   const filteredNotices =
     activeTab === "All"
       ? initialNotices
       : initialNotices.filter((n) => n.category.toLowerCase() === activeTab.toLowerCase());
+
+  // Reset page when tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
+
+  const totalPages = Math.ceil(filteredNotices.length / itemsPerPage);
+  const paginatedNotices = filteredNotices.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -93,11 +107,46 @@ export default function EgpNoticeClient({ initialNotices }: EgpNoticeClientProps
       </div>
 
       {/* Notices Table */}
-      <div className="table_section mb-20">
+      <div className="table_section mb-10">
         <div className="custom-container">
-          <NoticeTable notices={filteredNotices} />
+          <NoticeTable notices={paginatedNotices} />
         </div>
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mb-20">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="w-10 h-10 rounded-xl bg-white border border-ac-2 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <i className="fa-solid fa-chevron-left"></i>
+          </button>
+          
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              className={`w-10 h-10 rounded-xl font-bold text-sm transition-all ${
+                currentPage === page
+                  ? "bg-primary text-white shadow-lg"
+                  : "bg-white border border-ac-2 text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="w-10 h-10 rounded-xl bg-white border border-ac-2 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <i className="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

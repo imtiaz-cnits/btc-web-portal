@@ -265,10 +265,18 @@ const Navbar: React.FC<NavbarProps> = ({ initialNotices = [] }) => {
 
       {/* Navbar */}
       <nav
-        className={`navBar ${isFixed ? "fixed top-0" : "relative"} w-full z-[50]`}
+        className={`w-full z-[50] transition-all duration-300 ${
+          isFixed
+            ? "fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md shadow-lg py-1 border-b border-slate-100"
+            : "relative py-0"
+        }`}
       >
         <div className="custom-container">
-          <div className="w-full bg-shade-1 rounded-xl border border-primary mt-2 lg:mt-0">
+          <div
+            className={`w-full bg-shade-1 rounded-xl border border-primary transition-all duration-300 ${
+              isFixed ? "!border-none !rounded-none !bg-transparent" : "mt-2 lg:mt-0"
+            }`}
+          >
             <div className="flex justify-between h-[80px] items-center px-3">
               <Link
                 href="/"

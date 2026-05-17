@@ -4,20 +4,21 @@ import StatsSection from "@/components/StatsSection";
 import AboutSection from "@/components/AboutSection";
 import ProjectsSection from "@/components/ProjectsSection";
 import ClientSlider from "@/components/ClientSlider";
+import HomeNoticesSection from "@/components/HomeNoticesSection";
 import prisma from "@/lib/prisma";
 
 export const revalidate = 0; // Live data on every load
 
-export default async function HomePage() {
-  // Fetch active tender notices from remote database
-  const rawTenderNotices = await prisma.notice.findMany({
-    where: { status: "active" },
-    orderBy: { createdAt: "desc" },
-    take: 10,
-  });
+const categoryMap: Record<string, string> = {
+  LTM: "LTM",
+  OTM: "OTM",
+  LOTTERY_PENDING: "Lottery Pending",
+  LOTTERY_RESULT: "Lottery Result",
+};
 
-  // Fetch active winner lists from remote database
-  const rawWinnerNotices = await prisma.winnerList.findMany({
+export default async function HomePage() {
+  // Fetch active tender notices for the Hero slider
+  const rawTenderNotices = await prisma.notice.findMany({
     where: { status: "active" },
     orderBy: { createdAt: "desc" },
     take: 10,
@@ -39,19 +40,36 @@ export default async function HomePage() {
     filePath: n.filePath || undefined,
   }));
 
-  const winnerNotices = rawWinnerNotices.map((w) => ({
-    id: w.id,
-    title: w.title,
-    date: formatShortDate(w.publishDate || w.createdAt),
-    filePath: w.filePath || undefined,
-  }));
+  // Fetch active notices for the Browse Notices By Category Section
+  const allActiveNotices = await prisma.notice.findMany({
+    where: { status: "active" },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const homepageNotices = allActiveNotices.map((notice) => {
+    const pubDate = notice.publishDate || notice.createdAt;
+    const formattedDate = new Date(pubDate).toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+
+    return {
+      id: notice.id,
+      title: notice.title,
+      date: formattedDate,
+      fileUrl: notice.filePath || "",
+      category: categoryMap[notice.category] || "LTM",
+    };
+  });
 
   return (
     <div className="home-page">
-      <Hero 
-        tenderNotices={tenderNotices} 
-        winnerNotices={winnerNotices} 
-      />
+      <Hero tenderNotices={tenderNotices} />
+      
+      {/* Tender Browse Section right below Hero */}
+      <HomeNoticesSection notices={homepageNotices} />
+      
       <Services />
       <StatsSection />
       <AboutSection />

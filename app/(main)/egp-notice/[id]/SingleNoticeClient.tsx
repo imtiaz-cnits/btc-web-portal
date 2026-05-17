@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import Link from "next/link";
 
 interface NoticeItem {
@@ -56,6 +56,15 @@ export default function SingleNoticeClient({ notice }: SingleNoticeClientProps) 
     }
   }
 
+  useEffect(() => {
+    if (parsedTables.length > 0) {
+      document.documentElement.classList.add("hide-global-layout");
+      return () => {
+        document.documentElement.classList.remove("hide-global-layout");
+      };
+    }
+  }, [parsedTables]);
+
   const handlePrint = () => {
     // If it's ONLY a PDF and nothing else, print the iframe for high fidelity
     const hasOtherContent = !!(notice.content || parsedTables.length > 0);
@@ -77,11 +86,11 @@ export default function SingleNoticeClient({ notice }: SingleNoticeClientProps) 
             <title>&nbsp;</title>
             <style>
               @page {
-                size: auto;
-                margin: 15mm 15mm 15mm 15mm;
+                size: A4 portrait;
+                margin: 0 !important;
               }
               body {
-                padding: 0;
+                padding: 15mm 15mm 15mm 15mm !important;
                 margin: 0;
                 font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
                 background-color: white !important;
@@ -171,6 +180,217 @@ export default function SingleNoticeClient({ notice }: SingleNoticeClientProps) 
     return val.toLocaleString("en-US");
   };
 
+  // 1. FULLSCREEN TABLE VIEW (Hides layout headers and footers for pure document presentation)
+  if (parsedTables.length > 0) {
+    return (
+      <div className="w-full min-h-screen bg-white select-none relative font-bangla pb-20">
+        {/* Dynamic Global Header/Footer Suppressor */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          .website-layout > *:not(.main),
+          .top_notice_board,
+          .topbar,
+          .footer_wrap,
+          footer,
+          header,
+          nav,
+          .newsletter_section,
+          .newsletter,
+          .bg-[#ff253a],
+          .marquee,
+          .text_marquee {
+            display: none !important;
+          }
+          .website-layout, .home-page {
+            padding: 0 !important;
+            margin: 0 !important;
+          }
+          .main {
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+        `}} />
+
+        {/* Fullscreen Top Navigation Bar */}
+        <div className="w-full bg-white border-b border-slate-200 py-3.5 px-4 flex justify-center gap-3 print:hidden">
+          <Link
+            href="/"
+            className="bg-[#e74c3c] hover:bg-[#c0392b] text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-1.5 shadow-sm transition-all"
+          >
+            <i className="fa-solid fa-home"></i> Home
+          </Link>
+          <Link
+            href="/egp-notice"
+            className="bg-[#34495e] hover:bg-[#2c3e50] text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-1.5 shadow-sm transition-all"
+          >
+            <i className="fa-solid fa-arrow-left"></i> Back
+          </Link>
+          <button
+            onClick={handlePrint}
+            className="bg-[var(--primary-color)] hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+          >
+            <i className="fa-solid fa-print"></i> Print
+          </button>
+        </div>
+
+        {/* Fullscreen Table Content Wrapper */}
+        <div ref={printAreaRef} className="w-full max-w-full px-2 sm:px-6 md:px-12 py-8 bg-white space-y-8">
+          {parsedTables.map((table, tIdx) => {
+            const headers = table.headers || [];
+            const rows = table.rows || [];
+
+            // PWD LTM Template Table Sum Calculations
+            const securityColIdx = headers.findIndex((h: string) => h.toLowerCase().includes("security"));
+            const docFeesColIdx = headers.findIndex((h: string) => h.toLowerCase().includes("fees") || h.toLowerCase().includes("fee"));
+
+            const totalSecurity = securityColIdx !== -1 ? rows.reduce((sum: number, r: string[]) => sum + parseMoney(r[securityColIdx]), 0) : 0;
+            const totalDocFees = docFeesColIdx !== -1 ? rows.reduce((sum: number, r: string[]) => sum + parseMoney(r[docFeesColIdx]), 0) : 0;
+
+            return (
+              <div key={table.id || tIdx} className="pwd-table-block space-y-4 p-0 bg-white relative font-bangla text-black print:p-0 print:border-0">
+                
+                {/* Procuring Entity Header */}
+                {table.officeName && (
+                  <div className="text-center font-extrabold text-3xl md:text-4xl text-black mb-6 tracking-wide leading-tight">
+                    {table.officeName}
+                  </div>
+                )}
+
+                {/* Unified Three Color Blocks Bar */}
+                {(table.noticeDateBlock || table.lastDateBlock || table.lotteryDateBlock) && (
+                  <div className="grid grid-cols-3 border border-black text-center text-xs md:text-sm font-bold divide-x divide-black mb-4">
+                    {table.noticeDateBlock ? (
+                      <div className="bg-[#ffff00] text-black py-3.5 flex items-center justify-center gap-1.5 border-none">
+                        Notice Date : {table.noticeDateBlock}
+                      </div>
+                    ) : <div className="bg-[#ffff00] py-3.5" />}
+                    {table.lastDateBlock ? (
+                      <div className="bg-[#ff9966] text-white py-3.5 flex items-center justify-center gap-1.5 border-none">
+                        Last Date : {table.lastDateBlock}
+                      </div>
+                    ) : <div className="bg-[#ff9966] py-3.5" />}
+                    {table.lotteryDateBlock ? (
+                      <div className="bg-[#99cc99] text-black py-3.5 flex items-center justify-center gap-1.5 border-none">
+                        Lottery Date : {table.lotteryDateBlock}
+                      </div>
+                    ) : <div className="bg-[#99cc99] py-3.5" />}
+                  </div>
+                )}
+
+                {/* Table Specs with Watermark */}
+                <div 
+                  className="pwd-scroll-wrapper w-full overflow-x-auto overflow-y-hidden bg-white relative"
+                  style={{ overflowY: "hidden", height: "auto", maxHeight: "none" }}
+                >
+                  {/* Watermark */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.06] select-none rotate-0 z-0">
+                    <span className="text-[80px] md:text-[140px] font-black text-slate-800 tracking-widest uppercase">
+                      LTM Notice
+                    </span>
+                  </div>
+
+                  <table className="w-full border-collapse text-left text-xs font-semibold text-black relative z-10 print:w-full">
+                    <thead className="bg-[#ccffff] border-b border-black text-black">
+                      <tr className="divide-x divide-black">
+                        {headers.map((hdr: string, idx: number) => (
+                          <th key={idx} className="p-3 font-bold border border-black bg-[#ccffff] text-black text-xs md:text-sm uppercase text-center">
+                            {hdr}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-black">
+                      {rows.map((row: string[], rIdx: number) => (
+                        <tr key={rIdx} className="hover:bg-slate-50/50 transition divide-x divide-black">
+                          {row.map((cell: string, cIdx: number) => (
+                            <td key={cIdx} className="p-3 border border-black text-black text-base md:text-lg font-semibold font-bangla">
+                              {cell}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+
+                      {/* Sum Totals Row if any sum matches */}
+                      {(securityColIdx !== -1 || docFeesColIdx !== -1) && (
+                        <tr className="bg-slate-50 font-bold text-black divide-x divide-black border-t border-black">
+                          {headers.map((hdr: string, idx: number) => {
+                            if (idx === 0) {
+                              const colSpanCount = Math.min(securityColIdx !== -1 ? securityColIdx : docFeesColIdx, headers.length);
+                              return (
+                                <td key={idx} className="p-3 border border-black text-right text-xs md:text-sm font-extrabold" colSpan={colSpanCount}>
+                                  Total :
+                                </td>
+                              );
+                            }
+                            // Skip columns merged by colSpan
+                            const minTotalColIdx = Math.min(securityColIdx !== -1 ? securityColIdx : docFeesColIdx, headers.length);
+                            if (idx < minTotalColIdx) {
+                              return null;
+                            }
+                            if (idx === securityColIdx) {
+                              return (
+                                <td key={idx} className="p-3 border border-black text-xs md:text-sm font-extrabold text-black">
+                                  {formatMoney(totalSecurity)}
+                                </td>
+                              );
+                            }
+                            if (idx === docFeesColIdx) {
+                              return (
+                                <td key={idx} className="p-3 border border-black text-xs md:text-sm font-extrabold text-black">
+                                  {formatMoney(totalDocFees)}
+                                </td>
+                              );
+                            }
+                            return <td key={idx} className="p-3 border border-black"></td>;
+                          })}
+                        </tr>
+                      )}
+
+                      {rows.length === 0 && (
+                        <tr>
+                          <td colSpan={headers.length || 1} className="p-8 text-center text-slate-400 italic">
+                            No tender entries available.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Compact Government Footer Table Blocks */}
+                {(table.payOrderTo || table.moreInfo) && (
+                  <div className="grid grid-cols-2 border border-t-0 border-black font-bangla text-xs md:text-sm text-black">
+                    {table.payOrderTo ? (
+                      <div className="p-3 border-r border-black bg-white">
+                        <span className="text-[10px] text-slate-500 block uppercase tracking-wider mb-0.5 font-bold">BD Pay Order To :</span>
+                        <span className="text-black font-extrabold leading-relaxed text-sm md:text-base">{table.payOrderTo}</span>
+                      </div>
+                    ) : <div className="p-3 border-r border-black bg-white" />}
+                    {table.moreInfo ? (
+                      <div className="p-3 bg-white">
+                        <span className="text-[10px] text-slate-500 block uppercase tracking-wider mb-0.5 font-bold">More Info :</span>
+                        <span className="text-black font-extrabold leading-relaxed text-sm md:text-base">{table.moreInfo}</span>
+                      </div>
+                    ) : <div className="p-3 bg-white" />}
+                  </div>
+                )}
+
+                {/* Red Warning alert below table */}
+                {table.bottomWarning && (
+                  <div className="mt-4 text-red-600 font-extrabold text-base md:text-lg font-bangla text-left leading-relaxed">
+                    {table.bottomWarning}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // 2. STANDARD NOTICE LAYOUT
   return (
     <div className="single_notice_page bg-secondary py-16 min-h-screen">
       <div className="custom-container">
@@ -279,7 +499,7 @@ export default function SingleNoticeClient({ notice }: SingleNoticeClientProps) 
                   const totalDocFees = docFeesColIdx !== -1 ? rows.reduce((sum: number, r: string[]) => sum + parseMoney(r[docFeesColIdx]), 0) : 0;
 
                   return (
-                    <div key={table.id || tIdx} className="pwd-table-block space-y-4 border border-black p-6 bg-white relative font-bangla text-black print:p-0 print:border-0 select-none">
+                    <div key={table.id || tIdx} className="pwd-table-block space-y-4 p-0 bg-white relative font-bangla text-black print:p-0 print:border-0 select-none">
                       
                       {/* Procuring Entity Header */}
                       {table.officeName && (
@@ -310,9 +530,12 @@ export default function SingleNoticeClient({ notice }: SingleNoticeClientProps) 
                       )}
 
                       {/* Table Specs with Watermark */}
-                      <div className="pwd-scroll-wrapper w-full overflow-x-auto border border-black bg-white relative">
+                      <div 
+                        className="pwd-scroll-wrapper w-full overflow-x-auto overflow-y-hidden bg-white relative"
+                        style={{ overflowY: "hidden", height: "auto", maxHeight: "none" }}
+                      >
                         {/* Watermark */}
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.06] select-none rotate-12 z-0">
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.06] select-none rotate-0 z-0">
                           <span className="text-[80px] md:text-[120px] font-black text-slate-800 tracking-widest uppercase">
                             LTM Notice
                           </span>

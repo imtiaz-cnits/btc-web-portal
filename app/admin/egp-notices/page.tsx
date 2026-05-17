@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getNotices, deleteNotice } from "@/app/actions/notices";
 import DeleteButton from "@/components/dashboard/DeleteButton";
+import NoticeLimitDropdown from "@/components/dashboard/NoticeLimitDropdown";
 import { 
   Plus, 
   Search, 
@@ -10,7 +11,9 @@ import {
   Trash2,
   FileSpreadsheet,
   FileText,
-  FileDown
+  FileDown,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 
 export const revalidate = 0; // Live data
@@ -18,24 +21,51 @@ export const revalidate = 0; // Live data
 export default async function AdminNoticesPage({
   searchParams,
 }: {
-  searchParams: { search?: string };
+  searchParams: { search?: string; filter?: string; page?: string; limit?: string };
 }) {
   const allNotices = await getNotices();
   const query = searchParams?.search?.toLowerCase() || "";
-  
-  const notices = query
-    ? allNotices.filter(
-        (n) =>
-          n.title.toLowerCase().includes(query) ||
-          (n.year && n.year.toLowerCase().includes(query)) ||
-          n.category.toLowerCase().includes(query)
-      )
-    : allNotices;
+  const filter = searchParams?.filter || "all"; // 'all', 'published', 'draft'
+  const currentPage = parseInt(searchParams?.page || "1", 10);
+  const currentLimit = parseInt(searchParams?.limit || "10", 10);
+
+  // Filter based on search query
+  let filtered = allNotices;
+  if (query) {
+    filtered = filtered.filter(
+      (n) =>
+        n.title.toLowerCase().includes(query) ||
+        (n.year && n.year.toLowerCase().includes(query)) ||
+        n.category.toLowerCase().includes(query)
+    );
+  }
+
+  // Count matches based on search query before status filter
+  const totalCount = filtered.length;
+  const activeCount = filtered.filter(n => n.status === "active").length;
+  const draftCount = filtered.filter(n => n.status !== "active").length;
+
+  // Filter based on status tabs
+  let notices = filtered;
+  if (filter === "published") {
+    notices = filtered.filter(n => n.status === "active");
+  } else if (filter === "draft") {
+    notices = filtered.filter(n => n.status !== "active");
+  }
+
+  // Pagination calculation
+  const totalPages = Math.ceil(notices.length / currentLimit);
+  // Cap current page if out of bounds
+  const activePage = Math.min(Math.max(1, currentPage), totalPages || 1);
+  const paginatedNotices = notices.slice(
+    (activePage - 1) * currentLimit,
+    activePage * currentLimit
+  );
 
   return (
     <div className="space-y-6">
       {/* Top action block */}
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm shrink-0">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
             <FileCheck2 className="w-6 h-6 text-[var(--primary-color)]" />
@@ -50,6 +80,54 @@ export default async function AdminNoticesPage({
           <Plus className="w-4 h-4" />
           Add Notice
         </Link>
+      </div>
+
+      {/* Premium Filter Tabs & Limit Selector */}
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-200 pb-px shrink-0 select-none">
+        <div className="flex gap-2">
+          <Link
+            href={`/admin/egp-notices?filter=all${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
+            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${
+              filter === "all"
+                ? "border-[var(--primary-color)] text-[var(--primary-color)]"
+                : "border-transparent text-slate-400 hover:text-slate-600"
+            }`}
+          >
+            All Notices
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${
+              filter === "all" ? "bg-green-50 text-green-700" : "bg-slate-100 text-slate-500"
+            }`}>{totalCount}</span>
+          </Link>
+          <Link
+            href={`/admin/egp-notices?filter=published${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
+            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${
+              filter === "published"
+                ? "border-[var(--primary-color)] text-[var(--primary-color)]"
+                : "border-transparent text-slate-400 hover:text-slate-600"
+            }`}
+          >
+            Published
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${
+              filter === "published" ? "bg-green-50 text-green-700" : "bg-slate-100 text-slate-500"
+            }`}>{activeCount}</span>
+          </Link>
+          <Link
+            href={`/admin/egp-notices?filter=draft${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
+            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${
+              filter === "draft"
+                ? "border-[var(--primary-color)] text-[var(--primary-color)]"
+                : "border-transparent text-slate-400 hover:text-slate-600"
+            }`}
+          >
+            Drafts
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${
+              filter === "draft" ? "bg-amber-50 text-amber-700" : "bg-slate-100 text-slate-500"
+            }`}>{draftCount}</span>
+          </Link>
+        </div>
+        <div className="pb-2.5">
+          <NoticeLimitDropdown />
+        </div>
       </div>
 
       {/* Notices Table */}
@@ -67,7 +145,7 @@ export default async function AdminNoticesPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
-              {notices.map((notice) => {
+              {paginatedNotices.map((notice) => {
                 return (
                   <tr key={notice.id} className="hover:bg-slate-50/50 transition">
                     <td className="px-6 py-4">
@@ -119,9 +197,9 @@ export default async function AdminNoticesPage({
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-3 items-center">
                         <Link 
-                          href={`/admin/egp-notices/edit/${notice.id}`} 
-                          className="p-1.5 hover:bg-blue-50 text-blue-600 rounded-lg transition inline-flex items-center justify-center border border-transparent hover:border-blue-100"
-                          title="Edit"
+                           href={`/admin/egp-notices/edit/${notice.id}`} 
+                           className="p-1.5 hover:bg-blue-50 text-blue-600 rounded-lg transition inline-flex items-center justify-center border border-transparent hover:border-blue-100"
+                           title="Edit"
                         >
                           <Edit3 className="w-4 h-4" />
                         </Link>
@@ -135,7 +213,7 @@ export default async function AdminNoticesPage({
                 );
               })}
               
-              {notices.length === 0 && (
+              {paginatedNotices.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-6 py-16 text-center text-slate-400 font-semibold text-sm">
                     No procurement notices found. Create one to get started!
@@ -146,6 +224,49 @@ export default async function AdminNoticesPage({
           </table>
         </div>
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm shrink-0">
+          <span className="text-xs font-bold text-slate-500">
+            Showing {Math.min((activePage - 1) * currentLimit + 1, notices.length)} to {Math.min(activePage * currentLimit, notices.length)} of {notices.length} entries
+          </span>
+          
+          <div className="flex items-center gap-1.5">
+            <Link
+              href={`/admin/egp-notices?filter=${filter}${query ? `&search=${query}` : ""}&limit=${currentLimit}&page=${Math.max(1, activePage - 1)}`}
+              className={`w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center font-bold text-slate-500 hover:bg-slate-50 transition-all ${
+                activePage === 1 ? "pointer-events-none opacity-50" : ""
+              }`}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Link>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Link
+                key={page}
+                href={`/admin/egp-notices?filter=${filter}${query ? `&search=${query}` : ""}&limit=${currentLimit}&page=${page}`}
+                className={`w-9 h-9 rounded-xl flex items-center justify-center font-extrabold text-xs transition-all ${
+                  activePage === page
+                    ? "bg-[var(--primary-color)] text-white shadow-md shadow-green-600/10"
+                    : "border border-slate-200 text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {page}
+              </Link>
+            ))}
+
+            <Link
+              href={`/admin/egp-notices?filter=${filter}${query ? `&search=${query}` : ""}&limit=${currentLimit}&page=${Math.min(totalPages, activePage + 1)}`}
+              className={`w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center font-bold text-slate-500 hover:bg-slate-50 transition-all ${
+                activePage === totalPages ? "pointer-events-none opacity-50" : ""
+              }`}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

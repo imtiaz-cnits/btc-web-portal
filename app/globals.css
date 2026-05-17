@@ -14,7 +14,7 @@
 
   /* Fonts */
   --font-primary: "Space Grotesk", sans-serif;
-  --font-secondary: "Albert Sans", sans-serif;
+  --font-secondary: "Space Grotesk", "Tiro Bangla", "Albert Sans", sans-serif;
   --font-bangla: "Tiro Bangla", serif;
 }
 
@@ -32,8 +32,13 @@
   --text-1: #171717;
   --text-2: #454545;
   --primary-font: "Space Grotesk", sans-serif;
-  --secondary-font: "Albert Sans", sans-serif;
+  --secondary-font: "Space Grotesk", "Tiro Bangla", "Albert Sans", sans-serif;
   --bangla-font: "Tiro Bangla", serif;
+}
+
+/* Bulletproof Unicode Font Stack for all user input and data table elements */
+input, textarea, select, button, table, .font-bangla {
+  font-family: "Space Grotesk", "Tiro Bangla", sans-serif !important;
 }
 
 /* Explicit Navigation Classes for fallback */
@@ -116,6 +121,7 @@ h4,
 h5 {
   margin-top: 0;
   font-weight: 700;
+  font-family: var(--primary-font);
 }
 
 h6 {
@@ -226,4 +232,32 @@ ul {
   border-radius: 12px 12px 12px 0px;
   background-color: var(--primary-color);
   z-index: -1;
+}
+
+/* Bulletproof Global Layout Suppressor Rules */
+html.hide-global-layout .website-layout > *:not(.main),
+html.hide-global-layout .top_notice_board,
+html.hide-global-layout .topbar,
+html.hide-global-layout .footer_wrap,
+html.hide-global-layout footer,
+html.hide-global-layout header,
+html.hide-global-layout nav,
+html.hide-global-layout .newsletter_section,
+html.hide-global-layout .newsletter,
+html.hide-global-layout .bg-[#ff253a],
+html.hide-global-layout .marquee,
+html.hide-global-layout .text_marquee {
+  display: none !important;
+}
+
+html.hide-global-layout .website-layout {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+html.hide-global-layout .main {
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }

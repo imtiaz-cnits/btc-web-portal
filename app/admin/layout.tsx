@@ -3,19 +3,19 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Award, 
-  User, 
-  LogOut, 
-  Globe, 
-  Menu, 
-  X, 
+import {
+  LayoutDashboard,
+  FileText,
+  Award,
+  User,
+  LogOut,
+  Globe,
+  Menu,
+  X,
   ChevronRight,
   Bell,
   Search,
-  ShieldCheck
+  ShieldCheck,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { getRecentNotices } from "@/app/actions/notices";
@@ -28,12 +28,14 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const { data: session } = useSession();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [avatar, setAvatar] = useState<string | null>(null);
-  const [searchValue, setSearchValue] = useState(searchParams.get("search") || "");
-  
+  const [searchValue, setSearchValue] = useState(
+    searchParams.get("search") || "",
+  );
+
   // Dynamic bell notifications state
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -82,61 +84,65 @@ export default function AdminLayout({
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setSearchValue(val);
-    
+
     const params = new URLSearchParams(window.location.search);
     if (val) {
       params.set("search", val);
     } else {
       params.delete("search");
     }
-    
+
     router.push(`${pathname}?${params.toString()}`);
   };
 
   const menus = [
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-    { name: "Tender Notices", href: "/admin/egp-notices", icon: FileText },
-    { name: "Winner List", href: "/admin/winner-list", icon: Award },
+    { name: "Notices", href: "/admin/egp-notices", icon: FileText },
     { name: "Manage Roles", href: "/admin/roles", icon: ShieldCheck },
     { name: "Profile", href: "/admin/profile", icon: User },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans antialiased text-slate-800 overflow-x-hidden w-full">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-secondary antialiased text-slate-800 overflow-x-hidden w-full">
       <div className="flex flex-1 relative overflow-x-hidden w-full min-w-0">
-        
         {/* Mobile Sidebar click-outside backdrop overlay */}
         {sidebarOpen && (
-          <div 
+          <div
             onClick={() => setSidebarOpen(false)}
             className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-25 md:hidden transition-all duration-300 cursor-pointer"
           />
         )}
 
         {/* Sidebar */}
-        <aside 
+        <aside
           className={`bg-slate-900 border-r border-slate-800 text-white fixed h-full z-30 transition-all duration-300 flex flex-col shadow-2xl overflow-hidden ${
-            sidebarOpen ? "w-[260px] translate-x-0" : "w-0 -translate-x-[260px] md:w-[70px] md:translate-x-0"
+            sidebarOpen
+              ? "w-[260px] translate-x-0"
+              : "w-0 -translate-x-[260px] md:w-[70px] md:translate-x-0"
           }`}
         >
           {/* Logo Brand (Centered when collapsed) */}
-          <div className={`h-16 flex items-center border-b border-slate-800 shrink-0 transition-all ${
-            sidebarOpen ? "justify-between px-6" : "justify-center px-2"
-          }`}>
+          <div
+            className={`h-16 flex items-center border-b border-slate-800 shrink-0 transition-all ${
+              sidebarOpen ? "justify-between px-6" : "justify-center px-2"
+            }`}
+          >
             <div className="flex items-center gap-2 overflow-hidden">
               <div className="w-8 h-8 rounded-lg bg-[var(--primary-color)] flex items-center justify-center font-bold text-white shadow-lg shrink-0">
                 B
               </div>
-              <span className={`font-bold text-base tracking-wider text-green-400 uppercase transition-all duration-300 whitespace-nowrap ${
-                sidebarOpen ? "opacity-100" : "opacity-0 md:hidden"
-              }`}>
+              <span
+                className={`font-bold text-base tracking-wider text-green-400 uppercase transition-all duration-300 whitespace-nowrap ${
+                  sidebarOpen ? "opacity-100" : "opacity-0 md:hidden"
+                }`}
+              >
                 BTC Admin
               </span>
             </div>
-            
+
             {/* Close button for mobile */}
-            <button 
-              onClick={() => setSidebarOpen(false)} 
+            <button
+              onClick={() => setSidebarOpen(false)}
               className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white md:hidden"
             >
               <X className="w-5 h-5" />
@@ -144,29 +150,38 @@ export default function AdminLayout({
           </div>
 
           {/* Navigation Links */}
-          <nav className={`flex-1 py-6 space-y-2 overflow-y-auto ${sidebarOpen ? "px-4" : "px-2"}`}>
+          <nav
+            className={`flex-1 py-6 space-y-2 overflow-y-auto ${sidebarOpen ? "px-4" : "px-2"}`}
+          >
             {menus.map((menu) => {
               const Icon = menu.icon;
-              const isActive = pathname === menu.href || pathname.startsWith(`${menu.href}/`);
+              const isActive =
+                pathname === menu.href || pathname.startsWith(`${menu.href}/`);
               return (
                 <Link
                   key={menu.name}
                   href={menu.href}
                   className={`flex items-center rounded-xl font-medium text-sm transition-all duration-200 group relative ${
-                    sidebarOpen ? "gap-3 px-4 py-3.5 justify-start" : "justify-center p-2.5 w-11 h-11 mx-auto"
+                    sidebarOpen
+                      ? "gap-3 px-4 py-3.5 justify-start"
+                      : "justify-center p-2.5 w-11 h-11 mx-auto"
                   } ${
-                    isActive 
-                      ? "bg-[var(--primary-color)] text-white shadow-lg shadow-green-600/20" 
+                    isActive
+                      ? "bg-[var(--primary-color)] text-white shadow-lg shadow-green-600/20"
                       : "text-slate-400 hover:bg-slate-800 hover:text-white"
                   }`}
                 >
-                  <Icon className={`w-5 h-5 shrink-0 ${isActive ? "text-white" : "text-slate-400 group-hover:text-white"}`} />
-                  <span className={`transition-opacity duration-300 whitespace-nowrap ${
-                    sidebarOpen ? "opacity-100" : "opacity-0 md:hidden"
-                  }`}>
+                  <Icon
+                    className={`w-5 h-5 shrink-0 ${isActive ? "text-white" : "text-slate-400 group-hover:text-white"}`}
+                  />
+                  <span
+                    className={`transition-opacity duration-300 whitespace-nowrap ${
+                      sidebarOpen ? "opacity-100" : "opacity-0 md:hidden"
+                    }`}
+                  >
                     {menu.name}
                   </span>
-                  
+
                   {/* Tooltip for collapsed mode */}
                   {!sidebarOpen && (
                     <div className="absolute left-16 bg-slate-900 border border-slate-800 text-white text-xs px-2.5 py-1.5 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity hidden md:block z-50 pointer-events-none whitespace-nowrap">
@@ -181,16 +196,20 @@ export default function AdminLayout({
               <Link
                 href="/"
                 className={`flex items-center rounded-xl font-medium text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-200 group relative ${
-                  sidebarOpen ? "gap-3 px-4 py-3.5 justify-start" : "justify-center p-2.5 w-11 h-11 mx-auto"
+                  sidebarOpen
+                    ? "gap-3 px-4 py-3.5 justify-start"
+                    : "justify-center p-2.5 w-11 h-11 mx-auto"
                 }`}
               >
                 <Globe className="w-5 h-5 shrink-0 text-slate-400 group-hover:text-white" />
-                <span className={`transition-opacity duration-300 whitespace-nowrap ${
-                  sidebarOpen ? "opacity-100" : "opacity-0 md:hidden"
-                }`}>
+                <span
+                  className={`transition-opacity duration-300 whitespace-nowrap ${
+                    sidebarOpen ? "opacity-100" : "opacity-0 md:hidden"
+                  }`}
+                >
                   View Website
                 </span>
-                
+
                 {!sidebarOpen && (
                   <div className="absolute left-16 bg-slate-900 border border-slate-800 text-white text-xs px-2.5 py-1.5 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity hidden md:block z-50 pointer-events-none whitespace-nowrap">
                     View Website
@@ -201,20 +220,30 @@ export default function AdminLayout({
           </nav>
 
           {/* User Footer (No padding errors when collapsed) */}
-          <div className={`border-t border-slate-800 bg-slate-950/40 shrink-0 transition-all ${
-            sidebarOpen ? "p-4" : "p-2 py-4"
-          }`}>
+          <div
+            className={`border-t border-slate-800 bg-slate-950/40 shrink-0 transition-all ${
+              sidebarOpen ? "p-4" : "p-2 py-4"
+            }`}
+          >
             <button
               onClick={() => signOut({ callbackUrl: "/admin/auth" })}
               className={`w-full flex items-center justify-between rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group ${
-                sidebarOpen ? "px-4 py-3" : "justify-center p-2.5 w-11 h-11 mx-auto"
+                sidebarOpen
+                  ? "px-4 py-3"
+                  : "justify-center p-2.5 w-11 h-11 mx-auto"
               }`}
             >
-              <div className={`flex items-center ${sidebarOpen ? "gap-3" : "justify-center"}`}>
-                <LogOut className={`w-5 h-5 shrink-0 ${sidebarOpen ? "" : "text-slate-400 group-hover:text-red-400"}`} />
-                <span className={`font-medium text-sm transition-opacity duration-300 ${
-                  sidebarOpen ? "opacity-100" : "opacity-0 hidden"
-                }`}>
+              <div
+                className={`flex items-center ${sidebarOpen ? "gap-3" : "justify-center"}`}
+              >
+                <LogOut
+                  className={`w-5 h-5 shrink-0 ${sidebarOpen ? "" : "text-slate-400 group-hover:text-red-400"}`}
+                />
+                <span
+                  className={`font-medium text-sm transition-opacity duration-300 ${
+                    sidebarOpen ? "opacity-100" : "opacity-0 hidden"
+                  }`}
+                >
                   Sign Out
                 </span>
               </div>
@@ -226,15 +255,16 @@ export default function AdminLayout({
         </aside>
 
         {/* Content Wrapper */}
-        <div 
+        <div
           className={`flex-1 flex flex-col transition-all duration-300 min-h-screen min-w-0 w-full overflow-hidden ${
             sidebarOpen ? "pl-0 md:pl-[260px]" : "pl-0 md:pl-[70px]"
           }`}
         >
           {/* Header */}
-          <header className="h-16 bg-white border-b border-slate-200 flex items-center px-6 justify-between sticky top-0 z-20 shadow-sm backdrop-blur-md bg-white/90 shrink-0 min-w-0 w-full">
+          <header className={`h-16 bg-white border-b border-slate-200 flex items-center px-6 justify-between fixed top-0 right-0 z-20 shadow-sm backdrop-blur-md bg-white/90 shrink-0 min-w-0 transition-all duration-300 ${
+            sidebarOpen ? "left-0 md:left-[260px]" : "left-0 md:left-[70px]"
+          }`}>
             <div className="flex items-center gap-4 min-w-0">
-              
               {/* Header Logo (ONLY visible on mobile, hidden on desktop!) */}
               <div className="flex items-center gap-2 mr-3 shrink-0 md:hidden">
                 <div className="w-8 h-8 rounded-lg bg-[var(--primary-color)] flex items-center justify-center font-bold text-white shadow-lg shrink-0">
@@ -245,8 +275,8 @@ export default function AdminLayout({
                 </span>
               </div>
 
-              <button 
-                onClick={toggleSidebar} 
+              <button
+                onClick={toggleSidebar}
                 className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700 transition"
               >
                 <Menu className="w-5 h-5" />
@@ -255,8 +285,8 @@ export default function AdminLayout({
               {/* Dynamic search bar */}
               <div className="relative hidden sm:block max-w-xs md:max-w-md w-full">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={searchValue}
                   onChange={handleSearchChange}
                   placeholder="Search dashboard..."
@@ -265,9 +295,12 @@ export default function AdminLayout({
               </div>
             </div>
 
-            <div className="flex items-center gap-4 shrink-0 relative" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="flex items-center gap-4 shrink-0 relative"
+              onClick={(e) => e.stopPropagation()}
+            >
               {/* Notification bell */}
-              <button 
+              <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition relative"
               >
@@ -281,13 +314,17 @@ export default function AdminLayout({
               {showNotifications && (
                 <div className="absolute top-[100%] right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl w-[320px] md:w-[360px] z-50 overflow-hidden divide-y divide-slate-100 animate-scale-in">
                   <div className="p-4 bg-slate-50 flex justify-between items-center">
-                    <span className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Tender Notifications</span>
-                    <span className="bg-green-100 text-green-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">{notifications.length} New</span>
+                    <span className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
+                      Tender Notifications
+                    </span>
+                    <span className="bg-green-100 text-green-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                      {notifications.length} New
+                    </span>
                   </div>
 
                   <div className="max-h-[300px] overflow-y-auto divide-y divide-slate-50">
                     {notifications.map((notif) => (
-                      <Link 
+                      <Link
                         key={notif.id}
                         href={`/admin/egp-notices`}
                         onClick={() => setShowNotifications(false)}
@@ -298,10 +335,13 @@ export default function AdminLayout({
                             {notif.category}
                           </span>
                           <span className="text-[10px] text-slate-400 font-medium">
-                            {new Date(notif.createdAt).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric"
-                            })}
+                            {new Date(notif.createdAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                              },
+                            )}
                           </span>
                         </div>
                         <p className="text-xs font-bold text-slate-700 mt-1.5 line-clamp-2 hover:text-[var(--primary-color)] transition leading-relaxed">
@@ -317,8 +357,8 @@ export default function AdminLayout({
                     )}
                   </div>
 
-                  <Link 
-                    href="/admin/egp-notices" 
+                  <Link
+                    href="/admin/egp-notices"
                     onClick={() => setShowNotifications(false)}
                     className="p-3 text-center block text-[11px] font-extrabold text-[var(--primary-color)] hover:text-green-700 bg-slate-50/50 hover:bg-slate-50 transition uppercase tracking-wider"
                   >
@@ -339,9 +379,9 @@ export default function AdminLayout({
                 </div>
 
                 {avatar ? (
-                  <img 
-                    src={avatar} 
-                    alt="Admin Avatar" 
+                  <img
+                    src={avatar}
+                    alt="Admin Avatar"
                     className="w-10 h-10 rounded-full object-cover shadow-md border-2 border-white"
                   />
                 ) : (
@@ -354,10 +394,8 @@ export default function AdminLayout({
           </header>
 
           {/* Main Content Area (min-w-0 for flexbox responsive layout) */}
-          <main className="p-4 sm:p-6 md:p-8 flex-grow bg-slate-50 min-w-0 w-full overflow-hidden">
-            <div className="max-w-[1600px] mx-auto w-full h-full min-w-0">
-              {children}
-            </div>
+          <main className="p-4 sm:p-6 md:p-8 flex-grow bg-slate-50 min-w-0 w-full overflow-hidden mt-16">
+            <div className="w-full h-full">{children}</div>
           </main>
         </div>
       </div>

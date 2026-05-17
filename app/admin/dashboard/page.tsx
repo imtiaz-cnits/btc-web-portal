@@ -23,13 +23,10 @@ export default async function AdminDashboardPage() {
   const pendingCount = await prisma.notice.count({ where: { category: "LOTTERY_PENDING" } });
   const resultCount = await prisma.notice.count({ where: { category: "LOTTERY_RESULT" } });
 
-  const totalWinners = await prisma.winnerList.count();
-
   const stats = [
     { name: "Total Notices", value: totalNotices, icon: FileText, color: "bg-blue-50 text-blue-600 border-blue-100" },
     { name: "Active Notices", value: activeNotices, icon: CheckCircle2, color: "bg-emerald-50 text-emerald-600 border-emerald-100" },
     { name: "Inactive Notices", value: inactiveNotices, icon: AlertCircle, color: "bg-rose-50 text-rose-600 border-rose-100" },
-    { name: "Winner Lists", value: totalWinners, icon: Award, color: "bg-amber-50 text-amber-600 border-amber-100" },
   ];
 
   const categories = [
@@ -63,7 +60,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Grid Statistics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (

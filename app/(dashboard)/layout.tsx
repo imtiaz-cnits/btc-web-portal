@@ -26,8 +26,7 @@ export default function AdminLayout({
           <div className="p-6">
             <h2 className="text-xl font-bold text-[var(--primary-color)]">BTC ADMIN</h2>
             <nav className="mt-10 space-y-4">
-              <Link href="/admin/egp-notices" className="block text-gray-600 hover:text-[var(--primary-color)]">Tender Notices</Link>
-              <Link href="/admin/winner-list" className="block text-gray-600 hover:text-[var(--primary-color)]">Winner List</Link>
+              <Link href="/admin/egp-notices" className="block text-gray-600 hover:text-[var(--primary-color)]">Notices</Link>
               <Link href="/" className="block text-gray-600 hover:text-[var(--primary-color)] border-t pt-4">View Website</Link>
             </nav>
           </div>

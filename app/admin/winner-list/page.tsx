@@ -2,8 +2,21 @@ import Link from "next/link";
 import { getWinners, deleteWinner } from "@/app/actions/winners";
 import DeleteButton from "@/components/dashboard/DeleteButton";
 
-export default async function AdminWinnersPage() {
-  const winners = await getWinners();
+export default async function AdminWinnersPage({
+  searchParams,
+}: {
+  searchParams: { search?: string };
+}) {
+  const allWinners = await getWinners();
+  const query = searchParams?.search?.toLowerCase() || "";
+  
+  const winners = query
+    ? allWinners.filter(
+        (w) =>
+          w.title.toLowerCase().includes(query) ||
+          w.status.toLowerCase().includes(query)
+      )
+    : allWinners;
 
   return (
     <div className="space-y-6">

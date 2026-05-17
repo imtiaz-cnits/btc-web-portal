@@ -1,20 +1,20 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/request'
-import { verifyJWT } from '@/lib/jwt'
+import { NextResponse, NextRequest } from 'next/server'
+import { getToken } from 'next-auth/jwt'
 
 export async function middleware(request: NextRequest) {
-  const token = request.cookies.get('token')?.value
   const { pathname } = request.nextUrl
 
   // Protect /admin routes
   if (pathname.startsWith('/admin')) {
+    const token = await getToken({ 
+      req: request, 
+      secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET 
+    })
+
     // Skip protection for auth pages
     if (pathname === '/admin/auth') {
-      if (token) {
-        const payload = await verifyJWT(token)
-        if (payload) {
-          return NextResponse.redirect(new URL('/admin/dashboard', request.url))
-        }
+      if (token && token.role === 'ADMIN') {
+        return NextResponse.redirect(new URL('/admin/egp-notices', request.url))
       }
       return NextResponse.next()
     }
@@ -23,11 +23,9 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/admin/auth', request.url))
     }
 
-    const payload = await verifyJWT(token)
-    if (!payload) {
-      const response = NextResponse.redirect(new URL('/admin/auth', request.url))
-      response.cookies.delete('token')
-      return response
+    // Enforce admin role
+    if (token.role !== 'ADMIN') {
+      return new NextResponse("Access Denied. Admin role required.", { status: 403 })
     }
   }
 
@@ -37,3 +35,4 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: ['/admin/:path*'],
 }
+

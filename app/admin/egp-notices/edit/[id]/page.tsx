@@ -1,6 +1,8 @@
 import { getNoticeById } from "@/app/actions/notices";
-import EditNoticeForm from "@/components/dashboard/EditNoticeForm";
+import NoticeForm from "@/components/dashboard/NoticeForm";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default async function EditNoticePage({ params }: { params: { id: string } }) {
   const notice = await getNoticeById(params.id);
@@ -11,8 +13,21 @@ export default async function EditNoticePage({ params }: { params: { id: string 
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800">Edit Tender Notice</h1>
-      <EditNoticeForm notice={notice} />
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <Link 
+          href="/admin/egp-notices"
+          className="p-2 hover:bg-white border border-transparent hover:border-slate-200 rounded-xl text-slate-500 hover:text-slate-700 transition"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Link>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Edit Tender Notice</h1>
+          <p className="text-slate-500 text-sm mt-0.5">Modify the procurement notice parameters, table rows/columns, or uploaded files.</p>
+        </div>
+      </div>
+
+      <NoticeForm notice={notice} />
     </div>
   );
 }

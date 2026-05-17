@@ -63,17 +63,19 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
                     <div className="flex items-center justify-center gap-2">
                       <Link
                         href={`/egp-notice/${notice.id}`}
-                        className="bg-primary hover:!text-secondary text-white px-5 py-2 rounded-lg font-bold text-xs uppercase hover:bg-text-1 transition shadow-sm flex items-center gap-2"
+                        className="bg-primary hover:!text-secondary !text-white px-5 py-2 rounded-lg font-bold text-xs uppercase hover:bg-text-1 transition shadow-sm flex items-center gap-2"
                       >
                         <i className="fa-solid fa-eye "></i> View
                       </Link>
-                      <a
-                        href={notice.fileUrl}
-                        download
-                        className="bg-text-1 !text-secondary hover:!text-black px-4 py-2 rounded-lg font-bold text-xs uppercase hover:bg-primary transition shadow-sm flex items-center gap-2"
-                      >
-                        <i className="fa-solid fa-download "></i>
-                      </a>
+                      {notice.fileUrl && (
+                        <a
+                          href={notice.fileUrl}
+                          download
+                          className="bg-text-1 !text-secondary px-4 py-2 rounded-lg font-bold text-xs uppercase hover:bg-primary transition shadow-sm flex items-center gap-2"
+                        >
+                          <i className="fa-solid fa-download "></i>
+                        </a>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -126,13 +128,15 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
                 >
                   <i className="fa-solid fa-eye"></i> View Detail
                 </Link>
-                <a
-                  href={notice.fileUrl}
-                  download
-                  className="bg-text-1 !text-secondary hover:!text-black hover:bg-primary p-3 rounded-xl font-bold text-[11px] uppercase flex items-center justify-center aspect-square shadow-sm active:scale-95 transition-all"
-                >
-                  <i className="fa-solid fa-download"></i>
-                </a>
+                {notice.fileUrl && (
+                  <a
+                    href={notice.fileUrl}
+                    download
+                    className="bg-text-1 !text-secondary hover:!text-black hover:bg-primary p-3 rounded-xl font-bold text-[11px] uppercase flex items-center justify-center aspect-square shadow-sm active:scale-95 transition-all"
+                  >
+                    <i className="fa-solid fa-download"></i>
+                  </a>
+                )}
               </div>
             </div>
           ))

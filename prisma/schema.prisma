@@ -16,6 +16,7 @@ model User {
   name              String
   email             String    @unique
   password          String
+  role              Role      @default(USER)
   verifyOtp         String    @default("")
   verifyOtpExpireAt BigInt    @default(0)
   isAccountVerified Boolean   @default(false)
@@ -29,10 +30,22 @@ model User {
   @@map("users")
 }
 
+enum Role {
+  ADMIN
+  USER
+}
+
+enum NoticeType {
+  FILE
+  TEXT
+  TABLE
+}
+
 enum NoticeCategory {
   LTM
   OTM
-  LOTTERY
+  LOTTERY_PENDING
+  LOTTERY_RESULT
 }
 
 enum Status {
@@ -43,7 +56,10 @@ enum Status {
 model Notice {
   id          String         @id @default(cuid())
   title       String
-  content     String         @db.Text
+  content     String?        @db.Text
+  type        NoticeType     @default(FILE)
+  tableData   String?        @db.LongText
+  year        String?
   category    NoticeCategory @default(LTM)
   createdBy   User           @relation(fields: [authorId], references: [id])
   authorId    String
@@ -61,7 +77,7 @@ model Notice {
 model WinnerList {
   id          String    @id @default(cuid())
   title       String
-  content     String    @db.Text
+  content     String?   @db.Text
   createdBy   User      @relation(fields: [authorId], references: [id])
   authorId    String
   filePath    String?
@@ -74,3 +90,4 @@ model WinnerList {
   @@index([createdAt(sort: Desc)])
   @@map("winner_lists")
 }
+

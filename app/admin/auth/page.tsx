@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { login, register } from "@/app/actions/auth";
+import { register } from "@/app/actions/auth";
 import { motion, AnimatePresence } from "framer-motion";
+import { signIn } from "next-auth/react";
 
 export default function AdminAuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -17,15 +18,49 @@ export default function AdminAuthPage() {
     setMessage({ type: "", text: "" });
 
     const formData = new FormData(e.currentTarget);
-    const result = isLogin ? await login(formData) : await register(formData);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
-    if (result.success) {
-      setMessage({ type: "success", text: result.message });
-      if (isLogin || result.userId) {
-        setTimeout(() => router.push("/admin/egp-notices"), 1000);
+    if (isLogin) {
+      // Authenticate via NextAuth Credentials Provider
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setMessage({ type: "error", text: result.error });
+      } else {
+        setMessage({ type: "success", text: "Login successful! Redirecting..." });
+        setTimeout(() => {
+          router.push("/admin/egp-notices");
+        }, 1000);
       }
     } else {
-      setMessage({ type: "error", text: result.message });
+      // Register new Admin
+      const result = await register(formData);
+
+      if (result.success) {
+        setMessage({ type: "success", text: result.message + " Logging in..." });
+        
+        // Log in immediately using the registered credentials
+        const loginRes = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+
+        if (loginRes?.error) {
+          setMessage({ type: "error", text: "Registration success but login failed: " + loginRes.error });
+        } else {
+          setTimeout(() => {
+            router.push("/admin/egp-notices");
+          }, 1000);
+        }
+      } else {
+        setMessage({ type: "error", text: result.message });
+      }
     }
     setLoading(false);
   }

@@ -11,7 +11,7 @@ export default async function SingleNoticePage({ params }: { params: { id: strin
     publishDate: new Date(),
     lastDate: new Date(),
     createdBy: { name: "Admin" },
-    filePath: null
+    filePath: null as string | null
   };
   /*
   const notice = await prisma.notice.findUnique({

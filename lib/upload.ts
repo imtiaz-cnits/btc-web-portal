@@ -14,7 +14,7 @@ export async function uploadFile(file: File | null): Promise<string | null> {
     const fileName = `${uuidv4()}${fileExtension}`;
     
     // Path where file will be saved
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
+    const uploadDir = path.join(process.cwd(), "public", "assets", "img");
     const filePath = path.join(uploadDir, fileName);
 
     // Ensure directory exists
@@ -24,7 +24,7 @@ export async function uploadFile(file: File | null): Promise<string | null> {
     await writeFile(filePath, buffer);
 
     // Return the public URL path
-    return `/uploads/${fileName}`;
+    return `/assets/img/${fileName}`;
   } catch (error) {
     console.error("Upload Error:", error);
     return null;

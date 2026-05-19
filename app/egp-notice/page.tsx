@@ -14,10 +14,15 @@ const categoryMap: Record<string, string> = {
 
 export default async function PublicEgpNoticePage() {
   // Fetch active notices from database ordered by publication or creation date
-  const notices = await prisma.notice.findMany({
-    where: { status: "active" },
-    orderBy: { createdAt: "desc" },
-  });
+  let notices = [];
+  try {
+    notices = await prisma.notice.findMany({
+      where: { status: "active" },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch (error) {
+    console.error("Failed to fetch notices in PublicEgpNoticePage:", error);
+  }
 
   // Map database notice properties to the fields expected by NoticeTable
   const mappedNotices = notices.map((notice, idx) => {

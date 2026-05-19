@@ -18,9 +18,14 @@ export default async function PublicSingleNoticePage({
 }: {
   params: { id: string };
 }) {
-  const notice = await prisma.notice.findUnique({
-    where: { id: params.id },
-  });
+  let notice = null;
+  try {
+    notice = await prisma.notice.findUnique({
+      where: { id: params.id },
+    });
+  } catch (error) {
+    console.error("Failed to fetch notice in PublicSingleNoticePage:", error);
+  }
 
   if (!notice) {
     notFound();

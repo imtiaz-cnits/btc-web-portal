@@ -18,11 +18,16 @@ const categoryMap: Record<string, string> = {
 
 export default async function HomePage() {
   // Fetch active tender notices for the Hero slider
-  const rawTenderNotices = await prisma.notice.findMany({
-    where: { status: "active" },
-    orderBy: { createdAt: "desc" },
-    take: 10,
-  });
+  let rawTenderNotices = [];
+  try {
+    rawTenderNotices = await prisma.notice.findMany({
+      where: { status: "active" },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    });
+  } catch (error) {
+    console.error("Failed to fetch raw tender notices for homepage:", error);
+  }
 
   // Convert dates to "15 May" short format that the GSAP slider expects
   const formatShortDate = (date: Date | null) => {
@@ -41,10 +46,15 @@ export default async function HomePage() {
   }));
 
   // Fetch active notices for the Browse Notices By Category Section
-  const allActiveNotices = await prisma.notice.findMany({
-    where: { status: "active" },
-    orderBy: { createdAt: "desc" },
-  });
+  let allActiveNotices = [];
+  try {
+    allActiveNotices = await prisma.notice.findMany({
+      where: { status: "active" },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch (error) {
+    console.error("Failed to fetch active notices for homepage categories:", error);
+  }
 
   const homepageNotices = allActiveNotices.map((notice) => {
     const pubDate = notice.publishDate || notice.createdAt;

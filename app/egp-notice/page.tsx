@@ -14,7 +14,7 @@ const categoryMap: Record<string, string> = {
 
 export default async function PublicEgpNoticePage() {
   // Fetch active notices from database ordered by publication or creation date
-  let notices = [];
+  let notices: any[] = [];
   try {
     notices = await prisma.notice.findMany({
       where: { status: "active" },

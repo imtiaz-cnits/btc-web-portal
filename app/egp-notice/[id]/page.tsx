@@ -18,7 +18,7 @@ export default async function PublicSingleNoticePage({
 }: {
   params: { id: string };
 }) {
-  let notice = null;
+  let notice: any = null;
   try {
     notice = await prisma.notice.findUnique({
       where: { id: params.id },

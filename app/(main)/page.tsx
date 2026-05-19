@@ -18,7 +18,7 @@ const categoryMap: Record<string, string> = {
 
 export default async function HomePage() {
   // Fetch active tender notices for the Hero slider
-  let rawTenderNotices = [];
+  let rawTenderNotices: any[] = [];
   try {
     rawTenderNotices = await prisma.notice.findMany({
       where: { status: "active" },
@@ -46,7 +46,7 @@ export default async function HomePage() {
   }));
 
   // Fetch active notices for the Browse Notices By Category Section
-  let allActiveNotices = [];
+  let allActiveNotices: any[] = [];
   try {
     allActiveNotices = await prisma.notice.findMany({
       where: { status: "active" },

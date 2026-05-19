@@ -67,5 +67,5 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 1 * 24 * 60 * 60, // 1 day
   },
-  secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "btc-portal-secret-key-12345",
 };

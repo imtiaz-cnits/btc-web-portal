@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -20,6 +20,47 @@ import {
 import { useSession, signOut } from "next-auth/react";
 import { getRecentNotices } from "@/app/actions/notices";
 
+function AdminSearchBar() {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  const [searchValue, setSearchValue] = useState(
+    searchParams.get("search") || "",
+  );
+
+  // Update search input when URL changes
+  useEffect(() => {
+    setSearchValue(searchParams.get("search") || "");
+  }, [searchParams]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setSearchValue(val);
+
+    const params = new URLSearchParams(window.location.search);
+    if (val) {
+      params.set("search", val);
+    } else {
+      params.delete("search");
+    }
+
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  return (
+    <div className="relative hidden sm:block max-w-xs md:max-w-md w-full">
+      <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+      <input
+        type="text"
+        value={searchValue}
+        onChange={handleSearchChange}
+        placeholder="Search dashboard..."
+        className="bg-slate-50 border border-slate-200 rounded-full pl-9 pr-4 py-1.5 text-xs outline-none focus:border-green-500 focus:bg-white w-[220px] transition-all font-semibold text-slate-700"
+      />
+    </div>
+  );
+}
+
 export default function AdminLayout({
   children,
 }: {
@@ -27,14 +68,10 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const { data: session } = useSession();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [avatar, setAvatar] = useState<string | null>(null);
-  const [searchValue, setSearchValue] = useState(
-    searchParams.get("search") || "",
-  );
 
   // Dynamic bell notifications state
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -58,11 +95,6 @@ export default function AdminLayout({
     return () => window.removeEventListener("click", handleClose);
   }, []);
 
-  // Update search input when URL changes
-  useEffect(() => {
-    setSearchValue(searchParams.get("search") || "");
-  }, [searchParams]);
-
   useEffect(() => {
     const updateAvatar = () => {
       setAvatar(localStorage.getItem("btc_admin_avatar"));
@@ -79,20 +111,6 @@ export default function AdminLayout({
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
-  };
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setSearchValue(val);
-
-    const params = new URLSearchParams(window.location.search);
-    if (val) {
-      params.set("search", val);
-    } else {
-      params.delete("search");
-    }
-
-    router.push(`${pathname}?${params.toString()}`);
   };
 
   const menus = [
@@ -271,16 +289,9 @@ export default function AdminLayout({
               </button>
 
               {/* Dynamic search bar */}
-              <div className="relative hidden sm:block max-w-xs md:max-w-md w-full">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={searchValue}
-                  onChange={handleSearchChange}
-                  placeholder="Search dashboard..."
-                  className="bg-slate-50 border border-slate-200 rounded-full pl-9 pr-4 py-1.5 text-xs outline-none focus:border-green-500 focus:bg-white w-[220px] transition-all font-semibold text-slate-700"
-                />
-              </div>
+              <Suspense fallback={<div className="w-[220px]" />}>
+                <AdminSearchBar />
+              </Suspense>
             </div>
 
             <div

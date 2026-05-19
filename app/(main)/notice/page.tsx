@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { getNotices } from "@/app/actions/notices";
 
+export const revalidate = 0; // Live data on every load, prevents build-time database fetch failures
+
 export default async function PublicNoticesPage() {
   const notices = await getNotices();
   const activeNotices = notices.filter(n => n.status === 'active');

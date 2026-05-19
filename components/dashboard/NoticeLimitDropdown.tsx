@@ -36,10 +36,10 @@ export default function NoticeLimitDropdown() {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center justify-between gap-2 bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer min-w-[100px] shadow-xs"
+        className="inline-flex items-center justify-between gap-2 bg-slate-600 hover:bg-slate-700 border-0 rounded-xl px-4 py-2.5 text-xs font-bold text-white transition cursor-pointer min-w-[100px] shadow-xs active:scale-95"
       >
         <span>Show {currentLimit}</span>
-        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-3.5 h-3.5 text-white transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       {isOpen && (

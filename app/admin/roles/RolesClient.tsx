@@ -228,11 +228,11 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
                                   setActiveDropdownUserId(user.id);
                                 }
                               }}
-                              className="bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-700 outline-none hover:border-slate-300 transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-between gap-1.5 min-w-[90px] h-9 shadow-xs"
+                              className="bg-slate-600 hover:bg-slate-700 border-0 rounded-xl px-3 py-1.5 text-xs font-bold text-white outline-none transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-between gap-1.5 min-w-[90px] h-9 shadow-xs active:scale-95"
                               title={isAdmin ? "Protected Administrator Account" : "Change User Role"}
                             >
                               <span>{user.role}</span>
-                              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${activeDropdownUserId === user.id ? "rotate-180" : ""}`} />
+                              <ChevronDown className={`w-3.5 h-3.5 text-white transition-transform ${activeDropdownUserId === user.id ? "rotate-180" : ""}`} />
                             </button>
 
                             {activeDropdownUserId === user.id && (
@@ -265,9 +265,9 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
                             onClick={() => handleResetPassword(user.id)}
                             disabled={isPending || isAdmin}
                             title={isAdmin ? "Protected Administrator Account" : "Reset User Password to default '12345678'"}
-                            className="p-2 bg-slate-50 border border-slate-200 text-slate-500 hover:text-amber-600 hover:border-amber-200 hover:bg-amber-50 rounded-xl transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed h-9 w-9 flex items-center justify-center"
+                            className="p-2 bg-amber-500 hover:bg-amber-600 border-0 text-white rounded-xl transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed h-9 w-9 flex items-center justify-center shadow-xs cursor-pointer"
                           >
-                            <Key className="w-4 h-4" />
+                            <Key className="w-4 h-4 text-white" />
                           </button>
 
                           {/* Delete Account Button */}
@@ -276,9 +276,9 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
                             onClick={() => setDeleteConfirmUser(user)}
                             disabled={isPending || isAdmin}
                             title={isAdmin ? "Protected Administrator Account" : "Delete User Account"}
-                            className="p-2 bg-slate-50 border border-slate-200 text-slate-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 rounded-xl transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed h-9 w-9 flex items-center justify-center"
+                            className="p-2 bg-red-650 hover:bg-red-700 border-0 text-white rounded-xl transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed h-9 w-9 flex items-center justify-center shadow-xs cursor-pointer"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4 text-white" />
                           </button>
                         </div>
                       </td>
@@ -323,7 +323,7 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
               <button
                 type="button"
                 onClick={() => setDeleteConfirmUser(null)}
-                className="px-5 py-2.5 bg-slate-100 text-slate-600 hover:bg-slate-200 transition font-bold rounded-xl text-xs active:scale-95"
+                className="px-5 py-2.5 bg-slate-500 hover:bg-slate-600 text-white transition font-bold rounded-xl text-xs active:scale-95 border-0 cursor-pointer"
               >
                 Cancel
               </button>

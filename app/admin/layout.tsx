@@ -115,25 +115,23 @@ export default function AdminLayout({
 
         {/* Sidebar */}
         <aside
-          className={`bg-slate-900 border-r border-slate-800 text-white fixed h-full z-30 transition-all duration-300 flex flex-col shadow-2xl overflow-hidden ${
+          className={`bg-slate-900 border-r border-slate-800 text-white fixed h-full z-30 transition-all duration-300 flex flex-col shadow-2xl overflow-hidden overflow-x-hidden ${
             sidebarOpen
               ? "w-[260px] translate-x-0"
               : "w-0 -translate-x-[260px] md:w-[70px] md:translate-x-0"
           }`}
         >
           {/* Logo Brand (Centered when collapsed) */}
-          <div
-            className={`h-16 flex items-center border-b border-slate-800 shrink-0 transition-all ${
-              sidebarOpen ? "justify-between px-6" : "justify-center px-2"
-            }`}
-          >
-            <div className="flex items-center gap-2 overflow-hidden">
+          <div className="h-16 flex items-center border-b border-slate-800 shrink-0 px-[13px] transition-all duration-300 w-full overflow-hidden">
+            <div className="flex items-center gap-4 overflow-hidden w-full shrink-0 justify-start">
               <div className="w-8 h-8 rounded-lg bg-[var(--primary-color)] flex items-center justify-center font-bold text-white shadow-lg shrink-0">
                 B
               </div>
               <span
-                className={`font-bold text-base tracking-wider text-green-400 uppercase transition-all duration-300 whitespace-nowrap ${
-                  sidebarOpen ? "opacity-100" : "opacity-0 md:hidden"
+                className={`font-bold text-base tracking-wider text-green-400 uppercase transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+                  sidebarOpen
+                    ? "opacity-100 max-w-[150px]"
+                    : "opacity-0 max-w-0 pointer-events-none"
                 }`}
               >
                 BTC Admin
@@ -141,18 +139,18 @@ export default function AdminLayout({
             </div>
 
             {/* Close button for mobile */}
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white md:hidden"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            {sidebarOpen && (
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white md:hidden shrink-0"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
           </div>
 
           {/* Navigation Links */}
-          <nav
-            className={`flex-1 py-6 space-y-2 overflow-y-auto ${sidebarOpen ? "px-4" : "px-2"}`}
-          >
+          <nav className="flex-1 py-6 space-y-2 overflow-y-auto overflow-x-hidden transition-all duration-300 w-full px-3">
             {menus.map((menu) => {
               const Icon = menu.icon;
               const isActive =
@@ -161,22 +159,20 @@ export default function AdminLayout({
                 <Link
                   key={menu.name}
                   href={menu.href}
-                  className={`flex items-center rounded-xl font-medium text-sm transition-all duration-200 group relative ${
-                    sidebarOpen
-                      ? "gap-3 px-4 py-3.5 justify-start"
-                      : "justify-center p-2.5 w-11 h-11 mx-auto"
-                  } ${
+                  className={`flex items-center gap-4 rounded-xl font-medium text-sm transition-all duration-300 group relative overflow-hidden whitespace-nowrap w-full border border-transparent px-[13px] py-3.5 justify-start ${
                     isActive
                       ? "bg-[var(--primary-color)] text-white shadow-lg shadow-green-600/20"
                       : "text-slate-400 hover:bg-slate-800 hover:text-white"
                   }`}
                 >
                   <Icon
-                    className={`w-5 h-5 shrink-0 ${isActive ? "text-white" : "text-slate-400 group-hover:text-white"}`}
+                    className={`w-5 h-5 shrink-0 transition-colors duration-300 ${isActive ? "text-white" : "text-slate-400 group-hover:text-white"}`}
                   />
                   <span
-                    className={`transition-opacity duration-300 whitespace-nowrap ${
-                      sidebarOpen ? "opacity-100" : "opacity-0 md:hidden"
+                    className={`transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+                      sidebarOpen
+                        ? "opacity-100 max-w-[180px]"
+                        : "opacity-0 max-w-0 pointer-events-none"
                     }`}
                   >
                     {menu.name}
@@ -192,19 +188,17 @@ export default function AdminLayout({
               );
             })}
 
-            <div className="border-t border-slate-800 pt-4 mt-4">
+            <div className="border-t border-slate-800 pt-4 mt-4 w-full px-[3px]">
               <Link
                 href="/"
-                className={`flex items-center rounded-xl font-medium text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-200 group relative ${
-                  sidebarOpen
-                    ? "gap-3 px-4 py-3.5 justify-start"
-                    : "justify-center p-2.5 w-11 h-11 mx-auto"
-                }`}
+                className="flex items-center gap-4 rounded-xl font-medium text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-300 group relative overflow-hidden whitespace-nowrap w-full border border-transparent px-[10px] py-3.5 justify-start"
               >
-                <Globe className="w-5 h-5 shrink-0 text-slate-400 group-hover:text-white" />
+                <Globe className="w-5 h-5 shrink-0 text-slate-400 group-hover:text-white transition-colors duration-300" />
                 <span
-                  className={`transition-opacity duration-300 whitespace-nowrap ${
-                    sidebarOpen ? "opacity-100" : "opacity-0 md:hidden"
+                  className={`transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+                    sidebarOpen
+                      ? "opacity-100 max-w-[180px]"
+                      : "opacity-0 max-w-0 pointer-events-none"
                   }`}
                 >
                   View Website
@@ -220,36 +214,28 @@ export default function AdminLayout({
           </nav>
 
           {/* User Footer (No padding errors when collapsed) */}
-          <div
-            className={`border-t border-slate-800 bg-slate-950/40 shrink-0 transition-all ${
-              sidebarOpen ? "p-4" : "p-2 py-4"
-            }`}
-          >
+          <div className="border-t border-slate-800 bg-slate-950/40 shrink-0 transition-all duration-300 w-full overflow-hidden p-3">
             <button
               onClick={() => signOut({ callbackUrl: "/admin/auth" })}
-              className={`w-full flex items-center justify-between rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group ${
-                sidebarOpen
-                  ? "px-4 py-3"
-                  : "justify-center p-2.5 w-11 h-11 mx-auto"
-              }`}
+              className="flex items-center gap-4 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 group overflow-hidden whitespace-nowrap w-full border-0 cursor-pointer px-[13px] py-3 justify-start"
             >
-              <div
-                className={`flex items-center ${sidebarOpen ? "gap-3" : "justify-center"}`}
+              <LogOut className="w-5 h-5 shrink-0 text-slate-400 group-hover:text-red-400 transition-colors duration-300" />
+              <span
+                className={`font-medium text-sm transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+                  sidebarOpen
+                    ? "opacity-100 max-w-[100px]"
+                    : "opacity-0 max-w-0 pointer-events-none"
+                }`}
               >
-                <LogOut
-                  className={`w-5 h-5 shrink-0 ${sidebarOpen ? "" : "text-slate-400 group-hover:text-red-400"}`}
-                />
-                <span
-                  className={`font-medium text-sm transition-opacity duration-300 ${
-                    sidebarOpen ? "opacity-100" : "opacity-0 hidden"
-                  }`}
-                >
-                  Sign Out
-                </span>
-              </div>
-              {sidebarOpen && (
-                <ChevronRight className="w-4 h-4 text-slate-600 transition-opacity" />
-              )}
+                Sign Out
+              </span>
+              <ChevronRight
+                className={`w-4 h-4 text-slate-600 transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ml-auto shrink-0 ${
+                  sidebarOpen
+                    ? "opacity-100 max-w-[20px]"
+                    : "opacity-0 max-w-0 pointer-events-none"
+                }`}
+              />
             </button>
           </div>
         </aside>
@@ -261,9 +247,11 @@ export default function AdminLayout({
           }`}
         >
           {/* Header */}
-          <header className={`h-16 bg-white border-b border-slate-200 flex items-center px-6 justify-between fixed top-0 right-0 z-20 shadow-sm backdrop-blur-md bg-white/90 shrink-0 min-w-0 transition-all duration-300 ${
-            sidebarOpen ? "left-0 md:left-[260px]" : "left-0 md:left-[70px]"
-          }`}>
+          <header
+            className={`h-16 bg-white border-b border-slate-200 flex items-center px-6 justify-between fixed top-0 right-0 z-20 shadow-sm backdrop-blur-md bg-white/90 shrink-0 min-w-0 transition-all duration-300 ${
+              sidebarOpen ? "left-0 md:left-[260px]" : "left-0 md:left-[70px]"
+            }`}
+          >
             <div className="flex items-center gap-4 min-w-0">
               {/* Header Logo (ONLY visible on mobile, hidden on desktop!) */}
               <div className="flex items-center gap-2 mr-3 shrink-0 md:hidden">

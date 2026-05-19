@@ -3,6 +3,7 @@
 import React, { useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useVerticalNotice } from "@/lib/hooks/use-gsap";
 
 // Assets
@@ -28,6 +29,7 @@ const Hero: React.FC<HeroProps> = ({
   loading,
   error,
 }) => {
+  const router = useRouter();
   const {
     noticeRef: tenderNoticeRef,
     handleMouseEnter: tenderMouseEnter,
@@ -35,11 +37,7 @@ const Hero: React.FC<HeroProps> = ({
   } = useVerticalNotice(tenderNotices);
 
   const handleViewFile = (notice: Notice) => {
-    if (notice.filePath) {
-      window.open(`https://egpbtc.com${notice.filePath}`, "_blank");
-    } else {
-      window.open(`/egp-notice/${notice.id}`, "_blank");
-    }
+    router.push(`/egp-notice/${notice.id}`);
   };
 
   return (

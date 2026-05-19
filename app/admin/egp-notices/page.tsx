@@ -75,9 +75,9 @@ export default async function AdminNoticesPage({
         </div>
         <Link 
           href="/admin/egp-notices/add" 
-          className="bg-[var(--primary-color)] text-white hover:bg-green-700 font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-green-600/20 text-sm flex items-center gap-2 active:scale-95 transition-all shrink-0"
+          className="bg-[var(--primary-color)] !text-white hover:bg-green-700 font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-green-600/20 text-sm flex items-center gap-2 active:scale-95 transition-all shrink-0 cursor-pointer"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 !text-white" />
           Add Notice
         </Link>
       </div>
@@ -198,15 +198,13 @@ export default async function AdminNoticesPage({
                       <div className="flex justify-end gap-3 items-center">
                         <Link 
                            href={`/admin/egp-notices/edit/${notice.id}`} 
-                           className="p-1.5 hover:bg-blue-50 text-blue-600 rounded-lg transition inline-flex items-center justify-center border border-transparent hover:border-blue-100"
+                           className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition inline-flex items-center justify-center border-0 active:scale-95 shadow-sm"
                            title="Edit"
                         >
-                          <Edit3 className="w-4 h-4" />
+                          <Edit3 className="w-4 h-4 text-white" />
                         </Link>
                         
-                        <div className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition inline-flex items-center justify-center border border-transparent hover:border-rose-100">
-                          <DeleteButton id={notice.id} action={deleteNotice} />
-                        </div>
+                        <DeleteButton id={notice.id} action={deleteNotice} />
                       </div>
                     </td>
                   </tr>
@@ -235,21 +233,21 @@ export default async function AdminNoticesPage({
           <div className="flex items-center gap-1.5">
             <Link
               href={`/admin/egp-notices?filter=${filter}${query ? `&search=${query}` : ""}&limit=${currentLimit}&page=${Math.max(1, activePage - 1)}`}
-              className={`w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center font-bold text-slate-500 hover:bg-slate-50 transition-all ${
+              className={`w-9 h-9 rounded-xl bg-slate-500 hover:bg-slate-600 text-white flex items-center justify-center font-bold transition-all border-0 ${
                 activePage === 1 ? "pointer-events-none opacity-50" : ""
               }`}
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4 text-white" />
             </Link>
 
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <Link
                 key={page}
                 href={`/admin/egp-notices?filter=${filter}${query ? `&search=${query}` : ""}&limit=${currentLimit}&page=${page}`}
-                className={`w-9 h-9 rounded-xl flex items-center justify-center font-extrabold text-xs transition-all ${
+                className={`w-9 h-9 rounded-xl flex items-center justify-center font-extrabold text-xs transition-all border-0 ${
                   activePage === page
                     ? "bg-[var(--primary-color)] text-white shadow-md shadow-green-600/10"
-                    : "border border-slate-200 text-slate-600 hover:bg-slate-50"
+                    : "bg-slate-450 hover:bg-slate-500 text-white"
                 }`}
               >
                 {page}
@@ -258,11 +256,11 @@ export default async function AdminNoticesPage({
 
             <Link
               href={`/admin/egp-notices?filter=${filter}${query ? `&search=${query}` : ""}&limit=${currentLimit}&page=${Math.min(totalPages, activePage + 1)}`}
-              className={`w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center font-bold text-slate-500 hover:bg-slate-50 transition-all ${
+              className={`w-9 h-9 rounded-xl bg-slate-500 hover:bg-slate-600 text-white flex items-center justify-center font-bold transition-all border-0 ${
                 activePage === totalPages ? "pointer-events-none opacity-50" : ""
               }`}
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4 text-white" />
             </Link>
           </div>
         </div>

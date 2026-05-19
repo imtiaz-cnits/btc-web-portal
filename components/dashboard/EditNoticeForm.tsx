@@ -102,7 +102,7 @@ export default function EditNoticeForm({ notice }: { notice: any }) {
         <button 
           type="button" 
           onClick={() => router.back()}
-          className="px-6 py-2 border rounded-lg font-medium hover:bg-gray-50 transition"
+          className="px-6 py-2 bg-slate-500 hover:bg-slate-600 text-white rounded-lg font-medium transition border-0 active:scale-95 shadow-sm cursor-pointer"
         >
           Cancel
         </button>

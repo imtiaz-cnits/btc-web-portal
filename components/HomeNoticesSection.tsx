@@ -194,10 +194,13 @@ export default function HomeNoticesSection({ notices }: HomeNoticesSectionProps)
         <div className="flex justify-center mt-10">
           <Link
             href="/egp-notice"
-            className="bg-primary hover:bg-text-1 hover:!text-secondary text-white font-extrabold px-10 py-4 rounded-xl shadow-lg shadow-green-600/20 text-sm tracking-wide uppercase transition-all duration-300 active:scale-95 flex items-center gap-2 cursor-pointer"
+            className="contact_btn cursor-pointer relative inline-flex items-center justify-center px-10 py-4 overflow-hidden tracking-tighter text-white bg-primary rounded-tl-lg rounded-tr-lg rounded-bl-0 rounded-br-lg group transition-all duration-300 shadow-lg shadow-green-600/20 active:scale-95"
           >
-            <span>View All Notice</span>
-            <i className="fa-solid fa-arrow-right"></i>
+            <span className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-text-1 group-hover:h-full"></span>
+            <span className="relative text-base font-semibold text-white transition-colors duration-300 uppercase flex items-center gap-2">
+              <span>View All Notice</span>
+              <i className="fa-solid fa-arrow-right relative z-10 transition-colors duration-300"></i>
+            </span>
           </Link>
         </div>
       </div>

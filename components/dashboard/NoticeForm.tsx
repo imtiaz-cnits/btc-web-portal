@@ -119,6 +119,43 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   // Multiple Tables Array
   const [tablesList, setTablesList] = useState<any[]>([]);
 
+  // Real-time file upload preview state
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFileUrl, setSelectedFileUrl] = useState<string | null>(null);
+  
+  // Modal Previewer State
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [modalPreviewUrl, setModalPreviewUrl] = useState<string | null>(null);
+  const [modalPreviewType, setModalPreviewType] = useState<"image" | "pdf" | null>(null);
+
+  // Clean up ObjectURL when component unmounts or changes
+  useEffect(() => {
+    return () => {
+      if (selectedFileUrl && selectedFileUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(selectedFileUrl);
+      }
+    };
+  }, [selectedFileUrl]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      if (selectedFileUrl && selectedFileUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(selectedFileUrl);
+      }
+      const url = URL.createObjectURL(file);
+      setSelectedFileUrl(url);
+    } else {
+      setSelectedFile(null);
+      if (selectedFileUrl && selectedFileUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(selectedFileUrl);
+      }
+      setSelectedFileUrl(null);
+    }
+  };
+
+
   // ----------------------------------------------------
   // Load CDN Flatpickr for beautiful datepickers
   // ----------------------------------------------------
@@ -178,6 +215,25 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           } else {
             // Backward compatibility for old single-table formats
             if (parsed.isPwdTemplate) {
+              const legacyRows = parsed.rows || [];
+              const normalizedLegacyRows = legacyRows.map((row: any, rIdx: number) => {
+                if (Array.isArray(row)) return row;
+                if (row && typeof row === "object") {
+                  return [
+                    (rIdx + 1).toString(),
+                    row.tenderId || "",
+                    row.description || "",
+                    row.location || "",
+                    row.appCost || "",
+                    row.solvency || "",
+                    row.security || "",
+                    row.docFees || "",
+                    row.lastDateTime || row.lastDate || ""
+                  ];
+                }
+                return [];
+              });
+
               setTablesList([{
                 id: "old-pwd-" + Math.random().toString(),
                 type: "pwd_ltm",
@@ -188,7 +244,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                 payOrderTo: parsed.payOrderTo || "",
                 moreInfo: parsed.moreInfo || "",
                 bottomWarning: parsed.bottomWarning || "",
-                rows: parsed.rows || []
+                headers: ["SL No", "Tender ID", "Description", "Location", "AppCost (Tk)", "Solvency (Tk)", "Security (Tk)", "Doc Fees (Tk)", "Last Date & Time"],
+                rows: normalizedLegacyRows
               }]);
             } else if (parsed.headers && parsed.rows) {
               setTablesList([{
@@ -698,6 +755,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
               name="file" 
               accept=".pdf,image/*"
               required={!isEdit || !notice.filePath}
+              onChange={handleFileChange}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
             />
             <div className="space-y-3 pointer-events-none">
@@ -705,16 +763,75 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                 <FileUp className="w-6 h-6" />
               </div>
               <div>
-                <p className="font-semibold text-slate-700 text-sm">Click or Drag to Upload Notice File</p>
+                <p className="font-semibold text-slate-700 text-sm">
+                  {selectedFile ? "File Selected Successfully!" : "Click or Drag to Upload Notice File"}
+                </p>
                 <p className="text-slate-400 text-xs mt-1">Accepts PDF documents and Images (PNG, JPG, JPEG) up to 10MB.</p>
               </div>
             </div>
           </div>
 
-          {isEdit && notice.filePath && (
-            <div className="bg-slate-100 p-4 rounded-xl text-xs text-slate-500 font-semibold border border-slate-200 mt-4 flex items-center gap-1.5">
-              <span>📎 Existing Attached Document:</span>
-              <a href={notice.filePath} target="_blank" rel="noreferrer" className="text-[var(--primary-color)] underline hover:text-green-700 font-bold">{notice.filePath.split('/').pop()}</a>
+          {/* New Selected File Review Row */}
+          {selectedFile && (
+            <div className="bg-green-50/50 p-4 rounded-xl text-xs text-green-800 font-semibold border border-green-200 mt-4 flex items-center justify-between animate-scale-in">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span>📎 Selected File:</span>
+                <span className="font-extrabold truncate text-green-700 max-w-[200px] sm:max-w-md">{selectedFile.name}</span>
+                <span className="text-[10px] bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-extrabold">
+                  {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                </span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const isPdf = selectedFile.type === "application/pdf" || selectedFile.name.toLowerCase().endsWith(".pdf");
+                    setModalPreviewUrl(selectedFileUrl);
+                    setModalPreviewType(isPdf ? "pdf" : "image");
+                    setShowPreviewModal(true);
+                  }}
+                  className="bg-green-600 hover:bg-green-750 !text-white font-extrabold px-3 py-1.5 rounded-lg flex items-center gap-1 transition active:scale-95 text-[10px] uppercase cursor-pointer border-0"
+                >
+                  <Eye className="w-3.5 h-3.5 !text-white" /> Preview
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedFile(null);
+                    if (selectedFileUrl && selectedFileUrl.startsWith("blob:")) {
+                      URL.revokeObjectURL(selectedFileUrl);
+                    }
+                    setSelectedFileUrl(null);
+                    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+                    if (fileInput) fileInput.value = "";
+                  }}
+                  className="bg-red-600 hover:bg-red-750 text-white font-extrabold px-3 py-1.5 rounded-lg flex items-center gap-1 transition active:scale-95 text-[10px] uppercase cursor-pointer border-0"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Existing Document Review Row */}
+          {isEdit && notice.filePath && !selectedFile && (
+            <div className="bg-slate-100 p-4 rounded-xl text-xs text-slate-500 font-semibold border border-slate-200 mt-4 flex items-center justify-between">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span>📎 Existing Attached Document:</span>
+                <span className="text-[var(--primary-color)] font-bold truncate max-w-[200px] sm:max-w-md">{notice.filePath.split('/').pop()}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const isPdf = notice.filePath.toLowerCase().endsWith(".pdf");
+                  setModalPreviewUrl(notice.filePath);
+                  setModalPreviewType(isPdf ? "pdf" : "image");
+                  setShowPreviewModal(true);
+                }}
+                className="bg-green-600 hover:bg-green-700 !text-white font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition active:scale-95 text-[10px] uppercase cursor-pointer border-0"
+              >
+                <Eye className="w-3.5 h-3.5 !text-white" /> Preview Document
+              </button>
             </div>
           )}
         </div>
@@ -763,9 +880,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
               <button
                 type="button"
                 onClick={addPwdTableBlock}
-                className="bg-green-600 hover:bg-green-750 text-white px-5 py-2.5 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 active:scale-95 shadow-md hover:shadow-lg"
+                className="bg-green-600 hover:bg-green-750 !text-white px-5 py-2.5 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 active:scale-95 shadow-md hover:shadow-lg border-0 cursor-pointer"
               >
-                <Plus className="w-4 h-4" /> Add PWD LTM Spreadsheet Table
+                <Plus className="w-4 h-4 !text-white" /> Add PWD LTM Spreadsheet Table
               </button>
             </div>
           </div>
@@ -787,7 +904,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                     <button
                       type="button"
                       onClick={() => removeTableBlock(tIdx)}
-                      className="text-red-500 hover:text-red-700 bg-red-50 border border-red-100 p-2 rounded-xl hover:bg-red-100 transition inline-flex items-center gap-1.5 text-xs font-bold"
+                      className="text-white hover:bg-red-700 bg-red-600 border-0 p-2 px-3 rounded-xl transition inline-flex items-center gap-1.5 text-xs font-bold shadow-xs active:scale-95 cursor-pointer"
                       title="Delete Entire Table Block"
                     >
                       <Trash2 className="w-4 h-4" /> Delete Table
@@ -862,16 +979,16 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                         <button 
                           type="button" 
                           onClick={() => addColumn(tIdx)}
-                          className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 border border-slate-200"
+                          className="bg-slate-600 hover:bg-slate-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 border-0 shadow-xs active:scale-95 cursor-pointer"
                         >
                           <Plus className="w-3.5 h-3.5" /> Add Column
                         </button>
                         <button 
                           type="button" 
                           onClick={() => addRow(tIdx)}
-                          className="bg-[var(--primary-color)] hover:bg-green-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-xs"
+                          className="bg-[var(--primary-color)] hover:bg-green-700 !text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-xs cursor-pointer border-0"
                         >
-                          <Plus className="w-3.5 h-3.5" /> Add Row
+                          <Plus className="w-3.5 h-3.5 !text-white" /> Add Row
                         </button>
                       </div>
                     </div>
@@ -895,7 +1012,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                     <button 
                                       type="button" 
                                       onClick={() => removeColumn(tIdx, cIdx)}
-                                      className="text-slate-400 hover:text-red-500 p-1.5 rounded hover:bg-white transition shrink-0"
+                                      className="text-white hover:bg-red-700 bg-red-600 p-1.5 rounded-lg transition shrink-0 border-0 flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
                                       title="Delete Column"
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
@@ -936,7 +1053,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                   <button 
                                     type="button" 
                                     onClick={() => removeRow(tIdx, rIdx)}
-                                    className="text-slate-400 hover:text-red-500 p-1.5 rounded hover:bg-slate-100 transition inline-flex items-center justify-center"
+                                    className="text-white hover:bg-red-750 bg-red-600 p-1.5 rounded-lg transition inline-flex items-center justify-center border-0 shadow-sm active:scale-95 cursor-pointer"
                                     title="Delete Row"
                                   >
                                     <Trash2 className="w-4 h-4" />
@@ -1031,7 +1148,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         <button 
           type="button" 
           onClick={() => router.back()}
-          className="px-6 py-3 border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition active:scale-95 text-xs uppercase tracking-wider"
+          className="px-6 py-3 bg-slate-500 hover:bg-slate-600 text-white rounded-xl font-bold transition active:scale-95 text-xs uppercase tracking-wider border-0"
         >
           Cancel
         </button>
@@ -1042,7 +1159,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
             onClick={(e) => {
               handleSubmit(e as any, "inactive");
             }}
-            className="bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-extrabold px-6 py-3 rounded-xl shadow-xs transition active:scale-95 disabled:opacity-50 flex items-center gap-2 text-xs uppercase tracking-wider cursor-pointer"
+            className="bg-slate-600 hover:bg-slate-700 text-white font-extrabold px-6 py-3 rounded-xl shadow-xs transition active:scale-95 disabled:opacity-50 flex items-center gap-2 text-xs uppercase tracking-wider cursor-pointer border-0"
           >
             Save as Draft
           </button>
@@ -1050,7 +1167,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         <button 
           type="submit" 
           disabled={loading}
-          className="bg-[var(--primary-color)] hover:bg-green-700 text-white font-extrabold px-8 py-3 rounded-xl shadow-lg shadow-green-600/20 transition active:scale-95 disabled:opacity-50 flex items-center gap-2 text-xs uppercase tracking-wider"
+          className="bg-[var(--primary-color)] hover:bg-green-700 !text-white font-extrabold px-8 py-3 rounded-xl shadow-lg shadow-green-600/20 transition active:scale-95 disabled:opacity-50 flex items-center gap-2 text-xs uppercase tracking-wider border-0 cursor-pointer"
         >
           {loading ? (
             <>
@@ -1062,6 +1179,62 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           )}
         </button>
       </div>
+
+      {/* ---------------------------------------------------- */}
+      {/* DYNAMIC DOCUMENT & IMAGE PREVIEW MODAL */}
+      {/* ---------------------------------------------------- */}
+      {showPreviewModal && modalPreviewUrl && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4 select-none animate-scale-in">
+          <div className="bg-white rounded-3xl p-6 max-w-4xl w-full border border-slate-150 shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="flex justify-between items-center border-b pb-4 mb-4 shrink-0">
+              <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wider flex items-center gap-2">
+                <Eye className="w-4 h-4 text-[var(--primary-color)]" /> Document Previewer
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPreviewModal(false);
+                  setModalPreviewUrl(null);
+                  setModalPreviewType(null);
+                }}
+                className="text-white bg-slate-600 hover:bg-slate-700 px-3 py-1.5 rounded-xl transition font-bold border-0"
+              >
+                ✕ Close
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-auto bg-slate-50 rounded-2xl border border-slate-200 p-2 min-h-0 flex items-center justify-center">
+              {modalPreviewType === "image" ? (
+                <img
+                  src={modalPreviewUrl}
+                  alt="Notice Preview"
+                  className="max-w-full max-h-[60vh] object-contain rounded-xl shadow-xs mx-auto"
+                />
+              ) : (
+                <iframe
+                  src={`${modalPreviewUrl}#toolbar=0`}
+                  className="w-full h-[65vh] border-0 rounded-xl"
+                  title="PDF Notice Document Preview"
+                ></iframe>
+              )}
+            </div>
+
+            <div className="mt-4 pt-4 border-t flex justify-end shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPreviewModal(false);
+                  setModalPreviewUrl(null);
+                  setModalPreviewType(null);
+                }}
+                className="bg-slate-800 hover:bg-slate-900 text-white font-extrabold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 cursor-pointer"
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

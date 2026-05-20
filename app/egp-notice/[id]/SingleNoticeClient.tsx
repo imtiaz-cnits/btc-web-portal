@@ -84,6 +84,8 @@ export default function SingleNoticeClient({
       }
     }
 
+    const isLandscape = parsedTables.length > 0;
+
     // Otherwise print the entire structured web content beautifully
     const printContents = printAreaRef.current?.innerHTML;
     if (printContents) {
@@ -94,7 +96,7 @@ export default function SingleNoticeClient({
             <title>&nbsp;</title>
             <style>
               @page {
-                size: A4 portrait;
+                size: A4 ${isLandscape ? "landscape" : "portrait"};
                 margin: 0 !important;
               }
               body {

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getNotices, deleteNotice } from "@/app/actions/notices";
 import DeleteButton from "@/components/dashboard/DeleteButton";
 import NoticeLimitDropdown from "@/components/dashboard/NoticeLimitDropdown";
+import WhatsAppShareButton from "@/components/dashboard/WhatsAppShareButton";
 import { 
   Plus, 
   Search, 
@@ -196,6 +197,8 @@ export default async function AdminNoticesPage({
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-3 items-center">
+                        <WhatsAppShareButton notice={notice} />
+
                         <Link 
                            href={`/admin/egp-notices/edit/${notice.id}`} 
                            className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition inline-flex items-center justify-center border-0 active:scale-95 shadow-sm"

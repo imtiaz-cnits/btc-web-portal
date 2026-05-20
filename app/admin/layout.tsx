@@ -16,6 +16,8 @@ import {
   Bell,
   Search,
   ShieldCheck,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { getRecentNotices } from "@/app/actions/notices";
@@ -73,6 +75,21 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [avatar, setAvatar] = useState<string | null>(null);
 
+  // ── Admin-only dark mode (scoped to this div, never touches <html>) ──
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("btc_admin_dark_mode");
+    if (saved === "true") setIsDark(true);
+  }, []);
+
+  const toggleDark = () => {
+    setIsDark((prev) => {
+      localStorage.setItem("btc_admin_dark_mode", String(!prev));
+      return !prev;
+    });
+  };
+
   // Dynamic bell notifications state
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -121,7 +138,9 @@ export default function AdminLayout({
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-secondary antialiased text-slate-800 overflow-x-hidden w-full">
+    <div className={`admin-layout min-h-screen flex flex-col font-secondary antialiased overflow-x-hidden w-full transition-colors duration-300 ${
+      isDark ? "dark bg-slate-900 text-slate-100" : "bg-slate-50 text-slate-800"
+    }`}>
       <div className="flex flex-1 relative overflow-x-hidden w-full min-w-0">
         {/* Mobile Sidebar click-outside backdrop overlay */}
         {sidebarOpen && (
@@ -266,8 +285,12 @@ export default function AdminLayout({
         >
           {/* Header */}
           <header
-            className={`h-16 bg-white border-b border-slate-200 flex items-center px-6 justify-between fixed top-0 right-0 z-20 shadow-sm backdrop-blur-md bg-white/90 shrink-0 min-w-0 transition-all duration-300 ${
+            className={`h-16 border-b flex items-center px-6 justify-between fixed top-0 right-0 z-20 shadow-sm backdrop-blur-md shrink-0 min-w-0 transition-all duration-300 ${
               sidebarOpen ? "left-0 md:left-[260px]" : "left-0 md:left-[70px]"
+            } ${
+              isDark
+                ? "bg-slate-900/95 border-slate-800"
+                : "bg-white/90 border-slate-200"
             }`}
           >
             <div className="flex items-center gap-4 min-w-0">
@@ -283,7 +306,11 @@ export default function AdminLayout({
 
               <button
                 onClick={toggleSidebar}
-                className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700 transition"
+                className={`p-2 rounded-lg transition ${
+                  isDark
+                    ? "hover:bg-slate-800 text-slate-400 hover:text-white"
+                    : "hover:bg-slate-100 text-slate-500 hover:text-slate-700"
+                }`}
               >
                 <Menu className="w-5 h-5" />
               </button>
@@ -298,22 +325,51 @@ export default function AdminLayout({
               className="flex items-center gap-4 shrink-0 relative"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* Dark mode toggle */}
+              <button
+                id="admin-dark-mode-toggle"
+                onClick={toggleDark}
+                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+                title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+                className={`p-2 rounded-lg transition relative ${
+                  isDark
+                    ? "hover:bg-slate-800 text-amber-400 hover:text-amber-300"
+                    : "hover:bg-slate-100 text-slate-400 hover:text-slate-600"
+                }`}
+              >
+                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+
               {/* Notification bell */}
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition relative"
+                className={`p-2 rounded-lg transition relative ${
+                  isDark
+                    ? "hover:bg-slate-800 text-slate-400 hover:text-slate-200"
+                    : "hover:bg-slate-100 text-slate-400 hover:text-slate-600"
+                }`}
               >
                 <Bell className="w-5 h-5" />
                 {notifications.length > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></span>
+                  <span className={`absolute top-1 right-1 w-2.5 h-2.5 bg-green-500 border-2 rounded-full ${
+                    isDark ? "border-slate-900" : "border-white"
+                  }`}></span>
                 )}
               </button>
 
               {/* Notification Dropdown Panel */}
               {showNotifications && (
-                <div className="absolute top-[100%] right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl w-[320px] md:w-[360px] z-50 overflow-hidden divide-y divide-slate-100 animate-scale-in">
-                  <div className="p-4 bg-slate-50 flex justify-between items-center">
-                    <span className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
+                <div className={`absolute top-[100%] right-0 mt-2 border rounded-2xl shadow-xl w-[320px] md:w-[360px] z-50 overflow-hidden divide-y animate-scale-in ${
+                  isDark
+                    ? "bg-slate-900 border-slate-700 divide-slate-800"
+                    : "bg-white border-slate-200 divide-slate-100"
+                }`}>
+                  <div className={`p-4 flex justify-between items-center ${
+                    isDark ? "bg-slate-800" : "bg-slate-50"
+                  }`}>
+                    <span className={`text-xs font-extrabold uppercase tracking-wider ${
+                      isDark ? "text-slate-300" : "text-slate-700"
+                    }`}>
                       Tender Notifications
                     </span>
                     <span className="bg-green-100 text-green-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
@@ -327,13 +383,17 @@ export default function AdminLayout({
                         key={notif.id}
                         href={`/admin/egp-notices`}
                         onClick={() => setShowNotifications(false)}
-                        className="p-4 block hover:bg-slate-50 transition cursor-pointer text-left"
+                        className={`p-4 block transition cursor-pointer text-left ${
+                          isDark ? "hover:bg-slate-800" : "hover:bg-slate-50"
+                        }`}
                       >
                         <div className="flex justify-between items-start gap-2">
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-green-50 text-green-700 text-[9px] font-bold uppercase border border-green-200 shrink-0">
                             {notif.category}
                           </span>
-                          <span className="text-[10px] text-slate-400 font-medium">
+                          <span className={`text-[10px] font-medium ${
+                            isDark ? "text-slate-500" : "text-slate-400"
+                          }`}>
                             {new Date(notif.createdAt).toLocaleDateString(
                               "en-US",
                               {
@@ -343,7 +403,9 @@ export default function AdminLayout({
                             )}
                           </span>
                         </div>
-                        <p className="text-xs font-bold text-slate-700 mt-1.5 line-clamp-2 hover:text-[var(--primary-color)] transition leading-relaxed">
+                        <p className={`text-xs font-bold mt-1.5 line-clamp-2 hover:text-[var(--primary-color)] transition leading-relaxed ${
+                          isDark ? "text-slate-300" : "text-slate-700"
+                        }`}>
                           {notif.title}
                         </p>
                       </Link>
@@ -367,12 +429,18 @@ export default function AdminLayout({
               )}
 
               {/* Profile Menu */}
-              <div className="flex items-center gap-3 border-l pl-4 border-slate-200">
+              <div className={`flex items-center gap-3 border-l pl-4 ${
+                isDark ? "border-slate-700" : "border-slate-200"
+              }`}>
                 <div className="text-right hidden md:block">
-                  <div className="text-sm font-semibold text-slate-800 leading-tight">
+                  <div className={`text-sm font-semibold leading-tight ${
+                    isDark ? "text-slate-200" : "text-slate-800"
+                  }`}>
                     {session?.user?.name || "Administrator"}
                   </div>
-                  <div className="text-[11px] font-medium text-slate-400 uppercase tracking-widest mt-0.5">
+                  <div className={`text-[11px] font-medium uppercase tracking-widest mt-0.5 ${
+                    isDark ? "text-slate-500" : "text-slate-400"
+                  }`}>
                     {session?.user?.email || "Admin User"}
                   </div>
                 </div>
@@ -393,7 +461,9 @@ export default function AdminLayout({
           </header>
 
           {/* Main Content Area (min-w-0 for flexbox responsive layout) */}
-          <main className="p-4 sm:p-6 md:p-8 flex-grow bg-slate-50 min-w-0 w-full overflow-hidden mt-16">
+          <main className={`p-4 sm:p-6 md:p-8 flex-grow min-w-0 w-full overflow-hidden mt-16 transition-colors duration-300 ${
+            isDark ? "bg-slate-900" : "bg-slate-50"
+          }`}>
             <div className="w-full h-full">{children}</div>
           </main>
         </div>

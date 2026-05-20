@@ -65,7 +65,7 @@ input, textarea, select, button, table, .font-bangla {
   min-width: 14rem;
   background-color: var(--secondary-color);
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
   opacity: 0;
   max-height: 0;
   visibility: hidden;
@@ -260,4 +260,256 @@ html.hide-global-layout .main {
   margin: 0 !important;
   width: 100% !important;
   max-width: 100% !important;
+}
+
+/* Scoped Dark Mode rules for Admin Panel */
+.admin-layout.dark {
+  background-color: #0f172a !important; /* bg-slate-900 / sidebar color */
+  color: #f1f5f9 !important;
+}
+
+.admin-layout.dark main {
+  background-color: #0f172a !important;
+}
+
+/* Sidebar styling overrides in dark mode */
+.admin-layout.dark aside {
+  background-color: #0f172a !important;
+  border-color: #1e293b !important;
+}
+
+.admin-layout.dark aside .bg-slate-950\/40 {
+  background-color: rgba(15, 23, 42, 0.4) !important;
+}
+
+.admin-layout.dark header {
+  background-color: rgba(15, 23, 42, 0.95) !important; /* bg-slate-900 */
+  border-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+/* Card and Container overrides */
+.admin-layout.dark .bg-white,
+.admin-layout.dark .bg-slate-50,
+.admin-layout.dark .bg-gray-50,
+.admin-layout.dark .bg-slate-100,
+.admin-layout.dark .bg-slate-50\/50,
+.admin-layout.dark .bg-slate-50\/30 {
+  background-color: #1e293b !important; /* bg-slate-800 */
+  border-color: #334155 !important;
+}
+
+.admin-layout.dark .border-slate-200,
+.admin-layout.dark .border-slate-100,
+.admin-layout.dark .border-slate-150,
+.admin-layout.dark .border-slate-300,
+.admin-layout.dark .border-gray-200,
+.admin-layout.dark .border-gray-100,
+.admin-layout.dark .border-transparent {
+  border-color: #334155 !important;
+}
+
+/* Text overrides */
+.admin-layout.dark .text-slate-800,
+.admin-layout.dark .text-slate-700,
+.admin-layout.dark .text-slate-900,
+.admin-layout.dark .text-gray-900,
+.admin-layout.dark .text-gray-800,
+.admin-layout.dark .text-black,
+.admin-layout.dark h1,
+.admin-layout.dark h2,
+.admin-layout.dark h3,
+.admin-layout.dark h4,
+.admin-layout.dark h5,
+.admin-layout.dark h6 {
+  color: #f1f5f9 !important;
+}
+
+.admin-layout.dark .text-slate-650,
+.admin-layout.dark .text-slate-600,
+.admin-layout.dark .text-slate-550,
+.admin-layout.dark .text-slate-500,
+.admin-layout.dark .text-gray-650,
+.admin-layout.dark .text-gray-600,
+.admin-layout.dark .text-gray-500 {
+  color: #cbd5e1 !important; /* text-slate-300 */
+}
+
+.admin-layout.dark .text-slate-400,
+.admin-layout.dark .text-gray-400 {
+  color: #94a3b8 !important; /* text-slate-400 */
+}
+
+/* Green Highlight elements (e.g. active states, info alerts) */
+.admin-layout.dark .bg-green-50,
+.admin-layout.dark .bg-green-50\/50,
+.admin-layout.dark .bg-green-50\/20,
+.admin-layout.dark .hover:bg-green-50:hover,
+.admin-layout.dark .hover\:bg-green-50:hover {
+  background-color: rgba(90, 164, 105, 0.15) !important;
+  color: #6dbb7d !important;
+}
+
+.admin-layout.dark .text-green-700,
+.admin-layout.dark .text-green-800,
+.admin-layout.dark .text-emerald-600 {
+  color: #6dbb7d !important;
+}
+
+.admin-layout.dark .border-green-200,
+.admin-layout.dark .border-green-100 {
+  border-color: rgba(90, 164, 105, 0.3) !important;
+}
+
+/* Table rows and header hover states */
+.admin-layout.dark tr:hover,
+.admin-layout.dark tbody tr:hover,
+.admin-layout.dark .hover\:bg-slate-50:hover,
+.admin-layout.dark .hover\:bg-slate-50\/50:hover,
+.admin-layout.dark .hover\:bg-gray-50:hover,
+.admin-layout.dark .hover\:bg-white:hover,
+.admin-layout.dark .hover\:bg-slate-100:hover {
+  background-color: #334155 !important;
+}
+
+.admin-layout.dark thead,
+.admin-layout.dark thead tr {
+  background-color: #0f172a !important; /* bg-slate-900 */
+}
+
+.admin-layout.dark .bg-\[\#ccffff\],
+.admin-layout.dark th.bg-\[\#ccffff\] {
+  background-color: #0b0f19 !important; /* slate-950 */
+  color: #f1f5f9 !important;
+}
+
+/* Form controls (Inputs, Select, Textareas) */
+.admin-layout.dark input[type="text"],
+.admin-layout.dark input[type="number"],
+.admin-layout.dark input[type="date"],
+.admin-layout.dark input[type="email"],
+.admin-layout.dark input[type="password"],
+.admin-layout.dark select,
+.admin-layout.dark textarea {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+.admin-layout.dark input:focus,
+.admin-layout.dark select:focus,
+.admin-layout.dark textarea:focus {
+  background-color: #1e293b !important;
+  border-color: #5aa469 !important;
+}
+
+.admin-layout.dark input::placeholder,
+.admin-layout.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* Buttons and Links */
+.admin-layout.dark .bg-slate-800:not(aside):not(input) {
+  background-color: #3b82f6 !important; /* blue-500 */
+  color: #ffffff !important;
+}
+
+.admin-layout.dark .hover\:bg-slate-900:hover {
+  background-color: #2563eb !important; /* blue-600 */
+}
+
+.admin-layout.dark .bg-slate-500 {
+  background-color: #475569 !important;
+}
+
+.admin-layout.dark .hover\:bg-slate-600:hover {
+  background-color: #334155 !important;
+}
+
+.admin-layout.dark .divide-slate-50 > :not([hidden]) ~ :not([hidden]),
+.admin-layout.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+.admin-layout.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #334155 !important;
+}
+
+/* Alert dialogs */
+.admin-layout.dark .bg-rose-50 {
+  background-color: rgba(244, 63, 94, 0.1) !important;
+  color: #f43f5e !important;
+  border-color: rgba(244, 63, 94, 0.2) !important;
+}
+
+.admin-layout.dark .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  color: #10b981 !important;
+  border-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Flatpickr Dark Mode Overrides */
+.admin-layout.dark .flatpickr-calendar {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+  color: #f1f5f9 !important;
+}
+
+.admin-layout.dark .flatpickr-months .flatpickr-month,
+.admin-layout.dark .flatpickr-months .flatpickr-prev-month,
+.admin-layout.dark .flatpickr-months .flatpickr-next-month {
+  color: #f1f5f9 !important;
+  fill: #f1f5f9 !important;
+}
+
+.admin-layout.dark .flatpickr-current-month .flatpickr-monthDropdown-months {
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+.admin-layout.dark .flatpickr-weekday {
+  color: #94a3b8 !important;
+}
+
+.admin-layout.dark .flatpickr-day {
+  color: #cbd5e1 !important;
+}
+
+.admin-layout.dark .flatpickr-day:hover,
+.admin-layout.dark .flatpickr-day.prevMonthDay:hover,
+.admin-layout.dark .flatpickr-day.nextMonthDay:hover,
+.admin-layout.dark .flatpickr-day.today:hover {
+  background: #334155 !important;
+  border-color: #475569 !important;
+  color: #f1f5f9 !important;
+}
+
+.admin-layout.dark .flatpickr-day.selected {
+  background: #5aa469 !important;
+  border-color: #5aa469 !important;
+  color: #ffffff !important;
+}
+
+.admin-layout.dark .flatpickr-day.today {
+  border-color: #5aa469 !important;
+}
+
+.admin-layout.dark .flatpickr-time {
+  border-top: 1px solid #334155 !important;
+  background: #1e293b !important;
+}
+
+.admin-layout.dark .flatpickr-time input {
+  color: #f1f5f9 !important;
+}
+
+.admin-layout.dark .flatpickr-time .numInputWrapper span.arrowUp:after {
+  border-bottom-color: #cbd5e1 !important;
+}
+
+.admin-layout.dark .flatpickr-time .numInputWrapper span.arrowDown:after {
+  border-top-color: #cbd5e1 !important;
+}
+
+.admin-layout.dark .flatpickr-time input:hover,
+.admin-layout.dark .flatpickr-time .numInputWrapper:hover {
+  background: #334155 !important;
 }

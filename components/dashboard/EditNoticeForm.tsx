@@ -50,9 +50,10 @@ export default function EditNoticeForm({ notice }: { notice: any }) {
         <div className="space-y-2">
           <label className="text-sm font-semibold text-gray-700">Category</label>
           <select name="category" defaultValue={notice.category} className="w-full p-3 border rounded-lg outline-none">
-            <option value="LTM">LTM</option>
             <option value="OTM">OTM</option>
-            <option value="LOTTERY">LOTTERY</option>
+            <option value="LTM">LTM</option>
+            <option value="LOTTERY_PENDING">Lottery Pending</option>
+            <option value="LOTTERY_RESULT">Lottery Result</option>
           </select>
         </div>
 

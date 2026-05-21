@@ -5,7 +5,7 @@ import Link from "next/link";
 
 interface Notice {
   id: string;
-  no: string;
+  no?: string;
   title: string;
   date: string;
   fileUrl: string;
@@ -24,16 +24,16 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-shade-1 border-b border-ac-2">
-              <th className="p-5 font-bold text-text-1 uppercase text-sm w-16">
+              <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-16">
                 #
               </th>
-              <th className="p-5 font-bold text-text-1 uppercase text-sm">
+              <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm">
                 Procuring Entity / Title
               </th>
-              <th className="p-5 font-bold text-text-1 uppercase text-sm w-40 text-center">
+              <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-40 text-center">
                 Last Date
               </th>
-              <th className="p-5 font-bold text-text-1 uppercase text-sm w-48 text-center">
+              <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-48 text-center">
                 Action
               </th>
             </tr>
@@ -45,35 +45,32 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
                   key={notice.id}
                   className="border-b border-ac-2 hover:bg-slate-50 transition-colors single_notice"
                 >
-                  <td className="p-5 text-text-2 font-medium">{index + 1}</td>
-                  <td className="p-5">
-                    <h4 className="text-text-1 font-semibold leading-tight mb-1 font-bangla text-lg">
+                  <td className="py-2.5 px-4 text-text-2 font-medium">{index + 1}</td>
+                  <td className="py-2.5 px-4">
+                    <h4 className="text-text-1 font-semibold leading-tight font-bangla text-base lg:text-lg">
                       {notice.title}
                     </h4>
-                    <span className="text-xs text-primary font-bold uppercase tracking-wider">
-                      {notice.category}
-                    </span>
                   </td>
-                  <td className="p-5 text-center">
+                  <td className="py-2.5 px-4 text-center">
                     <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-text-2 text-sm font-bold">
                       {notice.date}
                     </div>
                   </td>
-                  <td className="p-5">
+                  <td className="py-2.5 px-4">
                     <div className="flex items-center justify-center gap-2">
                       <Link
                         href={`/egp-notice/${notice.id}`}
-                        className="bg-primary hover:!text-secondary !text-white px-5 py-2 rounded-lg font-bold text-xs uppercase hover:bg-text-1 transition shadow-sm flex items-center gap-2"
+                        className="bg-primary hover:!text-secondary !text-white px-4 py-1.5 rounded-lg font-bold text-xs uppercase hover:bg-text-1 transition shadow-sm flex items-center gap-2"
                       >
-                        <i className="fa-solid fa-eye "></i> View
+                        <i className="fa-solid fa-eye"></i> View
                       </Link>
                       {notice.fileUrl && (
                         <a
                           href={notice.fileUrl}
                           download
-                          className="bg-text-1 !text-secondary px-4 py-2 rounded-lg font-bold text-xs uppercase hover:bg-primary transition shadow-sm flex items-center gap-2"
+                          className="bg-text-1 !text-secondary px-3.5 py-1.5 rounded-lg font-bold text-xs uppercase hover:bg-primary transition shadow-sm flex items-center gap-2"
                         >
-                          <i className="fa-solid fa-download "></i>
+                          <i className="fa-solid fa-download"></i>
                         </a>
                       )}
                     </div>

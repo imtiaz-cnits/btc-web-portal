@@ -19,16 +19,15 @@ interface EgpNoticeClientProps {
 }
 
 export default function EgpNoticeClient({ initialNotices }: EgpNoticeClientProps) {
-  const [activeTab, setActiveTab] = useState("All");
+  const [activeTab, setActiveTab] = useState("OTM");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 15;
 
-  const tabs = ["All", "OTM", "LTM", "Lottery Pending", "Lottery Result"];
+  const tabs = ["OTM", "LTM", "Lottery Pending", "Lottery Result"];
 
-  const filteredNotices =
-    activeTab === "All"
-      ? initialNotices
-      : initialNotices.filter((n) => n.category.toLowerCase() === activeTab.toLowerCase());
+  const filteredNotices = initialNotices.filter(
+    (n) => n.category.toLowerCase() === activeTab.toLowerCase()
+  );
 
   // Reset page when tab changes
   useEffect(() => {
@@ -77,14 +76,14 @@ export default function EgpNoticeClient({ initialNotices }: EgpNoticeClientProps
   return (
     <div className="egp_notice_page bg-secondary overflow-hidden">
       {/* Tabs System */}
-      <div className="tab_section mt-16 mb-10">
+      <div className="tab_section mt-10 mb-6">
         <div className="custom-container text-center">
-          <div className="text-center mb-10">
+          <div className="text-center mb-8">
             <h3 className="text-primary font-bold uppercase tracking-widest text-sm mb-2">
               Tender Information
             </h3>
             <h2 className="text-3xl lg:text-4xl font-bold text-text-1 uppercase">
-              Browse Notices by Category
+              Browse Notices
             </h2>
           </div>
 
@@ -93,11 +92,10 @@ export default function EgpNoticeClient({ initialNotices }: EgpNoticeClientProps
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 uppercase tracking-wide ${
-                  activeTab.toLowerCase() === tab.toLowerCase()
+                className={`px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 uppercase tracking-wide ${activeTab.toLowerCase() === tab.toLowerCase()
                     ? "bg-primary text-white shadow-lg scale-105"
                     : "bg-transparent text-text-2 hover:bg-shade-1"
-                }`}
+                  }`}
               >
                 {tab}
               </button>
@@ -107,7 +105,7 @@ export default function EgpNoticeClient({ initialNotices }: EgpNoticeClientProps
       </div>
 
       {/* Notices Table */}
-      <div className="table_section mb-10">
+      <div className="table_section mb-6">
         <div className="custom-container">
           <NoticeTable notices={paginatedNotices} />
         </div>
@@ -115,7 +113,7 @@ export default function EgpNoticeClient({ initialNotices }: EgpNoticeClientProps
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 mb-20">
+        <div className="flex justify-center items-center gap-2 mb-12">
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
@@ -123,16 +121,15 @@ export default function EgpNoticeClient({ initialNotices }: EgpNoticeClientProps
           >
             <i className="fa-solid fa-chevron-left"></i>
           </button>
-          
+
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
               key={page}
               onClick={() => setCurrentPage(page)}
-              className={`w-10 h-10 rounded-xl font-bold text-sm transition-all ${
-                currentPage === page
+              className={`w-10 h-10 rounded-xl font-bold text-sm transition-all ${currentPage === page
                   ? "bg-primary text-white shadow-lg"
                   : "bg-white border border-ac-2 text-slate-600 hover:bg-slate-50"
-              }`}
+                }`}
             >
               {page}
             </button>

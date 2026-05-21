@@ -39,11 +39,17 @@ export default async function SingleNoticePage({ params }: { params: { id: strin
             <div className="flex flex-wrap gap-6 border-b pb-8">
               <div className="flex flex-col">
                 <span className="text-xs text-gray-400 uppercase font-bold">Published Date</span>
-                <span className="font-semibold">{notice.publishDate ? new Date(notice.publishDate).toLocaleDateString() : 'N/A'}</span>
+                <span className="font-semibold">{notice.publishDate ? (() => {
+                  const d = new Date(notice.publishDate);
+                  return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+                })() : 'N/A'}</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-xs text-gray-400 uppercase font-bold">Last Date of Submission</span>
-                <span className="font-semibold text-red-500">{notice.lastDate ? new Date(notice.lastDate).toLocaleDateString() : 'N/A'}</span>
+                <span className="font-semibold text-red-500">{notice.lastDate ? (() => {
+                  const d = new Date(notice.lastDate);
+                  return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+                })() : 'N/A'}</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-xs text-gray-400 uppercase font-bold">Author</span>

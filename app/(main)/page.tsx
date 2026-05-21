@@ -17,39 +17,17 @@ const categoryMap: Record<string, string> = {
 };
 
 export default async function HomePage() {
-  // Fetch active tender notices for the Hero slider
-  let rawTenderNotices: any[] = [];
-  try {
-    rawTenderNotices = await prisma.notice.findMany({
-      where: { status: "active" },
-      orderBy: { createdAt: "desc" },
-      take: 10,
-    });
-  } catch (error) {
-    console.error("Failed to fetch raw tender notices for homepage:", error);
-  }
-
-  // Convert dates to "15 May" short format that the GSAP slider expects
-  const formatShortDate = (date: Date | null) => {
-    if (!date) return "01 Jan";
-    const d = new Date(date);
-    const day = d.getDate().toString().padStart(2, "0");
-    const month = d.toLocaleString("en-US", { month: "short" });
-    return `${day} ${month}`;
-  };
-
-  const tenderNotices = rawTenderNotices.map((n) => ({
-    id: n.id,
-    title: n.title,
-    date: formatShortDate(n.publishDate || n.createdAt),
-    filePath: n.filePath || undefined,
-  }));
-
   // Fetch active notices for the Browse Notices By Category Section
   let allActiveNotices: any[] = [];
   try {
     allActiveNotices = await prisma.notice.findMany({
-      where: { status: "active" },
+      where: { 
+        status: "active",
+        OR: [
+          { publishDate: null },
+          { publishDate: { lte: new Date() } }
+        ]
+      },
       orderBy: { createdAt: "desc" },
     });
   } catch (error) {
@@ -58,11 +36,8 @@ export default async function HomePage() {
 
   const homepageNotices = allActiveNotices.map((notice) => {
     const pubDate = notice.publishDate || notice.createdAt;
-    const formattedDate = new Date(pubDate).toLocaleDateString("en-US", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    const d = new Date(pubDate);
+    const formattedDate = `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
 
     return {
       id: notice.id,
@@ -75,7 +50,7 @@ export default async function HomePage() {
 
   return (
     <div className="home-page">
-      <Hero tenderNotices={tenderNotices} />
+      <Hero />
       
       {/* Tender Browse Section right below Hero */}
       <HomeNoticesSection notices={homepageNotices} />

@@ -394,13 +394,10 @@ export default function AdminLayout({
                           <span className={`text-[10px] font-medium ${
                             isDark ? "text-slate-500" : "text-slate-400"
                           }`}>
-                            {new Date(notif.createdAt).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                              },
-                            )}
+                            {(() => {
+                              const d = new Date(notif.createdAt);
+                              return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+                            })()}
                           </span>
                         </div>
                         <p className={`text-xs font-bold mt-1.5 line-clamp-2 hover:text-[var(--primary-color)] transition leading-relaxed ${

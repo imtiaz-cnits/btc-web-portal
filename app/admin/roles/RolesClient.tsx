@@ -196,11 +196,10 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
                         </div>
                       </td>
                       <td className="p-5 text-slate-500 font-medium">
-                        {new Date(user.createdAt).toLocaleDateString("en-US", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
+                        {(() => {
+                          const d = new Date(user.createdAt);
+                          return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+                        })()}
                       </td>
                       <td className="p-5">
                         <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase border shadow-sm ${

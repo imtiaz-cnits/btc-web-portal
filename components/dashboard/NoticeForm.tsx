@@ -20,7 +20,8 @@ import {
   Check,
   ToggleLeft,
   Eye,
-  Sliders
+  Sliders,
+  Clock
 } from "lucide-react";
 
 interface NoticeFormProps {
@@ -35,19 +36,23 @@ function CustomSelect({
   value,
   onChange,
   options,
+  isOpen,
+  onToggle,
 }: {
   label?: string;
   value: string;
   onChange: (val: string) => void;
   options: { value: string; label: string }[];
+  isOpen: boolean;
+  onToggle: () => void;
 }) {
-  const [open, setOpen] = useState(false);
-
   useEffect(() => {
-    const handleClose = () => setOpen(false);
-    window.addEventListener("click", handleClose);
-    return () => window.removeEventListener("click", handleClose);
-  }, []);
+    if (isOpen) {
+      const handleClose = () => onToggle();
+      window.addEventListener("click", handleClose);
+      return () => window.removeEventListener("click", handleClose);
+    }
+  }, [isOpen, onToggle]);
 
   const activeOption = options.find((opt) => opt.value === value) || options[0];
 
@@ -55,21 +60,21 @@ function CustomSelect({
     <div className="space-y-2 relative" onClick={(e) => e.stopPropagation()}>
       {label && <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{label}</label>}
       <div 
-        onClick={() => setOpen(!open)}
+        onClick={onToggle}
         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 text-sm font-semibold focus:border-[var(--primary-color)] hover:border-slate-300 transition cursor-pointer flex justify-between items-center shadow-xs"
       >
         <span>{activeOption.label}</span>
-        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </div>
 
-      {open && (
+      {isOpen && (
         <div className="absolute top-[100%] left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden divide-y divide-slate-50 max-h-[250px] overflow-y-auto animate-scale-in">
           {options.map((opt) => (
             <div
               key={opt.value}
               onClick={() => {
                 onChange(opt.value);
-                setOpen(false);
+                onToggle();
               }}
               className={`px-4 py-3 text-xs font-semibold hover:bg-green-50 hover:text-green-700 transition cursor-pointer flex items-center justify-between ${
                 value === opt.value ? "bg-green-50/50 text-green-700 font-bold" : "text-slate-600"
@@ -95,29 +100,164 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
+  // Dropdown Open State Sync
+  const [openSelect, setOpenSelect] = useState<string | null>(null);
+
   // Base Form Fields
   const [title, setTitle] = useState(notice?.title || "");
   const [category, setCategory] = useState(notice?.category || "LTM");
   const [status, setStatus] = useState(notice?.status || "active");
   const [year, setYear] = useState(notice?.year || new Date().getFullYear().toString());
   
+  // Schedule Modal State
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [modalScheduledDate, setModalScheduledDate] = useState("");
+  const [modalScheduledDateOnly, setModalScheduledDateOnly] = useState("");
+  const [modalScheduledTimeOnly, setModalScheduledTimeOnly] = useState("");
+
+  const formatIsoToDmy = (isoStr: string) => {
+    if (!isoStr) return "";
+    const datePart = isoStr.includes("T") ? isoStr.split("T")[0] : isoStr;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+      const [y, m, d] = datePart.split("-");
+      return `${d}-${m}-${y}`;
+    }
+    return isoStr;
+  };
+
+  const formatIsoToDmyHms = (dateObj: Date) => {
+    if (!dateObj || isNaN(dateObj.getTime())) return "";
+    const d = String(dateObj.getDate()).padStart(2, "0");
+    const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const y = dateObj.getFullYear();
+    let hours = dateObj.getHours();
+    const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 0 should be 12
+    const h = String(hours).padStart(2, "0");
+    return `${d}-${m}-${y} ${h}:${minutes} ${ampm}`;
+  };
+
+  const formatPublishDateForState = (dateValue: any) => {
+    if (!dateValue) return "";
+    const dateObj = new Date(dateValue);
+    if (isNaN(dateObj.getTime())) return "";
+    
+    // If it has a time component (not exactly midnight local time) OR if it is in the future
+    const isFuture = dateObj > new Date();
+    const hasTime = dateObj.getHours() !== 0 || dateObj.getMinutes() !== 0;
+    
+    if (isFuture || hasTime) {
+      return formatIsoToDmyHms(dateObj);
+    }
+    
+    // Otherwise, standard DD-MM-YYYY
+    const d = String(dateObj.getDate()).padStart(2, "0");
+    const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const y = dateObj.getFullYear();
+    return `${d}-${m}-${y}`;
+  };
+
+  const parseDateTimeDmyToDate = (str: string): Date | null => {
+    if (!str) return null;
+    const trimmed = str.trim();
+    // Case 1: Simple date "DD-MM-YYYY"
+    if (/^\d{2}-\d{2}-\d{4}$/.test(trimmed)) {
+      const [d, m, y] = trimmed.split("-");
+      return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+    }
+    // Case 2: Date and time "DD-MM-YYYY hh:mm AM/PM" or similar, like from Flatpickr
+    // Format: "d-m-Y h:i K" -> e.g. "22-05-2026 05:30 PM"
+    const match = trimmed.match(/^(\d{2})-(\d{2})-(\d{4})\s+(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+    if (match) {
+      const [_, d, m, y, hStr, minStr, ampm] = match;
+      let hours = parseInt(hStr);
+      const minutes = parseInt(minStr);
+      if (ampm) {
+        if (ampm.toUpperCase() === "PM" && hours < 12) {
+          hours += 12;
+        } else if (ampm.toUpperCase() === "AM" && hours === 12) {
+          hours = 0;
+        }
+      }
+      return new Date(parseInt(y), parseInt(m) - 1, parseInt(d), hours, minutes);
+    }
+
+    // Fallback: try raw JS Date parsing
+    const parsed = new Date(trimmed);
+    if (!isNaN(parsed.getTime())) {
+      return parsed;
+    }
+    return null;
+  };
+
+  const formatCellDateToDmy = (cellStr: string) => {
+    if (!cellStr) return "";
+    const str = String(cellStr).trim();
+    
+    // If it's an ISO date string like 2026-05-19T00:00:00.000Z
+    if (str.includes("T")) {
+      const datePart = str.split("T")[0];
+      if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+        const [y, m, d] = datePart.split("-");
+        return `${d}-${m}-${y}`;
+      }
+    }
+    
+    // If it has time part, e.g. "2026-05-20 05:00 PM"
+    const parts = str.split(/\s+/);
+    const datePart = parts[0];
+    const timePart = parts.slice(1).join(" ");
+    
+    let formattedDate = datePart;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+      const [y, m, d] = datePart.split("-");
+      formattedDate = `${d}-${m}-${y}`;
+    } else if (/^\d{1,2}[-\/]\d{1,2}[-\/]\d{4}$/.test(datePart)) {
+      formattedDate = datePart.replace(/\//g, "-");
+      // ensure leading zero for day and month
+      const dParts = formattedDate.split("-");
+      const d = dParts[0].padStart(2, '0');
+      const m = dParts[1].padStart(2, '0');
+      const y = dParts[2];
+      formattedDate = `${d}-${m}-${y}`;
+    }
+    
+    return timePart ? `${formattedDate} ${timePart}` : formattedDate;
+  };
+
   const [publishDate, setPublishDate] = useState(
-    notice?.publishDate ? new Date(notice.publishDate).toISOString().split("T")[0] : ""
+    notice?.publishDate ? formatPublishDateForState(notice.publishDate) : ""
   );
   const [lastDate, setLastDate] = useState(
-    notice?.lastDate ? new Date(notice.lastDate).toISOString().split("T")[0] : ""
+    notice?.lastDate ? formatPublishDateForState(notice.lastDate) : ""
   );
 
   // Combinable Section Switches
-  const [enableFile, setEnableFile] = useState(true);
-  const [enableText, setEnableText] = useState(false);
-  const [enableTables, setEnableTables] = useState(false);
+  const [enableFile, setEnableFile] = useState(notice ? !!notice.filePath : false);
+  const [enableText, setEnableText] = useState(notice ? !!notice.content : false);
+  const [enableTables, setEnableTables] = useState(notice ? !!notice.tableData : true);
 
   // Text notice description content
   const [content, setContent] = useState(notice?.content || "");
 
   // Multiple Tables Array
-  const [tablesList, setTablesList] = useState<any[]>([]);
+  const [tablesList, setTablesList] = useState<any[]>(
+    notice?.tableData ? [] : [{
+      id: "tbl-init",
+      type: "pwd_ltm",
+      officeName: "গণপূর্ত বিভাগ, পাবনা।",
+      noticeDateBlock: "",
+      lastDateBlock: "",
+      lotteryDateBlock: "",
+      payOrderTo: "Executive Engineer, Pabna PWD Division, Pabna",
+      moreInfo: "Md. Babul Islam, e-Tender Solution, Sujanagar, Pabna. Mobile: 01711 222110, https://www.egpbd.com/",
+      bottomWarning: "ব্যাংক স্টেটমেন্ট অথবা ক্রেডিট কমিটমেন্ট দিতে হবে।",
+      headers: ["SL No", "Tender ID", "Description", "Location", "AppCost (Tk)", "Solvency (Tk)", "Security (Tk)", "Doc Fees (Tk)", "Last Date & Time"],
+      rows: [["1", "1251464", "Necessary repair works...", "Pabna sadar", "2,72,184", "2,00,000", "7,000", "500", ""]]
+    }]
+  );
 
   // Real-time file upload preview state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -182,21 +322,74 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
     function initFlatpickr() {
       if ((window as any).flatpickr) {
-        (window as any).flatpickr(".flatpickr-date", {
-          dateFormat: "Y-m-d",
-          allowInput: true,
-          onChange: (selectedDates: any, dateStr: string, instance: any) => {
-            const fieldName = instance.element.getAttribute("name");
-            if (fieldName === "publishDate") {
-              setPublishDate(dateStr);
-            } else if (fieldName === "lastDate") {
-              setLastDate(dateStr);
-            }
+        const els = document.querySelectorAll(".flatpickr-date");
+        els.forEach((el: any) => {
+          if (el._flatpickr) {
+            el._flatpickr.destroy();
           }
+          (window as any).flatpickr(el, {
+            dateFormat: "d-m-Y",
+            allowInput: true,
+            onChange: (selectedDates: any, dateStr: string, instance: any) => {
+              const fieldName = instance.element.getAttribute("name");
+              if (fieldName === "publishDate") {
+                setPublishDate(dateStr);
+              } else if (fieldName === "lastDate") {
+                setLastDate(dateStr);
+              }
+            }
+          });
+        });
+
+        // Initialize Date picker for modal
+        const modalDateEls = document.querySelectorAll(".flatpickr-date-modal");
+        modalDateEls.forEach((el: any) => {
+          if (el._flatpickr) {
+            el._flatpickr.destroy();
+          }
+          (window as any).flatpickr(el, {
+            dateFormat: "d-m-Y",
+            allowInput: true,
+            minDate: "today",
+            defaultDate: modalScheduledDateOnly || "today",
+            onChange: (selectedDates: any, dateStr: string) => {
+              setModalScheduledDateOnly(dateStr);
+            }
+          });
+        });
+
+        // Initialize Time picker for modal
+        const modalTimeEls = document.querySelectorAll(".flatpickr-time-modal");
+        modalTimeEls.forEach((el: any) => {
+          if (el._flatpickr) {
+            el._flatpickr.destroy();
+          }
+          (window as any).flatpickr(el, {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "h:i K",
+            allowInput: true,
+            defaultDate: modalScheduledTimeOnly || "12:00 PM",
+            onChange: (selectedDates: any, dateStr: string) => {
+              setModalScheduledTimeOnly(dateStr);
+            }
+          });
         });
       }
     }
-  }, [enableTables, tablesList]);
+
+    return () => {
+      document.querySelectorAll(".flatpickr-date").forEach((el: any) => {
+        if (el._flatpickr) el._flatpickr.destroy();
+      });
+      document.querySelectorAll(".flatpickr-date-modal").forEach((el: any) => {
+        if (el._flatpickr) el._flatpickr.destroy();
+      });
+      document.querySelectorAll(".flatpickr-time-modal").forEach((el: any) => {
+        if (el._flatpickr) el._flatpickr.destroy();
+      });
+    };
+  }, [enableTables, tablesList, showScheduleModal, modalScheduledDateOnly, modalScheduledTimeOnly]);
 
   // Table date Flatpickr binding is handled lower in the file after handlers are initialized.
 
@@ -211,13 +404,52 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         try {
           const parsed = JSON.parse(notice.tableData);
           if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
-            setTablesList(parsed.tables);
+            const formattedTables = parsed.tables.map((table: any) => {
+              const noticeDateBlock = formatCellDateToDmy(table.noticeDateBlock);
+              const lastDateBlock = formatCellDateToDmy(table.lastDateBlock);
+              const lotteryDateBlock = formatCellDateToDmy(table.lotteryDateBlock);
+              
+              const rows = (table.rows || []).map((row: any) => {
+                if (Array.isArray(row)) {
+                  return row.map((cell: string, cIdx: number) => {
+                    const headerName = (table.headers[cIdx] || "").toLowerCase();
+                    const isDateField = headerName.includes("date") || headerName.includes("time") || headerName.includes("তারিখ") || headerName.includes("সময়");
+                    if (isDateField && cell) {
+                      return formatCellDateToDmy(cell);
+                    }
+                    return cell;
+                  });
+                }
+                return row;
+              });
+              
+              return {
+                ...table,
+                noticeDateBlock,
+                lastDateBlock,
+                lotteryDateBlock,
+                rows
+              };
+            });
+            setTablesList(formattedTables);
           } else {
             // Backward compatibility for old single-table formats
             if (parsed.isPwdTemplate) {
               const legacyRows = parsed.rows || [];
               const normalizedLegacyRows = legacyRows.map((row: any, rIdx: number) => {
-                if (Array.isArray(row)) return row;
+                let cellVal = "";
+                if (Array.isArray(row)) {
+                  cellVal = row[8] || "";
+                } else if (row && typeof row === "object") {
+                  cellVal = row.lastDateTime || row.lastDate || "";
+                }
+                const formattedCellVal = formatCellDateToDmy(cellVal);
+                
+                if (Array.isArray(row)) {
+                  const newRow = [...row];
+                  newRow[8] = formattedCellVal;
+                  return newRow;
+                }
                 if (row && typeof row === "object") {
                   return [
                     (rIdx + 1).toString(),
@@ -228,7 +460,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                     row.solvency || "",
                     row.security || "",
                     row.docFees || "",
-                    row.lastDateTime || row.lastDate || ""
+                    formattedCellVal
                   ];
                 }
                 return [];
@@ -238,9 +470,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                 id: "old-pwd-" + Math.random().toString(),
                 type: "pwd_ltm",
                 officeName: parsed.officeName || "",
-                noticeDateBlock: parsed.noticeDateBlock || "",
-                lastDateBlock: parsed.lastDateBlock || "",
-                lotteryDateBlock: parsed.lotteryDateBlock || "",
+                noticeDateBlock: formatCellDateToDmy(parsed.noticeDateBlock),
+                lastDateBlock: formatCellDateToDmy(parsed.lastDateBlock),
+                lotteryDateBlock: formatCellDateToDmy(parsed.lotteryDateBlock),
                 payOrderTo: parsed.payOrderTo || "",
                 moreInfo: parsed.moreInfo || "",
                 bottomWarning: parsed.bottomWarning || "",
@@ -248,11 +480,22 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                 rows: normalizedLegacyRows
               }]);
             } else if (parsed.headers && parsed.rows) {
+              const formattedRows = parsed.rows.map((row: string[]) => {
+                return row.map((cell: string, cIdx: number) => {
+                  const headerName = (parsed.headers[cIdx] || "").toLowerCase();
+                  const isDateField = headerName.includes("date") || headerName.includes("time") || headerName.includes("তারিখ") || headerName.includes("সময়");
+                  if (isDateField && cell) {
+                    return formatCellDateToDmy(cell);
+                  }
+                  return cell;
+                });
+              });
+              
               setTablesList([{
                 id: "old-std-" + Math.random().toString(),
                 type: "standard",
                 headers: parsed.headers,
-                rows: parsed.rows
+                rows: formattedRows
               }]);
             }
           }
@@ -261,10 +504,79 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         }
       }
     } else {
-      // Set a default empty state for standard tables on add page
-      setTablesList([]);
+      // Set a default empty state or pre-populate with default table on add page if tables are enabled
+      if (enableTables) {
+        setTablesList([
+          {
+            id: "tbl-init",
+            type: "pwd_ltm",
+            officeName: "গণপূর্ত বিভাগ, পাবনা।",
+            noticeDateBlock: publishDate || "",
+            lastDateBlock: lastDate || "",
+            lotteryDateBlock: "",
+            payOrderTo: "Executive Engineer, Pabna PWD Division, Pabna",
+            moreInfo: "Md. Babul Islam, e-Tender Solution, Sujanagar, Pabna. Mobile: 01711 222110, https://www.egpbd.com/",
+            bottomWarning: "ব্যাংক স্টেটমেন্ট অথবা ক্রেডিট কমিটমেন্ট দিতে হবে।",
+            headers: ["SL No", "Tender ID", "Description", "Location", "AppCost (Tk)", "Solvency (Tk)", "Security (Tk)", "Doc Fees (Tk)", "Last Date & Time"],
+            rows: [["1", "1251464", "Necessary repair works...", "Pabna sadar", "2,72,184", "2,00,000", "7,000", "500", lastDate ? `${lastDate} 05:00 PM` : ""]]
+          }
+        ]);
+      } else {
+        setTablesList([]);
+      }
     }
   }, [isEdit, notice]);
+
+  // Dynamically sync publishDate and lastDate into all tables
+  useEffect(() => {
+    setTablesList(prev => {
+      let changed = false;
+      const next = prev.map(table => {
+        let tableChanged = false;
+        
+        const newNoticeDate = publishDate || "";
+        const oldNoticeDate = table.noticeDateBlock || "";
+        
+        const newLastDate = lastDate || "";
+        const oldLastDate = table.lastDateBlock || "";
+
+        let newRows = table.rows;
+        if (table.type === "pwd_ltm" && Array.isArray(table.rows)) {
+          newRows = table.rows.map((row: any) => {
+            if (Array.isArray(row) && row.length > 8) {
+              const existingVal = row[8] || "";
+              const timePart = existingVal.includes(" ") ? existingVal.split(" ").slice(1).join(" ") : "05:00 PM";
+              const targetVal = lastDate ? `${lastDate} ${timePart}` : "";
+              if (existingVal !== targetVal) {
+                tableChanged = true;
+                const newRow = [...row];
+                newRow[8] = targetVal;
+                return newRow;
+              }
+            }
+            return row;
+          });
+        }
+
+        if (oldNoticeDate !== newNoticeDate || oldLastDate !== newLastDate) {
+          tableChanged = true;
+        }
+
+        if (tableChanged) {
+          changed = true;
+          return {
+            ...table,
+            noticeDateBlock: newNoticeDate,
+            lastDateBlock: newLastDate,
+            rows: newRows
+          };
+        }
+        return table;
+      });
+
+      return changed ? next : prev;
+    });
+  }, [publishDate, lastDate]);
 
   // ----------------------------------------------------
   // Interactive Multi-Table State Modifiers
@@ -272,22 +584,25 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   
   // Add new blank table blocks
   const addPwdTableBlock = () => {
-    setTablesList([
-      ...tablesList,
-      {
-        id: "tbl-" + Math.random().toString(),
-        type: "pwd_ltm",
-        officeName: "গণপূর্ত বিভাগ, পাবনা।",
-        noticeDateBlock: "",
-        lastDateBlock: "",
-        lotteryDateBlock: "",
-        payOrderTo: "Executive Engineer, Pabna PWD Division, Pabna",
-        moreInfo: "Md. Babul Islam, e-Tender Solution, Sujanagar, Pabna. Mobile: 01711 222110, https://www.egpbd.com/",
-        bottomWarning: "ব্যাংক স্টেটমেন্ট অথবা ক্রেডিট কমিটমেন্ট দিতে হবে।",
-        headers: ["SL No", "Tender ID", "Description", "Location", "AppCost (Tk)", "Solvency (Tk)", "Security (Tk)", "Doc Fees (Tk)", "Last Date & Time"],
-        rows: [["1", "1251464", "Necessary repair works...", "Pabna sadar", "2,72,184", "2,00,000", "7,000", "500", "2026-04-09 05:00 PM"]]
-      }
-    ]);
+    setTablesList(prev => {
+      if (prev.length >= 1) return prev;
+      return [
+        ...prev,
+        {
+          id: "tbl-init",
+          type: "pwd_ltm",
+          officeName: "গণপূর্ত বিভাগ, পাবনা।",
+          noticeDateBlock: publishDate || "",
+          lastDateBlock: lastDate || "",
+          lotteryDateBlock: "",
+          payOrderTo: "Executive Engineer, Pabna PWD Division, Pabna",
+          moreInfo: "Md. Babul Islam, e-Tender Solution, Sujanagar, Pabna. Mobile: 01711 222110, https://www.egpbd.com/",
+          bottomWarning: "ব্যাংক স্টেটমেন্ট অথবা ক্রেডিট কমিটমেন্ট দিতে হবে।",
+          headers: ["SL No", "Tender ID", "Description", "Location", "AppCost (Tk)", "Solvency (Tk)", "Security (Tk)", "Doc Fees (Tk)", "Last Date & Time"],
+          rows: [["1", "1251464", "Necessary repair works...", "Pabna sadar", "2,72,184", "2,00,000", "7,000", "500", lastDate ? `${lastDate} 05:00 PM` : ""]]
+        }
+      ];
+    });
     setEnableTables(true);
   };
 
@@ -325,6 +640,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       const newRow = Array(t.headers.length).fill("");
       if (t.headers.length > 0) {
         newRow[0] = (t.rows.length + 1).toString();
+      }
+      if (t.type === "pwd_ltm" && newRow.length > 8) {
+        newRow[8] = lastDate ? `${lastDate} 05:00 PM` : "";
       }
       return {
         ...t,
@@ -418,42 +736,54 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   useEffect(() => {
     if ((window as any).flatpickr) {
       // 1. Standard custom columns datepicker binding
-      (window as any).flatpickr(".flatpickr-date-field", {
-        dateFormat: "Y-m-d",
-        allowInput: true,
-        onChange: (selectedDates: any, dateStr: string, instance: any) => {
-          const el = instance.element;
-          const tIdxAttr = el.getAttribute("data-tidx");
-          const rIdxAttr = el.getAttribute("data-ridx");
-          const cIdxAttr = el.getAttribute("data-cidx");
-          const fieldAttr = el.getAttribute("data-field");
+      const dateFields = document.querySelectorAll(".flatpickr-date-field");
+      dateFields.forEach((el: any) => {
+        if (el._flatpickr) {
+          el._flatpickr.destroy();
+        }
+        (window as any).flatpickr(el, {
+          dateFormat: "d-m-Y",
+          allowInput: true,
+          onChange: (selectedDates: any, dateStr: string, instance: any) => {
+            const el = instance.element;
+            const tIdxAttr = el.getAttribute("data-tidx");
+            const rIdxAttr = el.getAttribute("data-ridx");
+            const cIdxAttr = el.getAttribute("data-cidx");
+            const fieldAttr = el.getAttribute("data-field");
 
-          if (tIdxAttr !== null) {
-            const tIdx = parseInt(tIdxAttr);
-            if (rIdxAttr !== null && cIdxAttr !== null) {
-              handleCellChange(tIdx, parseInt(rIdxAttr), parseInt(cIdxAttr), dateStr);
-            } else if (fieldAttr !== null) {
-              handlePwdFieldChange(tIdx, fieldAttr, dateStr);
+            if (tIdxAttr !== null) {
+              const tIdx = parseInt(tIdxAttr);
+              if (rIdxAttr !== null && cIdxAttr !== null) {
+                handleCellChange(tIdx, parseInt(rIdxAttr), parseInt(cIdxAttr), dateStr);
+              } else if (fieldAttr !== null) {
+                handlePwdFieldChange(tIdx, fieldAttr, dateStr);
+              }
             }
           }
-        }
+        });
       });
 
       // 2. PWD rows custom date-time calendar picker binding
-      (window as any).flatpickr(".flatpickr-datetime-field", {
-        enableTime: true,
-        dateFormat: "Y-m-d h:i K",
-        allowInput: true,
-        onChange: (selectedDates: any, dateStr: string, instance: any) => {
-          const el = instance.element;
-          const tIdxAttr = el.getAttribute("data-tidx");
-          const rIdxAttr = el.getAttribute("data-ridx");
-          const fieldAttr = el.getAttribute("data-field");
-
-          if (tIdxAttr !== null && rIdxAttr !== null && fieldAttr !== null) {
-            handlePwdRowChange(parseInt(tIdxAttr), parseInt(rIdxAttr), fieldAttr, dateStr);
-          }
+      const datetimeFields = document.querySelectorAll(".flatpickr-datetime-field");
+      datetimeFields.forEach((el: any) => {
+        if (el._flatpickr) {
+          el._flatpickr.destroy();
         }
+        (window as any).flatpickr(el, {
+          enableTime: true,
+          dateFormat: "d-m-Y h:i K",
+          allowInput: true,
+          onChange: (selectedDates: any, dateStr: string, instance: any) => {
+            const el = instance.element;
+            const tIdxAttr = el.getAttribute("data-tidx");
+            const rIdxAttr = el.getAttribute("data-ridx");
+            const fieldAttr = el.getAttribute("data-field");
+
+            if (tIdxAttr !== null && rIdxAttr !== null && fieldAttr !== null) {
+              handlePwdRowChange(parseInt(tIdxAttr), parseInt(rIdxAttr), fieldAttr, dateStr);
+            }
+          }
+        });
       });
     }
   }, [tablesList]);
@@ -461,7 +791,11 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   // ----------------------------------------------------
   // Form Submission
   // ----------------------------------------------------
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>, forceStatus?: string) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>, 
+    forceStatus?: string,
+    overridePublishDate?: string
+  ) => {
     if (e) e.preventDefault();
     setLoading(true);
     setErrorMessage("");
@@ -475,7 +809,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         return;
       }
 
-      const formEl = (e.currentTarget.tagName === "FORM" ? e.currentTarget : e.currentTarget.closest("form")) as HTMLFormElement;
+      const formEl = document.querySelector("form") as HTMLFormElement;
       if (!formEl) {
         setErrorMessage("Notice form element not found.");
         setLoading(false);
@@ -483,6 +817,22 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       }
 
       const formData = new FormData(formEl);
+      
+      // Parse publish date and last date using our robust parser
+      const publishDateStr = overridePublishDate !== undefined ? overridePublishDate : (formData.get("publishDate") as string);
+      const publishDateObj = parseDateTimeDmyToDate(publishDateStr);
+      if (publishDateObj) {
+        formData.set("publishDate", publishDateObj.toISOString());
+      } else {
+        formData.set("publishDate", "");
+      }
+
+      const lastDateObj = parseDateTimeDmyToDate(formData.get("lastDate") as string);
+      if (lastDateObj) {
+        formData.set("lastDate", lastDateObj.toISOString());
+      } else {
+        formData.set("lastDate", "");
+      }
       
       // Add additional attributes manually
       formData.append("year", year);
@@ -547,44 +897,37 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     }
   };
 
-  // Generate Year Array
-  const years = Array.from({ length: 7 }, (_, i) => ({
+  const handleModalScheduleConfirm = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (!modalScheduledDateOnly || !modalScheduledTimeOnly) {
+      alert("অনুগ্রহ করে একটি তারিখ এবং একটি সময় সিলেক্ট করুন।");
+      return;
+    }
+    
+    const combinedDateTime = `${modalScheduledDateOnly} ${modalScheduledTimeOnly}`;
+    setPublishDate(combinedDateTime);
+    setShowScheduleModal(false);
+    
+    const fakeEvent = { preventDefault: () => {} } as any;
+    handleSubmit(fakeEvent, "active", combinedDateTime);
+  };
+
+  // Generate Year Array (Extend up to 2050)
+  const years = Array.from({ length: 27 }, (_, i) => ({
     value: (2024 + i).toString(),
     label: (2024 + i).toString(),
   }));
 
   const categoryOptions = [
-    { value: "OTM", label: "OTM (Open Tendering Method)" },
-    { value: "LTM", label: "LTM (Limited Tendering Method)" },
+    { value: "OTM", label: "OTM" },
+    { value: "LTM", label: "LTM" },
     { value: "LOTTERY_PENDING", label: "Lottery Pending" },
     { value: "LOTTERY_RESULT", label: "Lottery Result" },
-  ];
-
-  const statusOptions = [
-    { value: "active", label: "Active (Published on live site)" },
-    { value: "inactive", label: "Inactive (Draft / Hidden)" },
   ];
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-8 min-w-0 w-full overflow-hidden">
       
-      {/* Page Back Action */}
-      <div className="flex items-center justify-between border-b pb-5 border-slate-100 shrink-0">
-        <div className="flex items-center gap-3">
-          <button 
-            type="button" 
-            onClick={() => router.back()}
-            className="p-2 hover:bg-slate-100 rounded-xl text-slate-500 transition"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <h2 className="text-xl font-bold text-slate-800">{isEdit ? "Edit Tender Notice Studio" : "Create Tender Notice Studio"}</h2>
-            <p className="text-xs text-slate-500 mt-0.5 font-medium">Configure flexible, combinable attachment files, custom spreadsheet grids, and details.</p>
-          </div>
-        </div>
-      </div>
-
       {/* Notice Basic Settings Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 shrink-0">
         <div className="md:col-span-2 space-y-2">
@@ -604,6 +947,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           value={category}
           onChange={setCategory}
           options={categoryOptions}
+          isOpen={openSelect === "category"}
+          onToggle={() => setOpenSelect(openSelect === "category" ? null : "category")}
         />
 
         <CustomSelect 
@@ -611,13 +956,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           value={year}
           onChange={setYear}
           options={years}
-        />
-
-        <CustomSelect 
-          label="Publication Status"
-          value={status}
-          onChange={setStatus}
-          options={statusOptions}
+          isOpen={openSelect === "year"}
+          onToggle={() => setOpenSelect(openSelect === "year" ? null : "year")}
         />
 
         <div className="space-y-2 relative">
@@ -661,6 +1001,33 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           
+          {/* Tables Checkbox Switch */}
+          <label className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer shadow-xs select-none ${
+            enableTables 
+              ? "bg-green-50/50 border-green-200 text-green-700 font-bold" 
+              : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100/50"
+          }`}>
+            <div className="flex items-center gap-2.5">
+              <input 
+                type="checkbox"
+                checked={enableTables}
+                onChange={(e) => {
+                  const val = e.target.checked;
+                  setEnableTables(val);
+                  if (val) {
+                    setEnableFile(false);
+                    setEnableText(false);
+                    if (tablesList.length === 0) {
+                      addPwdTableBlock();
+                    }
+                  }
+                }}
+                className="w-4.5 h-4.5 rounded text-green-600 focus:ring-green-500 border-slate-300 cursor-pointer accent-green-600"
+              />
+              <span className="text-xs uppercase tracking-wider">📊 Data Tables Studio</span>
+            </div>
+          </label>
+
           {/* File Checkbox Switch */}
           <label className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer shadow-xs select-none ${
             enableFile 
@@ -706,33 +1073,6 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                 className="w-4.5 h-4.5 rounded text-green-600 focus:ring-green-500 border-slate-300 cursor-pointer accent-green-600"
               />
               <span className="text-xs uppercase tracking-wider">📝 Rich Description</span>
-            </div>
-          </label>
-
-          {/* Tables Checkbox Switch */}
-          <label className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer shadow-xs select-none ${
-            enableTables 
-              ? "bg-green-50/50 border-green-200 text-green-700 font-bold" 
-              : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100/50"
-          }`}>
-            <div className="flex items-center gap-2.5">
-              <input 
-                type="checkbox"
-                checked={enableTables}
-                onChange={(e) => {
-                  const val = e.target.checked;
-                  setEnableTables(val);
-                  if (val) {
-                    setEnableFile(false);
-                    setEnableText(false);
-                    if (tablesList.length === 0) {
-                      addPwdTableBlock();
-                    }
-                  }
-                }}
-                className="w-4.5 h-4.5 rounded text-green-600 focus:ring-green-500 border-slate-300 cursor-pointer accent-green-600"
-              />
-              <span className="text-xs uppercase tracking-wider">📊 Data Tables Studio</span>
             </div>
           </label>
 
@@ -876,15 +1216,17 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
             </div>
 
             {/* Top Table Generators */}
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={addPwdTableBlock}
-                className="bg-green-600 hover:bg-green-750 !text-white px-5 py-2.5 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 active:scale-95 shadow-md hover:shadow-lg border-0 cursor-pointer"
-              >
-                <Plus className="w-4 h-4 !text-white" /> Add PWD LTM Spreadsheet Table
-              </button>
-            </div>
+            {tablesList.length === 0 && (
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={addPwdTableBlock}
+                  className="bg-green-600 hover:bg-green-750 !text-white px-5 py-2.5 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 active:scale-95 shadow-md hover:shadow-lg border-0 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4 !text-white" /> Add PWD LTM Spreadsheet Table
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Renders tables list */}
@@ -923,34 +1265,6 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                         onChange={(e) => handlePwdFieldChange(tIdx, "officeName", e.target.value)}
                         className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 outline-none text-xs font-bold focus:border-[var(--primary-color)] transition"
                         placeholder="যেমন: গণপূর্ত বিভাগ, পাবনা।"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Notice Date</label>
-                      <input 
-                        type="text"
-                        name={`pwdNoticeDate_${tIdx}`}
-                        data-tidx={tIdx}
-                        data-field="noticeDateBlock"
-                        value={table.noticeDateBlock || ""}
-                        onChange={(e) => handlePwdFieldChange(tIdx, "noticeDateBlock", e.target.value)}
-                        placeholder="Select date..."
-                        className="flatpickr-date-field w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 outline-none text-xs font-bold focus:border-[var(--primary-color)] transition cursor-pointer"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Last Submission Date</label>
-                      <input 
-                        type="text"
-                        name={`pwdLastDate_${tIdx}`}
-                        data-tidx={tIdx}
-                        data-field="lastDateBlock"
-                        value={table.lastDateBlock || ""}
-                        onChange={(e) => handlePwdFieldChange(tIdx, "lastDateBlock", e.target.value)}
-                        placeholder="Select date..."
-                        className="flatpickr-date-field w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 outline-none text-xs font-bold focus:border-[var(--primary-color)] transition cursor-pointer"
                       />
                     </div>
 
@@ -1008,7 +1322,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                     onChange={(e) => handleHeaderChange(tIdx, cIdx, e.target.value)}
                                     className="bg-white/80 border border-slate-200 font-extrabold text-black outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded-lg p-1.5 text-xs"
                                   />
-                                  {table.headers.length > 1 && (
+                                  {((table.type === "pwd_ltm" 
+                                    ? (table.headers.length > 9 && cIdx === table.headers.length - 1)
+                                    : (table.headers.length > 1 && cIdx === table.headers.length - 1))) && (
                                     <button 
                                       type="button" 
                                       onClick={() => removeColumn(tIdx, cIdx)}
@@ -1030,6 +1346,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                               {row.map((cell: string, cIdx: number) => {
                                 const headerName = (table.headers[cIdx] || "").toLowerCase();
                                 const isDateField = headerName.includes("date") || headerName.includes("time") || headerName.includes("তারিখ") || headerName.includes("সময়");
+                                const isLastDateCol = table.type === "pwd_ltm" && cIdx === 8;
                                 return (
                                   <td key={cIdx} className="p-2 border-r border-slate-200">
                                     <input 
@@ -1040,10 +1357,15 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                       data-cidx={cIdx}
                                       value={cell} 
                                       onChange={(e) => handleCellChange(tIdx, rIdx, cIdx, e.target.value)}
+                                      readOnly={isLastDateCol}
                                       className={`bg-transparent border-0 outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded p-1.5 font-semibold text-slate-800 text-xs ${
-                                        isDateField ? "flatpickr-datetime-field cursor-pointer font-bold text-green-700 bg-green-50/20" : ""
+                                        isLastDateCol
+                                          ? "font-bold text-green-700 bg-green-50/20 cursor-not-allowed"
+                                          : isDateField
+                                            ? "flatpickr-datetime-field cursor-pointer font-bold text-green-700 bg-green-50/20"
+                                            : ""
                                       }`}
-                                      placeholder={isDateField ? "Select Date & Time..." : ""}
+                                      placeholder={isLastDateCol ? "Synced from Top" : isDateField ? "Select Date & Time..." : ""}
                                     />
                                   </td>
                                 );
@@ -1144,38 +1466,84 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       )}
 
       {/* Action buttons */}
-      <div className="border-t border-slate-100 pt-6 flex justify-end gap-4 shrink-0">
+      <div className="border-t border-slate-100 pt-6 flex flex-wrap justify-end gap-3 sm:gap-4 shrink-0">
         <button 
           type="button" 
           onClick={() => router.back()}
-          className="px-6 py-3 bg-slate-500 hover:bg-slate-600 text-white rounded-xl font-bold transition active:scale-95 text-xs uppercase tracking-wider border-0"
+          className="px-5 py-3 bg-slate-500 hover:bg-slate-600 text-white rounded-xl font-bold transition active:scale-95 text-xs uppercase tracking-wider border-0 cursor-pointer"
         >
           Cancel
         </button>
-        {!isEdit && (
+
+        {(!isEdit || notice?.status !== "active") && (
           <button 
             type="button"
             disabled={loading}
             onClick={(e) => {
               handleSubmit(e as any, "inactive");
             }}
-            className="bg-slate-600 hover:bg-slate-700 text-white font-extrabold px-6 py-3 rounded-xl shadow-xs transition active:scale-95 disabled:opacity-50 flex items-center gap-2 text-xs uppercase tracking-wider cursor-pointer border-0"
+            className="bg-slate-600 hover:bg-slate-700 text-white font-extrabold px-5 py-3 rounded-xl shadow-xs transition active:scale-95 disabled:opacity-50 flex items-center gap-2 text-xs uppercase tracking-wider cursor-pointer border-0"
           >
             Save as Draft
           </button>
         )}
+
         <button 
-          type="submit" 
+          type="button"
           disabled={loading}
-          className="bg-[var(--primary-color)] hover:bg-green-700 !text-white font-extrabold px-8 py-3 rounded-xl shadow-lg shadow-green-600/20 transition active:scale-95 disabled:opacity-50 flex items-center gap-2 text-xs uppercase tracking-wider border-0 cursor-pointer"
+          onClick={() => {
+            let defaultDateOnly = "";
+            let defaultTimeOnly = "";
+            const currentPublishDate = publishDate || "";
+            if (currentPublishDate) {
+              const parts = currentPublishDate.trim().split(/\s+/);
+              if (parts.length >= 2) {
+                defaultDateOnly = parts[0];
+                defaultTimeOnly = parts.slice(1).join(" ");
+              } else {
+                defaultDateOnly = parts[0];
+                defaultTimeOnly = "12:00 PM";
+              }
+            } else {
+              const now = new Date();
+              const d = String(now.getDate()).padStart(2, "0");
+              const m = String(now.getMonth() + 1).padStart(2, "0");
+              const y = now.getFullYear();
+              defaultDateOnly = `${d}-${m}-${y}`;
+              
+              let hrs = now.getHours();
+              const mins = String(now.getMinutes()).padStart(2, "0");
+              const ampm = hrs >= 12 ? 'PM' : 'AM';
+              hrs = hrs % 12;
+              hrs = hrs ? hrs : 12;
+              defaultTimeOnly = `${String(hrs).padStart(2, "0")}:${mins} ${ampm}`;
+            }
+            setModalScheduledDateOnly(defaultDateOnly);
+            setModalScheduledTimeOnly(defaultTimeOnly);
+            setModalScheduledDate(currentPublishDate);
+            setShowScheduleModal(true);
+          }}
+          className="bg-indigo-600 hover:bg-indigo-750 text-white font-extrabold px-5 py-3 rounded-xl shadow-md transition active:scale-95 disabled:opacity-50 flex items-center gap-2 text-xs uppercase tracking-wider cursor-pointer border-0"
+        >
+          <Calendar className="w-4 h-4" /> Schedule
+        </button>
+
+        <button 
+          type="button"
+          disabled={loading}
+          onClick={(e) => {
+            e.preventDefault();
+            handleSubmit(e as any, "active");
+          }}
+          className="bg-[var(--primary-color)] hover:bg-green-700 !text-white font-extrabold px-7 py-3 rounded-xl shadow-lg shadow-green-600/20 transition active:scale-95 disabled:opacity-50 flex items-center gap-2 text-xs uppercase tracking-wider border-0 cursor-pointer"
         >
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              Saving Studio...
+              {isEdit ? "Updating..." : "Publishing..."}
             </>
           ) : (
-            isEdit ? "Update Tender Notice" : "Save Tender Notice"
+            "Publish Notice"
           )}
         </button>
       </div>
@@ -1230,6 +1598,94 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                 className="bg-slate-800 hover:bg-slate-900 text-white font-extrabold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 cursor-pointer"
               >
                 Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ---------------------------------------------------- */}
+      {/* PREMIUM GLASSMORPHISM SCHEDULE POPUP MODAL */}
+      {/* ---------------------------------------------------- */}
+      {showScheduleModal && (
+        <div 
+          onClick={() => setShowScheduleModal(false)}
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[1000] flex items-center justify-center p-4 select-none animate-scale-in"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl p-6 max-w-md w-full border border-slate-200 shadow-2xl flex flex-col relative overflow-hidden"
+          >
+            {/* Design accents */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+            
+            <div className="flex justify-between items-center border-b pb-4 mb-4 shrink-0">
+              <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wider flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-indigo-600 animate-pulse" /> নোটিশ শিডিউল করুন (Schedule Notice)
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowScheduleModal(false)}
+                className="text-slate-400 hover:text-slate-600 transition text-lg bg-transparent border-0 cursor-pointer p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4 py-2">
+              <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                নোটিশটি স্বয়ংক্রিয়ভাবে পাবলিশ করার জন্য ভবিষ্যতের একটি তারিখ এবং সময় নির্বাচন করুন। নির্ধারিত সময়ের পূর্বে পাবলিক পেজে নোটিশটি লুকানো থাকবে।
+              </p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2 relative">
+                  <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">
+                    পাবলিশের তারিখ (Publish Date)
+                  </label>
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      value={modalScheduledDateOnly}
+                      onChange={(e) => setModalScheduledDateOnly(e.target.value)}
+                      placeholder="তারিখ সিলেক্ট করুন..."
+                      className="flatpickr-date-modal bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3 py-3 text-slate-800 outline-none text-xs font-bold focus:border-indigo-500 focus:bg-white transition cursor-pointer w-full shadow-xs"
+                    />
+                    <Calendar className="w-3.5 h-3.5 text-indigo-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+
+                <div className="space-y-2 relative">
+                  <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">
+                    পাবলিশের সময় (Publish Time)
+                  </label>
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      value={modalScheduledTimeOnly}
+                      onChange={(e) => setModalScheduledTimeOnly(e.target.value)}
+                      placeholder="সময় সিলেক্ট করুন..."
+                      className="flatpickr-time-modal bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3 py-3 text-slate-800 outline-none text-xs font-bold focus:border-indigo-500 focus:bg-white transition cursor-pointer w-full shadow-xs"
+                    />
+                    <Clock className="w-3.5 h-3.5 text-indigo-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-slate-100 flex justify-end gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowScheduleModal(false)}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 cursor-pointer border border-slate-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleModalScheduleConfirm}
+                className="bg-[var(--primary-color)] hover:bg-green-700 !text-white font-extrabold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 cursor-pointer border-0 shadow-lg shadow-green-600/20 flex items-center gap-1.5"
+              >
+                Add Schedule
               </button>
             </div>
           </div>

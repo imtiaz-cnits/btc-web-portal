@@ -9,9 +9,9 @@ export default function AddNoticePage() {
       <div className="flex items-center gap-3">
         <Link
           href="/admin/egp-notices"
-          className="p-2 hover:bg-white border border-transparent hover:border-slate-200 rounded-xl text-slate-500 hover:text-slate-700 transition"
+          className="p-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-sm transition flex items-center justify-center border-0"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5 text-white" />
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-slate-800">

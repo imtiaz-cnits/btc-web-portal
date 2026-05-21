@@ -1,18 +1,10 @@
 import Link from "next/link";
-import { getNotices, deleteNotice } from "@/app/actions/notices";
-import DeleteButton from "@/components/dashboard/DeleteButton";
+import { getNotices } from "@/app/actions/notices";
 import NoticeLimitDropdown from "@/components/dashboard/NoticeLimitDropdown";
-import WhatsAppShareButton from "@/components/dashboard/WhatsAppShareButton";
-import { 
-  Plus, 
-  Search, 
-  Calendar, 
-  FileCheck2, 
-  Edit3, 
-  Trash2,
-  FileSpreadsheet,
-  FileText,
-  FileDown,
+import NoticesTable from "@/components/dashboard/NoticesTable";
+import {
+  Plus,
+  FileCheck2,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
@@ -42,16 +34,22 @@ export default async function AdminNoticesPage({
   }
 
   // Count matches based on search query before status filter
-  const totalCount = filtered.length;
-  const activeCount = filtered.filter(n => n.status === "active").length;
+  const now = new Date();
+  const totalCount = filtered.filter(n => !(n.status === "active" && n.publishDate && new Date(n.publishDate) > now)).length;
+  const activeCount = filtered.filter(n => n.status === "active" && (!n.publishDate || new Date(n.publishDate) <= now)).length;
   const draftCount = filtered.filter(n => n.status !== "active").length;
+  const scheduledCount = filtered.filter(n => n.status === "active" && n.publishDate && new Date(n.publishDate) > now).length;
 
   // Filter based on status tabs
   let notices = filtered;
-  if (filter === "published") {
-    notices = filtered.filter(n => n.status === "active");
+  if (filter === "all") {
+    notices = filtered.filter(n => !(n.status === "active" && n.publishDate && new Date(n.publishDate) > now));
+  } else if (filter === "published") {
+    notices = filtered.filter(n => n.status === "active" && (!n.publishDate || new Date(n.publishDate) <= now));
   } else if (filter === "draft") {
     notices = filtered.filter(n => n.status !== "active");
+  } else if (filter === "scheduled") {
+    notices = filtered.filter(n => n.status === "active" && n.publishDate && new Date(n.publishDate) > now);
   }
 
   // Pagination calculation
@@ -74,8 +72,8 @@ export default async function AdminNoticesPage({
           </h1>
           <p className="text-slate-500 text-sm mt-0.5">Manage and track your active, inactive, file-based, or table-grid notices.</p>
         </div>
-        <Link 
-          href="/admin/egp-notices/add" 
+        <Link
+          href="/admin/egp-notices/add"
           className="bg-[var(--primary-color)] !text-white hover:bg-green-700 font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-green-600/20 text-sm flex items-center gap-2 active:scale-95 transition-all shrink-0 cursor-pointer"
         >
           <Plus className="w-4 h-4 !text-white" />
@@ -88,42 +86,47 @@ export default async function AdminNoticesPage({
         <div className="flex gap-2">
           <Link
             href={`/admin/egp-notices?filter=all${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
-            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${
-              filter === "all"
+            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "all"
                 ? "border-[var(--primary-color)] text-[var(--primary-color)]"
                 : "border-transparent text-slate-400 hover:text-slate-600"
-            }`}
+              }`}
           >
             All Notices
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${
-              filter === "all" ? "bg-green-50 text-green-700" : "bg-slate-100 text-slate-500"
-            }`}>{totalCount}</span>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${filter === "all" ? "bg-green-50 text-green-700" : "bg-slate-100 text-slate-500"
+              }`}>{totalCount}</span>
           </Link>
           <Link
             href={`/admin/egp-notices?filter=published${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
-            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${
-              filter === "published"
+            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "published"
                 ? "border-[var(--primary-color)] text-[var(--primary-color)]"
                 : "border-transparent text-slate-400 hover:text-slate-600"
-            }`}
+              }`}
           >
             Published
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${
-              filter === "published" ? "bg-green-50 text-green-700" : "bg-slate-100 text-slate-500"
-            }`}>{activeCount}</span>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${filter === "published" ? "bg-green-50 text-green-700" : "bg-slate-100 text-slate-500"
+              }`}>{activeCount}</span>
           </Link>
           <Link
             href={`/admin/egp-notices?filter=draft${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
-            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${
-              filter === "draft"
+            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "draft"
                 ? "border-[var(--primary-color)] text-[var(--primary-color)]"
                 : "border-transparent text-slate-400 hover:text-slate-600"
-            }`}
+              }`}
           >
             Drafts
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${
-              filter === "draft" ? "bg-amber-50 text-amber-700" : "bg-slate-100 text-slate-500"
-            }`}>{draftCount}</span>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${filter === "draft" ? "bg-amber-50 text-amber-700" : "bg-slate-100 text-slate-500"
+              }`}>{draftCount}</span>
+          </Link>
+          <Link
+            href={`/admin/egp-notices?filter=scheduled${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
+            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "scheduled"
+                ? "border-[var(--primary-color)] text-[var(--primary-color)]"
+                : "border-transparent text-slate-400 hover:text-slate-600"
+              }`}
+          >
+            Scheduled
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${filter === "scheduled" ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-500"
+              }`}>{scheduledCount}</span>
           </Link>
         </div>
         <div className="pb-2.5">
@@ -134,95 +137,11 @@ export default async function AdminNoticesPage({
       {/* Notices Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-sm">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Title & Type</th>
-                <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Category</th>
-                <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Year</th>
-                <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Status</th>
-                <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Publish Date</th>
-                <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 font-medium">
-              {paginatedNotices.map((notice) => {
-                return (
-                  <tr key={notice.id} className="hover:bg-slate-50/50 transition">
-                    <td className="px-6 py-4">
-                      <div className="space-y-1">
-                        <span className="text-slate-800 font-bold line-clamp-1">{notice.title}</span>
-                        <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">
-                          {notice.type === "FILE" && (
-                            <span className="inline-flex items-center gap-1 text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold">
-                              <FileDown className="w-3 h-3" />
-                              File
-                            </span>
-                          )}
-                          {notice.type === "TEXT" && (
-                            <span className="inline-flex items-center gap-1 text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold">
-                              <FileText className="w-3 h-3" />
-                              Text
-                            </span>
-                          )}
-                          {notice.type === "TABLE" && (
-                            <span className="inline-flex items-center gap-1 text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold">
-                              <FileSpreadsheet className="w-3 h-3" />
-                              Table
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="px-2.5 py-1 bg-green-50 text-green-700 text-xs rounded-full font-bold uppercase tracking-wider">
-                        {notice.category.replace("_", " ")}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-slate-600 text-sm font-semibold">
-                      {notice.year || "N/A"}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 text-xs rounded-full font-bold uppercase tracking-wider ${
-                        notice.status === "active" ? "bg-emerald-50 text-emerald-600 border border-emerald-100" : "bg-amber-50 text-amber-600 border border-amber-100"
-                      }`}>
-                        {notice.status === "active" ? "Active" : "Draft"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-slate-400 text-xs font-semibold">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5" />
-                        {notice.publishDate ? new Date(notice.publishDate).toLocaleDateString() : "N/A"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-3 items-center">
-                        <WhatsAppShareButton notice={notice} />
-
-                        <Link 
-                           href={`/admin/egp-notices/edit/${notice.id}`} 
-                           className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition inline-flex items-center justify-center border-0 active:scale-95 shadow-sm"
-                           title="Edit"
-                        >
-                          <Edit3 className="w-4 h-4 text-white" />
-                        </Link>
-                        
-                        <DeleteButton id={notice.id} action={deleteNotice} />
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-              
-              {paginatedNotices.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-6 py-16 text-center text-slate-400 font-semibold text-sm">
-                    No procurement notices found. Create one to get started!
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          <NoticesTable
+            notices={paginatedNotices as any}
+            startIndex={(activePage - 1) * currentLimit}
+            now={now.toISOString()}
+          />
         </div>
       </div>
 
@@ -232,13 +151,12 @@ export default async function AdminNoticesPage({
           <span className="text-xs font-bold text-slate-500">
             Showing {Math.min((activePage - 1) * currentLimit + 1, notices.length)} to {Math.min(activePage * currentLimit, notices.length)} of {notices.length} entries
           </span>
-          
+
           <div className="flex items-center gap-1.5">
             <Link
               href={`/admin/egp-notices?filter=${filter}${query ? `&search=${query}` : ""}&limit=${currentLimit}&page=${Math.max(1, activePage - 1)}`}
-              className={`w-9 h-9 rounded-xl bg-slate-500 hover:bg-slate-600 text-white flex items-center justify-center font-bold transition-all border-0 ${
-                activePage === 1 ? "pointer-events-none opacity-50" : ""
-              }`}
+              className={`w-9 h-9 rounded-xl bg-slate-500 hover:bg-slate-600 text-white flex items-center justify-center font-bold transition-all border-0 ${activePage === 1 ? "pointer-events-none opacity-50" : ""
+                }`}
             >
               <ChevronLeft className="w-4 h-4 text-white" />
             </Link>
@@ -247,11 +165,10 @@ export default async function AdminNoticesPage({
               <Link
                 key={page}
                 href={`/admin/egp-notices?filter=${filter}${query ? `&search=${query}` : ""}&limit=${currentLimit}&page=${page}`}
-                className={`w-9 h-9 rounded-xl flex items-center justify-center font-extrabold text-xs transition-all border-0 ${
-                  activePage === page
+                className={`w-9 h-9 rounded-xl flex items-center justify-center font-extrabold text-xs transition-all border-0 ${activePage === page
                     ? "bg-[var(--primary-color)] text-white shadow-md shadow-green-600/10"
                     : "bg-slate-450 hover:bg-slate-500 text-white"
-                }`}
+                  }`}
               >
                 {page}
               </Link>
@@ -259,9 +176,8 @@ export default async function AdminNoticesPage({
 
             <Link
               href={`/admin/egp-notices?filter=${filter}${query ? `&search=${query}` : ""}&limit=${currentLimit}&page=${Math.min(totalPages, activePage + 1)}`}
-              className={`w-9 h-9 rounded-xl bg-slate-500 hover:bg-slate-600 text-white flex items-center justify-center font-bold transition-all border-0 ${
-                activePage === totalPages ? "pointer-events-none opacity-50" : ""
-              }`}
+              className={`w-9 h-9 rounded-xl bg-slate-500 hover:bg-slate-600 text-white flex items-center justify-center font-bold transition-all border-0 ${activePage === totalPages ? "pointer-events-none opacity-50" : ""
+                }`}
             >
               <ChevronRight className="w-4 h-4 text-white" />
             </Link>

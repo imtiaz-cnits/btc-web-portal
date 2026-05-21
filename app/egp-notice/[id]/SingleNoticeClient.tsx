@@ -3,6 +3,48 @@
 import React, { useRef, useEffect } from "react";
 import Link from "next/link";
 
+const formatDisplayDate = (dateStr: any) => {
+  if (dateStr === null || dateStr === undefined) return "";
+  const str = String(dateStr).trim();
+  if (!str) return "";
+
+  // If it's an ISO date string like 2026-05-19T00:00:00.000Z
+  if (str.includes("T")) {
+    const datePart = str.split("T")[0];
+    if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+      const [y, m, d] = datePart.split("-");
+      return `${d}-${m}-${y}`;
+    }
+  }
+
+  // Try parsing YYYY-MM-DD format (optionally followed by time e.g., 2026-04-09 05:00 PM)
+  const parts = str.split(/\s+/);
+  const datePart = parts[0];
+  const timePart = parts.slice(1).join(" ");
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+    const [y, m, d] = datePart.split("-");
+    return timePart ? `${d}-${m}-${y} ${timePart}` : `${d}-${m}-${y}`;
+  }
+
+  // If it's already in d/m/Y format or dd/mm/yyyy or with dashes
+  if (/^\d{1,2}[-\/]\d{1,2}[-\/]\d{4}$/.test(datePart)) {
+    return str.replace(/\//g, "-");
+  }
+
+  // Fallback try to parse standard JS date
+  const parsed = Date.parse(str);
+  if (!isNaN(parsed)) {
+    const dateObj = new Date(parsed);
+    const d = String(dateObj.getDate()).padStart(2, '0');
+    const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const y = dateObj.getFullYear();
+    return `${d}-${m}-${y}`;
+  }
+
+  return str;
+};
+
 interface NoticeItem {
   id: string;
   title: string;
@@ -72,18 +114,6 @@ export default function SingleNoticeClient({
   }, [parsedTables]);
 
   const handlePrint = () => {
-    // If it's ONLY a PDF and nothing else, print the iframe for high fidelity
-    const hasOtherContent = !!(notice.content || parsedTables.length > 0);
-    if (notice.filePath && isPdf && !hasOtherContent) {
-      const iframe = document.getElementById(
-        "notice-frame",
-      ) as HTMLIFrameElement;
-      if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.print();
-        return;
-      }
-    }
-
     const isLandscape = parsedTables.length > 0;
 
     // Otherwise print the entire structured web content beautifully
@@ -96,11 +126,11 @@ export default function SingleNoticeClient({
             <title>&nbsp;</title>
             <style>
               @page {
-                size: A4 ${isLandscape ? "landscape" : "portrait"};
+                size: A4 ${isPdf ? "portrait" : (isLandscape ? "landscape" : "portrait")};
                 margin: 0 !important;
               }
               body {
-                padding: 15mm 15mm 15mm 15mm !important;
+                padding: ${isPdf ? "0" : "15mm 15mm 15mm 15mm"} !important;
                 margin: 0;
                 font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
                 background-color: white !important;
@@ -112,8 +142,37 @@ export default function SingleNoticeClient({
               .print-container {
                 width: 100% !important;
                 max-width: 100% !important;
-                margin: 0 auto;
+                margin: ${isPdf ? "0" : "0 auto"};
+                padding: 0 !important;
                 background-color: white;
+              }
+              /* Minimal Print Header Styles */
+              .print-header {
+                border-bottom: 2px solid #1b4332 !important;
+                padding-bottom: 10pt !important;
+                margin-bottom: 15pt !important;
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+              }
+              .notice-title {
+                font-size: 18pt !important;
+                font-weight: 700 !important;
+                color: #000000 !important;
+                margin: 0 0 8pt 0 !important;
+                line-height: 1.4 !important;
+                text-align: left !important;
+              }
+              .notice-details-bar {
+                display: flex !important;
+                justify-content: space-between !important;
+                font-size: 10pt !important;
+                color: #333333 !important;
+                font-weight: 600 !important;
+              }
+              .detail-item {
+                font-weight: 500 !important;
+              }
+              .detail-item strong {
+                color: #000000 !important;
               }
               .pwd-table-block {
                 border: none !important;
@@ -156,11 +215,25 @@ export default function SingleNoticeClient({
                 border: none !important;
                 page-break-inside: avoid;
               }
-              h1, h2, h3, h4, h5, p, div, tr {
+              h1, h2, h3, h4, h5, p, tr {
                 page-break-inside: avoid;
               }
               iframe {
-                display: none !important;
+                display: block !important;
+                width: 100% !important;
+                height: 24.5cm !important;
+                border: none !important;
+                margin-top: 10pt !important;
+              }
+              canvas.pdf-page-canvas {
+                display: block !important;
+                width: 100% !important;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                page-break-inside: avoid !important;
+                page-break-after: always !important;
+                box-sizing: border-box !important;
               }
               .no-print, button, .btn, h4, .print-hidden, [class*="print:hidden"] {
                 display: none !important;
@@ -169,18 +242,108 @@ export default function SingleNoticeClient({
           </head>
           <body>
             <div class="print-container">
-              ${printContents}
+              ${(!isLandscape && !isPdf) ? `
+                <div class="print-header">
+                  <h1 class="notice-title">${notice.title}</h1>
+                  <div class="notice-details-bar">
+                    <span class="detail-item"><strong>Category:</strong> ${notice.category}</span>
+                    <span class="detail-item"><strong>Date:</strong> ${notice.date}</span>
+                  </div>
+                </div>
+              ` : ''}
+              ${isPdf ? `
+                <div id="pdf-render-container">
+                  <div id="pdf-loading" style="text-align: center; padding: 50px; font-weight: bold; font-family: sans-serif; font-size: 18px; color: #555;">Loading document pages for print...</div>
+                </div>
+              ` : printContents}
             </div>
+            ${isPdf ? `
+              <script>
+                (function() {
+                  const script = document.createElement('script');
+                  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js';
+                  script.onload = function() {
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+                    
+                    let pdfUrl = '${notice.filePath}';
+                    if (!pdfUrl.startsWith('/') && !pdfUrl.startsWith('http')) {
+                      pdfUrl = '/' + pdfUrl;
+                    }
+                    const container = document.getElementById('pdf-render-container');
+                    const loadingEl = document.getElementById('pdf-loading');
+                    
+                    pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+                      loadingEl.style.display = 'none';
+                      
+                      let promiseChain = Promise.resolve();
+                      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                        (function(num) {
+                          promiseChain = promiseChain.then(() => {
+                            return pdf.getPage(num).then(function(page) {
+                              const viewport = page.getViewport({ scale: 2.0 });
+                              const canvas = document.createElement('canvas');
+                              canvas.className = 'pdf-page-canvas';
+                              
+                              container.appendChild(canvas);
+                              
+                              const context = canvas.getContext('2d');
+                              canvas.height = viewport.height;
+                              canvas.width = viewport.width;
+                              
+                              const renderContext = {
+                                canvasContext: context,
+                                viewport: viewport
+                              };
+                              return page.render(renderContext).promise;
+                            });
+                          });
+                        })(pageNum);
+                      }
+                      
+                      promiseChain.then(() => {
+                        setTimeout(() => {
+                          window.print();
+                          window.location.reload();
+                        }, 500);
+                      }).catch(err => {
+                        console.error('Error rendering PDF pages:', err);
+                        container.innerHTML = '<div style="color: red; text-align: center; font-weight: bold; padding: 50px;">Error rendering PDF pages. Please download and print the file directly.</div>';
+                        setTimeout(() => {
+                          window.print();
+                          window.location.reload();
+                        }, 1000);
+                      });
+                    }).catch(err => {
+                      console.error('Error loading PDF:', err);
+                      container.innerHTML = '<div style="color: red; text-align: center; font-weight: bold; padding: 50px;">Error loading PDF document: ' + err.message + '</div>';
+                      setTimeout(() => {
+                        window.print();
+                        window.location.reload();
+                      }, 2000);
+                    });
+                  };
+                  script.onerror = function() {
+                    document.getElementById('pdf-loading').innerHTML = '<div style="color: red; padding: 50px; font-weight: bold; font-family: sans-serif;">Failed to load PDF library. Please make sure you are connected to the internet or download the file directly.</div>';
+                  };
+                  document.head.appendChild(script);
+                })();
+              </script>
+            ` : ''}
           </body>
         </html>
       `;
-      window.print();
-      document.body.innerHTML = originalContents;
-      window.location.reload(); // Restore full React DOM
+      
+      if (!isPdf) {
+        // A small delay (1000ms) to allow attached images to fully load in the DOM
+        setTimeout(() => {
+          window.print();
+          document.body.innerHTML = originalContents;
+          window.location.reload(); // Restore full React DOM
+        }, 1000);
+      }
     }
   };
 
-  // Money parser helper for summing up numbers in PWD Table
   const parseMoney = (val: string) => {
     if (!val) return 0;
     return parseFloat(val.toString().replace(/,/g, "")) || 0;
@@ -259,16 +422,16 @@ export default function SingleNoticeClient({
                 ? table.headers
                 : table.type === "pwd_ltm"
                   ? [
-                      "SL No",
-                      "Tender ID",
-                      "Description",
-                      "Location",
-                      "AppCost (Tk)",
-                      "Solvency (Tk)",
-                      "Security (Tk)",
-                      "Doc Fees (Tk)",
-                      "Last Date & Time",
-                    ]
+                    "SL No",
+                    "Tender ID",
+                    "Description",
+                    "Location",
+                    "AppCost (Tk)",
+                    "Solvency (Tk)",
+                    "Security (Tk)",
+                    "Doc Fees (Tk)",
+                    "Last Date & Time",
+                  ]
                   : [];
             const rawRows = table.rows || [];
 
@@ -311,18 +474,18 @@ export default function SingleNoticeClient({
             const totalSecurity =
               securityColIdx !== -1
                 ? normalizedRows.reduce(
-                    (sum: number, r: string[]) =>
-                      sum + parseMoney(r[securityColIdx]),
-                    0,
-                  )
+                  (sum: number, r: string[]) =>
+                    sum + parseMoney(r[securityColIdx]),
+                  0,
+                )
                 : 0;
             const totalDocFees =
               docFeesColIdx !== -1
                 ? normalizedRows.reduce(
-                    (sum: number, r: string[]) =>
-                      sum + parseMoney(r[docFeesColIdx]),
-                    0,
-                  )
+                  (sum: number, r: string[]) =>
+                    sum + parseMoney(r[docFeesColIdx]),
+                  0,
+                )
                 : 0;
 
             return (
@@ -341,30 +504,30 @@ export default function SingleNoticeClient({
                 {(table.noticeDateBlock ||
                   table.lastDateBlock ||
                   table.lotteryDateBlock) && (
-                  <div className="grid grid-cols-3 border border-black text-center text-xs md:text-sm font-bold divide-x divide-black mb-4">
-                    {table.noticeDateBlock ? (
-                      <div className="bg-[#ffff00] text-black py-3.5 flex items-center justify-center gap-1.5 border-none">
-                        Notice Date : {table.noticeDateBlock}
-                      </div>
-                    ) : (
-                      <div className="bg-[#ffff00] py-3.5" />
-                    )}
-                    {table.lastDateBlock ? (
-                      <div className="bg-[#ff9966] text-white py-3.5 flex items-center justify-center gap-1.5 border-none">
-                        Last Date : {table.lastDateBlock}
-                      </div>
-                    ) : (
-                      <div className="bg-[#ff9966] py-3.5" />
-                    )}
-                    {table.lotteryDateBlock ? (
-                      <div className="bg-[#99cc99] text-black py-3.5 flex items-center justify-center gap-1.5 border-none">
-                        Lottery Date : {table.lotteryDateBlock}
-                      </div>
-                    ) : (
-                      <div className="bg-[#99cc99] py-3.5" />
-                    )}
-                  </div>
-                )}
+                    <div className="grid grid-cols-3 border border-black text-center text-xs md:text-sm font-bold divide-x divide-black mb-4">
+                      {table.noticeDateBlock ? (
+                        <div className="bg-[#ffff00] text-black py-3.5 flex items-center justify-center gap-1.5 border-none">
+                          Notice Date : {formatDisplayDate(table.noticeDateBlock)}
+                        </div>
+                      ) : (
+                        <div className="bg-[#ffff00] py-3.5" />
+                      )}
+                      {table.lastDateBlock ? (
+                        <div className="bg-[#ff9966] text-white py-3.5 flex items-center justify-center gap-1.5 border-none">
+                          Last Date : {formatDisplayDate(table.lastDateBlock)}
+                        </div>
+                      ) : (
+                        <div className="bg-[#ff9966] py-3.5" />
+                      )}
+                      {table.lotteryDateBlock ? (
+                        <div className="bg-[#99cc99] text-black py-3.5 flex items-center justify-center gap-1.5 border-none">
+                          Lottery Date : {formatDisplayDate(table.lotteryDateBlock)}
+                        </div>
+                      ) : (
+                        <div className="bg-[#99cc99] py-3.5" />
+                      )}
+                    </div>
+                  )}
 
                 {/* Table Specs with Watermark */}
                 <div
@@ -406,7 +569,7 @@ export default function SingleNoticeClient({
                               key={cIdx}
                               className="p-3 border border-black text-black text-base md:text-lg font-semibold font-bangla"
                             >
-                              {cell}
+                              {formatDisplayDate(cell)}
                             </td>
                           ))}
                         </tr>
@@ -540,7 +703,7 @@ export default function SingleNoticeClient({
           <div className="flex-1">
             <Link
               href="/egp-notice"
-              className="text-text-1 hover:!text-primary font-bold inline-flex items-center gap-2 mb-4 transition uppercase tracking-wider text-xs"
+              className="inline-flex items-center bg-primary hover:!text-secondary !text-secondary px-4 py-2 mb-5 rounded-xl font-bold text-sm uppercase hover:bg-text-1 transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all"
             >
               <i className="fa-solid fa-arrow-left"></i> Back to All Notices
             </Link>
@@ -569,7 +732,7 @@ export default function SingleNoticeClient({
               <a
                 href={notice.filePath}
                 download
-                className="flex-1 lg:flex-initial bg-primary hover:!text-secondary text-white px-6 py-3.5 rounded-xl font-bold text-sm uppercase hover:bg-text-1 transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all"
+                className="flex-1 lg:flex-initial bg-primary hover:!text-secondary !text-secondary px-6 py-3.5 rounded-xl font-bold text-sm uppercase hover:bg-text-1 transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all"
               >
                 <i className="fa-solid fa-download"></i> Download File
               </a>
@@ -645,18 +808,18 @@ export default function SingleNoticeClient({
                   const totalSecurity =
                     securityColIdx !== -1
                       ? rows.reduce(
-                          (sum: number, r: string[]) =>
-                            sum + parseMoney(r[securityColIdx]),
-                          0,
-                        )
+                        (sum: number, r: string[]) =>
+                          sum + parseMoney(r[securityColIdx]),
+                        0,
+                      )
                       : 0;
                   const totalDocFees =
                     docFeesColIdx !== -1
                       ? rows.reduce(
-                          (sum: number, r: string[]) =>
-                            sum + parseMoney(r[docFeesColIdx]),
-                          0,
-                        )
+                        (sum: number, r: string[]) =>
+                          sum + parseMoney(r[docFeesColIdx]),
+                        0,
+                      )
                       : 0;
 
                   return (
@@ -675,30 +838,30 @@ export default function SingleNoticeClient({
                       {(table.noticeDateBlock ||
                         table.lastDateBlock ||
                         table.lotteryDateBlock) && (
-                        <div className="grid grid-cols-3 border border-black text-center text-xs md:text-sm font-bold divide-x divide-black mb-4">
-                          {table.noticeDateBlock ? (
-                            <div className="bg-[#ffff00] text-black py-2.5 flex items-center justify-center gap-1.5 border-none">
-                              Notice Date : {table.noticeDateBlock}
-                            </div>
-                          ) : (
-                            <div className="bg-[#ffff00] py-2.5" />
-                          )}
-                          {table.lastDateBlock ? (
-                            <div className="bg-[#ff9966] text-white py-2.5 flex items-center justify-center gap-1.5 border-none">
-                              Last Date : {table.lastDateBlock}
-                            </div>
-                          ) : (
-                            <div className="bg-[#ff9966] py-2.5" />
-                          )}
-                          {table.lotteryDateBlock ? (
-                            <div className="bg-[#99cc99] text-black py-2.5 flex items-center justify-center gap-1.5 border-none">
-                              Lottery Date : {table.lotteryDateBlock}
-                            </div>
-                          ) : (
-                            <div className="bg-[#99cc99] py-2.5" />
-                          )}
-                        </div>
-                      )}
+                          <div className="grid grid-cols-3 border border-black text-center text-xs md:text-sm font-bold divide-x divide-black mb-4">
+                            {table.noticeDateBlock ? (
+                              <div className="bg-[#ffff00] text-black py-2.5 flex items-center justify-center gap-1.5 border-none">
+                                Notice Date : {formatDisplayDate(table.noticeDateBlock)}
+                              </div>
+                            ) : (
+                              <div className="bg-[#ffff00] py-2.5" />
+                            )}
+                            {table.lastDateBlock ? (
+                              <div className="bg-[#ff9966] text-white py-2.5 flex items-center justify-center gap-1.5 border-none">
+                                Last Date : {formatDisplayDate(table.lastDateBlock)}
+                              </div>
+                            ) : (
+                              <div className="bg-[#ff9966] py-2.5" />
+                            )}
+                            {table.lotteryDateBlock ? (
+                              <div className="bg-[#99cc99] text-black py-2.5 flex items-center justify-center gap-1.5 border-none">
+                                Lottery Date : {formatDisplayDate(table.lotteryDateBlock)}
+                              </div>
+                            ) : (
+                              <div className="bg-[#99cc99] py-2.5" />
+                            )}
+                          </div>
+                        )}
 
                       {/* Table Specs with Watermark */}
                       <div
@@ -740,7 +903,7 @@ export default function SingleNoticeClient({
                                     key={cIdx}
                                     className="p-2.5 border border-black text-black text-base font-semibold font-bangla"
                                   >
-                                    {cell}
+                                    {formatDisplayDate(cell)}
                                   </td>
                                 ))}
                               </tr>
@@ -749,64 +912,64 @@ export default function SingleNoticeClient({
                             {/* Sum Totals Row if any sum matches */}
                             {(securityColIdx !== -1 ||
                               docFeesColIdx !== -1) && (
-                              <tr className="bg-slate-50 font-bold text-black divide-x divide-black border-t border-black">
-                                {headers.map((hdr: string, idx: number) => {
-                                  if (idx === 0) {
-                                    const colSpanCount = Math.min(
+                                <tr className="bg-slate-50 font-bold text-black divide-x divide-black border-t border-black">
+                                  {headers.map((hdr: string, idx: number) => {
+                                    if (idx === 0) {
+                                      const colSpanCount = Math.min(
+                                        securityColIdx !== -1
+                                          ? securityColIdx
+                                          : docFeesColIdx,
+                                        headers.length,
+                                      );
+                                      return (
+                                        <td
+                                          key={idx}
+                                          className="p-2.5 border border-black text-right text-xs"
+                                          colSpan={colSpanCount}
+                                        >
+                                          Total :
+                                        </td>
+                                      );
+                                    }
+                                    // Skip columns merged by colSpan
+                                    const minTotalColIdx = Math.min(
                                       securityColIdx !== -1
                                         ? securityColIdx
                                         : docFeesColIdx,
                                       headers.length,
                                     );
+                                    if (idx < minTotalColIdx) {
+                                      return null;
+                                    }
+                                    if (idx === securityColIdx) {
+                                      return (
+                                        <td
+                                          key={idx}
+                                          className="p-2.5 border border-black text-xs font-extrabold text-black"
+                                        >
+                                          {formatMoney(totalSecurity)}
+                                        </td>
+                                      );
+                                    }
+                                    if (idx === docFeesColIdx) {
+                                      return (
+                                        <td
+                                          key={idx}
+                                          className="p-2.5 border border-black text-xs font-extrabold text-black"
+                                        >
+                                          {formatMoney(totalDocFees)}
+                                        </td>
+                                      );
+                                    }
                                     return (
                                       <td
                                         key={idx}
-                                        className="p-2.5 border border-black text-right text-xs"
-                                        colSpan={colSpanCount}
-                                      >
-                                        Total :
-                                      </td>
+                                        className="p-2.5 border border-black"
+                                      ></td>
                                     );
-                                  }
-                                  // Skip columns merged by colSpan
-                                  const minTotalColIdx = Math.min(
-                                    securityColIdx !== -1
-                                      ? securityColIdx
-                                      : docFeesColIdx,
-                                    headers.length,
-                                  );
-                                  if (idx < minTotalColIdx) {
-                                    return null;
-                                  }
-                                  if (idx === securityColIdx) {
-                                    return (
-                                      <td
-                                        key={idx}
-                                        className="p-2.5 border border-black text-xs font-extrabold text-black"
-                                      >
-                                        {formatMoney(totalSecurity)}
-                                      </td>
-                                    );
-                                  }
-                                  if (idx === docFeesColIdx) {
-                                    return (
-                                      <td
-                                        key={idx}
-                                        className="p-2.5 border border-black text-xs font-extrabold text-black"
-                                      >
-                                        {formatMoney(totalDocFees)}
-                                      </td>
-                                    );
-                                  }
-                                  return (
-                                    <td
-                                      key={idx}
-                                      className="p-2.5 border border-black"
-                                    ></td>
-                                  );
-                                })}
-                              </tr>
-                            )}
+                                  })}
+                                </tr>
+                              )}
 
                             {rows.length === 0 && (
                               <tr>

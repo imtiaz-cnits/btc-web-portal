@@ -28,7 +28,10 @@ export default async function PublicNoticesPage() {
                       {notice.category}
                     </span>
                     <span className="text-gray-400 text-sm">
-                      Published: {notice.publishDate ? new Date(notice.publishDate).toLocaleDateString() : 'N/A'}
+                      Published: {notice.publishDate ? (() => {
+                        const d = new Date(notice.publishDate);
+                        return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+                      })() : 'N/A'}
                     </span>
                   </div>
                   <h2 className="text-xl font-bold text-gray-800 group-hover:text-[var(--primary-color)] transition">

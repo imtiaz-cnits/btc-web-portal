@@ -27,16 +27,13 @@ export default async function PublicSingleNoticePage({
     console.error("Failed to fetch notice in PublicSingleNoticePage:", error);
   }
 
-  if (!notice) {
+  if (!notice || notice.status !== "active" || (notice.publishDate && new Date(notice.publishDate) > new Date())) {
     notFound();
   }
 
   const pubDate = notice.publishDate || notice.createdAt;
-  const formattedDate = new Date(pubDate).toLocaleDateString("en-US", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  const d = new Date(pubDate);
+  const formattedDate = `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
 
   const mappedNotice = {
     id: notice.id,

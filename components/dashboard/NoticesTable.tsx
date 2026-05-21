@@ -1,0 +1,450 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { deleteNotice } from "@/app/actions/notices";
+import DeleteButton from "@/components/dashboard/DeleteButton";
+import WhatsAppShareButton from "@/components/dashboard/WhatsAppShareButton";
+import {
+  Calendar,
+  FileSpreadsheet,
+  FileText,
+  FileDown,
+  Edit3,
+  Eye,
+  X,
+  ExternalLink,
+} from "lucide-react";
+
+interface Notice {
+  id: string;
+  title: string;
+  category: string;
+  year?: string | null;
+  status: string;
+  publishDate?: Date | null;
+  type: string;
+  content?: string | null;
+  filePath?: string | null;
+  tableData?: string | null;
+}
+
+interface NoticesTableProps {
+  notices: Notice[];
+  startIndex: number;
+  now: string;
+}
+
+// -----------------------------------------------
+// Inline Table Data Renderer
+// -----------------------------------------------
+function TableDataPreview({ tableData }: { tableData: string }) {
+  try {
+    const parsed = JSON.parse(tableData);
+
+    // v2 format: multiple tables
+    if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
+      return (
+        <div className="space-y-6">
+          {parsed.tables.map((table: any, tIdx: number) => (
+            <div key={tIdx} className="space-y-2">
+              {table.officeName && (
+                <p className="text-xs font-bold text-slate-600 text-center">{table.officeName}</p>
+              )}
+              <div className="overflow-x-auto rounded-xl border border-slate-200">
+                <table className="w-full text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-[#1b4332] text-white">
+                      {(table.headers || []).map((h: string, i: number) => (
+                        <th key={i} className="px-3 py-2 text-left font-bold whitespace-nowrap border border-[#2d6a4f] text-[10px] uppercase tracking-wide">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(table.rows || []).map((row: string[], rIdx: number) => (
+                      <tr key={rIdx} className={rIdx % 2 === 0 ? "bg-white" : "bg-slate-50"}>
+                        {row.map((cell: string, cIdx: number) => (
+                          <td key={cIdx} className="px-3 py-2 border border-slate-200 text-slate-700 whitespace-nowrap">
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // PWD template
+    if (parsed.isPwdTemplate) {
+      return (
+        <div className="space-y-2">
+          {parsed.officeName && (
+            <p className="text-xs font-bold text-slate-600 text-center">{parsed.officeName}</p>
+          )}
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="bg-[#1b4332] text-white">
+                  {(parsed.headers || []).map((h: string, i: number) => (
+                    <th key={i} className="px-3 py-2 text-left font-bold whitespace-nowrap border border-[#2d6a4f] text-[10px] uppercase tracking-wide">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(parsed.rows || []).map((row: string[], rIdx: number) => (
+                  <tr key={rIdx} className={rIdx % 2 === 0 ? "bg-white" : "bg-slate-50"}>
+                    {row.map((cell: string, cIdx: number) => (
+                      <td key={cIdx} className="px-3 py-2 border border-slate-200 text-slate-700 whitespace-nowrap">
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    }
+
+    // Legacy simple format
+    if (parsed.headers && parsed.rows) {
+      return (
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr className="bg-[#1b4332] text-white">
+                {(parsed.headers || []).map((h: string, i: number) => (
+                  <th key={i} className="px-3 py-2 text-left font-bold whitespace-nowrap border border-[#2d6a4f] text-[10px] uppercase tracking-wide">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {(parsed.rows || []).map((row: string[], rIdx: number) => (
+                <tr key={rIdx} className={rIdx % 2 === 0 ? "bg-white" : "bg-slate-50"}>
+                  {row.map((cell: string, cIdx: number) => (
+                    <td key={cIdx} className="px-3 py-2 border border-slate-200 text-slate-700 whitespace-nowrap">
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+  } catch (e) {
+    // fall through
+  }
+
+  return (
+    <div className="text-center py-6 text-slate-400 text-xs font-semibold">
+      Table data could not be parsed.
+    </div>
+  );
+}
+
+// -----------------------------------------------
+// Main Component
+// -----------------------------------------------
+export default function NoticesTable({ notices, startIndex, now }: NoticesTableProps) {
+  const nowDate = new Date(now);
+  const [quickViewNotice, setQuickViewNotice] = useState<Notice | null>(null);
+
+  const formatPublishDate = (notice: Notice) => {
+    if (!notice.publishDate) return "N/A";
+    const d = new Date(notice.publishDate);
+    const dateStr = `${String(d.getDate()).padStart(2, "0")}-${String(d.getMonth() + 1).padStart(2, "0")}-${d.getFullYear()}`;
+    const isScheduled = notice.status === "active" && new Date(notice.publishDate) > nowDate;
+    const hasTime = d.getHours() !== 0 || d.getMinutes() !== 0;
+    if (isScheduled || hasTime) {
+      let hrs = d.getHours();
+      const mins = String(d.getMinutes()).padStart(2, "0");
+      const ampm = hrs >= 12 ? "PM" : "AM";
+      hrs = hrs % 12;
+      hrs = hrs ? hrs : 12;
+      return `${dateStr} ${String(hrs).padStart(2, "0")}:${mins} ${ampm}`;
+    }
+    return dateStr;
+  };
+
+  const getStatusBadge = (notice: Notice) => {
+    const isScheduled = notice.status === "active" && notice.publishDate && new Date(notice.publishDate) > nowDate;
+    if (notice.status === "active") {
+      return isScheduled
+        ? { label: "Scheduled", cls: "bg-blue-50 text-blue-600 border border-blue-100" }
+        : { label: "Active", cls: "bg-emerald-50 text-emerald-600 border border-emerald-100" };
+    }
+    return { label: "Draft", cls: "bg-amber-50 text-amber-600 border border-amber-100" };
+  };
+
+  // Render preview content inside the Quick View modal
+  const renderPreviewContent = (notice: Notice) => {
+    // File (image or PDF)
+    if (notice.filePath) {
+      const ext = notice.filePath.split(".").pop()?.toLowerCase();
+      if (["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext || "")) {
+        return (
+          <img
+            src={notice.filePath}
+            alt={notice.title}
+            className="max-w-full max-h-[55vh] object-contain mx-auto rounded-xl shadow-sm"
+          />
+        );
+      }
+      return (
+        <iframe
+          src={`${notice.filePath}#toolbar=0`}
+          className="w-full h-[55vh] border-0 rounded-xl bg-slate-50"
+          title="Notice Preview"
+        />
+      );
+    }
+
+    // Text (HTML)
+    if (notice.content) {
+      return (
+        <div
+          className="prose prose-sm max-w-none text-slate-700 leading-relaxed text-sm px-2"
+          dangerouslySetInnerHTML={{ __html: notice.content }}
+        />
+      );
+    }
+
+    // Table — render inline
+    if (notice.tableData) {
+      return <TableDataPreview tableData={notice.tableData} />;
+    }
+
+    return (
+      <div className="text-center py-10 text-slate-400 text-sm font-semibold">
+        No preview content available.
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <table className="w-full text-left border-collapse text-sm">
+        <thead className="bg-slate-50 border-b border-slate-200">
+          <tr>
+            <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs w-12 text-center">SL</th>
+            <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Title &amp; Type</th>
+            <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Category</th>
+            <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Year</th>
+            <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Status</th>
+            <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Publish Date</th>
+            <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100 font-medium">
+          {notices.map((notice, idx) => {
+            const statusBadge = getStatusBadge(notice);
+            return (
+              <tr key={notice.id} className="hover:bg-slate-50/50 transition">
+                {/* SL No */}
+                <td className="px-4 py-4 text-center">
+                  <span className="text-xs font-extrabold text-slate-400 bg-slate-100 w-7 h-7 rounded-lg flex items-center justify-center mx-auto">
+                    {startIndex + idx + 1}
+                  </span>
+                </td>
+
+                {/* Title & Type */}
+                <td className="px-6 py-4">
+                  <div className="space-y-1">
+                    <span className="text-slate-800 font-bold line-clamp-1">{notice.title}</span>
+                    <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">
+                      {notice.type === "FILE" && (
+                        <span className="inline-flex items-center gap-1 text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold">
+                          <FileDown className="w-3 h-3" /> File
+                        </span>
+                      )}
+                      {notice.type === "TEXT" && (
+                        <span className="inline-flex items-center gap-1 text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold">
+                          <FileText className="w-3 h-3" /> Text
+                        </span>
+                      )}
+                      {notice.type === "TABLE" && (
+                        <span className="inline-flex items-center gap-1 text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold">
+                          <FileSpreadsheet className="w-3 h-3" /> Table
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </td>
+
+                {/* Category */}
+                <td className="px-6 py-4">
+                  <span className="px-2.5 py-1 bg-green-50 text-green-700 text-xs rounded-full font-bold uppercase tracking-wider">
+                    {notice.category.replace("_", " ")}
+                  </span>
+                </td>
+
+                {/* Year */}
+                <td className="px-6 py-4 text-slate-600 text-sm font-semibold">{notice.year || "N/A"}</td>
+
+                {/* Status */}
+                <td className="px-6 py-4">
+                  <span className={`px-2.5 py-1 text-xs rounded-full font-bold uppercase tracking-wider ${statusBadge.cls}`}>
+                    {statusBadge.label}
+                  </span>
+                </td>
+
+                {/* Publish Date */}
+                <td className="px-6 py-4 text-slate-400 text-xs font-semibold">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 shrink-0" />
+                    {formatPublishDate(notice)}
+                  </div>
+                </td>
+
+                {/* Actions */}
+                <td className="px-6 py-4 text-right">
+                  <div className="flex justify-end gap-2 items-center">
+                    <WhatsAppShareButton notice={notice} />
+
+                    {/* Quick View */}
+                    <button
+                      type="button"
+                      onClick={() => setQuickViewNotice(notice)}
+                      className="bg-slate-600 hover:bg-slate-700 text-white p-2 rounded-lg transition inline-flex items-center justify-center border-0 active:scale-95 shadow-sm cursor-pointer"
+                      title="Quick View"
+                    >
+                      <Eye className="w-4 h-4 text-white" />
+                    </button>
+
+                    <Link
+                      href={`/admin/egp-notices/edit/${notice.id}`}
+                      className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition inline-flex items-center justify-center border-0 active:scale-95 shadow-sm"
+                      title="Edit"
+                    >
+                      <Edit3 className="w-4 h-4 text-white" />
+                    </Link>
+
+                    <DeleteButton id={notice.id} action={deleteNotice} />
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+
+          {notices.length === 0 && (
+            <tr>
+              <td colSpan={7} className="px-6 py-16 text-center text-slate-400 font-semibold text-sm">
+                No procurement notices found. Create one to get started!
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      {/* ---------------------------------------------------- */}
+      {/* QUICK VIEW POPUP MODAL                               */}
+      {/* ---------------------------------------------------- */}
+      {quickViewNotice && (
+        <div
+          className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[1000] flex items-center justify-center p-4"
+          onClick={() => setQuickViewNotice(null)}
+        >
+          <div
+            className="bg-white rounded-3xl w-full max-w-4xl border border-slate-100 shadow-2xl flex flex-col max-h-[92vh] relative overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top gradient bar */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[var(--primary-color)] via-blue-500 to-purple-500" />
+
+            {/* Header */}
+            <div className="flex justify-between items-start gap-4 px-6 pt-7 pb-4 border-b border-slate-100 shrink-0">
+              <div className="space-y-1.5 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {quickViewNotice.type === "FILE" && (
+                    <span className="inline-flex items-center gap-1 text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md text-[10px] uppercase font-extrabold">
+                      <FileDown className="w-3 h-3" /> File
+                    </span>
+                  )}
+                  {quickViewNotice.type === "TEXT" && (
+                    <span className="inline-flex items-center gap-1 text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md text-[10px] uppercase font-extrabold">
+                      <FileText className="w-3 h-3" /> Text
+                    </span>
+                  )}
+                  {quickViewNotice.type === "TABLE" && (
+                    <span className="inline-flex items-center gap-1 text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md text-[10px] uppercase font-extrabold">
+                      <FileSpreadsheet className="w-3 h-3" /> Table
+                    </span>
+                  )}
+                  <span className={`px-2 py-0.5 text-[10px] rounded-md font-extrabold uppercase ${getStatusBadge(quickViewNotice).cls}`}>
+                    {getStatusBadge(quickViewNotice).label}
+                  </span>
+                </div>
+                <h3 className="text-slate-800 font-extrabold text-base leading-snug">
+                  {quickViewNotice.title}
+                </h3>
+                <div className="flex items-center gap-3 text-xs text-slate-400 font-semibold flex-wrap">
+                  <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded-md font-bold uppercase text-[10px]">
+                    {quickViewNotice.category.replace("_", " ")}
+                  </span>
+                  {quickViewNotice.year && <span>Year: {quickViewNotice.year}</span>}
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    {formatPublishDate(quickViewNotice)}
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setQuickViewNotice(null)}
+                className="shrink-0 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-xl flex items-center justify-center transition border-0 cursor-pointer active:scale-95"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-auto p-6 min-h-0">
+              {renderPreviewContent(quickViewNotice)}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-between items-center gap-3 shrink-0 bg-slate-50/60">
+              <Link
+                href={`/egp-notice/${quickViewNotice.id}`}
+                target="_blank"
+                className="inline-flex items-center gap-1.5 text-xs font-bold !text-secondary bg-slate-500 hover:bg-slate-600 px-3 py-2 rounded-lg transition active:scale-95"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                Public Page
+              </Link>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setQuickViewNotice(null)}
+                  className="bg-slate-500 hover:bg-slate-600 text-white font-bold px-5 py-2 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 cursor-pointer border-0"
+                >
+                  Close
+                </button>
+                <Link
+                  href={`/admin/egp-notices/edit/${quickViewNotice.id}`}
+                  className="bg-[var(--primary-color)] !text-secondary font-bold px-5 py-2 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 inline-flex items-center gap-1.5 border-0"
+                >
+                  <Edit3 className="w-3.5 h-3.5" /> Edit
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

@@ -17,7 +17,13 @@ export default async function PublicEgpNoticePage() {
   let notices: any[] = [];
   try {
     notices = await prisma.notice.findMany({
-      where: { status: "active" },
+      where: { 
+        status: "active",
+        OR: [
+          { publishDate: null },
+          { publishDate: { lte: new Date() } }
+        ]
+      },
       orderBy: { createdAt: "desc" },
     });
   } catch (error) {
@@ -27,11 +33,8 @@ export default async function PublicEgpNoticePage() {
   // Map database notice properties to the fields expected by NoticeTable
   const mappedNotices = notices.map((notice, idx) => {
     const pubDate = notice.publishDate || notice.createdAt;
-    const formattedDate = new Date(pubDate).toLocaleDateString("en-US", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    const d = new Date(pubDate);
+    const formattedDate = `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
 
     return {
       id: notice.id,

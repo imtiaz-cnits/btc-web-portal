@@ -126,7 +126,10 @@ export default async function AdminDashboardPage() {
                       {notice.category}
                     </span>
                     <span>
-                      {notice.publishDate ? new Date(notice.publishDate).toLocaleDateString() : "N/A"}
+                      {notice.publishDate ? (() => {
+                        const d = new Date(notice.publishDate);
+                        return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+                      })() : "N/A"}
                     </span>
                     <span className="bg-slate-100 px-2 py-0.5 rounded font-bold uppercase text-[10px]">
                       {notice.type}

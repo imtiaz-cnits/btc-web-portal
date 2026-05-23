@@ -24,6 +24,7 @@ model User {
   resetOtpExpireAt  BigInt    @default(0)
   notices           Notice[]
   winnerLists       WinnerList[]
+  image             String?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 

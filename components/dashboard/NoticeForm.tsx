@@ -91,6 +91,147 @@ function CustomSelect({
 }
 
 // ----------------------------------------------------
+// 1.5. Dynamic Category Header Map and Migration Helpers
+// ----------------------------------------------------
+const HEADERS_MAP: Record<string, string[]> = {
+  LTM: [
+    "SL.NO",
+    "Tender Id",
+    "Brief Description of Works",
+    "Work Location",
+    "Type of Method",
+    "APP Estimate Cost Tk.",
+    "Bank Credit Line",
+    "Tender Security (BD)",
+    "Document Price. Tk",
+    "Schedule & BD Last Selling Date"
+  ],
+  LOTTERY_PENDING: [
+    "SL.NO",
+    "Tender Id",
+    "Brief Description of Works",
+    "Work Location",
+    "Type of Method",
+    "APP Estimate Cost Tk.",
+    "Bank Credit Line",
+    "Tender Security (BD)",
+    "Document Price. Tk",
+    "Schedule & BD Last Selling Date"
+  ],
+  LOTTERY_RESULT: [
+    "SL.NO",
+    "Tender Id",
+    "Brief Description of Works",
+    "Work Location",
+    "Type of Method",
+    "APP Estimate Cost Tk.",
+    "Bank Credit Line",
+    "Tender Security (BD)",
+    "Document Price. Tk",
+    "Schedule & BD Last Selling Date",
+    "WINNER LIST NAME"
+  ],
+  OTM: [
+    "SL.NO",
+    "Tender Id",
+    "Brief Description of Works",
+    "Work Location",
+    "Type of Method",
+    "APP Estimate Cost Tk.",
+    "Bank Credit Line",
+    "TURN OVER 05 Years",
+    "Similar Work 05 Years",
+    "Tender Security (BD)",
+    "Document Price. Tk",
+    "Schedule & BD Last Selling Date"
+  ]
+};
+
+function migrateTableRows(
+  oldHeaders: string[], 
+  oldRows: string[][], 
+  newHeaders: string[], 
+  newCategory: string
+): string[][] {
+  if (!Array.isArray(oldRows)) return [];
+  return oldRows.map((row, rowIndex) => {
+    if (!Array.isArray(row)) return [];
+    return newHeaders.map((newHdr, newColIdx) => {
+      // 1. SL.NO auto-calculated
+      if (newHdr.toUpperCase().replace(/\./g, "") === "SLNO") {
+        return (rowIndex + 1).toString();
+      }
+
+      // 2. Type of Method updated automatically based on category
+      if (newHdr.toLowerCase().includes("method") || newHdr.toLowerCase().includes("matho")) {
+        return newCategory === "OTM" ? "OTM" : "LTM SOCIAL";
+      }
+
+      // 3. Match from existing headers using normalized strings
+      const normalizedNewHdr = newHdr.toLowerCase().replace(/\s+/g, "").replace(/\./g, "");
+      const matchedIdx = oldHeaders.findIndex(oldHdr => {
+        if (!oldHdr) return false;
+        const normalizedOld = oldHdr.toLowerCase().replace(/\s+/g, "").replace(/\./g, "");
+        return normalizedOld === normalizedNewHdr || normalizedOld.includes(normalizedNewHdr) || normalizedNewHdr.includes(normalizedOld);
+      });
+
+      if (matchedIdx !== -1 && row[matchedIdx] !== undefined) {
+        return row[matchedIdx];
+      }
+
+      // 4. Default: empty string
+      return "";
+    });
+  });
+}
+
+// ----------------------------------------------------
+// 1.8. Currency input parsing and formatting helper
+// ----------------------------------------------------
+const isCurrencyColumn = (hdr: string) => {
+  if (!hdr) return false;
+  const lower = hdr.toLowerCase();
+  return lower.includes("cost") || 
+         lower.includes("tk") || 
+         lower.includes("taka") || 
+         lower.includes("security") || 
+         lower.includes("fees") || 
+         lower.includes("fee") || 
+         lower.includes("price") || 
+         lower.includes("amount") || 
+         lower.includes("turn over") || 
+         lower.includes("turnover") || 
+         lower.includes("similar work") || 
+         lower.includes("similar") || 
+         lower.includes("credit") || 
+         lower.includes("টাকা");
+};
+
+const formatInputCurrency = (value: string) => {
+  if (!value) return "";
+  let clean = value.replace(/,/g, "");
+  const parts = clean.split(".");
+  if (parts.length > 2) {
+    clean = parts[0] + "." + parts.slice(1).join("");
+  }
+  const integerPart = parts[0].replace(/\D/g, "");
+  let formatted = integerPart ? parseInt(integerPart, 10).toLocaleString("en-US") : "";
+  if (parts.length > 1) {
+    const decimalPart = parts[1].replace(/\D/g, "");
+    formatted += "." + decimalPart;
+  }
+  return formatted;
+};
+
+const getLastDateColIdx = (headers: string[]) => {
+  if (!Array.isArray(headers)) return -1;
+  return headers.findIndex(h => {
+    const lower = (h || "").toLowerCase();
+    return lower.includes("selling") || lower.includes("last date & time") || lower.includes("schedule");
+  });
+};
+
+// ----------------------------------------------------
 // 2. Main Multi-Table Tender Notice Studio Form Component
 // ----------------------------------------------------
 export default function NoticeForm({ notice }: NoticeFormProps) {
@@ -105,7 +246,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
   // Base Form Fields
   const [title, setTitle] = useState(notice?.title || "");
-  const [category, setCategory] = useState(notice?.category || "LTM");
+  const [category, setCategory] = useState(notice?.category || "OTM");
   const [status, setStatus] = useState(notice?.status || "active");
   const [year, setYear] = useState(notice?.year || new Date().getFullYear().toString());
   
@@ -506,6 +647,17 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     } else {
       // Set a default empty state or pre-populate with default table on add page if tables are enabled
       if (enableTables) {
+        const targetHeaders = HEADERS_MAP[category] || HEADERS_MAP.LTM;
+        const initialRow = targetHeaders.map((hdr) => {
+          const normHdr = hdr.toUpperCase().replace(/\./g, "");
+          if (normHdr === "SLNO") return "1";
+          if (hdr.toLowerCase().includes("method") || hdr.toLowerCase().includes("matho")) return category === "OTM" ? "OTM" : "LTM SOCIAL";
+          return "";
+        });
+
+        const initialColors = targetHeaders.map(hdr => hdr === "WINNER LIST NAME" ? "#ffffcc" : "#ffffff");
+        const defaultHeaderBg = category === "OTM" ? "#c2ffd8" : "#ccffff";
+
         setTablesList([
           {
             id: "tbl-init",
@@ -517,8 +669,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
             payOrderTo: "Executive Engineer, Pabna PWD Division, Pabna",
             moreInfo: "Md. Babul Islam, e-Tender Solution, Sujanagar, Pabna. Mobile: 01711 222110, https://www.egpbd.com/",
             bottomWarning: "ব্যাংক স্টেটমেন্ট অথবা ক্রেডিট কমিটমেন্ট দিতে হবে।",
-            headers: ["SL No", "Tender ID", "Description", "Location", "AppCost (Tk)", "Solvency (Tk)", "Security (Tk)", "Doc Fees (Tk)", "Last Date & Time"],
-            rows: [["1", "1251464", "Necessary repair works...", "Pabna sadar", "2,72,184", "2,00,000", "7,000", "500", lastDate ? `${lastDate} 05:00 PM` : ""]]
+            headers: targetHeaders,
+            rows: [initialRow],
+            columnColors: initialColors,
+            headerBgColor: defaultHeaderBg
           }
         ]);
       } else {
@@ -542,20 +696,23 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
         let newRows = table.rows;
         if (table.type === "pwd_ltm" && Array.isArray(table.rows)) {
-          newRows = table.rows.map((row: any) => {
-            if (Array.isArray(row) && row.length > 8) {
-              const existingVal = row[8] || "";
-              const timePart = existingVal.includes(" ") ? existingVal.split(" ").slice(1).join(" ") : "05:00 PM";
-              const targetVal = lastDate ? `${lastDate} ${timePart}` : "";
-              if (existingVal !== targetVal) {
-                tableChanged = true;
-                const newRow = [...row];
-                newRow[8] = targetVal;
-                return newRow;
+          const lastDateColIdx = getLastDateColIdx(table.headers || []);
+          if (lastDateColIdx !== -1) {
+            newRows = table.rows.map((row: any) => {
+              if (Array.isArray(row) && row.length > lastDateColIdx) {
+                const existingVal = row[lastDateColIdx] || "";
+                const timePart = existingVal.includes(" ") ? existingVal.split(" ").slice(1).join(" ") : "05:00 PM";
+                const targetVal = lastDate ? `${lastDate} ${timePart}` : "";
+                if (existingVal !== targetVal) {
+                  tableChanged = true;
+                  const newRow = [...row];
+                  newRow[lastDateColIdx] = targetVal;
+                  return newRow;
+                }
               }
-            }
-            return row;
-          });
+              return row;
+            });
+          }
         }
 
         if (oldNoticeDate !== newNoticeDate || oldLastDate !== newLastDate) {
@@ -578,6 +735,54 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     });
   }, [publishDate, lastDate]);
 
+  // Dynamically migrate table columns and structures based on the Notice Category selected
+  useEffect(() => {
+    setTablesList(prev => {
+      if (prev.length === 0) return prev;
+      return prev.map(table => {
+        if (table.type !== "pwd_ltm") return table;
+        
+        const targetHeaders = HEADERS_MAP[category] || HEADERS_MAP.LTM;
+        const currentHeaders = table.headers || [];
+        const currentRows = table.rows || [];
+        
+        // Migrate row cell contents based on fuzzy text matching
+        const migratedRows = migrateTableRows(currentHeaders, currentRows, targetHeaders, category);
+        
+        // Setup/Migrate column background colors
+        const currentColors = table.columnColors || [];
+        const migratedColors = targetHeaders.map((newHdr, newColIdx) => {
+          // Defaults: light yellow for WINNER LIST NAME
+          if (newHdr === "WINNER LIST NAME") return "#ffffcc";
+          
+          // Match existing color if possible
+          const oldColIdx = currentHeaders.findIndex((oldHdr: string) => {
+            if (!oldHdr) return false;
+            return oldHdr.toLowerCase().replace(/\s+/g, "") === newHdr.toLowerCase().replace(/\s+/g, "");
+          });
+          if (oldColIdx !== -1 && currentColors[oldColIdx]) {
+            return currentColors[oldColIdx];
+          }
+          return "#ffffff"; // default cell bg
+        });
+
+        // Set dynamic default header colors based on LTM vs OTM style
+        let defaultHeaderBg = table.headerBgColor;
+        if (!defaultHeaderBg || defaultHeaderBg === "#ccffff" || defaultHeaderBg === "#c2ffd8") {
+          defaultHeaderBg = category === "OTM" ? "#c2ffd8" : "#ccffff";
+        }
+
+        return {
+          ...table,
+          headers: targetHeaders,
+          rows: migratedRows,
+          columnColors: migratedColors,
+          headerBgColor: defaultHeaderBg
+        };
+      });
+    });
+  }, [category]);
+
   // ----------------------------------------------------
   // Interactive Multi-Table State Modifiers
   // ----------------------------------------------------
@@ -586,6 +791,18 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   const addPwdTableBlock = () => {
     setTablesList(prev => {
       if (prev.length >= 1) return prev;
+
+      const targetHeaders = HEADERS_MAP[category] || HEADERS_MAP.LTM;
+      const initialRow = targetHeaders.map((hdr) => {
+        const normHdr = hdr.toUpperCase().replace(/\./g, "");
+        if (normHdr === "SLNO") return "1";
+        if (hdr.toLowerCase().includes("method") || hdr.toLowerCase().includes("matho")) return category === "OTM" ? "OTM" : "LTM SOCIAL";
+        return "";
+      });
+
+      const initialColors = targetHeaders.map(hdr => hdr === "WINNER LIST NAME" ? "#ffffcc" : "#ffffff");
+      const defaultHeaderBg = category === "OTM" ? "#c2ffd8" : "#ccffff";
+
       return [
         ...prev,
         {
@@ -598,8 +815,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           payOrderTo: "Executive Engineer, Pabna PWD Division, Pabna",
           moreInfo: "Md. Babul Islam, e-Tender Solution, Sujanagar, Pabna. Mobile: 01711 222110, https://www.egpbd.com/",
           bottomWarning: "ব্যাংক স্টেটমেন্ট অথবা ক্রেডিট কমিটমেন্ট দিতে হবে।",
-          headers: ["SL No", "Tender ID", "Description", "Location", "AppCost (Tk)", "Solvency (Tk)", "Security (Tk)", "Doc Fees (Tk)", "Last Date & Time"],
-          rows: [["1", "1251464", "Necessary repair works...", "Pabna sadar", "2,72,184", "2,00,000", "7,000", "500", lastDate ? `${lastDate} 05:00 PM` : ""]]
+          headers: targetHeaders,
+          rows: [initialRow],
+          columnColors: initialColors,
+          headerBgColor: defaultHeaderBg
         }
       ];
     });
@@ -641,8 +860,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       if (t.headers.length > 0) {
         newRow[0] = (t.rows.length + 1).toString();
       }
-      if (t.type === "pwd_ltm" && newRow.length > 8) {
-        newRow[8] = lastDate ? `${lastDate} 05:00 PM` : "";
+      const lastDateColIdx = getLastDateColIdx(t.headers || []);
+      if (t.type === "pwd_ltm" && lastDateColIdx !== -1 && newRow.length > lastDateColIdx) {
+        newRow[lastDateColIdx] = lastDate ? `${lastDate} 05:00 PM` : "";
       }
       return {
         ...t,
@@ -674,10 +894,29 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   const handleCellChange = (tIdx: number, rowIndex: number, colIndex: number, val: string) => {
     setTablesList(prev => prev.map((t, idx) => {
       if (idx !== tIdx) return t;
+      
+      let formattedVal = val;
+      const hdr = t.headers[colIndex] || "";
+      if (isCurrencyColumn(hdr)) {
+        formattedVal = formatInputCurrency(val);
+      }
+      
       const updated = [...t.rows];
       updated[rowIndex] = [...updated[rowIndex]];
-      updated[rowIndex][colIndex] = val;
+      updated[rowIndex][colIndex] = formattedVal;
       return { ...t, rows: updated };
+    }));
+  };
+
+  const handleColumnColorChange = (tIdx: number, colIdx: number, color: string) => {
+    setTablesList(prev => prev.map((t, idx) => {
+      if (idx !== tIdx) return t;
+      const updatedColors = [...(t.columnColors || [])];
+      while (updatedColors.length < t.headers.length) {
+        updatedColors.push("#ffffff");
+      }
+      updatedColors[colIdx] = color;
+      return { ...t, columnColors: updatedColors };
     }));
   };
 
@@ -936,7 +1175,11 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
             name="title" 
             required 
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              const newTitle = e.target.value;
+              setTitle(newTitle);
+              setTablesList(prev => prev.map((t, idx) => idx === 0 ? { ...t, officeName: newTitle } : t));
+            }}
             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 focus:border-[var(--primary-color)] focus:bg-white focus:ring-1 focus:ring-[var(--primary-color)] outline-none transition text-sm font-semibold shadow-xs"
             placeholder="e.g., Supply & Installation of Medical Equipment..."
           />
@@ -1254,7 +1497,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                   </div>
 
                   {/* Procuring Entity & Dates Headers Config */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-xs shrink-0">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-xs shrink-0">
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
                         <Building2 className="w-3.5 h-3.5 text-green-600" /> Procuring Office Name (Bangla)
@@ -1265,6 +1508,19 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                         onChange={(e) => handlePwdFieldChange(tIdx, "officeName", e.target.value)}
                         className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 outline-none text-xs font-bold focus:border-[var(--primary-color)] transition"
                         placeholder="যেমন: গণপূর্ত বিভাগ, পাবনা।"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                        <Info className="w-3.5 h-3.5 text-green-600" /> Notice Sub-Title (Optional)
+                      </label>
+                      <input 
+                        type="text"
+                        value={table.subTitle || ""}
+                        onChange={(e) => handlePwdFieldChange(tIdx, "subTitle", e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 outline-none text-xs font-bold focus:border-[var(--primary-color)] transition"
+                        placeholder="যেমন: BADC POLY SEED (OTM Mathod)"
                       />
                     </div>
 
@@ -1280,6 +1536,31 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                         placeholder="Select date..."
                         className="flatpickr-date-field w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 outline-none text-xs font-bold focus:border-[var(--primary-color)] transition cursor-pointer"
                       />
+                    </div>
+
+                    {/* Header Background Color selector */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Header BG Color</label>
+                      <div className="flex items-center gap-1.5 h-8">
+                        {[
+                          { hex: "#ccffff", name: "Cyan" },
+                          { hex: "#ccffcc", name: "Green" },
+                          { hex: "#c2ffd8", name: "Sage" },
+                          { hex: "#fed7aa", name: "Orange" },
+                          { hex: "#e2e8f0", name: "Slate" }
+                        ].map((clr) => (
+                          <button
+                            key={clr.hex}
+                            type="button"
+                            onClick={() => handlePwdFieldChange(tIdx, "headerBgColor", clr.hex)}
+                            className={`w-6 h-6 rounded-lg border transition transform hover:scale-110 active:scale-95 cursor-pointer ${
+                              (table.headerBgColor || "#ccffff") === clr.hex ? "border-slate-800 ring-2 ring-slate-400" : "border-slate-200"
+                            }`}
+                            style={{ backgroundColor: clr.hex }}
+                            title={`Set header bg to ${clr.name}`}
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
 
@@ -1312,32 +1593,62 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                       <table className="w-full border-collapse text-left text-xs bg-white">
                         <thead className="bg-[#ccffff] border-b border-slate-200 text-black sticky top-0 font-bold">
                           <tr className="divide-x divide-slate-200">
-                            {(table.headers || []).map((hdr: string, cIdx: number) => (
-                              <th key={cIdx} className="p-3 min-w-[160px] bg-[#ccffff] text-black">
-                                <div className="flex items-center gap-2">
-                                  <input 
-                                    type="text" 
-                                    required
-                                    value={hdr} 
-                                    onChange={(e) => handleHeaderChange(tIdx, cIdx, e.target.value)}
-                                    className="bg-white/80 border border-slate-200 font-extrabold text-black outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded-lg p-1.5 text-xs"
-                                  />
-                                  {((table.type === "pwd_ltm" 
-                                    ? (table.headers.length > 9 && cIdx === table.headers.length - 1)
-                                    : (table.headers.length > 1 && cIdx === table.headers.length - 1))) && (
-                                    <button 
-                                      type="button" 
-                                      onClick={() => removeColumn(tIdx, cIdx)}
-                                      className="text-white hover:bg-red-700 bg-red-600 p-1.5 rounded-lg transition shrink-0 border-0 flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
-                                      title="Delete Column"
-                                    >
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
-                                  )}
-                                </div>
-                              </th>
-                            ))}
-                            <th className="p-3 w-12 text-center bg-[#ccffff] text-slate-500">Del</th>
+                            {(table.headers || []).map((hdr: string, cIdx: number) => {
+                              const headerBg = table.headerBgColor || "#ccffff";
+                              return (
+                                <th key={cIdx} className="p-3 min-w-[175px] text-black" style={{ backgroundColor: headerBg }}>
+                                  <div className="flex flex-col gap-2">
+                                    <div className="flex items-center gap-2">
+                                      <input 
+                                        type="text" 
+                                        required
+                                        value={hdr} 
+                                        onChange={(e) => handleHeaderChange(tIdx, cIdx, e.target.value)}
+                                        className="bg-white/85 border border-slate-250 font-extrabold text-black outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded-lg p-1.5 text-[11px]"
+                                      />
+                                      {((table.type === "pwd_ltm" 
+                                        ? (table.headers.length > 9 && cIdx === table.headers.length - 1)
+                                        : (table.headers.length > 1 && cIdx === table.headers.length - 1))) && (
+                                        <button 
+                                          type="button" 
+                                          onClick={() => removeColumn(tIdx, cIdx)}
+                                          className="text-white hover:bg-red-700 bg-red-600 p-1.5 rounded-lg transition shrink-0 border-0 flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+                                          title="Delete Column"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      )}
+                                    </div>
+
+                                    {/* Column Cell Color Customizer */}
+                                    <div className="flex items-center justify-between px-1">
+                                      <span className="text-[9px] text-slate-700 font-extrabold uppercase tracking-wider">Cell Color:</span>
+                                      <div className="flex gap-1">
+                                        {[
+                                          { hex: "#ffffff", name: "White" },
+                                          { hex: "#ffffcc", name: "Yellow" },
+                                          { hex: "#d1fae5", name: "Green" },
+                                          { hex: "#e0f2fe", name: "Blue" },
+                                          { hex: "#ffe4e6", name: "Pink" }
+                                        ].map((clr) => (
+                                          <button
+                                            key={clr.hex}
+                                            type="button"
+                                            onClick={() => handleColumnColorChange(tIdx, cIdx, clr.hex)}
+                                            className={`w-3.5 h-3.5 rounded-full border border-slate-400 transition transform hover:scale-120 active:scale-95 cursor-pointer ${
+                                              (table.columnColors?.[cIdx] || "#ffffff") === clr.hex ? "ring-2 ring-slate-650" : ""
+                                            }`}
+                                            style={{ backgroundColor: clr.hex }}
+                                            title={`Set cell background to ${clr.name}`}
+                                          />
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </th>
+                              );
+                            })}
+                            <th className="p-3 w-12 text-center text-slate-700" style={{ backgroundColor: table.headerBgColor || "#ccffff" }}>Del</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-200">
@@ -1346,9 +1657,11 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                               {row.map((cell: string, cIdx: number) => {
                                 const headerName = (table.headers[cIdx] || "").toLowerCase();
                                 const isDateField = headerName.includes("date") || headerName.includes("time") || headerName.includes("তারিখ") || headerName.includes("সময়");
-                                const isLastDateCol = table.type === "pwd_ltm" && cIdx === 8;
+                                const lastDateColIdx = getLastDateColIdx(table.headers || []);
+                                const isLastDateCol = table.type === "pwd_ltm" && cIdx === lastDateColIdx;
+                                const cellBg = table.columnColors?.[cIdx] || "#ffffff";
                                 return (
-                                  <td key={cIdx} className="p-2 border-r border-slate-200">
+                                  <td key={cIdx} className="p-2 border-r border-slate-200 transition-colors duration-250" style={{ backgroundColor: cellBg }}>
                                     <input 
                                       type="text" 
                                       required
@@ -1360,9 +1673,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                       readOnly={isLastDateCol}
                                       className={`bg-transparent border-0 outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded p-1.5 font-semibold text-slate-800 text-xs ${
                                         isLastDateCol
-                                          ? "font-bold text-green-700 bg-green-50/20 cursor-not-allowed"
+                                          ? "font-bold text-green-700 bg-green-50/10 cursor-not-allowed"
                                           : isDateField
-                                            ? "flatpickr-datetime-field cursor-pointer font-bold text-green-700 bg-green-50/20"
+                                            ? "flatpickr-datetime-field cursor-pointer font-bold text-green-700 bg-green-50/10"
                                             : ""
                                       }`}
                                       placeholder={isLastDateCol ? "Synced from Top" : isDateField ? "Select Date & Time..." : ""}

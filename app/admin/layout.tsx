@@ -442,9 +442,9 @@ export default function AdminLayout({
                   </div>
                 </div>
 
-                {avatar ? (
+                {((session?.user?.image && session.user.image !== "null") || avatar) ? (
                   <img
-                    src={avatar}
+                    src={(session?.user?.image && session.user.image !== "null") ? session.user.image : (avatar || undefined)}
                     alt="Admin Avatar"
                     className="w-10 h-10 rounded-full object-cover shadow-md border-2 border-white"
                   />

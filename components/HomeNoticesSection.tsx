@@ -29,14 +29,8 @@ export default function HomeNoticesSection({ notices }: HomeNoticesSectionProps)
   const latestNotices = filtered.slice(0, 10);
 
   return (
-    <section className="bg-shade-1/20 border-t border-b border-ac-2/50 py-12 lg:py-16">
+    <section className="bg-shade-1/20 border-t border-b border-ac-2/50 pb-12 lg:pb-16">
       <div className="custom-container">
-        {/* Section Header */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl lg:text-4xl font-extrabold text-text-1 uppercase font-primary">
-            Our Notices
-          </h2>
-        </div>
 
         {/* Categories Tab selector */}
         <div className="flex justify-center mb-8 select-none">

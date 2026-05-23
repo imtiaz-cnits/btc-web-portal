@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { updateUserRole, resetUserPassword, deleteUserAccount } from "@/app/actions/auth";
 import { 
   Shield, 
@@ -24,13 +25,25 @@ interface UserItem {
   email: string;
   role: string;
   createdAt: Date;
+  image?: string | null;
 }
 
 export default function RolesClient({ initialUsers }: { initialUsers: UserItem[] }) {
+  const { data: session } = useSession();
+  const [localAvatar, setLocalAvatar] = useState<string | null>(null);
   const [users, setUsers] = useState(usersListSorter(initialUsers));
   const [isPending, startTransition] = useTransition();
   const [toast, setToast] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [activeDropdownUserId, setActiveDropdownUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleAvatarUpdate = () => {
+      setLocalAvatar(localStorage.getItem("btc_admin_avatar"));
+    };
+    handleAvatarUpdate();
+    window.addEventListener("avatarChanged", handleAvatarUpdate);
+    return () => window.removeEventListener("avatarChanged", handleAvatarUpdate);
+  }, []);
   
   // Modal state for delete confirmation
   const [deleteConfirmUser, setDeleteConfirmUser] = useState<UserItem | null>(null);
@@ -175,13 +188,25 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
                     <tr key={user.id} className="hover:bg-slate-50/50 transition">
                       <td className="p-5">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border shadow-sm ${
-                            isAdmin 
-                              ? "bg-green-50 border-green-200 text-green-700" 
-                              : "bg-slate-100 border-slate-200 text-slate-600"
-                          }`}>
-                            {(user.name || user.email).substring(0, 1).toUpperCase()}
-                          </div>
+                          {(() => {
+                            const isCurrentUser = (session?.user as any)?.id === user.id;
+                            const displayImage = (user.image && user.image !== "null") ? user.image : (isCurrentUser ? localAvatar : null);
+                            return displayImage ? (
+                              <img
+                                src={displayImage}
+                                alt={user.name || "User Avatar"}
+                                className="w-10 h-10 rounded-full object-cover shadow-sm border border-slate-200"
+                              />
+                            ) : (
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border shadow-sm ${
+                                isAdmin 
+                                  ? "bg-green-50 border-green-200 text-green-700" 
+                                  : "bg-slate-100 border-slate-200 text-slate-600"
+                              }`}>
+                                {(user.name || user.email).substring(0, 1).toUpperCase()}
+                              </div>
+                            );
+                          })()}
                           <div>
                             <div className="font-semibold text-slate-800 flex items-center gap-1.5">
                               {user.name || "N/A"}

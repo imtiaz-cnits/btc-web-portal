@@ -38,6 +38,45 @@ interface NoticesTableProps {
 // -----------------------------------------------
 // Inline Table Data Renderer
 // -----------------------------------------------
+const isCurrencyColumn = (hdr: string) => {
+  if (!hdr) return false;
+  const lower = hdr.toLowerCase();
+  return lower.includes("cost") || 
+         lower.includes("tk") || 
+         lower.includes("taka") || 
+         lower.includes("security") || 
+         lower.includes("fees") || 
+         lower.includes("fee") || 
+         lower.includes("price") || 
+         lower.includes("amount") || 
+         lower.includes("turn over") || 
+         lower.includes("turnover") || 
+         lower.includes("similar work") || 
+         lower.includes("similar") || 
+         lower.includes("credit") || 
+         lower.includes("টাকা");
+};
+
+const formatCellValue = (val: string, hdr: string) => {
+  if (!val) return "";
+  const str = String(val).trim();
+  if (isCurrencyColumn(hdr)) {
+    const cleanVal = str.replace(/,/g, "").trim();
+    const num = parseFloat(cleanVal);
+    if (!isNaN(num) && /^\d+(\.\d+)?$/.test(cleanVal)) {
+      if (cleanVal.includes(".")) {
+        const [integerPart, decimalPart] = cleanVal.split(".");
+        const parsedInt = parseFloat(integerPart);
+        if (!isNaN(parsedInt)) {
+          return `${parsedInt.toLocaleString("en-US")}.${decimalPart}`;
+        }
+      }
+      return num.toLocaleString("en-US");
+    }
+  }
+  return str;
+};
+
 function TableDataPreview({ tableData }: { tableData: string }) {
   try {
     const parsed = JSON.parse(tableData);
@@ -46,43 +85,170 @@ function TableDataPreview({ tableData }: { tableData: string }) {
     if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
       return (
         <div className="space-y-6">
-          {parsed.tables.map((table: any, tIdx: number) => (
-            <div key={tIdx} className="space-y-2">
-              {table.officeName && (
-                <p className="text-xs font-bold text-slate-600 text-center">{table.officeName}</p>
-              )}
-              <div className="overflow-x-auto rounded-xl border border-slate-200">
-                <table className="w-full text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-[#1b4332] text-white">
-                      {(table.headers || []).map((h: string, i: number) => (
-                        <th key={i} className="px-3 py-2 text-left font-bold whitespace-nowrap border border-[#2d6a4f] text-[10px] uppercase tracking-wide">
-                          {h}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(table.rows || []).map((row: string[], rIdx: number) => (
-                      <tr key={rIdx} className={rIdx % 2 === 0 ? "bg-white" : "bg-slate-50"}>
-                        {row.map((cell: string, cIdx: number) => (
-                          <td key={cIdx} className="px-3 py-2 border border-slate-200 text-slate-700 whitespace-nowrap">
-                            {cell}
-                          </td>
+          {parsed.tables.map((table: any, tIdx: number) => {
+            const headerBg = table.headerBgColor;
+            const isCustomHeader = !!headerBg;
+            const headers = table.headers || [];
+            const rows = table.rows || [];
+
+            const securityColIdx = headers.findIndex((h: string) =>
+              h.toLowerCase().includes("security"),
+            );
+            const docFeesColIdx = headers.findIndex((h: string) => {
+              const lower = h.toLowerCase();
+              return lower.includes("fee") || lower.includes("price");
+            });
+
+            const parseMoney = (val: string) => {
+              if (!val) return 0;
+              return parseFloat(val.toString().replace(/,/g, "")) || 0;
+            };
+
+            const formatMoney = (val: number) => {
+              return val.toLocaleString("en-US");
+            };
+
+            const totalSecurity =
+              securityColIdx !== -1
+                ? rows.reduce(
+                    (sum: number, r: string[]) =>
+                      sum + parseMoney(r[securityColIdx]),
+                    0,
+                  )
+                : 0;
+            const totalDocFees =
+              docFeesColIdx !== -1
+                ? rows.reduce(
+                    (sum: number, r: string[]) =>
+                      sum + parseMoney(r[docFeesColIdx]),
+                    0,
+                  )
+                : 0;
+
+            return (
+              <div key={tIdx} className="space-y-2">
+                {table.officeName && (
+                  <p className="text-xs font-bold text-slate-700 text-center">{table.officeName}</p>
+                )}
+                {table.subTitle && (
+                  <p className="text-[10px] font-semibold text-slate-500 text-center -mt-1.5">{table.subTitle}</p>
+                )}
+                <div className="overflow-x-auto rounded-xl border border-slate-200">
+                  <table className="w-full text-xs border-collapse">
+                    <thead>
+                      <tr 
+                        style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
+                        className={isCustomHeader ? "text-slate-800" : "bg-[#1b4332] text-white"}
+                      >
+                        {headers.map((h: string, i: number) => (
+                          <th 
+                            key={i} 
+                            style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
+                            className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide ${
+                              isCustomHeader ? "border-slate-200 text-slate-800" : "border-[#2d6a4f] text-white"
+                            }`}
+                          >
+                            {h}
+                          </th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {rows.map((row: string[], rIdx: number) => (
+                        <tr key={rIdx} className={rIdx % 2 === 0 ? "bg-white" : "bg-slate-50"}>
+                          {row.map((cell: string, cIdx: number) => {
+                            const cellBg = table.columnColors?.[cIdx];
+                            const isDesc = (headers[cIdx] || "").toLowerCase().includes("description");
+                            const isCurrency = isCurrencyColumn(headers[cIdx] || "");
+                            return (
+                              <td 
+                                key={cIdx} 
+                                style={cellBg ? { backgroundColor: cellBg } : undefined}
+                                className={`px-3 py-2 border border-slate-200 text-slate-750 ${
+                                  isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-nowrap"
+                                } ${isCurrency ? "text-right" : "text-left"}`}
+                              >
+                                {formatCellValue(cell, headers[cIdx] || "")}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+
+                      {/* Sum Totals Row if any sum matches */}
+                      {(securityColIdx !== -1 || docFeesColIdx !== -1) && (
+                        <tr className="bg-[#ffffcc] font-bold text-slate-800 border-t border-slate-200">
+                          {headers.map((hdr: string, idx: number) => {
+                            if (idx === 0) {
+                              const colSpanCount = Math.min(
+                                securityColIdx !== -1
+                                  ? securityColIdx
+                                  : docFeesColIdx,
+                                headers.length,
+                              );
+                              return (
+                                <td
+                                  key={idx}
+                                  className="px-3 py-2 text-right font-extrabold bg-[#ffffcc] border border-slate-200"
+                                  colSpan={colSpanCount}
+                                >
+                                  Total Amount BD Tk =
+                                </td>
+                              );
+                            }
+                            // Skip columns merged by colSpan
+                            const minTotalColIdx = Math.min(
+                              securityColIdx !== -1
+                                ? securityColIdx
+                                : docFeesColIdx,
+                              headers.length,
+                            );
+                            if (idx < minTotalColIdx) {
+                              return null;
+                            }
+                            if (idx === securityColIdx) {
+                              return (
+                                <td
+                                  key={idx}
+                                  className="px-3 py-2 font-extrabold text-slate-800 bg-[#ffffcc] border border-slate-200 text-right whitespace-nowrap"
+                                >
+                                  {formatMoney(totalSecurity)}
+                                </td>
+                              );
+                            }
+                            if (idx === docFeesColIdx) {
+                              return (
+                                <td
+                                  key={idx}
+                                  className="px-3 py-2 font-extrabold text-slate-800 bg-[#ffffcc] border border-slate-200 text-right whitespace-nowrap"
+                                >
+                                  {formatMoney(totalDocFees)}
+                                </td>
+                              );
+                            }
+                            return (
+                              <td
+                                key={idx}
+                                className="px-3 py-2 border border-slate-200 bg-[#ffffcc]"
+                              ></td>
+                            );
+                          })}
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       );
     }
 
     // PWD template
     if (parsed.isPwdTemplate) {
+      const headerBg = parsed.headerBgColor;
+      const isCustomHeader = !!headerBg;
       return (
         <div className="space-y-2">
           {parsed.officeName && (
@@ -91,9 +257,18 @@ function TableDataPreview({ tableData }: { tableData: string }) {
           <div className="overflow-x-auto rounded-xl border border-slate-200">
             <table className="w-full text-xs border-collapse">
               <thead>
-                <tr className="bg-[#1b4332] text-white">
+                <tr 
+                  style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
+                  className={isCustomHeader ? "text-slate-800" : "bg-[#1b4332] text-white"}
+                >
                   {(parsed.headers || []).map((h: string, i: number) => (
-                    <th key={i} className="px-3 py-2 text-left font-bold whitespace-nowrap border border-[#2d6a4f] text-[10px] uppercase tracking-wide">
+                    <th 
+                      key={i} 
+                      style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
+                      className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide ${
+                        isCustomHeader ? "border-slate-200 text-slate-800" : "border-[#2d6a4f] text-white"
+                      }`}
+                    >
                       {h}
                     </th>
                   ))}
@@ -102,11 +277,21 @@ function TableDataPreview({ tableData }: { tableData: string }) {
               <tbody>
                 {(parsed.rows || []).map((row: string[], rIdx: number) => (
                   <tr key={rIdx} className={rIdx % 2 === 0 ? "bg-white" : "bg-slate-50"}>
-                    {row.map((cell: string, cIdx: number) => (
-                      <td key={cIdx} className="px-3 py-2 border border-slate-200 text-slate-700 whitespace-nowrap">
-                        {cell}
-                      </td>
-                    ))}
+                    {row.map((cell: string, cIdx: number) => {
+                      const cellBg = parsed.columnColors?.[cIdx];
+                      const isDesc = (parsed.headers?.[cIdx] || "").toLowerCase().includes("description");
+                      return (
+                        <td 
+                          key={cIdx} 
+                          style={cellBg ? { backgroundColor: cellBg } : undefined}
+                          className={`px-3 py-2 border border-slate-200 text-slate-700 ${
+                            isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-nowrap"
+                          }`}
+                        >
+                          {cell}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>
@@ -118,13 +303,24 @@ function TableDataPreview({ tableData }: { tableData: string }) {
 
     // Legacy simple format
     if (parsed.headers && parsed.rows) {
+      const headerBg = parsed.headerBgColor;
+      const isCustomHeader = !!headerBg;
       return (
         <div className="overflow-x-auto rounded-xl border border-slate-200">
           <table className="w-full text-xs border-collapse">
             <thead>
-              <tr className="bg-[#1b4332] text-white">
+              <tr 
+                style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
+                className={isCustomHeader ? "text-slate-800" : "bg-[#1b4332] text-white"}
+              >
                 {(parsed.headers || []).map((h: string, i: number) => (
-                  <th key={i} className="px-3 py-2 text-left font-bold whitespace-nowrap border border-[#2d6a4f] text-[10px] uppercase tracking-wide">
+                  <th 
+                    key={i} 
+                    style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
+                    className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide ${
+                      isCustomHeader ? "border-slate-200 text-slate-800" : "border-[#2d6a4f] text-white"
+                    }`}
+                  >
                     {h}
                   </th>
                 ))}
@@ -133,11 +329,21 @@ function TableDataPreview({ tableData }: { tableData: string }) {
             <tbody>
               {(parsed.rows || []).map((row: string[], rIdx: number) => (
                 <tr key={rIdx} className={rIdx % 2 === 0 ? "bg-white" : "bg-slate-50"}>
-                  {row.map((cell: string, cIdx: number) => (
-                    <td key={cIdx} className="px-3 py-2 border border-slate-200 text-slate-700 whitespace-nowrap">
-                      {cell}
-                    </td>
-                  ))}
+                  {row.map((cell: string, cIdx: number) => {
+                    const cellBg = parsed.columnColors?.[cIdx];
+                    const isDesc = (parsed.headers?.[cIdx] || "").toLowerCase().includes("description");
+                    return (
+                      <td 
+                        key={cIdx} 
+                        style={cellBg ? { backgroundColor: cellBg } : undefined}
+                        className={`px-3 py-2 border border-slate-200 text-slate-700 ${
+                          isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-nowrap"
+                        }`}
+                      >
+                        {cell}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>

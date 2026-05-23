@@ -7,6 +7,7 @@ import { signJWT } from "@/lib/jwt";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
+import { uploadFile } from "@/lib/upload";
 
 export async function login(formData: FormData) {
   const email = formData.get("email") as string;
@@ -90,6 +91,7 @@ export async function logout() {
 export async function updateProfile(userId: string, formData: FormData) {
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
+  const avatarFile = formData.get("avatar") as File | null;
 
   if (!name || !email) {
     return { success: false, message: "All fields are required" };
@@ -104,12 +106,26 @@ export async function updateProfile(userId: string, formData: FormData) {
       return { success: false, message: "Email is already taken" };
     }
 
+    let imagePath: string | null = null;
+    if (avatarFile && avatarFile.size > 0) {
+      imagePath = await uploadFile(avatarFile);
+    }
+
+    const updateData: any = { name, email };
+    if (imagePath) {
+      updateData.image = imagePath;
+    }
+
     await prisma.user.update({
       where: { id: userId },
-      data: { name, email }
+      data: updateData
     });
 
-    return { success: true, message: "Profile updated successfully" };
+    return { 
+      success: true, 
+      message: "Profile updated successfully", 
+      image: imagePath 
+    };
   } catch (error) {
     console.error("Update profile error:", error);
     return { success: false, message: "Internal server error" };
@@ -166,6 +182,7 @@ export async function getAllUsers() {
       email: true,
       role: true,
       createdAt: true,
+      image: true,
     }
   });
 }

@@ -21,10 +21,14 @@ export default function AdminProfilePage() {
         name: session.user.name || "",
         email: session.user.email || "",
       });
-    }
-    const savedAvatar = localStorage.getItem("btc_admin_avatar");
-    if (savedAvatar) {
-      setAvatar(savedAvatar);
+      if (session.user.image) {
+        setAvatar(session.user.image);
+      } else {
+        const savedAvatar = localStorage.getItem("btc_admin_avatar");
+        if (savedAvatar) {
+          setAvatar(savedAvatar);
+        }
+      }
     }
   }, [session]);
 
@@ -34,9 +38,7 @@ export default function AdminProfilePage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result as string;
-        setAvatar(base64String);
-        localStorage.setItem("btc_admin_avatar", base64String);
-        window.dispatchEvent(new Event("avatarChanged"));
+        setAvatar(base64String); // Show immediate client-side preview
       };
       reader.readAsDataURL(file);
     }
@@ -55,6 +57,13 @@ export default function AdminProfilePage() {
     const result = await updateProfile(userId, formData);
     if (result.success) {
       setProfileMessage({ type: "success", text: result.message });
+      
+      const newImage = result.image || session.user.image;
+      if (newImage) {
+        localStorage.setItem("btc_admin_avatar", newImage);
+        window.dispatchEvent(new Event("avatarChanged"));
+      }
+
       // Update NextAuth session data client-side
       await update({
         ...session,
@@ -62,6 +71,7 @@ export default function AdminProfilePage() {
           ...session.user,
           name: formData.get("name") as string,
           email: formData.get("email") as string,
+          image: newImage,
         }
       });
     } else {
@@ -139,6 +149,7 @@ export default function AdminProfilePage() {
                   <span className="text-[10px] font-bold mt-1 uppercase tracking-wider">Upload</span>
                   <input 
                     type="file" 
+                    name="avatar"
                     accept="image/*" 
                     onChange={handleAvatarChange} 
                     className="hidden" 

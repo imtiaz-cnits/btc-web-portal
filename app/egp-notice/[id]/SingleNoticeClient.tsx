@@ -45,6 +45,47 @@ const formatDisplayDate = (dateStr: any) => {
   return str;
 };
 
+const isCurrencyColumn = (hdr: string) => {
+  if (!hdr) return false;
+  const lower = hdr.toLowerCase();
+  return lower.includes("cost") || 
+         lower.includes("tk") || 
+         lower.includes("taka") || 
+         lower.includes("security") || 
+         lower.includes("fees") || 
+         lower.includes("fee") || 
+         lower.includes("price") || 
+         lower.includes("amount") || 
+         lower.includes("turn over") || 
+         lower.includes("turnover") || 
+         lower.includes("similar work") || 
+         lower.includes("similar") || 
+         lower.includes("credit") || 
+         lower.includes("টাকা");
+};
+
+const formatCellValue = (val: string, hdr: string) => {
+  if (!val) return "";
+  const str = String(val).trim();
+  if (isCurrencyColumn(hdr)) {
+    // Extract any digits and dots
+    const cleanVal = str.replace(/,/g, "").trim();
+    const num = parseFloat(cleanVal);
+    // Ensure it's a valid number and only numeric chars
+    if (!isNaN(num) && /^\d+(\.\d+)?$/.test(cleanVal)) {
+      if (cleanVal.includes(".")) {
+        const [integerPart, decimalPart] = cleanVal.split(".");
+        const parsedInt = parseFloat(integerPart);
+        if (!isNaN(parsedInt)) {
+          return `${parsedInt.toLocaleString("en-US")}.${decimalPart}`;
+        }
+      }
+      return num.toLocaleString("en-US");
+    }
+  }
+  return formatDisplayDate(str);
+};
+
 interface NoticeItem {
   id: string;
   title: string;
@@ -130,7 +171,7 @@ export default function SingleNoticeClient({
                 margin: 0 !important;
               }
               body {
-                padding: ${isPdf ? "0" : "15mm 15mm 15mm 15mm"} !important;
+                padding: ${isPdf ? "0" : "5mm 5mm 5mm 5mm"} !important;
                 margin: 0;
                 font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
                 background-color: white !important;
@@ -179,6 +220,8 @@ export default function SingleNoticeClient({
                 box-shadow: none !important;
                 padding: 0 !important;
                 margin-bottom: 25pt !important;
+                width: 100% !important;
+                max-width: 100% !important;
               }
               .pwd-scroll-wrapper {
                 border: none !important;
@@ -186,6 +229,9 @@ export default function SingleNoticeClient({
                 padding: 0 !important;
                 margin: 0 !important;
                 width: 100% !important;
+                max-width: 100% !important;
+                overflow: visible !important;
+                display: block !important;
               }
               table {
                 width: 100% !important;
@@ -194,13 +240,23 @@ export default function SingleNoticeClient({
                 margin-top: 10pt !important;
                 margin-bottom: 10pt !important;
                 page-break-inside: avoid;
+                overflow: visible !important;
+                table-layout: auto !important;
               }
-              th, td {
+               th, td {
                 border: 1px solid #000000 !important;
-                padding: 6pt 8pt !important;
+                padding: 4px 6px !important;
                 text-align: left !important;
-                font-size: 8.5pt !important;
+                font-size: 7.2pt !important;
                 color: #000000 !important;
+                white-space: normal !important;
+                word-break: break-word !important;
+              }
+              th.whitespace-nowrap, td.whitespace-nowrap {
+                white-space: normal !important;
+              }
+              th.text-right, td.text-right {
+                text-align: right !important;
               }
               th {
                 background-color: #ccffff !important;
@@ -214,6 +270,26 @@ export default function SingleNoticeClient({
                 margin: 0 auto !important;
                 border: none !important;
                 page-break-inside: avoid;
+              }
+              .watermark-container {
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                opacity: 0.08 !important;
+                z-index: 0 !important;
+                pointer-events: none !important;
+              }
+              img.watermark-img {
+                width: 320px !important;
+                max-width: 320px !important;
+                height: auto !important;
+                display: block !important;
+                margin: 0 auto !important;
               }
               h1, h2, h3, h4, h5, p, tr {
                 page-break-inside: avoid;
@@ -465,11 +541,10 @@ export default function SingleNoticeClient({
             const securityColIdx = headers.findIndex((h: string) =>
               h.toLowerCase().includes("security"),
             );
-            const docFeesColIdx = headers.findIndex(
-              (h: string) =>
-                h.toLowerCase().includes("fees") ||
-                h.toLowerCase().includes("fee"),
-            );
+            const docFeesColIdx = headers.findIndex((h: string) => {
+               const lower = h.toLowerCase();
+               return lower.includes("fee") || lower.includes("price");
+             });
 
             const totalSecurity =
               securityColIdx !== -1
@@ -493,41 +568,26 @@ export default function SingleNoticeClient({
                 key={table.id || tIdx}
                 className="pwd-table-block space-y-4 p-0 bg-white relative font-bangla text-black print:p-0 print:border-0"
               >
-                {/* Procuring Entity Header */}
+                {/* Main Title & Subtitle */}
                 {table.officeName && (
-                  <div className="text-center font-extrabold text-3xl md:text-4xl text-black mb-6 tracking-wide leading-tight">
+                  <div className="text-center font-extrabold text-3xl md:text-4xl text-black mb-2 tracking-wide leading-tight">
                     {table.officeName}
                   </div>
                 )}
+                {table.subTitle && (
+                  <div className="w-full text-center font-bold text-sm md:text-base text-black mb-4 tracking-wide leading-normal bg-white">
+                    {table.subTitle}
+                  </div>
+                )}
 
-                {/* Unified Three Color Blocks Bar */}
-                {(table.noticeDateBlock ||
-                  table.lastDateBlock ||
-                  table.lotteryDateBlock) && (
-                    <div className="grid grid-cols-3 border border-black text-center text-xs md:text-sm font-bold divide-x divide-black mb-4">
-                      {table.noticeDateBlock ? (
-                        <div className="bg-[#ffff00] text-black py-3.5 flex items-center justify-center gap-1.5 border-none">
-                          Notice Date : {formatDisplayDate(table.noticeDateBlock)}
-                        </div>
-                      ) : (
-                        <div className="bg-[#ffff00] py-3.5" />
-                      )}
-                      {table.lastDateBlock ? (
-                        <div className="bg-[#ff9966] text-white py-3.5 flex items-center justify-center gap-1.5 border-none">
-                          Last Date : {formatDisplayDate(table.lastDateBlock)}
-                        </div>
-                      ) : (
-                        <div className="bg-[#ff9966] py-3.5" />
-                      )}
-                      {table.lotteryDateBlock ? (
-                        <div className="bg-[#99cc99] text-black py-3.5 flex items-center justify-center gap-1.5 border-none">
-                          Lottery Date : {formatDisplayDate(table.lotteryDateBlock)}
-                        </div>
-                      ) : (
-                        <div className="bg-[#99cc99] py-3.5" />
-                      )}
+                {/* Egp Published Date */}
+                {table.noticeDateBlock && (
+                  <div className="flex justify-end mb-0">
+                    <div className="border border-black border-b-0 px-4 py-2 text-xs md:text-sm font-bold bg-[#ccffff] text-black tracking-wide">
+                      Egp Published Date : {formatDisplayDate(table.noticeDateBlock)}
                     </div>
-                  )}
+                  </div>
+                )}
 
                 {/* Table Specs with Watermark */}
                 <div
@@ -538,24 +598,38 @@ export default function SingleNoticeClient({
                     maxHeight: "none",
                   }}
                 >
-                  {/* Watermark */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.06] select-none rotate-0 z-0">
-                    <span className="text-[80px] md:text-[140px] font-black text-slate-800 tracking-widest uppercase">
-                      LTM Notice
-                    </span>
+                  {/* Centred Watermark Image with Plural/Singular Fallback */}
+                  <div className="watermark-container absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.07] select-none z-0">
+                    <img 
+                      src="/assets/icon/watermark.png" 
+                      alt="Watermark" 
+                      className="watermark-img w-[300px] md:w-[350px] h-auto max-h-[85%] object-contain"
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        if (target.src.includes("/assets/")) {
+                          target.src = "/asset/icon/watermark.png";
+                        }
+                      }}
+                    />
                   </div>
 
                   <table className="w-full border-collapse text-left text-xs font-semibold text-black relative z-10 print:w-full">
-                    <thead className="bg-[#ccffff] border-b border-black text-black">
+                    <thead className="border-b border-black text-black" style={{ backgroundColor: table.headerBgColor || "#ccffff" }}>
                       <tr className="divide-x divide-black">
-                        {headers.map((hdr: string, idx: number) => (
-                          <th
-                            key={idx}
-                            className="p-3 font-bold border border-black bg-[#ccffff] text-black text-xs md:text-sm uppercase text-center"
-                          >
-                            {hdr}
-                          </th>
-                        ))}
+                        {headers.map((hdr: string, idx: number) => {
+                          const isDesc = (hdr || "").toLowerCase().includes("description");
+                          return (
+                            <th
+                              key={idx}
+                              className={`p-3 font-bold border border-black text-black text-xs md:text-sm uppercase text-center ${
+                                isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"
+                              }`}
+                              style={{ backgroundColor: table.headerBgColor || "#ccffff" }}
+                            >
+                              {hdr}
+                            </th>
+                          );
+                        })}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-black">
@@ -564,20 +638,29 @@ export default function SingleNoticeClient({
                           key={rIdx}
                           className="hover:bg-slate-50/50 transition divide-x divide-black"
                         >
-                          {row.map((cell: string, cIdx: number) => (
-                            <td
-                              key={cIdx}
-                              className="p-3 border border-black text-black text-base md:text-lg font-semibold font-bangla"
-                            >
-                              {formatDisplayDate(cell)}
-                            </td>
-                          ))}
+                          {row.map((cell: string, cIdx: number) => {
+                            const cellBg = table.columnColors?.[cIdx] || "#ffffff";
+                            const isCurrency = isCurrencyColumn(headers[cIdx] || "");
+                            const isDesc = (headers[cIdx] || "").toLowerCase().includes("description");
+                            const hasCustomBg = cellBg && cellBg !== "#ffffff" && cellBg !== "#fff";
+                            return (
+                              <td
+                                key={cIdx}
+                                className={`p-3 border border-black text-black text-base md:text-lg font-semibold font-bangla ${
+                                  isCurrency ? "text-right" : "text-left"
+                                } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"}`}
+                                style={hasCustomBg ? { backgroundColor: cellBg } : undefined}
+                              >
+                                {formatCellValue(cell, headers[cIdx] || "")}
+                              </td>
+                            );
+                          })}
                         </tr>
                       ))}
 
                       {/* Sum Totals Row if any sum matches */}
                       {(securityColIdx !== -1 || docFeesColIdx !== -1) && (
-                        <tr className="bg-slate-50 font-bold text-black divide-x divide-black border-t border-black">
+                        <tr className="bg-[#ffffcc] font-bold text-black divide-x divide-black border-t border-black">
                           {headers.map((hdr: string, idx: number) => {
                             if (idx === 0) {
                               const colSpanCount = Math.min(
@@ -589,10 +672,10 @@ export default function SingleNoticeClient({
                               return (
                                 <td
                                   key={idx}
-                                  className="p-3 border border-black text-right text-xs md:text-sm font-extrabold"
+                                  className="p-3 border border-black text-right text-xs md:text-sm font-extrabold bg-[#ffffcc]"
                                   colSpan={colSpanCount}
                                 >
-                                  Total :
+                                  Total Amount BD Tk =
                                 </td>
                               );
                             }
@@ -610,7 +693,7 @@ export default function SingleNoticeClient({
                               return (
                                 <td
                                   key={idx}
-                                  className="p-3 border border-black text-xs md:text-sm font-extrabold text-black"
+                                  className="p-3 border border-black text-xs md:text-sm font-extrabold text-black bg-[#ffffcc] text-right"
                                 >
                                   {formatMoney(totalSecurity)}
                                 </td>
@@ -620,7 +703,7 @@ export default function SingleNoticeClient({
                               return (
                                 <td
                                   key={idx}
-                                  className="p-3 border border-black text-xs md:text-sm font-extrabold text-black"
+                                  className="p-3 border border-black text-xs md:text-sm font-extrabold text-black bg-[#ffffcc] text-right"
                                 >
                                   {formatMoney(totalDocFees)}
                                 </td>
@@ -652,36 +735,34 @@ export default function SingleNoticeClient({
 
                 {/* Compact Government Footer Table Blocks */}
                 {(table.payOrderTo || table.moreInfo) && (
-                  <div className="grid grid-cols-2 border border-t-0 border-black font-bangla text-xs md:text-sm text-black">
-                    {table.payOrderTo ? (
-                      <div className="p-3 border-r border-black bg-white">
-                        <span className="text-[10px] text-slate-500 block uppercase tracking-wider mb-0.5 font-bold">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 print:mt-4 print:grid-cols-2 font-bangla text-black">
+                    {table.payOrderTo && (
+                      <div className="bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-emerald-600 border-y border-r border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 print:bg-white print:border-black print:border-l-4 print:p-4 print:translate-y-0">
+                        <span className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest mb-3.5 print:text-black">
+                          <i className="fa-solid fa-building-columns text-emerald-600 text-sm print:hidden"></i>
                           BD Pay Order To :
                         </span>
-                        <span className="text-black font-extrabold leading-relaxed text-sm md:text-base">
+                        <div className="text-slate-850 font-bold text-base md:text-lg leading-relaxed whitespace-pre-line print:text-black print:font-normal">
                           {table.payOrderTo}
-                        </span>
+                        </div>
                       </div>
-                    ) : (
-                      <div className="p-3 border-r border-black bg-white" />
                     )}
-                    {table.moreInfo ? (
-                      <div className="p-3 bg-white">
-                        <span className="text-[10px] text-slate-500 block uppercase tracking-wider mb-0.5 font-bold">
-                          More Info :
+                    {table.moreInfo && (
+                      <div className="bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-blue-600 border-y border-r border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 print:bg-white print:border-black print:border-l-4 print:p-4 print:translate-y-0">
+                        <span className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest mb-3.5 print:text-black">
+                          <i className="fa-solid fa-circle-info text-blue-600 text-sm print:hidden"></i>
+                          Tender More Information :
                         </span>
-                        <span className="text-black font-extrabold leading-relaxed text-sm md:text-base">
+                        <div className="text-slate-850 font-bold text-base md:text-lg leading-relaxed whitespace-pre-line print:text-black print:font-normal">
                           {table.moreInfo}
-                        </span>
+                        </div>
                       </div>
-                    ) : (
-                      <div className="p-3 bg-white" />
                     )}
                   </div>
                 )}
 
                 {/* Red Warning alert below table */}
-                {table.bottomWarning && (
+                {table.bottomWarning && notice.category !== "OTM" && (
                   <div className="mt-4 text-red-600 font-extrabold text-base md:text-lg font-bangla text-left leading-relaxed">
                     {table.bottomWarning}
                   </div>
@@ -799,11 +880,10 @@ export default function SingleNoticeClient({
                   const securityColIdx = headers.findIndex((h: string) =>
                     h.toLowerCase().includes("security"),
                   );
-                  const docFeesColIdx = headers.findIndex(
-                    (h: string) =>
-                      h.toLowerCase().includes("fees") ||
-                      h.toLowerCase().includes("fee"),
-                  );
+                  const docFeesColIdx = headers.findIndex((h: string) => {
+                     const lower = h.toLowerCase();
+                     return lower.includes("fee") || lower.includes("price");
+                   });
 
                   const totalSecurity =
                     securityColIdx !== -1
@@ -827,41 +907,26 @@ export default function SingleNoticeClient({
                       key={table.id || tIdx}
                       className="pwd-table-block space-y-4 p-0 bg-white relative font-bangla text-black print:p-0 print:border-0 select-none"
                     >
-                      {/* Procuring Entity Header */}
+                      {/* Main Title & Subtitle */}
                       {table.officeName && (
-                        <div className="text-center font-extrabold text-3xl text-black mb-4 tracking-wide">
+                        <div className="text-center font-extrabold text-3xl text-black mb-2 tracking-wide">
                           {table.officeName}
                         </div>
                       )}
+                      {table.subTitle && (
+                        <div className="w-full text-center font-bold text-sm md:text-base text-black mb-4 tracking-wide leading-normal bg-white">
+                          {table.subTitle}
+                        </div>
+                      )}
 
-                      {/* Unified Three Color Blocks Bar */}
-                      {(table.noticeDateBlock ||
-                        table.lastDateBlock ||
-                        table.lotteryDateBlock) && (
-                          <div className="grid grid-cols-3 border border-black text-center text-xs md:text-sm font-bold divide-x divide-black mb-4">
-                            {table.noticeDateBlock ? (
-                              <div className="bg-[#ffff00] text-black py-2.5 flex items-center justify-center gap-1.5 border-none">
-                                Notice Date : {formatDisplayDate(table.noticeDateBlock)}
-                              </div>
-                            ) : (
-                              <div className="bg-[#ffff00] py-2.5" />
-                            )}
-                            {table.lastDateBlock ? (
-                              <div className="bg-[#ff9966] text-white py-2.5 flex items-center justify-center gap-1.5 border-none">
-                                Last Date : {formatDisplayDate(table.lastDateBlock)}
-                              </div>
-                            ) : (
-                              <div className="bg-[#ff9966] py-2.5" />
-                            )}
-                            {table.lotteryDateBlock ? (
-                              <div className="bg-[#99cc99] text-black py-2.5 flex items-center justify-center gap-1.5 border-none">
-                                Lottery Date : {formatDisplayDate(table.lotteryDateBlock)}
-                              </div>
-                            ) : (
-                              <div className="bg-[#99cc99] py-2.5" />
-                            )}
+                      {/* Egp Published Date */}
+                      {table.noticeDateBlock && (
+                        <div className="flex justify-end mb-0">
+                          <div className="border border-black border-b-0 px-4 py-2 text-xs md:text-sm font-bold bg-[#ccffff] text-black tracking-wide">
+                            Egp Published Date : {formatDisplayDate(table.noticeDateBlock)}
                           </div>
-                        )}
+                        </div>
+                      )}
 
                       {/* Table Specs with Watermark */}
                       <div
@@ -872,24 +937,38 @@ export default function SingleNoticeClient({
                           maxHeight: "none",
                         }}
                       >
-                        {/* Watermark */}
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.06] select-none rotate-0 z-0">
-                          <span className="text-[80px] md:text-[120px] font-black text-slate-800 tracking-widest uppercase">
-                            LTM Notice
-                          </span>
+                        {/* Centred Watermark Image with Plural/Singular Fallback */}
+                        <div className="watermark-container absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.07] select-none z-0">
+                          <img 
+                            src="/assets/icon/watermark.png" 
+                            alt="Watermark" 
+                            className="watermark-img w-[300px] md:w-[350px] h-auto max-h-[85%] object-contain"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              if (target.src.includes("/assets/")) {
+                                target.src = "/asset/icon/watermark.png";
+                              }
+                            }}
+                          />
                         </div>
 
                         <table className="w-full border-collapse text-left text-xs font-semibold text-black relative z-10 print:w-full">
-                          <thead className="bg-[#ccffff] border-b border-black text-black">
+                          <thead className="border-b border-black text-black" style={{ backgroundColor: table.headerBgColor || "#ccffff" }}>
                             <tr className="divide-x divide-black">
-                              {headers.map((hdr: string, idx: number) => (
-                                <th
-                                  key={idx}
-                                  className="p-2.5 font-bold border border-black bg-[#ccffff] text-black text-xs uppercase"
-                                >
-                                  {hdr}
-                                </th>
-                              ))}
+                              {headers.map((hdr: string, idx: number) => {
+                                const isDesc = (hdr || "").toLowerCase().includes("description");
+                                return (
+                                  <th
+                                    key={idx}
+                                    className={`p-2.5 font-bold border border-black text-black text-xs uppercase ${
+                                      isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"
+                                    }`}
+                                    style={{ backgroundColor: table.headerBgColor || "#ccffff" }}
+                                  >
+                                    {hdr}
+                                  </th>
+                                );
+                              })}
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-black">
@@ -898,21 +977,30 @@ export default function SingleNoticeClient({
                                 key={rIdx}
                                 className="hover:bg-slate-50/50 transition divide-x divide-black"
                               >
-                                {row.map((cell: string, cIdx: number) => (
-                                  <td
-                                    key={cIdx}
-                                    className="p-2.5 border border-black text-black text-base font-semibold font-bangla"
-                                  >
-                                    {formatDisplayDate(cell)}
-                                  </td>
-                                ))}
+                                {row.map((cell: string, cIdx: number) => {
+                                  const cellBg = table.columnColors?.[cIdx] || "#ffffff";
+                                  const isCurrency = isCurrencyColumn(headers[cIdx] || "");
+                                  const isDesc = (headers[cIdx] || "").toLowerCase().includes("description");
+                                  const hasCustomBg = cellBg && cellBg !== "#ffffff" && cellBg !== "#fff";
+                                  return (
+                                    <td
+                                      key={cIdx}
+                                      className={`p-2.5 border border-black text-black text-base font-semibold font-bangla ${
+                                        isCurrency ? "text-right" : "text-left"
+                                      } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"}`}
+                                      style={hasCustomBg ? { backgroundColor: cellBg } : undefined}
+                                    >
+                                      {formatCellValue(cell, headers[cIdx] || "")}
+                                    </td>
+                                  );
+                                })}
                               </tr>
                             ))}
 
                             {/* Sum Totals Row if any sum matches */}
                             {(securityColIdx !== -1 ||
                               docFeesColIdx !== -1) && (
-                                <tr className="bg-slate-50 font-bold text-black divide-x divide-black border-t border-black">
+                                <tr className="bg-[#ffffcc] font-bold text-black divide-x divide-black border-t border-black">
                                   {headers.map((hdr: string, idx: number) => {
                                     if (idx === 0) {
                                       const colSpanCount = Math.min(
@@ -924,10 +1012,10 @@ export default function SingleNoticeClient({
                                       return (
                                         <td
                                           key={idx}
-                                          className="p-2.5 border border-black text-right text-xs"
+                                          className="p-2.5 border border-black text-right text-xs font-extrabold bg-[#ffffcc]"
                                           colSpan={colSpanCount}
                                         >
-                                          Total :
+                                          Total Amount BD Tk =
                                         </td>
                                       );
                                     }
@@ -945,7 +1033,7 @@ export default function SingleNoticeClient({
                                       return (
                                         <td
                                           key={idx}
-                                          className="p-2.5 border border-black text-xs font-extrabold text-black"
+                                          className="p-2.5 border border-black text-xs font-extrabold text-black bg-[#ffffcc] text-right"
                                         >
                                           {formatMoney(totalSecurity)}
                                         </td>
@@ -955,7 +1043,7 @@ export default function SingleNoticeClient({
                                       return (
                                         <td
                                           key={idx}
-                                          className="p-2.5 border border-black text-xs font-extrabold text-black"
+                                          className="p-2.5 border border-black text-xs font-extrabold text-black bg-[#ffffcc] text-right"
                                         >
                                           {formatMoney(totalDocFees)}
                                         </td>
@@ -987,36 +1075,34 @@ export default function SingleNoticeClient({
 
                       {/* Compact Government Footer Table Blocks */}
                       {(table.payOrderTo || table.moreInfo) && (
-                        <div className="grid grid-cols-2 border border-t-0 border-black font-bangla text-xs text-black">
-                          {table.payOrderTo ? (
-                            <div className="p-3 border-r border-black bg-white">
-                              <span className="text-[10px] text-slate-500 block uppercase tracking-wider mb-0.5 font-bold">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 print:mt-4 print:grid-cols-2 font-bangla text-black">
+                          {table.payOrderTo && (
+                            <div className="bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-emerald-600 border-y border-r border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 print:bg-white print:border-black print:border-l-4 print:p-4 print:translate-y-0">
+                              <span className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest mb-3.5 print:text-black">
+                                <i className="fa-solid fa-building-columns text-emerald-600 text-sm print:hidden"></i>
                                 BD Pay Order To :
                               </span>
-                              <span className="text-black font-extrabold leading-relaxed">
+                              <div className="text-slate-850 font-bold text-base md:text-lg leading-relaxed whitespace-pre-line print:text-black print:font-normal">
                                 {table.payOrderTo}
-                              </span>
+                              </div>
                             </div>
-                          ) : (
-                            <div className="p-3 border-r border-black bg-white" />
                           )}
-                          {table.moreInfo ? (
-                            <div className="p-3 bg-white">
-                              <span className="text-[10px] text-slate-500 block uppercase tracking-wider mb-0.5 font-bold">
-                                More Info :
+                          {table.moreInfo && (
+                            <div className="bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-blue-600 border-y border-r border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 print:bg-white print:border-black print:border-l-4 print:p-4 print:translate-y-0">
+                              <span className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest mb-3.5 print:text-black">
+                                <i className="fa-solid fa-circle-info text-blue-600 text-sm print:hidden"></i>
+                                Tender More Information :
                               </span>
-                              <span className="text-black font-extrabold leading-relaxed">
+                              <div className="text-slate-850 font-bold text-base md:text-lg leading-relaxed whitespace-pre-line print:text-black print:font-normal">
                                 {table.moreInfo}
-                              </span>
+                              </div>
                             </div>
-                          ) : (
-                            <div className="p-3 bg-white" />
                           )}
                         </div>
                       )}
 
                       {/* Red Warning alert below table */}
-                      {table.bottomWarning && (
+                      {table.bottomWarning && notice.category !== "OTM" && (
                         <div className="mt-3 text-red-600 font-extrabold text-sm font-bangla text-left">
                           {table.bottomWarning}
                         </div>

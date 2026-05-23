@@ -141,7 +141,7 @@ const AboutPage: React.FC = () => {
                 </div>
                 <h3 className="des text-[18px] font-primary font-medium text-[var(--text-2)] m-0 pt-5 text-left">
                   Utilizing advanced construction tools, equipment, and
-                  techniques for efficiency and innovation.
+                  techniques for efficiency and innovation. Test
                 </h3>
               </div>
             </div>

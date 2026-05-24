@@ -48,20 +48,20 @@ const formatDisplayDate = (dateStr: any) => {
 const isCurrencyColumn = (hdr: string) => {
   if (!hdr) return false;
   const lower = hdr.toLowerCase();
-  return lower.includes("cost") || 
-         lower.includes("tk") || 
-         lower.includes("taka") || 
-         lower.includes("security") || 
-         lower.includes("fees") || 
-         lower.includes("fee") || 
-         lower.includes("price") || 
-         lower.includes("amount") || 
-         lower.includes("turn over") || 
-         lower.includes("turnover") || 
-         lower.includes("similar work") || 
-         lower.includes("similar") || 
-         lower.includes("credit") || 
-         lower.includes("টাকা");
+  return lower.includes("cost") ||
+    lower.includes("tk") ||
+    lower.includes("taka") ||
+    lower.includes("security") ||
+    lower.includes("fees") ||
+    lower.includes("fee") ||
+    lower.includes("price") ||
+    lower.includes("amount") ||
+    lower.includes("turn over") ||
+    lower.includes("turnover") ||
+    lower.includes("similar work") ||
+    lower.includes("similar") ||
+    lower.includes("credit") ||
+    lower.includes("টাকা");
 };
 
 const formatCellValue = (val: string, hdr: string) => {
@@ -155,9 +155,53 @@ export default function SingleNoticeClient({
   }, [parsedTables]);
 
   const handlePrint = () => {
-    const isLandscape = parsedTables.length > 0;
+    if (isPdf && notice.filePath) {
+      // PDF print handling using a hidden iframe with Chrome query parameters
+      // Bypasses browser PDF viewer layout bugs, scrollbars, sidebars, and multi-page print cuts!
+      const pdfUrl = notice.filePath.startsWith('/') || notice.filePath.startsWith('http') 
+        ? notice.filePath 
+        : '/' + notice.filePath;
 
-    // Otherwise print the entire structured web content beautifully
+      // Add query parameters to hide toolbars/navpanes and center-fit the document
+      const cleanPdfUrl = pdfUrl + '#toolbar=0&navpanes=0&scrollbar=0&view=Fit';
+
+      let iframe = document.getElementById('pdf-print-iframe') as HTMLIFrameElement;
+      if (iframe) {
+        document.body.removeChild(iframe);
+      }
+      
+      iframe = document.createElement('iframe');
+      iframe.id = 'pdf-print-iframe';
+      iframe.style.position = 'fixed';
+      iframe.style.right = '0';
+      iframe.style.bottom = '0';
+      iframe.style.width = '0';
+      iframe.style.height = '0';
+      iframe.style.border = '0';
+      iframe.src = cleanPdfUrl;
+      
+      document.body.appendChild(iframe);
+      
+      iframe.onload = function() {
+        try {
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+          // Remove the iframe after print dialog opens
+          setTimeout(() => {
+            const el = document.getElementById('pdf-print-iframe');
+            if (el) document.body.removeChild(el);
+          }, 5000);
+        } catch (e) {
+          // Fallback if cross-origin print blocks
+          window.open(pdfUrl, '_blank');
+        }
+      };
+      return;
+    }
+
+    // Restore original DOM replacement logic for standard web tables/text as requested by the user
+    // This keeps the original styles, colors, margins, fonts, and print layouts exactly the same!
+    const isLandscape = parsedTables.length > 0;
     const printContents = printAreaRef.current?.innerHTML;
     if (printContents) {
       const originalContents = document.body.innerHTML;
@@ -167,11 +211,11 @@ export default function SingleNoticeClient({
             <title>&nbsp;</title>
             <style>
               @page {
-                size: A4 ${isPdf ? "portrait" : (isLandscape ? "landscape" : "portrait")};
+                size: A4 ${isLandscape ? "landscape" : "portrait"};
                 margin: 0 !important;
               }
               body {
-                padding: ${isPdf ? "0" : "5mm 5mm 5mm 5mm"} !important;
+                padding: 5mm 5mm 5mm 5mm !important;
                 margin: 0;
                 font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
                 background-color: white !important;
@@ -183,7 +227,7 @@ export default function SingleNoticeClient({
               .print-container {
                 width: 100% !important;
                 max-width: 100% !important;
-                margin: ${isPdf ? "0" : "0 auto"};
+                margin: 0 auto;
                 padding: 0 !important;
                 background-color: white;
               }
@@ -201,6 +245,7 @@ export default function SingleNoticeClient({
                 margin: 0 0 8pt 0 !important;
                 line-height: 1.4 !important;
                 text-align: left !important;
+                font-family: 'Space Grotesk', 'Tiro Bangla', sans-serif !important;
               }
               .notice-details-bar {
                 display: flex !important;
@@ -232,6 +277,7 @@ export default function SingleNoticeClient({
                 max-width: 100% !important;
                 overflow: visible !important;
                 display: block !important;
+                position: relative !important;
               }
               table {
                 width: 100% !important;
@@ -242,6 +288,13 @@ export default function SingleNoticeClient({
                 page-break-inside: avoid;
                 overflow: visible !important;
                 table-layout: auto !important;
+                background-color: transparent !important;
+              }
+              tr {
+                background-color: transparent !important;
+              }
+              td:not([style*="background-color"]) {
+                background-color: transparent !important;
               }
                th, td {
                 border: 1px solid #000000 !important;
@@ -280,7 +333,7 @@ export default function SingleNoticeClient({
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                opacity: 0.08 !important;
+                opacity: 0.2 !important;
                 z-index: 0 !important;
                 pointer-events: none !important;
               }
@@ -294,23 +347,6 @@ export default function SingleNoticeClient({
               h1, h2, h3, h4, h5, p, tr {
                 page-break-inside: avoid;
               }
-              iframe {
-                display: block !important;
-                width: 100% !important;
-                height: 24.5cm !important;
-                border: none !important;
-                margin-top: 10pt !important;
-              }
-              canvas.pdf-page-canvas {
-                display: block !important;
-                width: 100% !important;
-                height: auto !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                page-break-inside: avoid !important;
-                page-break-after: always !important;
-                box-sizing: border-box !important;
-              }
               .no-print, button, .btn, h4, .print-hidden, [class*="print:hidden"] {
                 display: none !important;
               }
@@ -318,7 +354,7 @@ export default function SingleNoticeClient({
           </head>
           <body>
             <div class="print-container">
-              ${(!isLandscape && !isPdf) ? `
+              ${!isLandscape ? `
                 <div class="print-header">
                   <h1 class="notice-title">${notice.title}</h1>
                   <div class="notice-details-bar">
@@ -327,96 +363,24 @@ export default function SingleNoticeClient({
                   </div>
                 </div>
               ` : ''}
-              ${isPdf ? `
-                <div id="pdf-render-container">
-                  <div id="pdf-loading" style="text-align: center; padding: 50px; font-weight: bold; font-family: sans-serif; font-size: 18px; color: #555;">Loading document pages for print...</div>
-                </div>
-              ` : printContents}
+              ${printContents}
             </div>
-            ${isPdf ? `
-              <script>
-                (function() {
-                  const script = document.createElement('script');
-                  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js';
-                  script.onload = function() {
-                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-                    
-                    let pdfUrl = '${notice.filePath}';
-                    if (!pdfUrl.startsWith('/') && !pdfUrl.startsWith('http')) {
-                      pdfUrl = '/' + pdfUrl;
-                    }
-                    const container = document.getElementById('pdf-render-container');
-                    const loadingEl = document.getElementById('pdf-loading');
-                    
-                    pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
-                      loadingEl.style.display = 'none';
-                      
-                      let promiseChain = Promise.resolve();
-                      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                        (function(num) {
-                          promiseChain = promiseChain.then(() => {
-                            return pdf.getPage(num).then(function(page) {
-                              const viewport = page.getViewport({ scale: 2.0 });
-                              const canvas = document.createElement('canvas');
-                              canvas.className = 'pdf-page-canvas';
-                              
-                              container.appendChild(canvas);
-                              
-                              const context = canvas.getContext('2d');
-                              canvas.height = viewport.height;
-                              canvas.width = viewport.width;
-                              
-                              const renderContext = {
-                                canvasContext: context,
-                                viewport: viewport
-                              };
-                              return page.render(renderContext).promise;
-                            });
-                          });
-                        })(pageNum);
-                      }
-                      
-                      promiseChain.then(() => {
-                        setTimeout(() => {
-                          window.print();
-                          window.location.reload();
-                        }, 500);
-                      }).catch(err => {
-                        console.error('Error rendering PDF pages:', err);
-                        container.innerHTML = '<div style="color: red; text-align: center; font-weight: bold; padding: 50px;">Error rendering PDF pages. Please download and print the file directly.</div>';
-                        setTimeout(() => {
-                          window.print();
-                          window.location.reload();
-                        }, 1000);
-                      });
-                    }).catch(err => {
-                      console.error('Error loading PDF:', err);
-                      container.innerHTML = '<div style="color: red; text-align: center; font-weight: bold; padding: 50px;">Error loading PDF document: ' + err.message + '</div>';
-                      setTimeout(() => {
-                        window.print();
-                        window.location.reload();
-                      }, 2000);
-                    });
-                  };
-                  script.onerror = function() {
-                    document.getElementById('pdf-loading').innerHTML = '<div style="color: red; padding: 50px; font-weight: bold; font-family: sans-serif;">Failed to load PDF library. Please make sure you are connected to the internet or download the file directly.</div>';
-                  };
-                  document.head.appendChild(script);
-                })();
-              </script>
-            ` : ''}
           </body>
         </html>
       `;
-      
-      if (!isPdf) {
-        // A small delay (1000ms) to allow attached images to fully load in the DOM
-        setTimeout(() => {
-          window.print();
-          document.body.innerHTML = originalContents;
-          window.location.reload(); // Restore full React DOM
-        }, 1000);
-      }
+
+      // A small delay (1000ms) to allow attached images to fully load in the DOM
+      setTimeout(() => {
+        window.print();
+        document.body.innerHTML = originalContents;
+        
+        // Dynamic reload callback when clicking back to bypass standard React router removeChild crash
+        window.addEventListener('popstate', () => {
+          window.location.reload();
+        });
+        
+        window.location.reload(); // Restore full React DOM
+      }, 1000);
     }
   };
 
@@ -542,9 +506,9 @@ export default function SingleNoticeClient({
               h.toLowerCase().includes("security"),
             );
             const docFeesColIdx = headers.findIndex((h: string) => {
-               const lower = h.toLowerCase();
-               return lower.includes("fee") || lower.includes("price");
-             });
+              const lower = h.toLowerCase();
+              return lower.includes("fee") || lower.includes("price");
+            });
 
             const totalSecurity =
               securityColIdx !== -1
@@ -600,9 +564,9 @@ export default function SingleNoticeClient({
                 >
                   {/* Centred Watermark Image with Plural/Singular Fallback */}
                   <div className="watermark-container absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.07] select-none z-0">
-                    <img 
-                      src="/assets/icon/watermark.png" 
-                      alt="Watermark" 
+                    <img
+                      src="/assets/icon/watermark.png"
+                      alt="Watermark"
                       className="watermark-img w-[300px] md:w-[350px] h-auto max-h-[85%] object-contain"
                       onError={(e) => {
                         const target = e.currentTarget;
@@ -621,9 +585,8 @@ export default function SingleNoticeClient({
                           return (
                             <th
                               key={idx}
-                              className={`p-3 font-bold border border-black text-black text-xs md:text-sm uppercase text-center ${
-                                isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"
-                              }`}
+                              className={`p-3 font-bold border border-black text-black text-xs md:text-sm uppercase text-center ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"
+                                }`}
                               style={{ backgroundColor: table.headerBgColor || "#ccffff" }}
                             >
                               {hdr}
@@ -646,9 +609,8 @@ export default function SingleNoticeClient({
                             return (
                               <td
                                 key={cIdx}
-                                className={`p-3 border border-black text-black text-base md:text-lg font-semibold font-bangla ${
-                                  isCurrency ? "text-right" : "text-left"
-                                } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"}`}
+                                className={`p-3 border border-black text-black text-base md:text-lg font-semibold font-bangla ${isCurrency ? "text-right" : "text-left"
+                                  } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"}`}
                                 style={hasCustomBg ? { backgroundColor: cellBg } : undefined}
                               >
                                 {formatCellValue(cell, headers[cIdx] || "")}
@@ -881,9 +843,9 @@ export default function SingleNoticeClient({
                     h.toLowerCase().includes("security"),
                   );
                   const docFeesColIdx = headers.findIndex((h: string) => {
-                     const lower = h.toLowerCase();
-                     return lower.includes("fee") || lower.includes("price");
-                   });
+                    const lower = h.toLowerCase();
+                    return lower.includes("fee") || lower.includes("price");
+                  });
 
                   const totalSecurity =
                     securityColIdx !== -1
@@ -939,9 +901,9 @@ export default function SingleNoticeClient({
                       >
                         {/* Centred Watermark Image with Plural/Singular Fallback */}
                         <div className="watermark-container absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.07] select-none z-0">
-                          <img 
-                            src="/assets/icon/watermark.png" 
-                            alt="Watermark" 
+                          <img
+                            src="/assets/icon/watermark.png"
+                            alt="Watermark"
                             className="watermark-img w-[300px] md:w-[350px] h-auto max-h-[85%] object-contain"
                             onError={(e) => {
                               const target = e.currentTarget;
@@ -960,9 +922,8 @@ export default function SingleNoticeClient({
                                 return (
                                   <th
                                     key={idx}
-                                    className={`p-2.5 font-bold border border-black text-black text-xs uppercase ${
-                                      isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"
-                                    }`}
+                                    className={`p-2.5 font-bold border border-black text-black text-xs uppercase ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"
+                                      }`}
                                     style={{ backgroundColor: table.headerBgColor || "#ccffff" }}
                                   >
                                     {hdr}
@@ -985,9 +946,8 @@ export default function SingleNoticeClient({
                                   return (
                                     <td
                                       key={cIdx}
-                                      className={`p-2.5 border border-black text-black text-base font-semibold font-bangla ${
-                                        isCurrency ? "text-right" : "text-left"
-                                      } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"}`}
+                                      className={`p-2.5 border border-black text-black text-base font-semibold font-bangla ${isCurrency ? "text-right" : "text-left"
+                                        } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"}`}
                                       style={hasCustomBg ? { backgroundColor: cellBg } : undefined}
                                     >
                                       {formatCellValue(cell, headers[cIdx] || "")}

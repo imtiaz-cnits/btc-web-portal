@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
 
     // Skip protection for auth pages
     if (pathname === '/admin/auth') {
-      if (token && token.role === 'ADMIN') {
+      if (token && (token.role === 'ADMIN' || token.role === 'USER')) {
         return NextResponse.redirect(new URL('/admin/egp-notices', request.url))
       }
       return NextResponse.next()
@@ -23,9 +23,9 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/admin/auth', request.url))
     }
 
-    // Enforce admin role
-    if (token.role !== 'ADMIN') {
-      return new NextResponse("Access Denied. Admin role required.", { status: 403 })
+    // Enforce valid role (ADMIN or USER)
+    if (token.role !== 'ADMIN' && token.role !== 'USER') {
+      return new NextResponse("Access Denied. Invalid role.", { status: 403 })
     }
   }
 

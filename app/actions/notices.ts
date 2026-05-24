@@ -22,6 +22,7 @@ export async function createNotice(formData: FormData) {
   const year = formData.get("year") as string;
   const publishDate = formData.get("publishDate") as string;
   const lastDate = formData.get("lastDate") as string;
+  const lotteryDate = formData.get("lotteryDate") as string;
   
   if (!title || !category) {
     return { success: false, message: "Title and Category are required." };
@@ -45,6 +46,7 @@ export async function createNotice(formData: FormData) {
         status,
         publishDate: publishDate ? new Date(publishDate) : null,
         lastDate: lastDate ? new Date(lastDate) : null,
+        lotteryDate: lotteryDate ? new Date(lotteryDate) : null,
         authorId,
         filePath: filePath || null,
       },
@@ -75,6 +77,7 @@ export async function updateNotice(id: string, formData: FormData) {
   const year = formData.get("year") as string;
   const publishDate = formData.get("publishDate") as string;
   const lastDate = formData.get("lastDate") as string;
+  const lotteryDate = formData.get("lotteryDate") as string;
   
   if (!title || !category) {
     return { success: false, message: "Title and Category are required." };
@@ -106,6 +109,7 @@ export async function updateNotice(id: string, formData: FormData) {
         status,
         publishDate: publishDate ? new Date(publishDate) : null,
         lastDate: lastDate ? new Date(lastDate) : null,
+        lotteryDate: lotteryDate ? new Date(lotteryDate) : null,
         filePath: filePath || null,
       },
     });

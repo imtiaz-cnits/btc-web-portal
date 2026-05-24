@@ -1,9 +1,9 @@
 import prisma from "@/lib/prisma";
-import { 
-  FileText, 
-  Award, 
-  CheckCircle2, 
-  AlertCircle, 
+import {
+  FileText,
+  Award,
+  CheckCircle2,
+  AlertCircle,
   ArrowRight,
   TrendingUp,
   Inbox
@@ -16,7 +16,7 @@ export default async function AdminDashboardPage() {
   const totalNotices = await prisma.notice.count();
   const activeNotices = await prisma.notice.count({ where: { status: "active" } });
   const inactiveNotices = await prisma.notice.count({ where: { status: "inactive" } });
-  
+
   // Category counts
   const ltmCount = await prisma.notice.count({ where: { category: "LTM" } });
   const otmCount = await prisma.notice.count({ where: { category: "OTM" } });
@@ -50,9 +50,9 @@ export default async function AdminDashboardPage() {
           <h1 className="text-2xl font-bold text-slate-800">Welcome to Admin Dashboard</h1>
           <p className="text-slate-500 text-sm mt-1">Manage and track your portal's notices and tender information.</p>
         </div>
-        <Link 
+        <Link
           href="/admin/egp-notices/add"
-          className="bg-[var(--primary-color)] text-white hover:bg-green-700 font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-green-600/20 text-sm flex items-center gap-2 active:scale-95 transition-all"
+          className="bg-[var(--primary-color)] !text-secondary hover:bg-green-700 font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-green-600/20 text-sm flex items-center gap-2 active:scale-95 transition-all"
         >
           Add New Notice
           <ArrowRight className="w-4 h-4" />
@@ -96,7 +96,7 @@ export default async function AdminDashboardPage() {
                   <span className="text-slate-800">{cat.count} ({cat.percentage}%)</span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-2">
-                  <div 
+                  <div
                     className={`h-2 rounded-full ${cat.color} transition-all duration-500`}
                     style={{ width: `${cat.percentage}%` }}
                   ></div>
@@ -138,9 +138,8 @@ export default async function AdminDashboardPage() {
                 </div>
 
                 <div className="shrink-0">
-                  <span className={`px-2.5 py-1 text-xs rounded-full font-bold uppercase ${
-                    notice.status === "active" ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"
-                  }`}>
+                  <span className={`px-2.5 py-1 text-xs rounded-full font-bold uppercase ${notice.status === "active" ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"
+                    }`}>
                     {notice.status}
                   </span>
                 </div>

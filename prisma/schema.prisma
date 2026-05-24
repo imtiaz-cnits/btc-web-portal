@@ -68,6 +68,7 @@ model Notice {
   status      Status         @default(active)
   publishDate DateTime?
   lastDate    DateTime?
+  lotteryDate DateTime?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 

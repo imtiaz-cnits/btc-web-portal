@@ -35,14 +35,21 @@ export default async function HomePage() {
   }
 
   const homepageNotices = allActiveNotices.map((notice) => {
-    const pubDate = notice.publishDate || notice.createdAt;
-    const d = new Date(pubDate);
+    const displayDate = notice.lastDate || notice.publishDate || notice.createdAt;
+    const d = new Date(displayDate);
     const formattedDate = `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+
+    let formattedLotteryDate = "";
+    if (notice.lotteryDate) {
+      const ld = new Date(notice.lotteryDate);
+      formattedLotteryDate = `${String(ld.getDate()).padStart(2, '0')}-${String(ld.getMonth() + 1).padStart(2, '0')}-${ld.getFullYear()}`;
+    }
 
     return {
       id: notice.id,
       title: notice.title,
       date: formattedDate,
+      lotteryDate: formattedLotteryDate,
       fileUrl: notice.filePath || "",
       category: categoryMap[notice.category] || "LTM",
     };

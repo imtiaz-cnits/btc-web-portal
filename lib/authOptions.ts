@@ -24,9 +24,9 @@ export const authOptions: NextAuthOptions = {
           throw new Error("No user found with this email");
         }
 
-        // Restrict login to ADMIN role users
-        if (user.role !== "ADMIN") {
-          throw new Error("Access denied. Admin role required.");
+        // Allow both ADMIN and USER roles to log in
+        if (user.role !== "ADMIN" && user.role !== "USER") {
+          throw new Error("Access denied. Invalid role.");
         }
 
         const isPasswordValid = await bcrypt.compare(credentials.password, user.password);

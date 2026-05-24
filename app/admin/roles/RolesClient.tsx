@@ -35,15 +35,20 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
   const [isPending, startTransition] = useTransition();
   const [toast, setToast] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [activeDropdownUserId, setActiveDropdownUserId] = useState<string | null>(null);
+  const currentUserRole = (session?.user as any)?.role || "USER";
+  const isCurrentUserAdmin = currentUserRole === "ADMIN";
 
   useEffect(() => {
     const handleAvatarUpdate = () => {
-      setLocalAvatar(localStorage.getItem("btc_admin_avatar"));
+      const userId = (session?.user as any)?.id;
+      if (userId) {
+        setLocalAvatar(localStorage.getItem(`btc_avatar_${userId}`));
+      }
     };
     handleAvatarUpdate();
     window.addEventListener("avatarChanged", handleAvatarUpdate);
     return () => window.removeEventListener("avatarChanged", handleAvatarUpdate);
-  }, []);
+  }, [session]);
   
   // Modal state for delete confirmation
   const [deleteConfirmUser, setDeleteConfirmUser] = useState<UserItem | null>(null);
@@ -177,7 +182,10 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
                 <th className="p-5">Name & Email</th>
                 <th className="p-5">Registered On</th>
                 <th className="p-5">Current Role</th>
-                <th className="p-5 text-center">User Control Actions</th>
+                <th className="p-5">Status</th>
+                {isCurrentUserAdmin && (
+                  <th className="p-5 text-center">User Control Actions</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
@@ -190,7 +198,9 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
                         <div className="flex items-center gap-3">
                           {(() => {
                             const isCurrentUser = (session?.user as any)?.id === user.id;
-                            const displayImage = (user.image && user.image !== "null") ? user.image : (isCurrentUser ? localAvatar : null);
+                            // Only use localStorage avatar for the currently logged-in user
+                            const dbImage = (user.image && user.image !== "null") ? user.image : null;
+                            const displayImage = dbImage || (isCurrentUser ? localAvatar : null);
                             return displayImage ? (
                               <img
                                 src={displayImage}
@@ -237,84 +247,102 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
                         </span>
                       </td>
                       <td className="p-5">
-                        <div className="flex items-center justify-center gap-3">
-                          {isPending && <Loader2 className="w-4 h-4 text-slate-400 animate-spin mr-1" />}
-                          
-                          {/* Role Switcher Selector */}
-                          <div className="relative" onClick={(e) => e.stopPropagation()}>
+                        {(() => {
+                          const isCurrentUser = (session?.user as any)?.id === user.id;
+                          return isCurrentUser ? (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-extrabold uppercase border shadow-sm bg-green-50 text-green-700 border-green-200">
+                              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse inline-block" />
+                              Online
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-extrabold uppercase border shadow-sm bg-slate-100 text-slate-400 border-slate-200">
+                              <span className="w-2 h-2 rounded-full bg-slate-400 inline-block" />
+                              Offline
+                            </span>
+                          );
+                        })()}
+                      </td>
+                      {isCurrentUserAdmin && (
+                        <td className="p-5">
+                          <div className="flex items-center justify-center gap-3">
+                            {isPending && <Loader2 className="w-4 h-4 text-slate-400 animate-spin mr-1" />}
+                            
+                            {/* Role Switcher Selector */}
+                            <div className="relative" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                type="button"
+                                disabled={isPending || isAdmin}
+                                onClick={() => {
+                                  if (activeDropdownUserId === user.id) {
+                                    setActiveDropdownUserId(null);
+                                  } else {
+                                    setActiveDropdownUserId(user.id);
+                                  }
+                                }}
+                                className="bg-slate-600 hover:bg-slate-700 border-0 rounded-xl px-3 py-1.5 text-xs font-bold text-white outline-none transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-between gap-1.5 min-w-[90px] h-9 shadow-xs active:scale-95"
+                                title={isAdmin ? "Protected Administrator Account" : "Change User Role"}
+                              >
+                                <span>{user.role}</span>
+                                <ChevronDown className={`w-3.5 h-3.5 text-white transition-transform ${activeDropdownUserId === user.id ? "rotate-180" : ""}`} />
+                              </button>
+
+                              {activeDropdownUserId === user.id && (
+                                <div className="absolute top-[100%] right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden divide-y divide-slate-50 w-[110px] animate-scale-in">
+                                  {[
+                                    { value: "USER", label: "USER" },
+                                    { value: "ADMIN", label: "ADMIN" }
+                                  ].map((opt) => (
+                                    <div
+                                      key={opt.value}
+                                      onClick={() => {
+                                        handleRoleChange(user.id, opt.value as any);
+                                        setActiveDropdownUserId(null);
+                                      }}
+                                      className={`px-3 py-2.5 text-xs font-bold hover:bg-green-50 hover:text-green-700 transition cursor-pointer flex items-center justify-between ${
+                                        user.role === opt.value ? "bg-green-50 text-green-700" : "text-slate-600"
+                                      }`}
+                                    >
+                                      <span>{opt.label}</span>
+                                      {user.role === opt.value && <Check className="w-3.5 h-3.5 text-green-600" />}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Reset Password Button */}
                             <button
                               type="button"
+                              onClick={() => handleResetPassword(user.id)}
                               disabled={isPending || isAdmin}
-                              onClick={() => {
-                                if (activeDropdownUserId === user.id) {
-                                  setActiveDropdownUserId(null);
-                                } else {
-                                  setActiveDropdownUserId(user.id);
-                                }
-                              }}
-                              className="bg-slate-600 hover:bg-slate-700 border-0 rounded-xl px-3 py-1.5 text-xs font-bold text-white outline-none transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-between gap-1.5 min-w-[90px] h-9 shadow-xs active:scale-95"
-                              title={isAdmin ? "Protected Administrator Account" : "Change User Role"}
+                              title={isAdmin ? "Protected Administrator Account" : "Reset User Password to default '12345678'"}
+                              className="p-2 bg-amber-500 hover:bg-amber-600 border-0 text-white rounded-xl transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed h-9 w-9 flex items-center justify-center shadow-xs cursor-pointer"
                             >
-                              <span>{user.role}</span>
-                              <ChevronDown className={`w-3.5 h-3.5 text-white transition-transform ${activeDropdownUserId === user.id ? "rotate-180" : ""}`} />
+                              <Key className="w-4 h-4 text-white" />
                             </button>
 
-                            {activeDropdownUserId === user.id && (
-                              <div className="absolute top-[100%] right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden divide-y divide-slate-50 w-[110px] animate-scale-in">
-                                {[
-                                  { value: "USER", label: "USER" },
-                                  { value: "ADMIN", label: "ADMIN" }
-                                ].map((opt) => (
-                                  <div
-                                    key={opt.value}
-                                    onClick={() => {
-                                      handleRoleChange(user.id, opt.value as any);
-                                      setActiveDropdownUserId(null);
-                                    }}
-                                    className={`px-3 py-2.5 text-xs font-bold hover:bg-green-50 hover:text-green-700 transition cursor-pointer flex items-center justify-between ${
-                                      user.role === opt.value ? "bg-green-50 text-green-700" : "text-slate-600"
-                                    }`}
-                                  >
-                                    <span>{opt.label}</span>
-                                    {user.role === opt.value && <Check className="w-3.5 h-3.5 text-green-600" />}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                            {/* Delete Account Button */}
+                            <button
+                              type="button"
+                              onClick={() => setDeleteConfirmUser(user)}
+                              disabled={isPending || isAdmin}
+                              title={isAdmin ? "Protected Administrator Account" : "Delete User Account"}
+                              className="p-2 bg-red-650 hover:bg-red-700 border-0 text-white rounded-xl transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed h-9 w-9 flex items-center justify-center shadow-xs cursor-pointer"
+                            >
+                              <Trash2 className="w-4 h-4 text-white" />
+                            </button>
                           </div>
-
-                          {/* Reset Password Button */}
-                          <button
-                            type="button"
-                            onClick={() => handleResetPassword(user.id)}
-                            disabled={isPending || isAdmin}
-                            title={isAdmin ? "Protected Administrator Account" : "Reset User Password to default '12345678'"}
-                            className="p-2 bg-amber-500 hover:bg-amber-600 border-0 text-white rounded-xl transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed h-9 w-9 flex items-center justify-center shadow-xs cursor-pointer"
-                          >
-                            <Key className="w-4 h-4 text-white" />
-                          </button>
-
-                          {/* Delete Account Button */}
-                          <button
-                            type="button"
-                            onClick={() => setDeleteConfirmUser(user)}
-                            disabled={isPending || isAdmin}
-                            title={isAdmin ? "Protected Administrator Account" : "Delete User Account"}
-                            className="p-2 bg-red-650 hover:bg-red-700 border-0 text-white rounded-xl transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed h-9 w-9 flex items-center justify-center shadow-xs cursor-pointer"
-                          >
-                            <Trash2 className="w-4 h-4 text-white" />
-                          </button>
-                        </div>
-                      </td>
+                        </td>
+                      )}
                     </tr>
                   );
                 })
               ) : (
-                <tr>
-                  <td colSpan={4} className="p-12 text-center text-slate-400 font-semibold italic">
-                    {searchQuery ? "No matching users found for your search query." : "No registered users found."}
-                  </td>
-                </tr>
+                  <tr>
+                    <td colSpan={5} className="p-12 text-center text-slate-400 font-semibold italic">
+                      {searchQuery ? "No matching users found for your search query." : "No registered users found."}
+                    </td>
+                  </tr>
               )}
             </tbody>
           </table>

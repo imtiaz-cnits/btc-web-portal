@@ -369,10 +369,15 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   };
 
   const [publishDate, setPublishDate] = useState(
-    notice?.publishDate ? formatPublishDateForState(notice.publishDate) : ""
+    notice?.publishDate 
+      ? formatPublishDateForState(notice.publishDate) 
+      : (isEdit ? "" : formatPublishDateForState(new Date()))
   );
   const [lastDate, setLastDate] = useState(
     notice?.lastDate ? formatPublishDateForState(notice.lastDate) : ""
+  );
+  const [lotteryDate, setLotteryDate] = useState(
+    notice?.lotteryDate ? formatPublishDateForState(notice.lotteryDate) : ""
   );
 
   // Combinable Section Switches
@@ -477,6 +482,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                 setPublishDate(dateStr);
               } else if (fieldName === "lastDate") {
                 setLastDate(dateStr);
+              } else if (fieldName === "lotteryDate") {
+                setLotteryDate(dateStr);
               }
             }
           });
@@ -530,7 +537,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         if (el._flatpickr) el._flatpickr.destroy();
       });
     };
-  }, [enableTables, tablesList, showScheduleModal, modalScheduledDateOnly, modalScheduledTimeOnly]);
+  }, [showScheduleModal]);
 
   // Table date Flatpickr binding is handled lower in the file after handlers are initialized.
 
@@ -681,7 +688,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     }
   }, [isEdit, notice]);
 
-  // Dynamically sync publishDate and lastDate into all tables
+  // Dynamically sync publishDate, lastDate and lotteryDate into all tables
   useEffect(() => {
     setTablesList(prev => {
       let changed = false;
@@ -693,6 +700,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         
         const newLastDate = lastDate || "";
         const oldLastDate = table.lastDateBlock || "";
+
+        const newLotteryDate = lotteryDate || "";
+        const oldLotteryDate = table.lotteryDateBlock || "";
 
         let newRows = table.rows;
         if (table.type === "pwd_ltm" && Array.isArray(table.rows)) {
@@ -715,7 +725,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           }
         }
 
-        if (oldNoticeDate !== newNoticeDate || oldLastDate !== newLastDate) {
+        if (oldNoticeDate !== newNoticeDate || oldLastDate !== newLastDate || oldLotteryDate !== newLotteryDate) {
           tableChanged = true;
         }
 
@@ -725,6 +735,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
             ...table,
             noticeDateBlock: newNoticeDate,
             lastDateBlock: newLastDate,
+            lotteryDateBlock: newLotteryDate,
             rows: newRows
           };
         }
@@ -733,7 +744,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
       return changed ? next : prev;
     });
-  }, [publishDate, lastDate]);
+  }, [publishDate, lastDate, lotteryDate]);
 
   // Dynamically migrate table columns and structures based on the Notice Category selected
   useEffect(() => {
@@ -864,6 +875,16 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       if (t.type === "pwd_ltm" && lastDateColIdx !== -1 && newRow.length > lastDateColIdx) {
         newRow[lastDateColIdx] = lastDate ? `${lastDate} 05:00 PM` : "";
       }
+      
+      // Auto-populate Type of Method based on category
+      const methodColIdx = (t.headers || []).findIndex((h: string) => {
+        const lower = (h || "").toLowerCase();
+        return lower.includes("method") || lower.includes("matho");
+      });
+      if (methodColIdx !== -1 && newRow.length > methodColIdx) {
+        newRow[methodColIdx] = category === "OTM" ? "OTM" : "LTM SOCIAL";
+      }
+
       return {
         ...t,
         rows: [...t.rows, newRow]
@@ -1057,13 +1078,16 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
       const formData = new FormData(formEl);
       
-      // Parse publish date and last date using our robust parser
-      const publishDateStr = overridePublishDate !== undefined ? overridePublishDate : (formData.get("publishDate") as string);
-      const publishDateObj = parseDateTimeDmyToDate(publishDateStr);
-      if (publishDateObj) {
-        formData.set("publishDate", publishDateObj.toISOString());
+      // Parse publish date: use overridePublishDate if scheduling, otherwise force to current time for instant publication
+      if (overridePublishDate !== undefined) {
+        const publishDateObj = parseDateTimeDmyToDate(overridePublishDate);
+        if (publishDateObj) {
+          formData.set("publishDate", publishDateObj.toISOString());
+        } else {
+          formData.set("publishDate", "");
+        }
       } else {
-        formData.set("publishDate", "");
+        formData.set("publishDate", new Date().toISOString());
       }
 
       const lastDateObj = parseDateTimeDmyToDate(formData.get("lastDate") as string);
@@ -1071,6 +1095,13 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         formData.set("lastDate", lastDateObj.toISOString());
       } else {
         formData.set("lastDate", "");
+      }
+
+      const lotteryDateObj = parseDateTimeDmyToDate(formData.get("lotteryDate") as string);
+      if (lotteryDateObj) {
+        formData.set("lotteryDate", lotteryDateObj.toISOString());
+      } else {
+        formData.set("lotteryDate", "");
       }
       
       // Add additional attributes manually
@@ -1205,23 +1236,6 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
         <div className="space-y-2 relative">
           <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-slate-400" /> Publish Date
-          </label>
-          <div className="relative">
-            <input 
-              type="text" 
-              name="publishDate" 
-              value={publishDate}
-              onChange={(e) => setPublishDate(e.target.value)}
-              placeholder="Select date..."
-              className="flatpickr-date bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3.5 text-slate-800 outline-none text-sm font-semibold focus:border-[var(--primary-color)] focus:bg-white transition cursor-pointer w-full shadow-xs"
-            />
-            <Calendar className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
-        </div>
-
-        <div className="space-y-2 relative">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-slate-400" /> Last Submission Date
           </label>
           <div className="relative">
@@ -1236,6 +1250,25 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
             <Calendar className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
         </div>
+
+        {(category === "LOTTERY_RESULT" || category === "LOTTERY_PENDING") && (
+          <div className="space-y-2 relative animate-scale-in">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-slate-400" /> Lottery Date
+            </label>
+            <div className="relative">
+              <input 
+                type="text" 
+                name="lotteryDate" 
+                value={lotteryDate}
+                onChange={(e) => setLotteryDate(e.target.value)}
+                placeholder="Select date..."
+                className="flatpickr-date bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3.5 text-slate-800 outline-none text-sm font-semibold focus:border-[var(--primary-color)] focus:bg-white transition cursor-pointer w-full shadow-xs"
+              />
+              <Calendar className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Combinable Sections Configuration Bar */}
@@ -1497,7 +1530,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                   </div>
 
                   {/* Procuring Entity & Dates Headers Config */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-xs shrink-0">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-xs shrink-0">
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
                         <Building2 className="w-3.5 h-3.5 text-green-600" /> Procuring Office Name (Bangla)
@@ -1521,20 +1554,6 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                         onChange={(e) => handlePwdFieldChange(tIdx, "subTitle", e.target.value)}
                         className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 outline-none text-xs font-bold focus:border-[var(--primary-color)] transition"
                         placeholder="যেমন: BADC POLY SEED (OTM Mathod)"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lottery Opening Date</label>
-                      <input 
-                        type="text"
-                        name={`pwdLotteryDate_${tIdx}`}
-                        data-tidx={tIdx}
-                        data-field="lotteryDateBlock"
-                        value={table.lotteryDateBlock || ""}
-                        onChange={(e) => handlePwdFieldChange(tIdx, "lotteryDateBlock", e.target.value)}
-                        placeholder="Select date..."
-                        className="flatpickr-date-field w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 outline-none text-xs font-bold focus:border-[var(--primary-color)] transition cursor-pointer"
                       />
                     </div>
 
@@ -1595,8 +1614,14 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                           <tr className="divide-x divide-slate-200">
                             {(table.headers || []).map((hdr: string, cIdx: number) => {
                               const headerBg = table.headerBgColor || "#ccffff";
+                              const isDescCol = (hdr || "").toLowerCase().includes("description");
+                              const minWidthValue = isDescCol ? "400px" : "175px";
                               return (
-                                <th key={cIdx} className="p-3 min-w-[175px] text-black" style={{ backgroundColor: headerBg }}>
+                                <th 
+                                  key={cIdx} 
+                                  className="p-3 text-black" 
+                                  style={{ backgroundColor: headerBg, minWidth: minWidthValue }}
+                                >
                                   <div className="flex flex-col gap-2">
                                     <div className="flex items-center gap-2">
                                       <input 

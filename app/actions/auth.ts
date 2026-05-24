@@ -171,7 +171,7 @@ export async function updatePassword(userId: string, formData: FormData) {
 
 export async function getAllUsers() {
   const session = await getServerSession(authOptions);
-  if (!session?.user || (session.user as any).role !== "ADMIN") {
+  if (!session?.user) {
     throw new Error("Unauthorized");
   }
   return await prisma.user.findMany({

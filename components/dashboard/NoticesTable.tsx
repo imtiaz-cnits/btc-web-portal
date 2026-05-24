@@ -14,6 +14,7 @@ import {
   Eye,
   X,
   ExternalLink,
+  CheckCircle2,
 } from "lucide-react";
 
 interface Notice {
@@ -23,6 +24,7 @@ interface Notice {
   year?: string | null;
   status: string;
   publishDate?: Date | null;
+  lotteryDate?: Date | string | null;
   type: string;
   content?: string | null;
   filePath?: string | null;
@@ -84,7 +86,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
     // v2 format: multiple tables
     if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
       return (
-        <div className="space-y-6">
+        <div className="space-y-6 custom-table-preview">
           {parsed.tables.map((table: any, tIdx: number) => {
             const headerBg = table.headerBgColor;
             const isCustomHeader = !!headerBg;
@@ -145,7 +147,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                             key={i} 
                             style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
                             className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide ${
-                              isCustomHeader ? "border-slate-200 text-slate-800" : "border-[#2d6a4f] text-white"
+                              isCustomHeader ? "border-slate-200 !text-slate-800" : "border-[#2d6a4f] !text-white"
                             }`}
                           >
                             {h}
@@ -164,7 +166,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                               <td 
                                 key={cIdx} 
                                 style={cellBg ? { backgroundColor: cellBg } : undefined}
-                                className={`px-3 py-2 border border-slate-200 text-slate-750 ${
+                                className={`px-3 py-2 border border-slate-200 !text-slate-800 ${
                                   isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-nowrap"
                                 } ${isCurrency ? "text-right" : "text-left"}`}
                               >
@@ -189,7 +191,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                               return (
                                 <td
                                   key={idx}
-                                  className="px-3 py-2 text-right font-extrabold bg-[#ffffcc] border border-slate-200"
+                                  className="px-3 py-2 text-right font-extrabold bg-[#ffffcc] border border-slate-200 !text-slate-800"
                                   colSpan={colSpanCount}
                                 >
                                   Total Amount BD Tk =
@@ -210,7 +212,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                               return (
                                 <td
                                   key={idx}
-                                  className="px-3 py-2 font-extrabold text-slate-800 bg-[#ffffcc] border border-slate-200 text-right whitespace-nowrap"
+                                  className="px-3 py-2 font-extrabold !text-slate-800 bg-[#ffffcc] border border-slate-200 text-right whitespace-nowrap"
                                 >
                                   {formatMoney(totalSecurity)}
                                 </td>
@@ -220,7 +222,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                               return (
                                 <td
                                   key={idx}
-                                  className="px-3 py-2 font-extrabold text-slate-800 bg-[#ffffcc] border border-slate-200 text-right whitespace-nowrap"
+                                  className="px-3 py-2 font-extrabold !text-slate-800 bg-[#ffffcc] border border-slate-200 text-right whitespace-nowrap"
                                 >
                                   {formatMoney(totalDocFees)}
                                 </td>
@@ -229,7 +231,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                             return (
                               <td
                                 key={idx}
-                                className="px-3 py-2 border border-slate-200 bg-[#ffffcc]"
+                                className="px-3 py-2 border border-slate-200 bg-[#ffffcc] !text-slate-800"
                               ></td>
                             );
                           })}
@@ -250,7 +252,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
       const headerBg = parsed.headerBgColor;
       const isCustomHeader = !!headerBg;
       return (
-        <div className="space-y-2">
+        <div className="space-y-2 custom-table-preview">
           {parsed.officeName && (
             <p className="text-xs font-bold text-slate-600 text-center">{parsed.officeName}</p>
           )}
@@ -266,7 +268,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                       key={i} 
                       style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
                       className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide ${
-                        isCustomHeader ? "border-slate-200 text-slate-800" : "border-[#2d6a4f] text-white"
+                        isCustomHeader ? "border-slate-200 !text-slate-800" : "border-[#2d6a4f] !text-white"
                       }`}
                     >
                       {h}
@@ -284,7 +286,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                         <td 
                           key={cIdx} 
                           style={cellBg ? { backgroundColor: cellBg } : undefined}
-                          className={`px-3 py-2 border border-slate-200 text-slate-700 ${
+                          className={`px-3 py-2 border border-slate-200 !text-slate-800 ${
                             isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-nowrap"
                           }`}
                         >
@@ -306,7 +308,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
       const headerBg = parsed.headerBgColor;
       const isCustomHeader = !!headerBg;
       return (
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 custom-table-preview">
           <table className="w-full text-xs border-collapse">
             <thead>
               <tr 
@@ -318,7 +320,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                     key={i} 
                     style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
                     className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide ${
-                      isCustomHeader ? "border-slate-200 text-slate-800" : "border-[#2d6a4f] text-white"
+                      isCustomHeader ? "border-slate-200 !text-slate-800" : "border-[#2d6a4f] !text-white"
                     }`}
                   >
                     {h}
@@ -336,7 +338,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                       <td 
                         key={cIdx} 
                         style={cellBg ? { backgroundColor: cellBg } : undefined}
-                        className={`px-3 py-2 border border-slate-200 text-slate-700 ${
+                        className={`px-3 py-2 border border-slate-200 !text-slate-800 ${
                           isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-nowrap"
                         }`}
                       >
@@ -509,10 +511,21 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                 </td>
 
                 {/* Publish Date */}
-                <td className="px-6 py-4 text-slate-400 text-xs font-semibold">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 shrink-0" />
-                    {formatPublishDate(notice)}
+                <td className="px-6 py-4 text-slate-400 text-xs font-semibold font-sans">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                      <span>{formatPublishDate(notice)}</span>
+                    </div>
+                    {notice.lotteryDate && (
+                      <div className="flex items-center gap-1 text-emerald-600 font-extrabold text-[10px] uppercase tracking-wide">
+                        <CheckCircle2 className="w-3 h-3 shrink-0 text-emerald-600" />
+                        <span>Lottery: {(() => {
+                          const d = new Date(notice.lotteryDate);
+                          return `${String(d.getDate()).padStart(2, "0")}-${String(d.getMonth() + 1).padStart(2, "0")}-${d.getFullYear()}`;
+                        })()}</span>
+                      </div>
+                    )}
                   </div>
                 </td>
 
@@ -603,9 +616,18 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                   </span>
                   {quickViewNotice.year && <span>Year: {quickViewNotice.year}</span>}
                   <span className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    {formatPublishDate(quickViewNotice)}
+                    <Calendar className="w-3 h-3 text-slate-400" />
+                    Pub: {formatPublishDate(quickViewNotice)}
                   </span>
+                  {quickViewNotice.lotteryDate && (
+                    <span className="flex items-center gap-1 text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md font-extrabold uppercase text-[10px]">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                      Lottery: {(() => {
+                        const d = new Date(quickViewNotice.lotteryDate);
+                        return `${String(d.getDate()).padStart(2, "0")}-${String(d.getMonth() + 1).padStart(2, "0")}-${d.getFullYear()}`;
+                      })()}
+                    </span>
+                  )}
                 </div>
               </div>
               <button

@@ -8,6 +8,7 @@ interface Notice {
   no?: string;
   title: string;
   date: string;
+  lotteryDate?: string;
   fileUrl: string;
   category: string;
 }
@@ -17,6 +18,8 @@ interface NoticeTableProps {
 }
 
 const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
+  const isLotteryResult = notices.length > 0 && notices.some(n => n.category === "Lottery Result");
+
   return (
     <div className="rounded-2xl border border-ac-2 shadow-sm bg-white overflow-hidden">
       {/* Desktop View: Standard Table */}
@@ -30,6 +33,11 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
               <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm">
                 Procuring Entity / Title
               </th>
+              {isLotteryResult && (
+                <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-40 text-center">
+                  Lottery Date
+                </th>
+              )}
               <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-40 text-center">
                 Last Date
               </th>
@@ -51,6 +59,13 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
                       {notice.title}
                     </h4>
                   </td>
+                  {isLotteryResult && (
+                    <td className="py-2.5 px-4 text-center">
+                      <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-emerald-600 text-sm font-bold bg-green-50/50">
+                        {notice.lotteryDate || "N/A"}
+                      </div>
+                    </td>
+                  )}
                   <td className="py-2.5 px-4 text-center">
                     <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-text-2 text-sm font-bold">
                       {notice.date}
@@ -80,7 +95,7 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
             ) : (
               <tr>
                 <td
-                  colSpan={4}
+                  colSpan={isLotteryResult ? 5 : 4}
                   className="p-10 text-center text-text-2 font-medium italic"
                 >
                   No notices found in this category.
@@ -108,9 +123,17 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
                     {notice.category}
                   </span>
                 </div>
-                <div className="text-[11px] text-text-2 font-bold uppercase flex items-center gap-1">
-                  <i className="fa-solid fa-calendar-day text-primary"></i>
-                  {notice.date}
+                <div className="flex flex-col items-end gap-1">
+                  <div className="text-[11px] text-text-2 font-bold uppercase flex items-center gap-1">
+                    <i className="fa-solid fa-calendar-day text-primary text-xs"></i>
+                    Last: {notice.date}
+                  </div>
+                  {notice.lotteryDate && (
+                    <div className="text-[11px] text-emerald-600 font-bold uppercase flex items-center gap-1">
+                      <i className="fa-solid fa-calendar-check text-xs"></i>
+                      Lottery: {notice.lotteryDate}
+                    </div>
+                  )}
                 </div>
               </div>
 

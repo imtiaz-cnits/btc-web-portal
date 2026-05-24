@@ -114,12 +114,22 @@ export default function AdminLayout({
 
   useEffect(() => {
     const updateAvatar = () => {
-      setAvatar(localStorage.getItem("btc_admin_avatar"));
+      const userId = (session?.user as any)?.id;
+      if (userId) {
+        const userImg = session?.user?.image;
+        if (userImg && userImg !== "null") {
+          setAvatar(userImg);
+        } else {
+          setAvatar(localStorage.getItem(`btc_avatar_${userId}`));
+        }
+      } else {
+        setAvatar(null);
+      }
     };
     updateAvatar();
     window.addEventListener("avatarChanged", updateAvatar);
     return () => window.removeEventListener("avatarChanged", updateAvatar);
-  }, []);
+  }, [session]);
 
   // If we are on the auth login page, bypass the sidebar layout
   if (pathname === "/admin/auth") {

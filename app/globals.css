@@ -513,3 +513,67 @@ html.hide-global-layout .main {
 .admin-layout.dark .flatpickr-time .numInputWrapper:hover {
   background: #334155 !important;
 }
+
+/* --- Custom Table Preview Readable in Dark Mode --- */
+.admin-layout.dark .custom-table-preview {
+  color: #f1f5f9 !important;
+}
+
+.admin-layout.dark .custom-table-preview table {
+  border-color: #334155 !important;
+}
+
+.admin-layout.dark .custom-table-preview th {
+  border-color: #334155 !important;
+}
+
+.admin-layout.dark .custom-table-preview td {
+  border-color: #334155 !important;
+}
+
+/* Default alternating row background colors in dark mode */
+.admin-layout.dark .custom-table-preview tr:nth-child(even) {
+  background-color: #1e293b !important;
+}
+.admin-layout.dark .custom-table-preview tr:nth-child(odd) {
+  background-color: #0f172a !important;
+}
+
+/* If there is NO inline background color style, keep text light */
+.admin-layout.dark .custom-table-preview th:not([style*="background-color"]),
+.admin-layout.dark .custom-table-preview td:not([style*="background-color"]) {
+  color: #f1f5f9 !important;
+}
+
+/* If there IS an inline background color style, force dark text for readability (since custom bg colors are usually light) */
+.admin-layout.dark .custom-table-preview th[style*="background-color"],
+.admin-layout.dark .custom-table-preview td[style*="background-color"] {
+  color: #0f172a !important; /* Force extremely dark text for high contrast on light backgrounds */
+}
+
+/* Alternating rows override when no custom color is set */
+.admin-layout.dark .custom-table-preview tr:nth-child(even) td:not([style*="background-color"]) {
+  background-color: #1e293b !important;
+}
+.admin-layout.dark .custom-table-preview tr:nth-child(odd) td:not([style*="background-color"]) {
+  background-color: #0f172a !important;
+}
+
+/* Special styling for PWD office name and subTitle if they are rendered */
+.admin-layout.dark .custom-table-preview p {
+  color: #cbd5e1 !important;
+}
+
+/* Total / Sum Row override: bg-[#ffffcc] */
+.admin-layout.dark .custom-table-preview tr.bg-\[\#ffffcc\],
+.admin-layout.dark .custom-table-preview td.bg-\[\#ffffcc\],
+.admin-layout.dark .custom-table-preview tr.bg-\[\\#ffffcc\],
+.admin-layout.dark .custom-table-preview td.bg-\[\\#ffffcc\] {
+  background-color: #ffffcc !important; /* Keep it light yellow */
+}
+
+.admin-layout.dark .custom-table-preview td.bg-\[\#ffffcc\],
+.admin-layout.dark .custom-table-preview tr.bg-\[\#ffffcc\] td {
+  color: #0f172a !important; /* Force dark text on light yellow sum row */
+}
+

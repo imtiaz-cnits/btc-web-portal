@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider   = "prisma-client-js"
   engineType = "library"
@@ -12,23 +9,64 @@ datasource db {
 }
 
 model User {
-  id                String    @id @default(cuid())
+  id                String       @id @default(cuid())
   name              String
-  email             String    @unique
+  email             String       @unique
   password          String
-  role              Role      @default(USER)
-  verifyOtp         String    @default("")
-  verifyOtpExpireAt BigInt    @default(0)
-  isAccountVerified Boolean   @default(false)
-  resetOtp          String    @default("")
-  resetOtpExpireAt  BigInt    @default(0)
+  verifyOtp         String       @default("")
+  verifyOtpExpireAt BigInt       @default(0)
+  isAccountVerified Boolean      @default(false)
+  resetOtp          String       @default("")
+  resetOtpExpireAt  BigInt       @default(0)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  role              Role         @default(USER)
+  image             String?
   notices           Notice[]
   winnerLists       WinnerList[]
-  image             String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
 
   @@map("users")
+}
+
+model Notice {
+  id          String         @id @default(cuid())
+  title       String
+  content     String?        @db.Text
+  category    NoticeCategory @default(LTM)
+  authorId    String
+  filePath    String?
+  status      Status         @default(active)
+  publishDate DateTime?
+  lastDate    DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  tableData   String?        @db.LongText
+  type        NoticeType     @default(FILE)
+  year        String?
+  lotteryDate DateTime?
+  createdBy   User           @relation(fields: [authorId], references: [id], onDelete: NoAction)
+
+  @@index([createdAt(sort: Desc)])
+  @@index([authorId], map: "notices_authorId_fkey")
+  @@map("notices")
+}
+
+model WinnerList {
+  id          String    @id @default(cuid())
+  title       String
+  content     String?   @db.Text
+  authorId    String
+  filePath    String?
+  status      Status    @default(active)
+  publishDate DateTime?
+  lastDate    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   User      @relation(fields: [authorId], references: [id], onDelete: NoAction)
+
+  @@index([createdAt(sort: Desc)])
+  @@index([authorId], map: "winner_lists_authorId_fkey")
+  @@map("winner_lists")
 }
 
 enum Role {
@@ -53,43 +91,3 @@ enum Status {
   active
   inactive
 }
-
-model Notice {
-  id          String         @id @default(cuid())
-  title       String
-  content     String?        @db.Text
-  type        NoticeType     @default(FILE)
-  tableData   String?        @db.LongText
-  year        String?
-  category    NoticeCategory @default(LTM)
-  createdBy   User           @relation(fields: [authorId], references: [id])
-  authorId    String
-  filePath    String?
-  status      Status         @default(active)
-  publishDate DateTime?
-  lastDate    DateTime?
-  lotteryDate DateTime?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-
-  @@index([createdAt(sort: Desc)])
-  @@map("notices")
-}
-
-model WinnerList {
-  id          String    @id @default(cuid())
-  title       String
-  content     String?   @db.Text
-  createdBy   User      @relation(fields: [authorId], references: [id])
-  authorId    String
-  filePath    String?
-  status      Status    @default(active)
-  publishDate DateTime?
-  lastDate    DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  @@index([createdAt(sort: Desc)])
-  @@map("winner_lists")
-}
-

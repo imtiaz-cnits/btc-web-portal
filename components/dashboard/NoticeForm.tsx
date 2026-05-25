@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import ReactDOM from "react-dom";
 import { useRouter } from "next/navigation";
 import { createNotice, updateNotice } from "@/app/actions/notices";
 import { 
@@ -26,6 +27,124 @@ import {
 
 interface NoticeFormProps {
   notice?: any; // If provided, we are in EDIT mode
+}
+
+// ----------------------------------------------------
+// Work Location Suggestions
+// ----------------------------------------------------
+const LOCATION_SUGGESTIONS = [
+  "Pabna Sadar, Pabna",
+  "Sujanagar, Pabna",
+  "Ishwardi, Pabna",
+  "Bera, Pabna",
+  "Bhangura, Pabna",
+  "Chatmohar, Pabna",
+  "Faridpur, Pabna",
+  "Atgharia, Pabna",
+  "Santhia, Pabna",
+];
+
+function LocationAutocompleteInput({
+  value,
+  onChange,
+  className,
+  placeholder,
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  className?: string;
+  placeholder?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [highlighted, setHighlighted] = useState(-1);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
+  const inputRef = useRef<HTMLInputElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const filtered = value.trim()
+    ? LOCATION_SUGGESTIONS.filter((s) =>
+        s.toLowerCase().includes(value.toLowerCase())
+      )
+    : LOCATION_SUGGESTIONS;
+
+  const updatePosition = () => {
+    if (!inputRef.current) return;
+    const rect = inputRef.current.getBoundingClientRect();
+    setDropdownStyle({
+      position: "fixed",
+      top: rect.bottom + 2,
+      left: rect.left,
+      width: Math.max(rect.width, 200),
+      zIndex: 99999,
+    });
+  };
+
+  const handleMouseEnter = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    updatePosition();
+    setOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    closeTimer.current = setTimeout(() => setOpen(false), 300);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!open) { if (e.key === "ArrowDown") { updatePosition(); setOpen(true); } return; }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlighted((h) => Math.min(h + 1, filtered.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlighted((h) => Math.max(h - 1, 0));
+    } else if (e.key === "Enter" && highlighted >= 0) {
+      e.preventDefault();
+      onChange(filtered[highlighted]);
+      setOpen(false);
+      setHighlighted(-1);
+    } else if (e.key === "Escape") {
+      setOpen(false);
+    }
+  };
+
+  const dropdown = open && filtered.length > 0 ? (
+    <ul
+      style={dropdownStyle}
+      onMouseEnter={() => { if (closeTimer.current) clearTimeout(closeTimer.current); }}
+      onMouseLeave={handleMouseLeave}
+      className="bg-white border border-slate-200 rounded-lg shadow-xl max-h-48 overflow-y-auto text-xs"
+    >
+      {filtered.map((s, i) => (
+        <li
+          key={s}
+          onMouseDown={(e) => { e.preventDefault(); onChange(s); setOpen(false); setHighlighted(-1); }}
+          className={`px-3 py-2 cursor-pointer font-semibold transition-colors ${
+            i === highlighted
+              ? "bg-green-100 text-green-800"
+              : "hover:bg-slate-100 text-slate-700"
+          }`}
+        >
+          📍 {s}
+        </li>
+      ))}
+    </ul>
+  ) : null;
+
+  return (
+    <div className="relative w-full" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      <input
+        ref={inputRef}
+        type="text"
+        value={value}
+        onChange={(e) => { onChange(e.target.value); updatePosition(); setOpen(true); setHighlighted(-1); }}
+        onKeyDown={handleKeyDown}
+        className={className}
+        placeholder={placeholder || "Type location..."}
+        autoComplete="off"
+      />
+      {typeof document !== "undefined" && ReactDOM.createPortal(dropdown, document.body)}
+    </div>
+  );
 }
 
 // ----------------------------------------------------
@@ -398,7 +517,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       lastDateBlock: "",
       lotteryDateBlock: "",
       payOrderTo: "Executive Engineer, Pabna PWD Division, Pabna",
-      moreInfo: "Md. Babul Islam, e-Tender Solution, Sujanagar, Pabna. Mobile: 01711 222110, https://www.egpbd.com/",
+      moreInfo: "Engr. Md. Shah Alom B.Sc. Engr.(Civil)\nMobile No: 01711-805086\nL M B Market 1st Floor, Pabna.",
       bottomWarning: "ব্যাংক স্টেটমেন্ট অথবা ক্রেডিট কমিটমেন্ট দিতে হবে।",
       headers: ["SL No", "Tender ID", "Description", "Location", "AppCost (Tk)", "Solvency (Tk)", "Security (Tk)", "Doc Fees (Tk)", "Last Date & Time"],
       rows: [["1", "1251464", "Necessary repair works...", "Pabna sadar", "2,72,184", "2,00,000", "7,000", "500", ""]]
@@ -622,7 +741,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                 lastDateBlock: formatCellDateToDmy(parsed.lastDateBlock),
                 lotteryDateBlock: formatCellDateToDmy(parsed.lotteryDateBlock),
                 payOrderTo: parsed.payOrderTo || "",
-                moreInfo: parsed.moreInfo || "",
+                moreInfo: "Engr. Md. Shah Alom B.Sc. Engr.(Civil)\nMobile No: 01711-805086\nL M B Market 1st Floor, Pabna.",
                 bottomWarning: parsed.bottomWarning || "",
                 headers: ["SL No", "Tender ID", "Description", "Location", "AppCost (Tk)", "Solvency (Tk)", "Security (Tk)", "Doc Fees (Tk)", "Last Date & Time"],
                 rows: normalizedLegacyRows
@@ -674,7 +793,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
             lastDateBlock: lastDate || "",
             lotteryDateBlock: "",
             payOrderTo: "Executive Engineer, Pabna PWD Division, Pabna",
-            moreInfo: "Md. Babul Islam, e-Tender Solution, Sujanagar, Pabna. Mobile: 01711 222110, https://www.egpbd.com/",
+            moreInfo: "Engr. Md. Shah Alom B.Sc. Engr.(Civil)\nMobile No: 01711-805086\nL M B Market 1st Floor, Pabna.",
             bottomWarning: "ব্যাংক স্টেটমেন্ট অথবা ক্রেডিট কমিটমেন্ট দিতে হবে।",
             headers: targetHeaders,
             rows: [initialRow],
@@ -824,7 +943,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           lastDateBlock: lastDate || "",
           lotteryDateBlock: "",
           payOrderTo: "Executive Engineer, Pabna PWD Division, Pabna",
-          moreInfo: "Md. Babul Islam, e-Tender Solution, Sujanagar, Pabna. Mobile: 01711 222110, https://www.egpbd.com/",
+          moreInfo: "Engr. Md. Shah Alom B.Sc. Engr.(Civil)\nMobile No: 01711-805086\nL M B Market 1st Floor, Pabna.",
           bottomWarning: "ব্যাংক স্টেটমেন্ট অথবা ক্রেডিট কমিটমেন্ট দিতে হবে।",
           headers: targetHeaders,
           rows: [initialRow],
@@ -1687,24 +1806,39 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                 const cellBg = table.columnColors?.[cIdx] || "#ffffff";
                                 return (
                                   <td key={cIdx} className="p-2 border-r border-slate-200 transition-colors duration-250" style={{ backgroundColor: cellBg }}>
-                                    <input 
-                                      type="text" 
-                                      required
-                                      data-tidx={tIdx}
-                                      data-ridx={rIdx}
-                                      data-cidx={cIdx}
-                                      value={cell} 
-                                      onChange={(e) => handleCellChange(tIdx, rIdx, cIdx, e.target.value)}
-                                      readOnly={isLastDateCol}
-                                      className={`bg-transparent border-0 outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded p-1.5 font-semibold text-slate-800 text-xs ${
-                                        isLastDateCol
-                                          ? "font-bold text-green-700 bg-green-50/10 cursor-not-allowed"
-                                          : isDateField
-                                            ? "flatpickr-datetime-field cursor-pointer font-bold text-green-700 bg-green-50/10"
-                                            : ""
-                                      }`}
-                                      placeholder={isLastDateCol ? "Synced from Top" : isDateField ? "Select Date & Time..." : ""}
-                                    />
+                                    {(() => {
+                                      const isLocationCol = headerName.includes("location") || headerName.includes("লোকেশন") || headerName.includes("স্থান");
+                                      if (isLocationCol) {
+                                        return (
+                                          <LocationAutocompleteInput
+                                            value={cell}
+                                            onChange={(val) => handleCellChange(tIdx, rIdx, cIdx, val)}
+                                            className={`bg-transparent border-0 outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded p-1.5 font-semibold text-slate-800 text-xs`}
+                                            placeholder="Type location..."
+                                          />
+                                        );
+                                      }
+                                      return (
+                                        <input 
+                                          type="text" 
+                                          required
+                                          data-tidx={tIdx}
+                                          data-ridx={rIdx}
+                                          data-cidx={cIdx}
+                                          value={cell} 
+                                          onChange={(e) => handleCellChange(tIdx, rIdx, cIdx, e.target.value)}
+                                          readOnly={isLastDateCol}
+                                          className={`bg-transparent border-0 outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded p-1.5 font-semibold text-slate-800 text-xs ${
+                                            isLastDateCol
+                                              ? "font-bold text-green-700 bg-green-50/10 cursor-not-allowed"
+                                              : isDateField
+                                                ? "flatpickr-datetime-field cursor-pointer font-bold text-green-700 bg-green-50/10"
+                                                : ""
+                                          }`}
+                                          placeholder={isLastDateCol ? "Synced from Top" : isDateField ? "Select Date & Time..." : ""}
+                                        />
+                                      );
+                                    })()}
                                   </td>
                                 );
                               })}
@@ -1750,15 +1884,14 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
                       <div className="space-y-1">
                         <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                          <Info className="w-3.5 h-3.5 text-slate-400" /> Contact Info / e-Tender Solutions (Bangla / English)
+                          <Info className="w-3.5 h-3.5 text-slate-400" /> Contact Info / e-Tender Solutions (Fixed)
                         </label>
-                        <input 
-                          type="text"
-                          value={table.moreInfo || ""}
-                          onChange={(e) => handlePwdFieldChange(tIdx, "moreInfo", e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-slate-800 outline-none text-xs font-semibold focus:border-[var(--primary-color)] transition"
-                          placeholder="Md. Babul Islam, e-Tender Solution..."
-                        />
+                        <div className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-500 text-xs font-semibold cursor-not-allowed select-none leading-relaxed whitespace-pre-line">
+                          Engr. Md. Shah Alom B.Sc. Engr.(Civil){"\n"}Mobile No: 01711-805086{"\n"}L M B Market 1st Floor, Pabna.
+                        </div>
+                        <p className="text-[9px] text-slate-400 italic flex items-center gap-1 mt-0.5">
+                          <Info className="w-3 h-3" /> This field is fixed and cannot be edited.
+                        </p>
                       </div>
 
                       <div className="space-y-1">

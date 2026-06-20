@@ -28,6 +28,14 @@ export async function createNotice(formData: FormData) {
     return { success: false, message: "Title and Category are required." };
   }
 
+  if (lastDate && lotteryDate) {
+    const lastDateObj = new Date(lastDate);
+    const lotteryDateObj = new Date(lotteryDate);
+    if (!isNaN(lastDateObj.getTime()) && !isNaN(lotteryDateObj.getTime()) && lotteryDateObj < lastDateObj) {
+      return { success: false, message: "Lottery Date cannot be before the Last Date of submission." };
+    }
+  }
+
   let filePath = null;
   const file = formData.get("file") as File;
   if (file && file.size > 0) {
@@ -81,6 +89,14 @@ export async function updateNotice(id: string, formData: FormData) {
   
   if (!title || !category) {
     return { success: false, message: "Title and Category are required." };
+  }
+
+  if (lastDate && lotteryDate) {
+    const lastDateObj = new Date(lastDate);
+    const lotteryDateObj = new Date(lotteryDate);
+    if (!isNaN(lastDateObj.getTime()) && !isNaN(lotteryDateObj.getTime()) && lotteryDateObj < lastDateObj) {
+      return { success: false, message: "Lottery Date cannot be before the Last Date of submission." };
+    }
   }
 
   // Handle file upload if a new one is provided

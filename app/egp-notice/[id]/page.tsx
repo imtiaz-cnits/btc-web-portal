@@ -31,15 +31,35 @@ export default async function PublicSingleNoticePage({
     notFound();
   }
 
-  const pubDate = notice.publishDate || notice.createdAt;
-  const d = new Date(pubDate);
-  const formattedDate = `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+  let formattedPublishDate = "N/A";
+  if (notice.publishDate) {
+    const pd = new Date(notice.publishDate);
+    formattedPublishDate = `${String(pd.getDate()).padStart(2, '0')}-${String(pd.getMonth() + 1).padStart(2, '0')}-${pd.getFullYear()}`;
+  } else if (notice.createdAt) {
+    const pd = new Date(notice.createdAt);
+    formattedPublishDate = `${String(pd.getDate()).padStart(2, '0')}-${String(pd.getMonth() + 1).padStart(2, '0')}-${pd.getFullYear()}`;
+  }
+
+  let formattedLastDate = "";
+  if (notice.lastDate) {
+    const ld = new Date(notice.lastDate);
+    formattedLastDate = `${String(ld.getDate()).padStart(2, '0')}-${String(ld.getMonth() + 1).padStart(2, '0')}-${ld.getFullYear()}`;
+  }
+
+  let formattedLotteryDate = "";
+  if (notice.lotteryDate) {
+    const ld = new Date(notice.lotteryDate);
+    formattedLotteryDate = `${String(ld.getDate()).padStart(2, '0')}-${String(ld.getMonth() + 1).padStart(2, '0')}-${ld.getFullYear()}`;
+  }
 
   const mappedNotice = {
     id: notice.id,
     title: notice.title,
     category: categoryMap[notice.category] || "LTM",
-    date: formattedDate,
+    publishDate: formattedPublishDate,
+    lastDate: formattedLastDate,
+    lotteryDate: formattedLotteryDate,
+    date: formattedLastDate || formattedPublishDate, // backward compatibility fallback for date field
     type: notice.type,
     content: notice.content,
     tableData: notice.tableData,

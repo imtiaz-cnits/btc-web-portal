@@ -36,20 +36,41 @@ export default async function AdminNoticesPage({
   // Count matches based on search query before status filter
   const now = new Date();
   const totalCount = filtered.filter(n => !(n.status === "active" && n.publishDate && new Date(n.publishDate) > now)).length;
-  const activeCount = filtered.filter(n => n.status === "active" && (!n.publishDate || new Date(n.publishDate) <= now)).length;
+  const activeCount = filtered.filter(n => 
+    n.status === "active" && 
+    (!n.publishDate || new Date(n.publishDate) <= now) &&
+    (n.category === "LOTTERY_RESULT" || !n.lastDate || new Date(n.lastDate) >= now)
+  ).length;
   const draftCount = filtered.filter(n => n.status !== "active").length;
   const scheduledCount = filtered.filter(n => n.status === "active" && n.publishDate && new Date(n.publishDate) > now).length;
+  const archiveCount = filtered.filter(n => 
+    n.status === "active" && 
+    n.lastDate && 
+    new Date(n.lastDate) < now && 
+    n.category !== "LOTTERY_RESULT"
+  ).length;
 
   // Filter based on status tabs
   let notices = filtered;
   if (filter === "all") {
     notices = filtered.filter(n => !(n.status === "active" && n.publishDate && new Date(n.publishDate) > now));
   } else if (filter === "published") {
-    notices = filtered.filter(n => n.status === "active" && (!n.publishDate || new Date(n.publishDate) <= now));
+    notices = filtered.filter(n => 
+      n.status === "active" && 
+      (!n.publishDate || new Date(n.publishDate) <= now) &&
+      (n.category === "LOTTERY_RESULT" || !n.lastDate || new Date(n.lastDate) >= now)
+    );
   } else if (filter === "draft") {
     notices = filtered.filter(n => n.status !== "active");
   } else if (filter === "scheduled") {
     notices = filtered.filter(n => n.status === "active" && n.publishDate && new Date(n.publishDate) > now);
+  } else if (filter === "archive") {
+    notices = filtered.filter(n => 
+      n.status === "active" && 
+      n.lastDate && 
+      new Date(n.lastDate) < now && 
+      n.category !== "LOTTERY_RESULT"
+    );
   }
 
   // Pagination calculation
@@ -127,6 +148,17 @@ export default async function AdminNoticesPage({
             Scheduled
             <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${filter === "scheduled" ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-500"
               }`}>{scheduledCount}</span>
+          </Link>
+          <Link
+            href={`/admin/egp-notices?filter=archive${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
+            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "archive"
+                ? "border-[var(--primary-color)] text-[var(--primary-color)]"
+                : "border-transparent text-slate-400 hover:text-slate-600"
+              }`}
+          >
+            Archive
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${filter === "archive" ? "bg-purple-50 text-purple-700" : "bg-slate-100 text-slate-500"
+              }`}>{archiveCount}</span>
           </Link>
         </div>
         <div className="pb-2.5">

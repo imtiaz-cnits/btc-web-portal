@@ -5,7 +5,11 @@ export const revalidate = 0; // Live data on every load, prevents build-time dat
 
 export default async function PublicNoticesPage() {
   const notices = await getNotices();
-  const activeNotices = notices.filter(n => n.status === 'active');
+  const activeNotices = notices.filter(n => 
+    n.status === 'active' && 
+    (!n.publishDate || new Date(n.publishDate) <= new Date()) &&
+    (n.category === 'LOTTERY_RESULT' || !n.lastDate || new Date(n.lastDate) >= new Date())
+  );
 
   return (
     <div className="bg-gray-50 min-h-screen py-12">
@@ -40,7 +44,7 @@ export default async function PublicNoticesPage() {
                 </div>
                 <Link 
                   href={`/egp-notice/${notice.id}`}
-                  className="px-6 py-2 bg-[var(--primary-color)] text-white rounded-lg font-semibold hover:bg-[var(--text-1)] transition"
+                  className="px-6 py-2 bg-[var(--primary-color)] text-white rounded-lg font-semibold hover:bg-[var(--text-1)] transition cursor-pointer"
                 >
                   VIEW DETAILS
                 </Link>

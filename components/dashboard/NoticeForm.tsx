@@ -656,7 +656,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         if (el._flatpickr) el._flatpickr.destroy();
       });
     };
-  }, [showScheduleModal]);
+  }, [showScheduleModal, category]);
 
   // Table date Flatpickr binding is handled lower in the file after handlers are initialized.
 
@@ -1197,7 +1197,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
       const formData = new FormData(formEl);
       
-      // Parse publish date: use overridePublishDate if scheduling, otherwise force to current time for instant publication
+      // Parse publish date: use overridePublishDate if scheduling, otherwise get from form field
       if (overridePublishDate !== undefined) {
         const publishDateObj = parseDateTimeDmyToDate(overridePublishDate);
         if (publishDateObj) {
@@ -1206,7 +1206,13 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           formData.set("publishDate", "");
         }
       } else {
-        formData.set("publishDate", new Date().toISOString());
+        const formPublishDate = formData.get("publishDate") as string;
+        const publishDateObj = parseDateTimeDmyToDate(formPublishDate);
+        if (publishDateObj) {
+          formData.set("publishDate", publishDateObj.toISOString());
+        } else {
+          formData.set("publishDate", new Date().toISOString());
+        }
       }
 
       const lastDateObj = parseDateTimeDmyToDate(formData.get("lastDate") as string);
@@ -1221,6 +1227,13 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         formData.set("lotteryDate", lotteryDateObj.toISOString());
       } else {
         formData.set("lotteryDate", "");
+      }
+
+      // Check if Lottery Date is before Last Date of Submission
+      if (lastDateObj && lotteryDateObj && lotteryDateObj < lastDateObj) {
+        setErrorMessage("Lottery Date cannot be before the Last Date of submission.");
+        setLoading(false);
+        return;
       }
       
       // Add additional attributes manually
@@ -1315,7 +1328,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   ];
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-8 min-w-0 w-full overflow-hidden">
+    <form onSubmit={handleSubmit} className="space-y-8 min-w-0 w-full overflow-hidden">
       
       {/* Notice Basic Settings Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 shrink-0">
@@ -1352,6 +1365,23 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           isOpen={openSelect === "year"}
           onToggle={() => setOpenSelect(openSelect === "year" ? null : "year")}
         />
+
+        <div className="space-y-2 relative">
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-slate-400" /> Publish Date
+          </label>
+          <div className="relative">
+            <input 
+              type="text" 
+              name="publishDate" 
+              value={publishDate}
+              onChange={(e) => setPublishDate(e.target.value)}
+              placeholder="Select date..."
+              className="flatpickr-date bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3.5 text-slate-800 outline-none text-sm font-semibold focus:border-[var(--primary-color)] focus:bg-white transition cursor-pointer w-full shadow-xs"
+            />
+            <Calendar className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+        </div>
 
         <div className="space-y-2 relative">
           <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
@@ -1816,6 +1846,24 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                             className={`bg-transparent border-0 outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded p-1.5 font-semibold text-slate-800 text-xs`}
                                             placeholder="Type location..."
                                           />
+                                        );
+                                      }
+                                      const isMethodCol = headerName.includes("method") || headerName.includes("matho") || headerName.includes("পদ্ধতি");
+                                      if (isMethodCol) {
+                                        const METHOD_OPTIONS = ["OTM", "LTM", "RFQ", "DPM", "OSTETM", "LTM SOCIAL", "OTM SOCIAL"];
+                                        return (
+                                          <select
+                                            value={cell}
+                                            onChange={(e) => handleCellChange(tIdx, rIdx, cIdx, e.target.value)}
+                                            className="bg-transparent border-0 outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded p-1.5 font-bold text-slate-800 text-xs cursor-pointer"
+                                          >
+                                            <option value="">Select Method...</option>
+                                            {METHOD_OPTIONS.map((opt) => (
+                                              <option key={opt} value={opt}>
+                                                {opt}
+                                              </option>
+                                            ))}
+                                          </select>
                                         );
                                       }
                                       return (

@@ -90,6 +90,9 @@ interface NoticeItem {
   id: string;
   title: string;
   category: string;
+  publishDate: string;
+  lastDate?: string;
+  lotteryDate?: string;
   date: string;
   type: "FILE" | "TEXT" | "TABLE";
   content?: string | null;
@@ -371,7 +374,8 @@ export default function SingleNoticeClient({
                   <h1 class="notice-title">${notice.title}</h1>
                   <div class="notice-details-bar">
                     <span class="detail-item"><strong>Category:</strong> ${notice.category}</span>
-                    <span class="detail-item"><strong>Date:</strong> ${notice.date}</span>
+                    <span class="detail-item"><strong>Publish Date:</strong> ${notice.publishDate}</span>
+                    ${notice.lastDate ? `<span class="detail-item"><strong>Last Date:</strong> ${notice.lastDate}</span>` : ''}
                   </div>
                 </div>
               ` : ''}
@@ -445,13 +449,13 @@ export default function SingleNoticeClient({
         <div className="w-full bg-white border-b border-slate-200 py-3.5 px-4 flex justify-center gap-3 print:hidden">
           <Link
             href="/"
-            className="bg-[#e74c3c] hover:bg-[#c0392b] !text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-1.5 shadow-sm transition-all"
+            className="bg-[#e74c3c] hover:bg-[#c0392b] !text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
           >
             <i className="fa-solid fa-home"></i> Home
           </Link>
           <Link
             href="/egp-notice"
-            className="bg-[#34495e] hover:bg-[#2c3e50] !text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-1.5 shadow-sm transition-all"
+            className="bg-[#34495e] hover:bg-[#2c3e50] !text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
           >
             <i className="fa-solid fa-arrow-left"></i> Back
           </Link>
@@ -741,20 +745,33 @@ L M B Market 1st Floor, Pabna.`}
           <div className="flex-1">
             <Link
               href="/egp-notice"
-              className="inline-flex items-center bg-primary hover:!text-secondary !text-secondary px-4 py-2 mb-5 rounded-xl font-bold text-sm uppercase hover:bg-text-1 transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all"
+              className="inline-flex items-center bg-primary hover:!text-secondary !text-secondary px-4 py-2 mb-5 rounded-xl font-bold text-sm uppercase hover:bg-text-1 transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer"
             >
               <i className="fa-solid fa-arrow-left"></i> Back to All Notices
             </Link>
             <h1 className="text-2xl md:text-3xl font-bold text-text-1 font-bangla leading-tight">
               {notice.title}
             </h1>
-            <div className="flex items-center gap-4 mt-4">
-              <span className="bg-primary text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-4 text-sm font-bold">
+              <span className="bg-primary text-white px-4 py-1.5 rounded-full text-xs uppercase tracking-wider">
                 {notice.category}
               </span>
-              <span className="text-text-2 text-sm font-bold">
-                <i className="fa-solid fa-calendar-days mr-2"></i> {notice.date}
+              <span className="text-text-2 flex items-center gap-1.5">
+                <i className="fa-solid fa-calendar-plus text-primary"></i>
+                Publish Date: {notice.publishDate}
               </span>
+              {notice.lastDate && (
+                <span className="text-text-2 flex items-center gap-1.5">
+                  <i className="fa-solid fa-calendar-day text-primary"></i>
+                  Last Date: {notice.lastDate}
+                </span>
+              )}
+              {notice.lotteryDate && (
+                <span className="text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full text-xs flex items-center gap-1.5">
+                  <i className="fa-solid fa-calendar-check text-emerald-600"></i>
+                  Lottery Date: {notice.lotteryDate}
+                </span>
+              )}
             </div>
           </div>
 
@@ -762,7 +779,7 @@ L M B Market 1st Floor, Pabna.`}
           <div className="flex flex-wrap gap-3 w-full lg:w-auto shrink-0">
             <button
               onClick={handlePrint}
-              className="flex-1 lg:flex-initial bg-text-1 text-white px-6 py-3.5 rounded-xl font-bold text-sm uppercase hover:bg-primary transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all"
+              className="flex-1 lg:flex-initial bg-text-1 text-white px-6 py-3.5 rounded-xl font-bold text-sm uppercase hover:bg-primary transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer"
             >
               <i className="fa-solid fa-print"></i> Print Notice
             </button>
@@ -770,7 +787,7 @@ L M B Market 1st Floor, Pabna.`}
               <a
                 href={notice.filePath}
                 download
-                className="flex-1 lg:flex-initial bg-primary hover:!text-secondary !text-secondary px-6 py-3.5 rounded-xl font-bold text-sm uppercase hover:bg-text-1 transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all"
+                className="flex-1 lg:flex-initial bg-primary hover:!text-secondary !text-secondary px-6 py-3.5 rounded-xl font-bold text-sm uppercase hover:bg-text-1 transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer"
               >
                 <i className="fa-solid fa-download"></i> Download File
               </a>

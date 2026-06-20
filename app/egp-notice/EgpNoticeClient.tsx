@@ -92,7 +92,7 @@ export default function EgpNoticeClient({ initialNotices }: EgpNoticeClientProps
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 uppercase tracking-wide ${activeTab.toLowerCase() === tab.toLowerCase()
+                className={`px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 uppercase tracking-wide cursor-pointer ${activeTab.toLowerCase() === tab.toLowerCase()
                     ? "bg-primary text-white shadow-lg scale-105"
                     : "bg-transparent text-text-2 hover:bg-shade-1"
                   }`}
@@ -117,7 +117,7 @@ export default function EgpNoticeClient({ initialNotices }: EgpNoticeClientProps
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="w-10 h-10 rounded-xl bg-white border border-ac-2 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-10 h-10 rounded-xl bg-white border border-ac-2 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             <i className="fa-solid fa-chevron-left"></i>
           </button>
@@ -126,7 +126,7 @@ export default function EgpNoticeClient({ initialNotices }: EgpNoticeClientProps
             <button
               key={page}
               onClick={() => setCurrentPage(page)}
-              className={`w-10 h-10 rounded-xl font-bold text-sm transition-all ${currentPage === page
+              className={`w-10 h-10 rounded-xl font-bold text-sm transition-all cursor-pointer ${currentPage === page
                   ? "bg-primary text-white shadow-lg"
                   : "bg-white border border-ac-2 text-slate-600 hover:bg-slate-50"
                 }`}
@@ -138,7 +138,7 @@ export default function EgpNoticeClient({ initialNotices }: EgpNoticeClientProps
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="w-10 h-10 rounded-xl bg-white border border-ac-2 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-10 h-10 rounded-xl bg-white border border-ac-2 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             <i className="fa-solid fa-chevron-right"></i>
           </button>

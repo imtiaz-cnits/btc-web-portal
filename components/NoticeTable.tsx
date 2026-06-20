@@ -7,6 +7,7 @@ interface Notice {
   id: string;
   no?: string;
   title: string;
+  publishDate?: string;
   date: string;
   lotteryDate?: string;
   fileUrl: string;
@@ -32,6 +33,9 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
               </th>
               <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm">
                 Procuring Entity / Title
+              </th>
+              <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-40 text-center">
+                Publish Date
               </th>
               {isLotteryResult && (
                 <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-40 text-center">
@@ -59,6 +63,11 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
                       {notice.title}
                     </h4>
                   </td>
+                  <td className="py-2.5 px-4 text-center">
+                    <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-text-2 text-sm font-bold">
+                      {notice.publishDate || "N/A"}
+                    </div>
+                  </td>
                   {isLotteryResult && (
                     <td className="py-2.5 px-4 text-center">
                       <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-emerald-600 text-sm font-bold bg-green-50/50">
@@ -75,7 +84,7 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
                     <div className="flex items-center justify-center gap-2">
                       <Link
                         href={`/egp-notice/${notice.id}`}
-                        className="bg-primary hover:!text-secondary !text-white px-4 py-1.5 rounded-lg font-bold text-xs uppercase hover:bg-text-1 transition shadow-sm flex items-center gap-2"
+                        className="bg-primary hover:!text-secondary !text-white px-4 py-1.5 rounded-lg font-bold text-xs uppercase hover:bg-text-1 transition shadow-sm flex items-center gap-2 cursor-pointer"
                       >
                         <i className="fa-solid fa-eye"></i> View
                       </Link>
@@ -83,7 +92,7 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
                         <a
                           href={notice.fileUrl}
                           download
-                          className="bg-text-1 !text-secondary px-3.5 py-1.5 rounded-lg font-bold text-xs uppercase hover:bg-primary transition shadow-sm flex items-center gap-2"
+                          className="bg-text-1 !text-secondary px-3.5 py-1.5 rounded-lg font-bold text-xs uppercase hover:bg-primary transition shadow-sm flex items-center gap-2 cursor-pointer"
                         >
                           <i className="fa-solid fa-download"></i>
                         </a>
@@ -95,7 +104,7 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
             ) : (
               <tr>
                 <td
-                  colSpan={isLotteryResult ? 5 : 4}
+                  colSpan={isLotteryResult ? 6 : 5}
                   className="p-10 text-center text-text-2 font-medium italic"
                 >
                   No notices found in this category.
@@ -125,6 +134,10 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <div className="text-[11px] text-text-2 font-bold uppercase flex items-center gap-1">
+                    <i className="fa-solid fa-calendar-plus text-primary text-xs"></i>
+                    Pub: {notice.publishDate || "N/A"}
+                  </div>
+                  <div className="text-[11px] text-text-2 font-bold uppercase flex items-center gap-1">
                     <i className="fa-solid fa-calendar-day text-primary text-xs"></i>
                     Last: {notice.date}
                   </div>
@@ -144,7 +157,7 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
               <div className="flex items-center gap-3">
                 <Link
                   href={`/egp-notice/${notice.id}`}
-                  className="flex-1 bg-primary hover:bg-text-1 hover:!text-secondary  !text-text-1 py-3 rounded-xl font-bold text-[11px] uppercase flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all"
+                  className="flex-1 bg-primary hover:bg-text-1 hover:!text-secondary  !text-text-1 py-3 rounded-xl font-bold text-[11px] uppercase flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all cursor-pointer"
                 >
                   <i className="fa-solid fa-eye"></i> View Detail
                 </Link>
@@ -152,7 +165,7 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
                   <a
                     href={notice.fileUrl}
                     download
-                    className="bg-text-1 !text-secondary hover:!text-black hover:bg-primary p-3 rounded-xl font-bold text-[11px] uppercase flex items-center justify-center aspect-square shadow-sm active:scale-95 transition-all"
+                    className="bg-text-1 !text-secondary hover:!text-black hover:bg-primary p-3 rounded-xl font-bold text-[11px] uppercase flex items-center justify-center aspect-square shadow-sm active:scale-95 transition-all cursor-pointer"
                   >
                     <i className="fa-solid fa-download"></i>
                   </a>

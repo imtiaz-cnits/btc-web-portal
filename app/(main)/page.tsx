@@ -26,6 +26,15 @@ export default async function HomePage() {
         OR: [
           { publishDate: null },
           { publishDate: { lte: new Date() } }
+        ],
+        AND: [
+          {
+            OR: [
+              { category: "LOTTERY_RESULT" },
+              { lastDate: null },
+              { lastDate: { gte: new Date() } }
+            ]
+          }
         ]
       },
       orderBy: { createdAt: "desc" },
@@ -35,9 +44,20 @@ export default async function HomePage() {
   }
 
   const homepageNotices = allActiveNotices.map((notice) => {
-    const displayDate = notice.lastDate || notice.publishDate || notice.createdAt;
-    const d = new Date(displayDate);
-    const formattedDate = `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+    let formattedPublishDate = "N/A";
+    if (notice.publishDate) {
+      const pd = new Date(notice.publishDate);
+      formattedPublishDate = `${String(pd.getDate()).padStart(2, '0')}-${String(pd.getMonth() + 1).padStart(2, '0')}-${pd.getFullYear()}`;
+    } else if (notice.createdAt) {
+      const pd = new Date(notice.createdAt);
+      formattedPublishDate = `${String(pd.getDate()).padStart(2, '0')}-${String(pd.getMonth() + 1).padStart(2, '0')}-${pd.getFullYear()}`;
+    }
+
+    let formattedLastDate = "N/A";
+    if (notice.lastDate) {
+      const ld = new Date(notice.lastDate);
+      formattedLastDate = `${String(ld.getDate()).padStart(2, '0')}-${String(ld.getMonth() + 1).padStart(2, '0')}-${ld.getFullYear()}`;
+    }
 
     let formattedLotteryDate = "";
     if (notice.lotteryDate) {
@@ -48,7 +68,8 @@ export default async function HomePage() {
     return {
       id: notice.id,
       title: notice.title,
-      date: formattedDate,
+      publishDate: formattedPublishDate,
+      date: formattedLastDate,
       lotteryDate: formattedLotteryDate,
       fileUrl: notice.filePath || "",
       category: categoryMap[notice.category] || "LTM",

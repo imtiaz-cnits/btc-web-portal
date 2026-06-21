@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { deleteNotice } from "@/app/actions/notices";
+import { deleteNotice, saveNoticeWinners } from "@/app/actions/notices";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import DeleteButton from "@/components/dashboard/DeleteButton";
 import WhatsAppShareButton from "@/components/dashboard/WhatsAppShareButton";
 import {
@@ -24,6 +26,7 @@ interface Notice {
   year?: string | null;
   status: string;
   publishDate?: Date | null;
+  lastDate?: Date | string | null;
   lotteryDate?: Date | string | null;
   type: string;
   content?: string | null;
@@ -100,6 +103,9 @@ function TableDataPreview({ tableData }: { tableData: string }) {
               const lower = h.toLowerCase();
               return lower.includes("fee") || lower.includes("price");
             });
+            const winnerColIdx = headers.findIndex((h: string) =>
+              h.toUpperCase().replace(/\./g, "").includes("WINNER")
+            );
 
             const parseMoney = (val: string) => {
               if (!val) return 0;
@@ -156,26 +162,40 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {rows.map((row: string[], rIdx: number) => (
-                        <tr key={rIdx} className={rIdx % 2 === 0 ? "bg-white" : "bg-slate-50"}>
-                          {row.map((cell: string, cIdx: number) => {
-                            const cellBg = table.columnColors?.[cIdx];
-                            const isDesc = (headers[cIdx] || "").toLowerCase().includes("description");
-                            const isCurrency = isCurrencyColumn(headers[cIdx] || "");
-                            return (
-                              <td 
-                                key={cIdx} 
-                                style={cellBg ? { backgroundColor: cellBg } : undefined}
-                                className={`px-3 py-2 border border-slate-200 !text-slate-800 ${
-                                  isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-nowrap"
-                                } ${isCurrency ? "text-right" : "text-left"}`}
-                              >
-                                {formatCellValue(cell, headers[cIdx] || "")}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      ))}
+                      {rows.map((row: string[], rIdx: number) => {
+                        const isWinnerRow = winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
+                        return (
+                          <tr 
+                            key={rIdx} 
+                            className={
+                              isWinnerRow 
+                                ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500" 
+                                : rIdx % 2 === 0 
+                                  ? "bg-white" 
+                                  : "bg-slate-50"
+                            }
+                          >
+                            {row.map((cell: string, cIdx: number) => {
+                              const cellBg = isWinnerRow ? "#fffbeb" : table.columnColors?.[cIdx];
+                              const isDesc = (headers[cIdx] || "").toLowerCase().includes("description");
+                              const isCurrency = isCurrencyColumn(headers[cIdx] || "");
+                              const isWinnerCell = cIdx === winnerColIdx;
+                              return (
+                                <td 
+                                  key={cIdx} 
+                                  style={cellBg ? { backgroundColor: cellBg } : undefined}
+                                  className={`px-3 py-2 border border-slate-200 !text-slate-800 ${
+                                    isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-nowrap"
+                                  } ${isCurrency ? "text-right" : "text-left"}`}
+                                >
+                                  {isWinnerCell && isWinnerRow && <span className="inline-block mr-1">🏆</span>}
+                                  {formatCellValue(cell, headers[cIdx] || "")}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        );
+                      })}
 
                       {/* Sum Totals Row if any sum matches */}
                       {(securityColIdx !== -1 || docFeesColIdx !== -1) && (
@@ -202,7 +222,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                             const minTotalColIdx = Math.min(
                               securityColIdx !== -1
                                 ? securityColIdx
-                                : docFeesColIdx,
+                                  : docFeesColIdx,
                               headers.length,
                             );
                             if (idx < minTotalColIdx) {
@@ -251,6 +271,10 @@ function TableDataPreview({ tableData }: { tableData: string }) {
     if (parsed.isPwdTemplate) {
       const headerBg = parsed.headerBgColor;
       const isCustomHeader = !!headerBg;
+      const headers = parsed.headers || [];
+      const winnerColIdx = headers.findIndex((h: string) =>
+        h.toUpperCase().replace(/\./g, "").includes("WINNER")
+      );
       return (
         <div className="space-y-2 custom-table-preview">
           {parsed.officeName && (
@@ -263,7 +287,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                   style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
                   className={isCustomHeader ? "text-slate-800" : "bg-[#1b4332] text-white"}
                 >
-                  {(parsed.headers || []).map((h: string, i: number) => (
+                  {headers.map((h: string, i: number) => (
                     <th 
                       key={i} 
                       style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
@@ -277,25 +301,39 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                 </tr>
               </thead>
               <tbody>
-                {(parsed.rows || []).map((row: string[], rIdx: number) => (
-                  <tr key={rIdx} className={rIdx % 2 === 0 ? "bg-white" : "bg-slate-50"}>
-                    {row.map((cell: string, cIdx: number) => {
-                      const cellBg = parsed.columnColors?.[cIdx];
-                      const isDesc = (parsed.headers?.[cIdx] || "").toLowerCase().includes("description");
-                      return (
-                        <td 
-                          key={cIdx} 
-                          style={cellBg ? { backgroundColor: cellBg } : undefined}
-                          className={`px-3 py-2 border border-slate-200 !text-slate-800 ${
-                            isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-nowrap"
-                          }`}
-                        >
-                          {cell}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
+                {(parsed.rows || []).map((row: string[], rIdx: number) => {
+                  const isWinnerRow = winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
+                  return (
+                    <tr 
+                      key={rIdx} 
+                      className={
+                        isWinnerRow 
+                          ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500" 
+                          : rIdx % 2 === 0 
+                            ? "bg-white" 
+                            : "bg-slate-50"
+                      }
+                    >
+                      {row.map((cell: string, cIdx: number) => {
+                        const cellBg = isWinnerRow ? "#fffbeb" : parsed.columnColors?.[cIdx];
+                        const isDesc = (headers?.[cIdx] || "").toLowerCase().includes("description");
+                        const isWinnerCell = cIdx === winnerColIdx;
+                        return (
+                          <td 
+                            key={cIdx} 
+                            style={cellBg ? { backgroundColor: cellBg } : undefined}
+                            className={`px-3 py-2 border border-slate-200 !text-slate-800 ${
+                              isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-nowrap"
+                            }`}
+                          >
+                            {isWinnerCell && isWinnerRow && <span className="inline-block mr-1">🏆</span>}
+                            {cell}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -307,6 +345,10 @@ function TableDataPreview({ tableData }: { tableData: string }) {
     if (parsed.headers && parsed.rows) {
       const headerBg = parsed.headerBgColor;
       const isCustomHeader = !!headerBg;
+      const headers = parsed.headers || [];
+      const winnerColIdx = headers.findIndex((h: string) =>
+        h.toUpperCase().replace(/\./g, "").includes("WINNER")
+      );
       return (
         <div className="overflow-x-auto rounded-xl border border-slate-200 custom-table-preview">
           <table className="w-full text-xs border-collapse">
@@ -315,7 +357,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                 style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
                 className={isCustomHeader ? "text-slate-800" : "bg-[#1b4332] text-white"}
               >
-                {(parsed.headers || []).map((h: string, i: number) => (
+                {headers.map((h: string, i: number) => (
                   <th 
                     key={i} 
                     style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
@@ -329,25 +371,39 @@ function TableDataPreview({ tableData }: { tableData: string }) {
               </tr>
             </thead>
             <tbody>
-              {(parsed.rows || []).map((row: string[], rIdx: number) => (
-                <tr key={rIdx} className={rIdx % 2 === 0 ? "bg-white" : "bg-slate-50"}>
-                  {row.map((cell: string, cIdx: number) => {
-                    const cellBg = parsed.columnColors?.[cIdx];
-                    const isDesc = (parsed.headers?.[cIdx] || "").toLowerCase().includes("description");
-                    return (
-                      <td 
-                        key={cIdx} 
-                        style={cellBg ? { backgroundColor: cellBg } : undefined}
-                        className={`px-3 py-2 border border-slate-200 !text-slate-800 ${
-                          isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-nowrap"
-                        }`}
-                      >
-                        {cell}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
+              {(parsed.rows || []).map((row: string[], rIdx: number) => {
+                const isWinnerRow = winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
+                return (
+                  <tr 
+                    key={rIdx} 
+                    className={
+                      isWinnerRow 
+                        ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500" 
+                        : rIdx % 2 === 0 
+                          ? "bg-white" 
+                          : "bg-slate-50"
+                    }
+                  >
+                    {row.map((cell: string, cIdx: number) => {
+                      const cellBg = isWinnerRow ? "#fffbeb" : parsed.columnColors?.[cIdx];
+                      const isDesc = (headers?.[cIdx] || "").toLowerCase().includes("description");
+                      const isWinnerCell = cIdx === winnerColIdx;
+                      return (
+                        <td 
+                          key={cIdx} 
+                          style={cellBg ? { backgroundColor: cellBg } : undefined}
+                          className={`px-3 py-2 border border-slate-200 !text-slate-800 ${
+                            isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-nowrap"
+                          }`}
+                        >
+                          {isWinnerCell && isWinnerRow && <span className="inline-block mr-1">🏆</span>}
+                          {cell}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -371,6 +427,128 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
   const nowDate = new Date(now);
   const [quickViewNotice, setQuickViewNotice] = useState<Notice | null>(null);
 
+  const [isSelectingWinners, setIsSelectingWinners] = useState(false);
+  const [tempTableData, setTempTableData] = useState<any>(null);
+  const [submitWinnersLoading, setSubmitWinnersLoading] = useState(false);
+
+  const initWinnersMode = (notice: Notice) => {
+    try {
+      const parsed = JSON.parse(notice.tableData || "{}");
+      let tables = [];
+      if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
+        tables = parsed.tables;
+      } else if (parsed.isPwdTemplate) {
+        tables = [
+          {
+            type: "pwd_ltm",
+            officeName: parsed.officeName || "",
+            noticeDateBlock: parsed.noticeDateBlock || "",
+            lastDateBlock: parsed.lastDateBlock || "",
+            lotteryDateBlock: parsed.lotteryDateBlock || "",
+            payOrderTo: parsed.payOrderTo || "",
+            moreInfo: parsed.moreInfo || "",
+            bottomWarning: parsed.bottomWarning || "",
+            headers: parsed.headers || ["SL No", "Tender ID", "Description", "Location", "AppCost (Tk)", "Solvency (Tk)", "Security (Tk)", "Doc Fees (Tk)", "Last Date & Time"],
+            rows: parsed.rows || [],
+            columnColors: parsed.columnColors || []
+          }
+        ];
+      } else if (parsed.headers && parsed.rows) {
+        tables = [
+          {
+            type: "standard",
+            headers: parsed.headers,
+            rows: parsed.rows,
+            columnColors: parsed.columnColors || []
+          }
+        ];
+      }
+
+      // Ensure "WINNER LIST NAME" column exists in each table
+      const updatedTables = tables.map((table: any) => {
+        const headers = [...(table.headers || [])];
+        const rows = (table.rows || []).map((r: any) => Array.isArray(r) ? [...r] : []);
+        const columnColors = [...(table.columnColors || [])];
+
+        const winnerColIdx = headers.findIndex((h: string) => h.toUpperCase().replace(/\./g, "").includes("WINNER"));
+        if (winnerColIdx === -1) {
+          headers.push("WINNER LIST NAME");
+          columnColors.push("#ffffcc");
+          rows.forEach((r: any) => r.push(""));
+        }
+        return {
+          ...table,
+          headers,
+          rows,
+          columnColors
+        };
+      });
+
+      setTempTableData({
+        version: "v2",
+        tables: updatedTables
+      });
+      setIsSelectingWinners(true);
+    } catch (err) {
+      console.error("Failed to initialize winner selection mode", err);
+    }
+  };
+
+  const handleSaveWinners = async () => {
+    if (!quickViewNotice) return;
+    setSubmitWinnersLoading(true);
+    try {
+      let pdfBase64 = "";
+
+      // Ensure the hidden render div exists
+      const element = document.getElementById("pdf-render-capture");
+      if (element) {
+        const canvas = await html2canvas(element, {
+          scale: 2, // higher resolution
+          useCORS: true,
+          backgroundColor: "#ffffff",
+        });
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+        
+        const pdf = new jsPDF("p", "mm", "a4");
+        const imgWidth = 210; // A4 size width in mm
+        const pageHeight = 295; // A4 size height in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+
+        const pdfDataUri = pdf.output("datauristring");
+        pdfBase64 = pdfDataUri.split(",")[1];
+      }
+
+      const res = await saveNoticeWinners(quickViewNotice.id, JSON.stringify(tempTableData), pdfBase64);
+      if (res.success) {
+        alert(res.message);
+        setQuickViewNotice(null);
+        setIsSelectingWinners(false);
+        setTempTableData(null);
+        window.location.reload();
+      } else {
+        alert(res.message);
+      }
+    } catch (err) {
+      console.error("Failed to save winners and generate PDF:", err);
+      alert("Failed to save winners.");
+    } finally {
+      setSubmitWinnersLoading(false);
+    }
+  };
+
   const formatPublishDate = (notice: Notice) => {
     if (!notice.publishDate) return "N/A";
     const d = new Date(notice.publishDate);
@@ -389,13 +567,26 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
   };
 
   const getStatusBadge = (notice: Notice) => {
-    const isScheduled = notice.status === "active" && notice.publishDate && new Date(notice.publishDate) > nowDate;
-    if (notice.status === "active") {
-      return isScheduled
-        ? { label: "Scheduled", cls: "bg-blue-50 text-blue-600 border border-blue-100" }
-        : { label: "Active", cls: "bg-emerald-50 text-emerald-600 border border-emerald-100" };
+    if (notice.status !== "active") {
+      return { label: "Draft", cls: "bg-amber-50 text-amber-600 border border-amber-100" };
     }
-    return { label: "Draft", cls: "bg-amber-50 text-amber-600 border border-amber-100" };
+
+    const isScheduled = notice.publishDate && new Date(notice.publishDate) > nowDate;
+    if (isScheduled) {
+      return { label: "Scheduled", cls: "bg-blue-50 text-blue-600 border border-blue-100" };
+    }
+
+    const isWinner = notice.category === "LOTTERY_RESULT";
+    if (isWinner) {
+      return { label: "Winner Publish", cls: "bg-[#fffbeb] text-[#b45309] border border-[#fde68a]" };
+    }
+
+    const isPending = notice.lastDate && new Date(notice.lastDate) < nowDate;
+    if (isPending) {
+      return { label: "Pending", cls: "bg-purple-50 text-purple-600 border border-purple-100" };
+    }
+
+    return { label: "Active", cls: "bg-emerald-50 text-emerald-600 border border-emerald-100" };
   };
 
   // Render preview content inside the Quick View modal
@@ -575,10 +766,14 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
       {quickViewNotice && (
         <div
           className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[1000] flex items-center justify-center p-4"
-          onClick={() => setQuickViewNotice(null)}
+          onClick={() => {
+            setQuickViewNotice(null);
+            setIsSelectingWinners(false);
+            setTempTableData(null);
+          }}
         >
           <div
-            className="bg-white rounded-3xl w-full max-w-4xl border border-slate-100 shadow-2xl flex flex-col max-h-[92vh] relative overflow-hidden"
+            className="bg-white rounded-3xl w-full max-w-4xl border border-slate-100 shadow-2xl flex flex-col max-h-[92vh] relative overflow-hidden animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top gradient bar */}
@@ -632,7 +827,11 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
               </div>
               <button
                 type="button"
-                onClick={() => setQuickViewNotice(null)}
+                onClick={() => {
+                  setQuickViewNotice(null);
+                  setIsSelectingWinners(false);
+                  setTempTableData(null);
+                }}
                 className="shrink-0 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-xl flex items-center justify-center transition border-0 cursor-pointer active:scale-95"
               >
                 <X className="w-4 h-4" />
@@ -641,38 +840,271 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
 
             {/* Content */}
             <div className="flex-1 overflow-auto p-6 min-h-0">
-              {renderPreviewContent(quickViewNotice)}
+              {isSelectingWinners && tempTableData ? (
+                <div className="space-y-6">
+                  <p className="text-xs text-amber-600 font-bold bg-amber-50 border border-amber-100 p-3.5 rounded-xl leading-relaxed">
+                    🏆 বিজয়ী নির্বাচন করুন: নিচে টেবিলের <strong>WINNER LIST NAME</strong> কলামের ইনপুট বক্সে বিজয়ী ঠিকাদারের নাম টাইপ করুন। একাধিক বিজয়ী সিলেক্ট করতে পারেন। সেভ করলে ক্যাটাগরি স্বয়ংক্রিয়ভাবে Lottery Result এ আপডেট হবে।
+                  </p>
+                  
+                  {tempTableData.tables.map((table: any, tIdx: number) => {
+                    const headerBg = table.headerBgColor || "#ccffff";
+                    const headers = table.headers || [];
+                    const rows = table.rows || [];
+                    const winnerColIdx = headers.findIndex((h: string) =>
+                      h.toUpperCase().replace(/\./g, "").includes("WINNER")
+                    );
+
+                    return (
+                      <div key={tIdx} className="space-y-2">
+                        {table.officeName && (
+                          <p className="text-xs font-bold text-slate-700 text-center">{table.officeName}</p>
+                        )}
+                        <div className="overflow-x-auto rounded-xl border border-slate-200">
+                          <table className="w-full text-xs border-collapse">
+                            <thead>
+                              <tr style={{ backgroundColor: headerBg }} className="text-slate-800">
+                                {headers.map((h: string, i: number) => (
+                                  <th 
+                                    key={i} 
+                                    style={{ backgroundColor: headerBg }}
+                                    className="px-3 py-2 text-left font-bold border border-slate-200 text-[10px] uppercase tracking-wide !text-slate-800 whitespace-nowrap"
+                                  >
+                                    {h}
+                                  </th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {rows.map((row: string[], rIdx: number) => {
+                                const isWinnerRow = winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
+                                return (
+                                  <tr 
+                                    key={rIdx} 
+                                    className={isWinnerRow ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500" : rIdx % 2 === 0 ? "bg-white" : "bg-slate-50"}
+                                  >
+                                    {row.map((cell: string, cIdx: number) => {
+                                      const isWinnerCell = cIdx === winnerColIdx;
+                                      return (
+                                        <td 
+                                          key={cIdx} 
+                                          className="px-3 py-2 border border-slate-200 text-slate-800"
+                                        >
+                                          {isWinnerCell ? (
+                                            <div className="flex items-center gap-1.5 min-w-[180px]">
+                                              <span className="text-base select-none">🏆</span>
+                                              <input
+                                                type="text"
+                                                value={cell}
+                                                placeholder="Type Winner..."
+                                                onChange={(e) => {
+                                                  const val = e.target.value;
+                                                  const nextTables = tempTableData.tables.map((t: any, tI: number) => {
+                                                    if (tI !== tIdx) return t;
+                                                    const nextRows = t.rows.map((r: any, rI: number) => {
+                                                      if (rI !== rIdx) return r;
+                                                      const nextRow = [...r];
+                                                      nextRow[cIdx] = val;
+                                                      return nextRow;
+                                                    });
+                                                    return { ...t, rows: nextRows };
+                                                  });
+                                                  setTempTableData({ ...tempTableData, tables: nextTables });
+                                                }}
+                                                className="border border-slate-300 focus:border-amber-500 outline-none rounded-lg px-2.5 py-1 text-xs font-bold text-amber-800 bg-[#fffbeb] w-full"
+                                              />
+                                            </div>
+                                          ) : (
+                                            formatCellValue(cell, headers[cIdx] || "")
+                                          )}
+                                        </td>
+                                      );
+                                    })}
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                renderPreviewContent(quickViewNotice)
+              )}
             </div>
 
             {/* Footer */}
             <div className="px-6 py-4 border-t border-slate-100 flex justify-between items-center gap-3 shrink-0 bg-slate-50/60">
-              <Link
-                href={`/egp-notice/${quickViewNotice.id}`}
-                target="_blank"
-                className="inline-flex items-center gap-1.5 text-xs font-bold !text-secondary bg-slate-500 hover:bg-slate-600 px-3 py-2 rounded-lg transition active:scale-95"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                Public Page
-              </Link>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setQuickViewNotice(null)}
-                  className="bg-slate-500 hover:bg-slate-600 text-white font-bold px-5 py-2 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 cursor-pointer border-0"
-                >
-                  Close
-                </button>
-                <Link
-                  href={`/admin/egp-notices/edit/${quickViewNotice.id}`}
-                  className="bg-[var(--primary-color)] !text-secondary font-bold px-5 py-2 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 inline-flex items-center gap-1.5 border-0"
-                >
-                  <Edit3 className="w-3.5 h-3.5" /> Edit
-                </Link>
-              </div>
+              {isSelectingWinners ? (
+                <>
+                  <span className="text-xs font-semibold text-amber-600 animate-pulse flex items-center gap-1.5">
+                    ⚙ Winner Select Draw Mode Active...
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSelectingWinners(false);
+                        setTempTableData(null);
+                      }}
+                      className="bg-slate-500 hover:bg-slate-600 text-white font-bold px-5 py-2 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 cursor-pointer border-0"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      disabled={submitWinnersLoading}
+                      onClick={handleSaveWinners}
+                      className="bg-emerald-600 hover:bg-emerald-700 !text-white font-bold px-5 py-2 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 cursor-pointer border-0 flex items-center gap-1.5"
+                    >
+                      {submitWinnersLoading ? "Saving..." : "Save Winners & Publish"}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href={`/egp-notice/${quickViewNotice.id}`}
+                    target="_blank"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold !text-secondary bg-slate-500 hover:bg-slate-600 px-3 py-2 rounded-lg transition active:scale-95"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Public Page
+                  </Link>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setQuickViewNotice(null);
+                        setIsSelectingWinners(false);
+                        setTempTableData(null);
+                      }}
+                      className="bg-slate-500 hover:bg-slate-600 text-white font-bold px-5 py-2 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 cursor-pointer border-0"
+                    >
+                      Close
+                    </button>
+                    
+                    {quickViewNotice.type === "TABLE" && (
+                      <button
+                        type="button"
+                        onClick={() => initWinnersMode(quickViewNotice)}
+                        className="bg-amber-500 hover:bg-amber-600 !text-white font-bold px-5 py-2 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 flex items-center gap-1.5 border-0 cursor-pointer"
+                      >
+                        🏆 Manage Winners
+                      </button>
+                    )}
+
+                    <Link
+                      href={`/admin/egp-notices/edit/${quickViewNotice.id}`}
+                      className="bg-blue-600 hover:bg-blue-700 !text-secondary font-bold px-5 py-2 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 inline-flex items-center gap-1.5 border-0"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" /> Edit
+                    </Link>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
       )}
+
+      {/* Off-screen PDF Capture Area */}
+      {quickViewNotice && tempTableData && (
+        <div
+          id="pdf-render-capture"
+          className="bg-white text-black p-10 space-y-6"
+          style={{
+            position: "absolute",
+            left: "-9999px",
+            top: "-9999px",
+            width: "800px",
+          }}
+        >
+          {/* Header */}
+          <div className="text-center pb-4 border-b-2 border-[#1b4332] space-y-1">
+            <h1 className="text-2xl font-black text-slate-900 leading-tight">
+              {quickViewNotice.title}
+            </h1>
+            <p className="text-sm font-bold text-slate-700">
+              Lottery Winner Result Publication
+            </p>
+            <div className="flex justify-between text-[11px] font-semibold text-slate-500 pt-2 px-2">
+              <span>Category: {quickViewNotice.category.replace("_", " ")}</span>
+              {quickViewNotice.year && <span>Year: {quickViewNotice.year}</span>}
+              <span>Publish Date: {formatPublishDate(quickViewNotice)}</span>
+            </div>
+          </div>
+
+          {/* Tables */}
+          {tempTableData.tables.map((table: any, tIdx: number) => {
+            const headerBg = table.headerBgColor || "#ccffff";
+            const headers = table.headers || [];
+            const rows = table.rows || [];
+            const winnerColIdx = headers.findIndex((h: string) =>
+              h.toUpperCase().replace(/\./g, "").includes("WINNER")
+            );
+
+            return (
+              <div key={tIdx} className="space-y-2.5">
+                {table.officeName && (
+                  <p className="text-sm font-bold text-slate-800 text-center">{table.officeName}</p>
+                )}
+                {table.subTitle && (
+                  <p className="text-xs font-semibold text-slate-600 text-center -mt-1">{table.subTitle}</p>
+                )}
+                <div className="border border-slate-300 rounded-lg overflow-hidden">
+                  <table className="w-full text-xs border-collapse">
+                    <thead>
+                      <tr style={{ backgroundColor: headerBg }} className="text-slate-800 border-b border-slate-300">
+                        {headers.map((h: string, i: number) => (
+                          <th 
+                            key={i} 
+                            style={{ backgroundColor: headerBg }}
+                            className="px-3 py-2 text-left font-bold border-r border-slate-300 text-[10px] uppercase tracking-wide !text-slate-800"
+                          >
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rows.map((row: string[], rIdx: number) => {
+                        const isWinnerRow = winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
+                        return (
+                          <tr 
+                            key={rIdx} 
+                            className={isWinnerRow ? "bg-[#fffbeb] font-bold" : rIdx % 2 === 0 ? "bg-white" : "bg-slate-50"}
+                          >
+                            {row.map((cell: string, cIdx: number) => {
+                              const isWinnerCell = cIdx === winnerColIdx;
+                              return (
+                                <td 
+                                  key={cIdx} 
+                                  className="px-3 py-2 border-r border-b border-slate-300 text-slate-800 text-[11px]"
+                                >
+                                  {isWinnerCell && isWinnerRow && <span className="inline-block mr-1">🏆</span>}
+                                  {formatCellValue(cell, headers[cIdx] || "")}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Footer */}
+          <div className="pt-6 border-t border-slate-200 text-center text-[10px] text-slate-400 font-semibold">
+            Generated by BTC Web Portal. Verify results at /egp-notice/{quickViewNotice.id}
+          </div>
+        </div>
+      )}
+
     </>
   );
 }

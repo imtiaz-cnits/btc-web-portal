@@ -52,10 +52,15 @@ export default async function PublicSingleNoticePage({
     formattedLotteryDate = `${String(ld.getDate()).padStart(2, '0')}-${String(ld.getMonth() + 1).padStart(2, '0')}-${ld.getFullYear()}`;
   }
 
+  const isExpired = notice.lastDate && new Date(notice.lastDate) < new Date();
+  const finalCategory = (isExpired && notice.category !== "LOTTERY_RESULT") 
+    ? "LOTTERY_PENDING" 
+    : notice.category;
+
   const mappedNotice = {
     id: notice.id,
     title: notice.title,
-    category: categoryMap[notice.category] || "LTM",
+    category: categoryMap[finalCategory] || "LTM",
     publishDate: formattedPublishDate,
     lastDate: formattedLastDate,
     lotteryDate: formattedLotteryDate,

@@ -200,3 +200,79 @@ export async function getRecentNotices() {
     return [];
   }
 }
+
+export async function saveNoticeWinners(id: string, tableData: string, pdfBase64?: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return { success: false, message: "Unauthorized. Please login again." };
+  }
+
+  try {
+    let filePath = undefined;
+    if (pdfBase64) {
+      const fs = require("fs/promises");
+      const path = require("path");
+      
+      const buffer = Buffer.from(pdfBase64, "base64");
+      const uploadDir = path.join(process.cwd(), "public", "assets", "pdf");
+      await fs.mkdir(uploadDir, { recursive: true });
+      const fileName = `${id}-result.pdf`;
+      const fullPath = path.join(uploadDir, fileName);
+      await fs.writeFile(fullPath, buffer);
+      filePath = `/assets/pdf/${fileName}`;
+    }
+
+    await prisma.notice.update({
+      where: { id },
+      data: {
+        category: "LOTTERY_RESULT",
+        tableData: tableData,
+        ...(filePath ? { filePath } : {})
+      }
+    });
+
+    revalidatePath("/admin/egp-notices");
+    revalidatePath(`/egp-notice/${id}`);
+    revalidatePath("/egp-notice");
+    revalidatePath("/");
+    return { success: true, message: "Winner list saved, PDF result generated, and notice category updated to Lottery Result." };
+  } catch (error) {
+    console.error("Save notice winners error:", error);
+    return { success: false, message: "Failed to save winners." };
+  }
+}
+
+export async function uploadNoticePdf(id: string, pdfBase64: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return { success: false, message: "Unauthorized. Please login again." };
+  }
+
+  try {
+    const fs = require("fs/promises");
+    const path = require("path");
+    
+    const buffer = Buffer.from(pdfBase64, "base64");
+    const uploadDir = path.join(process.cwd(), "public", "assets", "pdf");
+    await fs.mkdir(uploadDir, { recursive: true });
+    const fileName = `${id}-details.pdf`;
+    const fullPath = path.join(uploadDir, fileName);
+    await fs.writeFile(fullPath, buffer);
+    const filePath = `/assets/pdf/${fileName}`;
+    
+    await prisma.notice.update({
+      where: { id },
+      data: { filePath }
+    });
+    
+    revalidatePath("/admin/egp-notices");
+    revalidatePath(`/egp-notice/${id}`);
+    revalidatePath("/egp-notice");
+    revalidatePath("/");
+
+    return { success: true, filePath };
+  } catch (error) {
+    console.error("Upload notice PDF error:", error);
+    return { success: false, message: "Failed to upload PDF." };
+  }
+}

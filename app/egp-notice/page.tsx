@@ -22,15 +22,6 @@ export default async function PublicEgpNoticePage() {
         OR: [
           { publishDate: null },
           { publishDate: { lte: new Date() } }
-        ],
-        AND: [
-          {
-            OR: [
-              { category: "LOTTERY_RESULT" },
-              { lastDate: null },
-              { lastDate: { gte: new Date() } }
-            ]
-          }
         ]
       },
       orderBy: { createdAt: "desc" },
@@ -62,6 +53,11 @@ export default async function PublicEgpNoticePage() {
       formattedLotteryDate = `${String(ld.getDate()).padStart(2, '0')}-${String(ld.getMonth() + 1).padStart(2, '0')}-${ld.getFullYear()}`;
     }
 
+    const isExpired = notice.lastDate && new Date(notice.lastDate) < new Date();
+    const finalCategory = (isExpired && notice.category !== "LOTTERY_RESULT") 
+      ? "LOTTERY_PENDING" 
+      : notice.category;
+
     return {
       id: notice.id,
       no: (idx + 1).toString().padStart(2, "0"),
@@ -70,7 +66,7 @@ export default async function PublicEgpNoticePage() {
       date: formattedLastDate,
       lotteryDate: formattedLotteryDate,
       fileUrl: notice.filePath || "",
-      category: categoryMap[notice.category] || "LTM",
+      category: categoryMap[finalCategory] || "LTM",
     };
   });
 

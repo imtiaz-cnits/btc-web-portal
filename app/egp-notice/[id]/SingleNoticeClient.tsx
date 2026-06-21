@@ -465,6 +465,15 @@ export default function SingleNoticeClient({
           >
             <i className="fa-solid fa-print"></i> Print
           </button>
+          {notice.filePath && (
+            <a
+              href={notice.filePath}
+              download
+              className="bg-[#2980b9] hover:bg-[#3498db] !text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+            >
+              <i className="fa-solid fa-download"></i> Download PDF
+            </a>
+          )}
         </div>
 
         {/* Fullscreen Table Content Wrapper */}
@@ -525,6 +534,9 @@ export default function SingleNoticeClient({
               const lower = h.toLowerCase();
               return lower.includes("fee") || lower.includes("price");
             });
+            const winnerColIdx = headers.findIndex((h: string) =>
+              h.toUpperCase().replace(/\./g, "").includes("WINNER")
+            );
 
             const totalSecurity =
               securityColIdx !== -1
@@ -612,29 +624,36 @@ export default function SingleNoticeClient({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-400">
-                      {normalizedRows.map((row: string[], rIdx: number) => (
-                        <tr
-                          key={rIdx}
-                          className="hover:bg-slate-50/50 transition divide-x divide-gray-400"
-                        >
-                          {row.map((cell: string, cIdx: number) => {
-                            const cellBg = table.columnColors?.[cIdx] || "#ffffff";
-                            const isCurrency = isCurrencyColumn(headers[cIdx] || "");
-                            const isDesc = (headers[cIdx] || "").toLowerCase().includes("description");
-                            const hasCustomBg = cellBg && cellBg !== "#ffffff" && cellBg !== "#fff";
-                            return (
-                              <td
-                                key={cIdx}
-                                className={`p-3 border border-gray-400 text-black text-sm font-semibold font-bangla ${isCurrency ? "text-right" : "text-left"
-                                  } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"}`}
-                                style={hasCustomBg ? { backgroundColor: cellBg } : undefined}
-                              >
-                                {formatCellValue(cell, headers[cIdx] || "")}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      ))}
+                      {normalizedRows.map((row: string[], rIdx: number) => {
+                        const isWinnerRow = winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
+                        return (
+                          <tr
+                            key={rIdx}
+                            className={`hover:bg-slate-50/50 transition divide-x divide-gray-400 ${
+                              isWinnerRow ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500" : ""
+                            }`}
+                          >
+                            {row.map((cell: string, cIdx: number) => {
+                              const cellBg = isWinnerRow ? "#fffbeb" : table.columnColors?.[cIdx] || "#ffffff";
+                              const isCurrency = isCurrencyColumn(headers[cIdx] || "");
+                              const isDesc = (headers[cIdx] || "").toLowerCase().includes("description");
+                              const isWinnerCell = cIdx === winnerColIdx;
+                              const hasCustomBg = cellBg && cellBg !== "#ffffff" && cellBg !== "#fff";
+                              return (
+                                <td
+                                  key={cIdx}
+                                  className={`p-3 border border-gray-400 text-black text-sm font-semibold font-bangla ${isCurrency ? "text-right" : "text-left"
+                                    } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"}`}
+                                  style={hasCustomBg ? { backgroundColor: cellBg } : undefined}
+                                >
+                                  {isWinnerCell && isWinnerRow && <span className="inline-block mr-1">🏆</span>}
+                                  {formatCellValue(cell, headers[cIdx] || "")}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        );
+                      })}
 
                       {/* Sum Totals Row if any sum matches */}
                       {(securityColIdx !== -1 || docFeesColIdx !== -1) && (
@@ -850,6 +869,32 @@ L M B Market 1st Floor, Pabna.`}
                   const headers = table.headers || [];
                   const rows = table.rows || [];
 
+                  // Safe normalization of rows into string arrays (supports both standard nested arrays and key-value objects)
+                  const normalizedRows = rows.map((row: any, rIdx: number) => {
+                    if (Array.isArray(row)) return row;
+                    if (row && typeof row === "object") {
+                      if (
+                        table.type === "pwd_ltm" ||
+                        "tenderId" in row ||
+                        "description" in row
+                      ) {
+                        return [
+                          (rIdx + 1).toString(),
+                          row.tenderId || "",
+                          row.description || "",
+                          row.location || "",
+                          row.appCost || "",
+                          row.solvency || "",
+                          row.security || "",
+                          row.docFees || "",
+                          row.lastDateTime || row.lastDate || "",
+                        ];
+                      }
+                      return Object.values(row).map((val) => (val ?? "").toString());
+                    }
+                    return [];
+                  });
+
                   // PWD LTM Template Table Sum Calculations
                   const securityColIdx = headers.findIndex((h: string) =>
                     h.toLowerCase().includes("security"),
@@ -861,7 +906,7 @@ L M B Market 1st Floor, Pabna.`}
 
                   const totalSecurity =
                     securityColIdx !== -1
-                      ? rows.reduce(
+                      ? normalizedRows.reduce(
                         (sum: number, r: string[]) =>
                           sum + parseMoney(r[securityColIdx]),
                         0,
@@ -869,12 +914,15 @@ L M B Market 1st Floor, Pabna.`}
                       : 0;
                   const totalDocFees =
                     docFeesColIdx !== -1
-                      ? rows.reduce(
+                      ? normalizedRows.reduce(
                         (sum: number, r: string[]) =>
                           sum + parseMoney(r[docFeesColIdx]),
                         0,
                       )
                       : 0;
+                  const winnerColIdx = headers.findIndex((h: string) =>
+                    h.toUpperCase().replace(/\./g, "").includes("WINNER")
+                  );
 
                   return (
                     <div
@@ -945,29 +993,36 @@ L M B Market 1st Floor, Pabna.`}
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-400">
-                            {rows.map((row: string[], rIdx: number) => (
-                              <tr
-                                key={rIdx}
-                                className="hover:bg-slate-50/50 transition divide-x divide-gray-400"
-                              >
-                                {row.map((cell: string, cIdx: number) => {
-                                  const cellBg = table.columnColors?.[cIdx] || "#ffffff";
-                                  const isCurrency = isCurrencyColumn(headers[cIdx] || "");
-                                  const isDesc = (headers[cIdx] || "").toLowerCase().includes("description");
-                                  const hasCustomBg = cellBg && cellBg !== "#ffffff" && cellBg !== "#fff";
-                                  return (
-                                    <td
-                                      key={cIdx}
-                                      className={`p-2.5 border border-gray-400 text-black text-sm font-semibold font-bangla ${isCurrency ? "text-right" : "text-left"
-                                        } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"}`}
-                                      style={hasCustomBg ? { backgroundColor: cellBg } : undefined}
-                                    >
-                                      {formatCellValue(cell, headers[cIdx] || "")}
-                                    </td>
-                                  );
-                                })}
-                              </tr>
-                            ))}
+                            {normalizedRows.map((row: string[], rIdx: number) => {
+                              const isWinnerRow = winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
+                              return (
+                                <tr
+                                  key={rIdx}
+                                  className={`hover:bg-slate-50/50 transition divide-x divide-gray-400 ${
+                                    isWinnerRow ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500" : ""
+                                  }`}
+                                >
+                                  {row.map((cell: string, cIdx: number) => {
+                                    const cellBg = isWinnerRow ? "#fffbeb" : table.columnColors?.[cIdx] || "#ffffff";
+                                    const isCurrency = isCurrencyColumn(headers[cIdx] || "");
+                                    const isDesc = (headers[cIdx] || "").toLowerCase().includes("description");
+                                    const isWinnerCell = cIdx === winnerColIdx;
+                                    const hasCustomBg = cellBg && cellBg !== "#ffffff" && cellBg !== "#fff";
+                                    return (
+                                      <td
+                                        key={cIdx}
+                                        className={`p-2.5 border border-gray-400 text-black text-sm font-semibold font-bangla ${isCurrency ? "text-right" : "text-left"
+                                          } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"}`}
+                                        style={hasCustomBg ? { backgroundColor: cellBg } : undefined}
+                                      >
+                                        {isWinnerCell && isWinnerRow && <span className="inline-block mr-1">🏆</span>}
+                                        {formatCellValue(cell, headers[cIdx] || "")}
+                                      </td>
+                                    );
+                                  })}
+                                </tr>
+                              );
+                            })}
 
                             {/* Sum Totals Row if any sum matches */}
                             {(securityColIdx !== -1 || docFeesColIdx !== -1) && (
@@ -1008,7 +1063,7 @@ L M B Market 1st Floor, Pabna.`}
                               </tr>
                             )}
 
-                            {rows.length === 0 && (
+                            {normalizedRows.length === 0 && (
                               <tr>
                                 <td colSpan={headers.length || 1} className="p-8 text-center text-slate-400 italic">
                                   No tender entries available.

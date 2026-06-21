@@ -350,6 +350,35 @@ const getLastDateColIdx = (headers: string[]) => {
   });
 };
 
+const getColumnMinWidth = (hdr: string): string => {
+  const lower = (hdr || "").toLowerCase().trim();
+  if (lower === "sl.no" || lower === "sl no" || lower === "sl. no" || lower === "sl") return "30px";
+  if (lower.includes("tender id") || lower.includes("tenderid")) return "65px";
+  if (lower.includes("description")) return "130px";
+  if (lower.includes("location") || lower.includes("work location")) return "80px";
+  if (lower.includes("method") || lower.includes("mathod")) return "55px";
+  if (lower.includes("estimate cost") || lower.includes("estimate") || lower.includes("appcost")) return "75px";
+  if (lower.includes("credit line") || lower.includes("credit") || lower.includes("solvency")) return "75px";
+  if (lower.includes("turn over") || lower.includes("turnover")) return "75px";
+  if (lower.includes("similar work") || lower.includes("similar")) return "75px";
+  if (lower.includes("security")) return "75px";
+  if (lower.includes("price") || lower.includes("fees") || lower.includes("fee")) return "60px";
+  if (lower.includes("selling") || lower.includes("date") || lower.includes("time") || lower.includes("schedule")) return "105px";
+  if (lower.includes("winner")) return "105px";
+  return "75px";
+};
+
+const DEFAULT_TITLE_OPTIONS = [
+  "গণপূর্ত বিভাগ, পাবনা। (PWD)",
+  "স্থানীয় সরকার প্রকৌশল অধিদপ্তর, পাবনা। (LGED)",
+  "সড়ক ও জনপথ বিভাগ, পাবনা। (RHD)",
+  "বাংলাদেশ কৃষি উন্নয়ন কর্পোরেশন, পাবনা। (BADC)",
+  "পানি উন্নয়ন বোর্ড, পাবনা। (BWDB)",
+  "শিক্ষা প্রকৌশল অধিদপ্তর, পাবনা। (EED)",
+  "স্বাস্থ্য প্রকৌশল অধিদপ্তর, পাবনা। (HED)",
+  "জনস্বাস্থ্য প্রকৌশল অধিদপ্তর, পাবনা। (DPHE)"
+];
+
 // ----------------------------------------------------
 // 2. Main Multi-Table Tender Notice Studio Form Component
 // ----------------------------------------------------
@@ -365,6 +394,55 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
   // Base Form Fields
   const [title, setTitle] = useState(notice?.title || "");
+  // Title custom dropdown states
+  const [titleOptions, setTitleOptions] = useState<string[]>([]);
+  const [newOptionInput, setNewOptionInput] = useState("");
+  const [showTitleDropdown, setShowTitleDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const handleAddTitleOption = (val: string) => {
+    const trimmed = val.trim();
+    if (!trimmed) return;
+    if (titleOptions.includes(trimmed)) return;
+    const updated = [trimmed, ...titleOptions];
+    setTitleOptions(updated);
+    localStorage.setItem("btc_notice_title_options", JSON.stringify(updated));
+  };
+
+  const handleDeleteTitleOption = (e: React.MouseEvent, optionToDelete: string) => {
+    e.stopPropagation();
+    const updated = titleOptions.filter(o => o !== optionToDelete);
+    setTitleOptions(updated);
+    localStorage.setItem("btc_notice_title_options", JSON.stringify(updated));
+  };
+
+  // Sync title options and click outside listeners
+  useEffect(() => {
+    const saved = localStorage.getItem("btc_notice_title_options");
+    let initialOptions = DEFAULT_TITLE_OPTIONS;
+    if (saved) {
+      try {
+        initialOptions = JSON.parse(saved);
+      } catch (e) {}
+    }
+    
+    if (notice?.title && !initialOptions.includes(notice.title)) {
+      initialOptions = [...initialOptions, notice.title];
+      localStorage.setItem("btc_notice_title_options", JSON.stringify(initialOptions));
+    }
+    
+    setTitleOptions(initialOptions);
+  }, [notice]);
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowTitleDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
   const [category, setCategory] = useState(notice?.category || "OTM");
   const [status, setStatus] = useState(notice?.status || "active");
   const [year, setYear] = useState(notice?.year || new Date().getFullYear().toString());
@@ -1332,20 +1410,93 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       
       {/* Notice Basic Settings Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 shrink-0">
-        <div className="md:col-span-2 space-y-2">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Notice Title</label>
-          <input 
-            name="title" 
-            required 
-            value={title}
-            onChange={(e) => {
-              const newTitle = e.target.value;
-              setTitle(newTitle);
-              setTablesList(prev => prev.map((t, idx) => idx === 0 ? { ...t, officeName: newTitle } : t));
-            }}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 focus:border-[var(--primary-color)] focus:bg-white focus:ring-1 focus:ring-[var(--primary-color)] outline-none transition text-sm font-semibold shadow-xs"
-            placeholder="e.g., Supply & Installation of Medical Equipment..."
-          />
+        <div ref={dropdownRef} className="md:col-span-2 space-y-2 relative">
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Notice Type</label>
+          <div className="relative">
+            <div 
+              onClick={() => setShowTitleDropdown(!showTitleDropdown)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 text-sm font-semibold focus:border-[var(--primary-color)] hover:border-slate-350 transition cursor-pointer flex justify-between items-center shadow-xs"
+            >
+              <span>{title || "Select Notice Type..."}</span>
+              <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showTitleDropdown ? "rotate-180" : ""}`} />
+            </div>
+            <input type="hidden" name="title" value={title} required />
+          </div>
+
+          {showTitleDropdown && (
+            <div className="absolute top-[100%] left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-55 overflow-hidden divide-y divide-slate-100 animate-scale-in">
+              {/* Add New Option Input Field Inside the Dropdown */}
+              <div className="p-3 bg-slate-50 flex gap-2" onClick={(e) => e.stopPropagation()}>
+                <input
+                  type="text"
+                  value={newOptionInput}
+                  onChange={(e) => setNewOptionInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      if (newOptionInput.trim()) {
+                        handleAddTitleOption(newOptionInput.trim());
+                        setTitle(newOptionInput.trim());
+                        setTablesList(prev => prev.map((t, idx) => idx === 0 ? { ...t, officeName: newOptionInput.trim() } : t));
+                        setNewOptionInput("");
+                        setShowTitleDropdown(false);
+                      }
+                    }
+                  }}
+                  placeholder="Type to search or add option..."
+                  className="flex-1 bg-white border border-slate-250 rounded-lg px-3 py-1.5 text-xs font-semibold focus:border-[var(--primary-color)] outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (newOptionInput.trim()) {
+                      handleAddTitleOption(newOptionInput.trim());
+                      setTitle(newOptionInput.trim());
+                      setTablesList(prev => prev.map((t, idx) => idx === 0 ? { ...t, officeName: newOptionInput.trim() } : t));
+                      setNewOptionInput("");
+                      setShowTitleDropdown(false);
+                    }
+                  }}
+                  className="bg-green-600 hover:bg-green-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition border-0 cursor-pointer whitespace-nowrap active:scale-95"
+                >
+                  Add
+                </button>
+              </div>
+
+              {/* Options List */}
+              <div className="max-h-[220px] overflow-y-auto divide-y divide-slate-50">
+                {titleOptions
+                  .filter(opt => opt.toLowerCase().includes(newOptionInput.toLowerCase()))
+                  .map((opt) => (
+                    <div
+                      key={opt}
+                      onClick={() => {
+                        setTitle(opt);
+                        setTablesList(prev => prev.map((t, idx) => idx === 0 ? { ...t, officeName: opt } : t));
+                        setShowTitleDropdown(false);
+                      }}
+                      className="px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-green-50 hover:text-green-800 transition cursor-pointer flex items-center justify-between group"
+                    >
+                      <span className="truncate">{opt}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => handleDeleteTitleOption(e, opt)}
+                        className="text-slate-400 hover:text-red-650 p-1 rounded-md border-0 bg-transparent transition opacity-100 md:opacity-0 group-hover:opacity-100 cursor-pointer flex items-center justify-center hover:bg-red-50"
+                        title="Delete Option"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                
+                {titleOptions.filter(opt => opt.toLowerCase().includes(newOptionInput.toLowerCase())).length === 0 && (
+                  <div className="px-4 py-3 text-xs text-slate-400 font-semibold italic text-center">
+                    No matching options. Type above and click Add!
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <CustomSelect 
@@ -1660,7 +1811,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
               return (
                 <div 
                   key={table.id || tIdx}
-                  className="bg-slate-50/50 rounded-2xl border-2 border-slate-200 p-5 md:p-6 space-y-6 relative min-w-0 w-full overflow-hidden shadow-xs hover:border-slate-300 transition duration-300"
+                  className="space-y-6 relative min-w-0 w-full overflow-hidden transition duration-300"
                 >
                   {/* Table Block Header Actions */}
                   <div className="flex justify-between items-center border-b pb-3 border-slate-200 shrink-0">
@@ -1763,22 +1914,24 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                           <tr className="divide-x divide-slate-200">
                             {(table.headers || []).map((hdr: string, cIdx: number) => {
                               const headerBg = table.headerBgColor || "#ccffff";
-                              const isDescCol = (hdr || "").toLowerCase().includes("description");
-                              const minWidthValue = isDescCol ? "400px" : "175px";
+                              const minWidthValue = getColumnMinWidth(hdr);
+                              const lowerHdr = (hdr || "").toLowerCase().trim();
+                              const isSlNo = lowerHdr === "sl.no" || lowerHdr === "sl no" || lowerHdr === "sl. no" || lowerHdr === "sl";
+                              const showLabel = parseInt(minWidthValue) >= 120;
                               return (
                                 <th 
                                   key={cIdx} 
-                                  className="p-3 text-black" 
+                                  className="p-1 text-black" 
                                   style={{ backgroundColor: headerBg, minWidth: minWidthValue }}
                                 >
-                                  <div className="flex flex-col gap-2">
-                                    <div className="flex items-center gap-2">
+                                  <div className="flex flex-col gap-1">
+                                    <div className="flex items-center gap-1">
                                       <input 
                                         type="text" 
                                         required
                                         value={hdr} 
                                         onChange={(e) => handleHeaderChange(tIdx, cIdx, e.target.value)}
-                                        className="bg-white/85 border border-slate-250 font-extrabold text-black outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded-lg p-1.5 text-[11px]"
+                                        className="bg-white/85 border border-slate-250 font-extrabold text-black outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded-lg px-1 py-0.5 text-[10px]"
                                       />
                                       {((table.type === "pwd_ltm" 
                                         ? (table.headers.length > 9 && cIdx === table.headers.length - 1)
@@ -1786,7 +1939,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                         <button 
                                           type="button" 
                                           onClick={() => removeColumn(tIdx, cIdx)}
-                                          className="text-white hover:bg-red-700 bg-red-600 p-1.5 rounded-lg transition shrink-0 border-0 flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+                                          className="text-white hover:bg-red-750 bg-red-600 p-0.5 rounded-lg transition shrink-0 border-0 flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
                                           title="Delete Column"
                                         >
                                           <Trash2 className="w-3.5 h-3.5" />
@@ -1795,34 +1948,36 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                     </div>
 
                                     {/* Column Cell Color Customizer */}
-                                    <div className="flex items-center justify-between px-1">
-                                      <span className="text-[9px] text-slate-700 font-extrabold uppercase tracking-wider">Cell Color:</span>
-                                      <div className="flex gap-1">
-                                        {[
-                                          { hex: "#ffffff", name: "White" },
-                                          { hex: "#ffffcc", name: "Yellow" },
-                                          { hex: "#d1fae5", name: "Green" },
-                                          { hex: "#e0f2fe", name: "Blue" },
-                                          { hex: "#ffe4e6", name: "Pink" }
-                                        ].map((clr) => (
-                                          <button
-                                            key={clr.hex}
-                                            type="button"
-                                            onClick={() => handleColumnColorChange(tIdx, cIdx, clr.hex)}
-                                            className={`w-3.5 h-3.5 rounded-full border border-slate-400 transition transform hover:scale-120 active:scale-95 cursor-pointer ${
-                                              (table.columnColors?.[cIdx] || "#ffffff") === clr.hex ? "ring-2 ring-slate-650" : ""
-                                            }`}
-                                            style={{ backgroundColor: clr.hex }}
-                                            title={`Set cell background to ${clr.name}`}
-                                          />
-                                        ))}
+                                    {!isSlNo && (
+                                      <div className="flex items-center justify-between px-0.5 mt-0.5">
+                                        {showLabel && <span className="text-[9px] text-slate-700 font-extrabold uppercase tracking-wider">Cell Color:</span>}
+                                        <div className="flex gap-0.5 ml-auto">
+                                          {[
+                                            { hex: "#ffffff", name: "White" },
+                                            { hex: "#ffffcc", name: "Yellow" },
+                                            { hex: "#d1fae5", name: "Green" },
+                                            { hex: "#e0f2fe", name: "Blue" },
+                                            { hex: "#ffe4e6", name: "Pink" }
+                                          ].map((clr) => (
+                                            <button
+                                              key={clr.hex}
+                                              type="button"
+                                              onClick={() => handleColumnColorChange(tIdx, cIdx, clr.hex)}
+                                              className={`w-2 h-2 rounded-full border border-slate-400 transition transform hover:scale-120 active:scale-95 cursor-pointer ${
+                                                (table.columnColors?.[cIdx] || "#ffffff") === clr.hex ? "ring-1 ring-slate-600" : ""
+                                              }`}
+                                              style={{ backgroundColor: clr.hex }}
+                                              title={`Set cell background to ${clr.name}`}
+                                            />
+                                          ))}
+                                        </div>
                                       </div>
-                                    </div>
+                                    )}
                                   </div>
                                 </th>
                               );
                             })}
-                            <th className="p-3 w-12 text-center text-slate-700" style={{ backgroundColor: table.headerBgColor || "#ccffff" }}>Del</th>
+                            <th className="p-1 w-8 text-center text-slate-700 text-[10px]" style={{ backgroundColor: table.headerBgColor || "#ccffff" }}>Del</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-200">
@@ -1835,7 +1990,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                 const isLastDateCol = table.type === "pwd_ltm" && cIdx === lastDateColIdx;
                                 const cellBg = table.columnColors?.[cIdx] || "#ffffff";
                                 return (
-                                  <td key={cIdx} className="p-2 border-r border-slate-200 transition-colors duration-250" style={{ backgroundColor: cellBg }}>
+                                  <td key={cIdx} className="p-1 border-r border-slate-200 transition-colors duration-250" style={{ backgroundColor: cellBg }}>
                                     {(() => {
                                       const isLocationCol = headerName.includes("location") || headerName.includes("লোকেশন") || headerName.includes("স্থান");
                                       if (isLocationCol) {
@@ -1843,27 +1998,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                           <LocationAutocompleteInput
                                             value={cell}
                                             onChange={(val) => handleCellChange(tIdx, rIdx, cIdx, val)}
-                                            className={`bg-transparent border-0 outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded p-1.5 font-semibold text-slate-800 text-xs`}
+                                            className={`bg-transparent border-0 outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded px-1 py-0.5 font-semibold text-slate-800 text-[10px]`}
                                             placeholder="Type location..."
                                           />
-                                        );
-                                      }
-                                      const isMethodCol = headerName.includes("method") || headerName.includes("matho") || headerName.includes("পদ্ধতি");
-                                      if (isMethodCol) {
-                                        const METHOD_OPTIONS = ["OTM", "LTM", "RFQ", "DPM", "OSTETM", "LTM SOCIAL", "OTM SOCIAL"];
-                                        return (
-                                          <select
-                                            value={cell}
-                                            onChange={(e) => handleCellChange(tIdx, rIdx, cIdx, e.target.value)}
-                                            className="bg-transparent border-0 outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded p-1.5 font-bold text-slate-800 text-xs cursor-pointer"
-                                          >
-                                            <option value="">Select Method...</option>
-                                            {METHOD_OPTIONS.map((opt) => (
-                                              <option key={opt} value={opt}>
-                                                {opt}
-                                              </option>
-                                            ))}
-                                          </select>
                                         );
                                       }
                                       return (
@@ -1876,29 +2013,29 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                           value={cell} 
                                           onChange={(e) => handleCellChange(tIdx, rIdx, cIdx, e.target.value)}
                                           readOnly={isLastDateCol}
-                                          className={`bg-transparent border-0 outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded p-1.5 font-semibold text-slate-800 text-xs ${
+                                          className={`bg-transparent border-0 outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded px-1 py-0.5 font-semibold text-slate-800 text-[10px] ${
                                             isLastDateCol
                                               ? "font-bold text-green-700 bg-green-50/10 cursor-not-allowed"
                                               : isDateField
                                                 ? "flatpickr-datetime-field cursor-pointer font-bold text-green-700 bg-green-50/10"
                                                 : ""
                                           }`}
-                                          placeholder={isLastDateCol ? "Synced from Top" : isDateField ? "Select Date & Time..." : ""}
+                                          placeholder={isLastDateCol ? "Synced" : isDateField ? "Select..." : ""}
                                         />
                                       );
                                     })()}
                                   </td>
                                 );
                               })}
-                              <td className="p-2 text-center bg-slate-50/30">
+                              <td className="p-1 text-center bg-slate-50/30">
                                 {table.rows.length > 1 && (
                                   <button 
                                     type="button" 
                                     onClick={() => removeRow(tIdx, rIdx)}
-                                    className="text-white hover:bg-red-750 bg-red-600 p-1.5 rounded-lg transition inline-flex items-center justify-center border-0 shadow-sm active:scale-95 cursor-pointer"
+                                    className="text-white hover:bg-red-750 bg-red-600 p-1 rounded-lg transition inline-flex items-center justify-center border-0 shadow-sm active:scale-95 cursor-pointer"
                                     title="Delete Row"
                                   >
-                                    <Trash2 className="w-4 h-4" />
+                                    <Trash2 className="w-3.5 h-3.5" />
                                   </button>
                                 )}
                               </td>

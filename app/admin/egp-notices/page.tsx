@@ -43,11 +43,15 @@ export default async function AdminNoticesPage({
   ).length;
   const draftCount = filtered.filter(n => n.status !== "active").length;
   const scheduledCount = filtered.filter(n => n.status === "active" && n.publishDate && new Date(n.publishDate) > now).length;
-  const archiveCount = filtered.filter(n => 
+  const pendingCount = filtered.filter(n => 
     n.status === "active" && 
     n.lastDate && 
     new Date(n.lastDate) < now && 
     n.category !== "LOTTERY_RESULT"
+  ).length;
+  const winnersCount = filtered.filter(n => 
+    n.status === "active" && 
+    n.category === "LOTTERY_RESULT"
   ).length;
 
   // Filter based on status tabs
@@ -64,12 +68,17 @@ export default async function AdminNoticesPage({
     notices = filtered.filter(n => n.status !== "active");
   } else if (filter === "scheduled") {
     notices = filtered.filter(n => n.status === "active" && n.publishDate && new Date(n.publishDate) > now);
-  } else if (filter === "archive") {
+  } else if (filter === "pending") {
     notices = filtered.filter(n => 
       n.status === "active" && 
       n.lastDate && 
       new Date(n.lastDate) < now && 
       n.category !== "LOTTERY_RESULT"
+    );
+  } else if (filter === "winners") {
+    notices = filtered.filter(n => 
+      n.status === "active" && 
+      n.category === "LOTTERY_RESULT"
     );
   }
 
@@ -128,6 +137,28 @@ export default async function AdminNoticesPage({
               }`}>{activeCount}</span>
           </Link>
           <Link
+            href={`/admin/egp-notices?filter=pending${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
+            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "pending"
+                ? "border-[var(--primary-color)] text-[var(--primary-color)]"
+                : "border-transparent text-slate-400 hover:text-slate-600"
+              }`}
+          >
+            Pending
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${filter === "pending" ? "bg-purple-50 text-purple-700" : "bg-slate-100 text-slate-500"
+              }`}>{pendingCount}</span>
+          </Link>
+          <Link
+            href={`/admin/egp-notices?filter=winners${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
+            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "winners"
+                ? "border-[var(--primary-color)] text-[var(--primary-color)]"
+                : "border-transparent text-slate-400 hover:text-slate-600"
+              }`}
+          >
+            Winners
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${filter === "winners" ? "bg-emerald-55 text-emerald-700" : "bg-slate-100 text-slate-500"
+              }`}>{winnersCount}</span>
+          </Link>
+          <Link
             href={`/admin/egp-notices?filter=draft${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
             className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "draft"
                 ? "border-[var(--primary-color)] text-[var(--primary-color)]"
@@ -148,17 +179,6 @@ export default async function AdminNoticesPage({
             Scheduled
             <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${filter === "scheduled" ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-500"
               }`}>{scheduledCount}</span>
-          </Link>
-          <Link
-            href={`/admin/egp-notices?filter=archive${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
-            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "archive"
-                ? "border-[var(--primary-color)] text-[var(--primary-color)]"
-                : "border-transparent text-slate-400 hover:text-slate-600"
-              }`}
-          >
-            Archive
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${filter === "archive" ? "bg-purple-50 text-purple-700" : "bg-slate-100 text-slate-500"
-              }`}>{archiveCount}</span>
           </Link>
         </div>
         <div className="pb-2.5">

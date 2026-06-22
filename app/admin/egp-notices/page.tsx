@@ -82,6 +82,16 @@ export default async function AdminNoticesPage({
     );
   }
 
+  // Sort notices by publishDate descending (fallback to createdAt descending) to ensure recent notices are always on top
+  notices.sort((a, b) => {
+    const dateA = a.publishDate ? new Date(a.publishDate).getTime() : new Date(a.createdAt).getTime();
+    const dateB = b.publishDate ? new Date(b.publishDate).getTime() : new Date(b.createdAt).getTime();
+    if (dateB !== dateA) {
+      return dateB - dateA;
+    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
   // Pagination calculation
   const totalPages = Math.ceil(notices.length / currentLimit);
   // Cap current page if out of bounds
@@ -155,7 +165,7 @@ export default async function AdminNoticesPage({
               }`}
           >
             Winners
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${filter === "winners" ? "bg-emerald-55 text-emerald-700" : "bg-slate-100 text-slate-500"
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-all duration-300 ${filter === "winners" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"
               }`}>{winnersCount}</span>
           </Link>
           <Link

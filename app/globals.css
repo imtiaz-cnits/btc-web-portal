@@ -539,23 +539,23 @@ html.hide-global-layout .main {
   background-color: #0f172a !important;
 }
 
-/* If there is NO inline background color style, keep text light */
-.admin-layout.dark .custom-table-preview th:not([style*="background-color"]),
-.admin-layout.dark .custom-table-preview td:not([style*="background-color"]) {
+/* If there is NO inline style, keep text light */
+.admin-layout.dark .custom-table-preview th:not([style]),
+.admin-layout.dark .custom-table-preview td:not([style]) {
   color: #f1f5f9 !important;
 }
 
-/* If there IS an inline background color style, force dark text for readability (since custom bg colors are usually light) */
-.admin-layout.dark .custom-table-preview th[style*="background-color"],
-.admin-layout.dark .custom-table-preview td[style*="background-color"] {
+/* If there IS an inline style (custom light background), force dark text for readability */
+.admin-layout.dark .custom-table-preview th[style],
+.admin-layout.dark .custom-table-preview td[style] {
   color: #0f172a !important; /* Force extremely dark text for high contrast on light backgrounds */
 }
 
 /* Alternating rows override when no custom color is set */
-.admin-layout.dark .custom-table-preview tr:nth-child(even) td:not([style*="background-color"]) {
+.admin-layout.dark .custom-table-preview tr:nth-child(even) td:not([style]) {
   background-color: #1e293b !important;
 }
-.admin-layout.dark .custom-table-preview tr:nth-child(odd) td:not([style*="background-color"]) {
+.admin-layout.dark .custom-table-preview tr:nth-child(odd) td:not([style]) {
   background-color: #0f172a !important;
 }
 
@@ -576,4 +576,58 @@ html.hide-global-layout .main {
 .admin-layout.dark .custom-table-preview tr.bg-\[\#ffffcc\] td {
   color: #0f172a !important; /* Force dark text on light yellow sum row */
 }
+
+/* Force white text for inputs and labels inside studio-table cells in dark mode */
+.admin-layout.dark .studio-table th,
+.admin-layout.dark .studio-table td,
+.admin-layout.dark .studio-table th input,
+.admin-layout.dark .studio-table td input,
+.admin-layout.dark .studio-table th span,
+.admin-layout.dark .studio-table td span {
+  color: #ffffff !important;
+}
+
+.admin-layout.dark .studio-table input::placeholder {
+  color: #64748b !important;
+}
+
+/* Ensure hover styles in custom dropdowns have high contrast in dark mode */
+.admin-layout.dark .hover\:bg-green-50:hover {
+  background-color: #15803d !important; /* solid green background on hover in dark mode */
+  color: #ffffff !important; /* white text on solid green background */
+}
+
+.admin-layout.dark .hover\:bg-slate-100:hover {
+  background-color: #475569 !important; /* slate-600 background on hover in dark mode */
+  color: #ffffff !important; /* white text on slate-600 background */
+}
+
+.admin-layout.dark .hover\:text-green-800:hover,
+.admin-layout.dark .hover\:text-green-700:hover {
+  color: #ffffff !important; /* Force white text when hovered on these elements */
+}
+
+/* Winner Row override in dark mode: bg-[#fffbeb] */
+.admin-layout.dark .bg-\[\#fffbeb\],
+.admin-layout.dark tr.bg-\[\#fffbeb\],
+.admin-layout.dark td.bg-\[\#fffbeb\] {
+  background-color: #272115 !important; /* Dark amber/brown background */
+  color: #fde047 !important;
+}
+
+.admin-layout.dark .bg-\[\#fffbeb\] input,
+.admin-layout.dark tr.bg-\[\#fffbeb\] input {
+  background-color: #1a140b !important; /* Darker input background */
+  color: #fde047 !important; /* Gold text color for the winner input */
+  border-color: #78350f !important; /* Dark gold border */
+}
+
+/* Force light gold text color in the custom table preview for winner cells in dark mode */
+.admin-layout.dark .custom-table-preview tr.bg-\[\#fffbeb\] td,
+.admin-layout.dark .custom-table-preview td.bg-\[\#fffbeb\],
+.admin-layout.dark .custom-table-preview td.bg-\[\#fffbeb\][style] {
+  color: #fde047 !important;
+}
+
+
 

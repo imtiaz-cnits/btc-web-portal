@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { deleteNotice, saveNoticeWinners } from "@/app/actions/notices";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import html2canvas from "html2canvas-pro";
 import DeleteButton from "@/components/dashboard/DeleteButton";
 import WhatsAppShareButton from "@/components/dashboard/WhatsAppShareButton";
 import {
@@ -541,9 +541,9 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
       } else {
         alert(res.message);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to save winners and generate PDF:", err);
-      alert("Failed to save winners.");
+      alert(`Failed to save winners: ${err?.message || err}`);
     } finally {
       setSubmitWinnersLoading(false);
     }
@@ -997,7 +997,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
 
                     <Link
                       href={`/admin/egp-notices/edit/${quickViewNotice.id}`}
-                      className="bg-blue-600 hover:bg-blue-700 !text-secondary font-bold px-5 py-2 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 inline-flex items-center gap-1.5 border-0"
+                      className="bg-blue-600 hover:bg-blue-700 !text-white font-bold px-5 py-2 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 inline-flex items-center gap-1.5 border-0"
                     >
                       <Edit3 className="w-3.5 h-3.5" /> Edit
                     </Link>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { deleteNotice, saveNoticeWinners } from "@/app/actions/notices";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
@@ -424,12 +425,31 @@ function TableDataPreview({ tableData }: { tableData: string }) {
 // Main Component
 // -----------------------------------------------
 export default function NoticesTable({ notices, startIndex, now }: NoticesTableProps) {
+  const searchParams = useSearchParams();
+  const filter = searchParams?.get("filter") || "all";
   const nowDate = new Date(now);
   const [quickViewNotice, setQuickViewNotice] = useState<Notice | null>(null);
 
   const [isSelectingWinners, setIsSelectingWinners] = useState(false);
   const [tempTableData, setTempTableData] = useState<any>(null);
   const [submitWinnersLoading, setSubmitWinnersLoading] = useState(false);
+
+  const formatLastDate = (notice: Notice) => {
+    if (!notice.lastDate) return "N/A";
+    const d = new Date(notice.lastDate);
+    if (isNaN(d.getTime())) return "N/A";
+    const dateStr = `${String(d.getDate()).padStart(2, "0")}-${String(d.getMonth() + 1).padStart(2, "0")}-${d.getFullYear()}`;
+    const hasTime = d.getHours() !== 0 || d.getMinutes() !== 0;
+    if (hasTime) {
+      let hrs = d.getHours();
+      const mins = String(d.getMinutes()).padStart(2, "0");
+      const ampm = hrs >= 12 ? "PM" : "AM";
+      hrs = hrs % 12;
+      hrs = hrs ? hrs : 12;
+      return `${dateStr} ${String(hrs).padStart(2, "0")}:${mins} ${ampm}`;
+    }
+    return dateStr;
+  };
 
   const initWinnersMode = (notice: Notice) => {
     try {
@@ -591,6 +611,11 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
 
   // Render preview content inside the Quick View modal
   const renderPreviewContent = (notice: Notice) => {
+    // Table — render inline first (avoids PDF iframe cut-off/dark-theme issues)
+    if (notice.tableData) {
+      return <TableDataPreview tableData={notice.tableData} />;
+    }
+
     // File (image or PDF)
     if (notice.filePath) {
       const ext = notice.filePath.split(".").pop()?.toLowerCase();
@@ -622,11 +647,6 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
       );
     }
 
-    // Table — render inline
-    if (notice.tableData) {
-      return <TableDataPreview tableData={notice.tableData} />;
-    }
-
     return (
       <div className="text-center py-10 text-slate-400 text-sm font-semibold">
         No preview content available.
@@ -645,6 +665,9 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
             <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Year</th>
             <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Status</th>
             <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Publish Date</th>
+            {(filter === "all" || filter === "published") && (
+              <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Last Date</th>
+            )}
             <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs text-right">Actions</th>
           </tr>
         </thead>
@@ -720,6 +743,16 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                   </div>
                 </td>
 
+                {/* Last Date */}
+                {(filter === "all" || filter === "published") && (
+                  <td className="px-6 py-4 text-slate-400 text-xs font-semibold font-sans">
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                      <span>{formatLastDate(notice)}</span>
+                    </div>
+                  </td>
+                )}
+
                 {/* Actions */}
                 <td className="px-6 py-4 text-right">
                   <div className="flex justify-end gap-2 items-center">
@@ -752,7 +785,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
 
           {notices.length === 0 && (
             <tr>
-              <td colSpan={7} className="px-6 py-16 text-center text-slate-400 font-semibold text-sm">
+              <td colSpan={(filter === "all" || filter === "published") ? 8 : 7} className="px-6 py-16 text-center text-slate-400 font-semibold text-sm">
                 No procurement notices found. Create one to get started!
               </td>
             </tr>
@@ -1018,9 +1051,36 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
             position: "absolute",
             left: "-9999px",
             top: "-9999px",
-            width: "800px",
+            width: "1250px",
+            color: "#000000",
+            backgroundColor: "#ffffff",
           }}
         >
+          {/* Force strict light mode rendering inside PDF capture element */}
+          <style dangerouslySetInnerHTML={{ __html: `
+            #pdf-render-capture,
+            #pdf-render-capture * {
+              color: #000000 !important;
+              border-color: #cbd5e1 !important;
+            }
+            #pdf-render-capture table {
+              background-color: #ffffff !important;
+              width: 100% !important;
+            }
+            #pdf-render-capture th {
+              color: #000000 !important;
+            }
+            #pdf-render-capture td {
+              background-color: #ffffff !important;
+              color: #000000 !important;
+            }
+            #pdf-render-capture tr.bg-\\[\\#fffbeb\\] {
+              background-color: #fffbeb !important;
+            }
+            #pdf-render-capture tr.bg-slate-50 {
+              background-color: #f8fafc !important;
+            }
+          `}} />
           {/* Header */}
           <div className="text-center pb-4 border-b-2 border-[#1b4332] space-y-1">
             <h1 className="text-2xl font-black text-slate-900 leading-tight">

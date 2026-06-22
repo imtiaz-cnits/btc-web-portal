@@ -85,6 +85,16 @@ export default function EditNoticeForm({ notice }: { notice: any }) {
           />
         </div>
 
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-gray-700">Lottery Date (Optional)</label>
+          <input 
+            type="date" 
+            name="lotteryDate" 
+            defaultValue={notice.lotteryDate ? new Date(notice.lotteryDate).toISOString().split('T')[0] : ""}
+            className="w-full p-3 border rounded-lg outline-none"
+          />
+        </div>
+
         <div className="md:col-span-2 space-y-2">
           <label className="text-sm font-semibold text-gray-700">Replace File (Optional)</label>
           <input 

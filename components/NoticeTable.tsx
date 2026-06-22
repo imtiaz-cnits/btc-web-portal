@@ -19,7 +19,11 @@ interface NoticeTableProps {
 }
 
 const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
-  const isLotteryResult = notices.length > 0 && notices.some(n => n.category === "Lottery Result");
+  const isLotteryResult = notices.length > 0 && notices.some(n => 
+    n.category === "Lottery Result" || 
+    n.category === "Lottery Pending" || 
+    (n.lotteryDate && n.lotteryDate.trim() !== "")
+  );
 
   return (
     <div className="rounded-2xl border border-ac-2 shadow-sm bg-white overflow-hidden">
@@ -37,14 +41,14 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
               <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-40 text-center">
                 Publish Date
               </th>
+              <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-40 text-center">
+                Last Date
+              </th>
               {isLotteryResult && (
                 <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-40 text-center">
                   Lottery Date
                 </th>
               )}
-              <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-40 text-center">
-                Last Date
-              </th>
               <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-48 text-center">
                 Action
               </th>
@@ -68,6 +72,11 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
                       {notice.publishDate || "N/A"}
                     </div>
                   </td>
+                  <td className="py-2.5 px-4 text-center">
+                    <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-text-2 text-sm font-bold">
+                      {notice.date}
+                    </div>
+                  </td>
                   {isLotteryResult && (
                     <td className="py-2.5 px-4 text-center">
                       <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-emerald-600 text-sm font-bold bg-green-50/50">
@@ -75,11 +84,6 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
                       </div>
                     </td>
                   )}
-                  <td className="py-2.5 px-4 text-center">
-                    <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-text-2 text-sm font-bold">
-                      {notice.date}
-                    </div>
-                  </td>
                   <td className="py-2.5 px-4">
                     <div className="flex items-center justify-center gap-2">
                       <Link

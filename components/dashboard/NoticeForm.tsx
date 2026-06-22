@@ -1628,7 +1628,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       }
 
       // lotteryDate: only parse/set when category supports it
-      const lotteryDateStr = (category === "LOTTERY_RESULT" || category === "LOTTERY_PENDING")
+      const lotteryDateStr = (category === "LOTTERY_RESULT" || category === "LOTTERY_PENDING" || category === "OTM" || category === "LTM")
         ? (formData.get("lotteryDate") as string)
         : "";
       const lotteryDateObj = parseDateTimeDmyToDate(lotteryDateStr);
@@ -1919,7 +1919,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           </div>
         </div>
 
-        {(category === "LOTTERY_RESULT" || category === "LOTTERY_PENDING") && (
+        {(category === "LOTTERY_RESULT" || category === "LOTTERY_PENDING" || category === "OTM" || category === "LTM") && (
           <div className="space-y-2 relative animate-scale-in">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-slate-400" /> Lottery Date

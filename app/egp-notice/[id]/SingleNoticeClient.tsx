@@ -109,6 +109,44 @@ export default function SingleNoticeClient({
 }: SingleNoticeClientProps) {
   const isPdf = notice.filePath?.toLowerCase().endsWith(".pdf") || false;
   const printAreaRef = useRef<HTMLDivElement>(null);
+  const [pdfDownloading, setPdfDownloading] = React.useState(false);
+
+  const handleDownloadPdf = async () => {
+    if (!printAreaRef.current || pdfDownloading) return;
+    setPdfDownloading(true);
+    try {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import("html2canvas-pro" as any),
+        import("jspdf"),
+      ]);
+      const canvas = await (html2canvas as any)(printAreaRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const pdf = new (jsPDF as any)("l", "mm", "a4"); // landscape for wide tables
+      const imgWidth = 297; // A4 landscape width
+      const pageHeight = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+      pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      pdf.save(`${notice.title.slice(0, 50)}-result.pdf`);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      alert("PDF generation failed. Please try again.");
+    } finally {
+      setPdfDownloading(false);
+    }
+  };
 
   // Parsing Multi-Tables (supports old single-table formats and new multi-table v2 formats)
   let parsedTables: any[] = [];
@@ -465,7 +503,7 @@ export default function SingleNoticeClient({
           >
             <i className="fa-solid fa-print"></i> Print
           </button>
-          {notice.filePath && (
+          {notice.filePath ? (
             <a
               href={notice.filePath}
               download
@@ -473,7 +511,20 @@ export default function SingleNoticeClient({
             >
               <i className="fa-solid fa-download"></i> Download PDF
             </a>
-          )}
+          ) : notice.tableData ? (
+            <button
+              type="button"
+              onClick={handleDownloadPdf}
+              disabled={pdfDownloading}
+              className="bg-[#2980b9] hover:bg-[#3498db] !text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-1.5 shadow-sm transition-all cursor-pointer disabled:opacity-60"
+            >
+              {pdfDownloading ? (
+                <><i className="fa-solid fa-spinner fa-spin"></i> Generating...</>
+              ) : (
+                <><i className="fa-solid fa-download"></i> Download PDF</>
+              )}
+            </button>
+          ) : null}
         </div>
 
         {/* Fullscreen Table Content Wrapper */}

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import Link from "next/link";
 
 interface Notice {
@@ -12,18 +12,295 @@ interface Notice {
   lotteryDate?: string;
   fileUrl: string;
   category: string;
+  tableData?: string | null;
 }
 
 interface NoticeTableProps {
   notices: Notice[];
 }
 
+// -----------------------------------------------
+// Helpers for table preview used in PDF capture
+// -----------------------------------------------
+const isCurrencyColumn = (hdr: string) => {
+  if (!hdr) return false;
+  const lower = hdr.toLowerCase();
+  return (
+    lower.includes("cost") ||
+    lower.includes("tk") ||
+    lower.includes("taka") ||
+    lower.includes("security") ||
+    lower.includes("fees") ||
+    lower.includes("fee") ||
+    lower.includes("price") ||
+    lower.includes("amount") ||
+    lower.includes("turn over") ||
+    lower.includes("turnover") ||
+    lower.includes("similar work") ||
+    lower.includes("similar") ||
+    lower.includes("credit") ||
+    lower.includes("টাকা")
+  );
+};
+
+const formatCellValue = (val: string, hdr: string) => {
+  if (!val) return "";
+  const str = String(val).trim();
+  if (isCurrencyColumn(hdr)) {
+    const cleanVal = str.replace(/,/g, "").trim();
+    const num = parseFloat(cleanVal);
+    if (!isNaN(num) && /^\d+(\.\d+)?$/.test(cleanVal)) {
+      if (cleanVal.includes(".")) {
+        const [integerPart, decimalPart] = cleanVal.split(".");
+        const parsedInt = parseFloat(integerPart);
+        if (!isNaN(parsedInt)) {
+          return `${parsedInt.toLocaleString("en-US")}.${decimalPart}`;
+        }
+      }
+      return num.toLocaleString("en-US");
+    }
+  }
+  return str;
+};
+
+// Renders the table data into a printable-friendly HTML table
+function TablePdfPreview({ tableData, title }: { tableData: string; title: string }) {
+  try {
+    const parsed = JSON.parse(tableData);
+    let tables: any[] = [];
+
+    if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
+      tables = parsed.tables;
+    } else if (parsed.headers && parsed.rows) {
+      tables = [{ headers: parsed.headers, rows: parsed.rows, columnColors: parsed.columnColors || [] }];
+    } else if (parsed.isPwdTemplate) {
+      tables = [{ ...parsed, headers: parsed.headers || [], rows: parsed.rows || [] }];
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="text-center pb-4 border-b-2 border-[#1b4332] space-y-1">
+          <h1 className="text-xl font-black text-slate-900 leading-tight">{title}</h1>
+          <p className="text-sm font-bold text-slate-700">Lottery Winner Result Publication</p>
+        </div>
+        {tables.map((table: any, tIdx: number) => {
+          const headers = table.headers || [];
+          const rows = table.rows || [];
+          const winnerColIdx = headers.findIndex((h: string) =>
+            h.toUpperCase().replace(/\./g, "").includes("WINNER")
+          );
+          return (
+            <div key={tIdx} className="space-y-2">
+              {table.officeName && (
+                <p className="text-xs font-bold text-slate-700 text-center">{table.officeName}</p>
+              )}
+              <div className="overflow-x-auto rounded border border-slate-200">
+                <table className="w-full text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-[#1b4332] text-white">
+                      {headers.map((h: string, i: number) => (
+                        <th
+                          key={i}
+                          className="px-3 py-2 text-left font-bold border border-[#2d6a4f] text-[10px] uppercase tracking-wide whitespace-nowrap"
+                        >
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((row: string[], rIdx: number) => {
+                      const isWinnerRow =
+                        winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
+                      return (
+                        <tr
+                          key={rIdx}
+                          className={
+                            isWinnerRow
+                              ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500"
+                              : rIdx % 2 === 0
+                              ? "bg-white"
+                              : "bg-slate-50"
+                          }
+                        >
+                          {row.map((cell: string, cIdx: number) => {
+                            const isCurrency = isCurrencyColumn(headers[cIdx] || "");
+                            const isWinnerCell = cIdx === winnerColIdx;
+                            return (
+                              <td
+                                key={cIdx}
+                                className={`px-3 py-2 border border-slate-200 text-slate-800 ${
+                                  isCurrency ? "text-right" : "text-left"
+                                } whitespace-nowrap`}
+                              >
+                                {isWinnerCell && isWinnerRow && (
+                                  <span className="inline-block mr-1">🏆</span>
+                                )}
+                                {formatCellValue(cell, headers[cIdx] || "")}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  } catch {
+    return null;
+  }
+}
+
+// -----------------------------------------------
+// Download button for table-based lottery result notices
+// -----------------------------------------------
+function TableDownloadButton({
+  notice,
+  className,
+}: {
+  notice: Notice;
+  className: string;
+}) {
+  const captureRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = React.useState(false);
+
+  const handleDownload = async () => {
+    if (!captureRef.current || loading) return;
+    setLoading(true);
+    try {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import("html2canvas-pro" as any),
+        import("jspdf"),
+      ]);
+
+      const canvas = await (html2canvas as any)(captureRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const pdf = new (jsPDF as any)("p", "mm", "a4");
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`${notice.title.slice(0, 50)}-result.pdf`);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      alert("PDF generation failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      {/* Hidden off-screen capture area */}
+      <div
+        style={{
+          position: "fixed",
+          left: "-9999px",
+          top: "-9999px",
+          width: "1100px",
+          color: "#000000",
+          backgroundColor: "#ffffff",
+          zIndex: -1,
+        }}
+      >
+        <div ref={captureRef} className="bg-white text-black p-10 space-y-6">
+          <style dangerouslySetInnerHTML={{ __html: `
+            .pdf-cap, .pdf-cap * { color: #000000 !important; border-color: #cbd5e1 !important; }
+            .pdf-cap table { background-color: #ffffff !important; width: 100% !important; }
+            .pdf-cap th { color: #ffffff !important; }
+            .pdf-cap td { background-color: #ffffff !important; color: #000000 !important; }
+          ` }} />
+          <div className="pdf-cap">
+            <TablePdfPreview tableData={notice.tableData!} title={notice.title} />
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={handleDownload}
+        disabled={loading}
+        className={className}
+        title="Download PDF"
+      >
+        {loading ? (
+          <i className="fa-solid fa-spinner fa-spin"></i>
+        ) : (
+          <i className="fa-solid fa-download"></i>
+        )}
+      </button>
+    </>
+  );
+}
+
+// -----------------------------------------------
+// Main NoticeTable component
+// -----------------------------------------------
 const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
-  const isLotteryResult = notices.length > 0 && notices.some(n => 
-    n.category === "Lottery Result" || 
-    n.category === "Lottery Pending" || 
+  const isLotteryResult = notices.length > 0 && notices.some(n =>
+    n.category === "Lottery Result" ||
+    n.category === "Lottery Pending" ||
     (n.lotteryDate && n.lotteryDate.trim() !== "")
   );
+
+  // Check if a notice can provide a download (either via fileUrl or via client-side PDF generation from tableData)
+  const canDownload = (notice: Notice) => {
+    if (notice.fileUrl) return true;
+    if (notice.category === "Lottery Result" && notice.tableData) return true;
+    return false;
+  };
+
+  const desktopDownloadBtn = (notice: Notice) => {
+    const cls = "bg-text-1 !text-secondary px-3.5 py-1.5 rounded-lg font-bold text-xs uppercase hover:bg-primary transition shadow-sm flex items-center gap-2 cursor-pointer";
+    if (notice.fileUrl) {
+      return (
+        <a href={notice.fileUrl} download className={cls}>
+          <i className="fa-solid fa-download"></i>
+        </a>
+      );
+    }
+    if (notice.category === "Lottery Result" && notice.tableData) {
+      return <TableDownloadButton notice={notice} className={cls} />;
+    }
+    return null;
+  };
+
+  const mobileDownloadBtn = (notice: Notice) => {
+    const cls = "bg-text-1 !text-secondary hover:!text-black hover:bg-primary p-3 rounded-xl font-bold text-[11px] uppercase flex items-center justify-center aspect-square shadow-sm active:scale-95 transition-all cursor-pointer";
+    if (notice.fileUrl) {
+      return (
+        <a href={notice.fileUrl} download className={cls}>
+          <i className="fa-solid fa-download"></i>
+        </a>
+      );
+    }
+    if (notice.category === "Lottery Result" && notice.tableData) {
+      return <TableDownloadButton notice={notice} className={cls} />;
+    }
+    return null;
+  };
 
   return (
     <div className="rounded-2xl border border-ac-2 shadow-sm bg-white overflow-hidden">
@@ -92,15 +369,7 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
                       >
                         <i className="fa-solid fa-eye"></i> View
                       </Link>
-                      {notice.fileUrl && (
-                        <a
-                          href={notice.fileUrl}
-                          download
-                          className="bg-text-1 !text-secondary px-3.5 py-1.5 rounded-lg font-bold text-xs uppercase hover:bg-primary transition shadow-sm flex items-center gap-2 cursor-pointer"
-                        >
-                          <i className="fa-solid fa-download"></i>
-                        </a>
-                      )}
+                      {canDownload(notice) && desktopDownloadBtn(notice)}
                     </div>
                   </td>
                 </tr>
@@ -165,15 +434,7 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
                 >
                   <i className="fa-solid fa-eye"></i> View Detail
                 </Link>
-                {notice.fileUrl && (
-                  <a
-                    href={notice.fileUrl}
-                    download
-                    className="bg-text-1 !text-secondary hover:!text-black hover:bg-primary p-3 rounded-xl font-bold text-[11px] uppercase flex items-center justify-center aspect-square shadow-sm active:scale-95 transition-all cursor-pointer"
-                  >
-                    <i className="fa-solid fa-download"></i>
-                  </a>
-                )}
+                {canDownload(notice) && mobileDownloadBtn(notice)}
               </div>
             </div>
           ))

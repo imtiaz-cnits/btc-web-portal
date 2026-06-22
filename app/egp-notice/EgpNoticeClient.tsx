@@ -10,8 +10,11 @@ interface NoticeItem {
   no: string;
   title: string;
   date: string;
+  publishDate?: string;
+  lotteryDate?: string;
   fileUrl: string;
   category: string;
+  tableData?: string | null;
 }
 
 interface EgpNoticeClientProps {

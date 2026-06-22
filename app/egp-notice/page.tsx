@@ -67,6 +67,7 @@ export default async function PublicEgpNoticePage() {
       lotteryDate: formattedLotteryDate,
       fileUrl: notice.filePath || "",
       category: categoryMap[finalCategory] || "LTM",
+      tableData: notice.tableData || null,
     };
   });
 

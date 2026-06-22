@@ -1018,7 +1018,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                       Close
                     </button>
                     
-                    {quickViewNotice.type === "TABLE" && (
+                    {quickViewNotice.type === "TABLE" && filter === "pending" && (
                       <button
                         type="button"
                         onClick={() => initWinnersMode(quickViewNotice)}

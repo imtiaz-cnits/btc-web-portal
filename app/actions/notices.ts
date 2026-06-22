@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { uploadFile } from "@/lib/upload";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
+import fs from "fs/promises";
+import path from "path";
 
 export async function createNotice(formData: FormData) {
   const session = await getServerSession(authOptions);
@@ -210,9 +212,6 @@ export async function saveNoticeWinners(id: string, tableData: string, pdfBase64
   try {
     let filePath = undefined;
     if (pdfBase64) {
-      const fs = require("fs/promises");
-      const path = require("path");
-      
       const buffer = Buffer.from(pdfBase64, "base64");
       const uploadDir = path.join(process.cwd(), "public", "assets", "pdf");
       await fs.mkdir(uploadDir, { recursive: true });
@@ -236,9 +235,9 @@ export async function saveNoticeWinners(id: string, tableData: string, pdfBase64
     revalidatePath("/egp-notice");
     revalidatePath("/");
     return { success: true, message: "Winner list saved, PDF result generated, and notice category updated to Lottery Result." };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Save notice winners error:", error);
-    return { success: false, message: "Failed to save winners." };
+    return { success: false, message: `Failed to save winners: ${error?.message || error}` };
   }
 }
 
@@ -249,9 +248,6 @@ export async function uploadNoticePdf(id: string, pdfBase64: string) {
   }
 
   try {
-    const fs = require("fs/promises");
-    const path = require("path");
-    
     const buffer = Buffer.from(pdfBase64, "base64");
     const uploadDir = path.join(process.cwd(), "public", "assets", "pdf");
     await fs.mkdir(uploadDir, { recursive: true });
@@ -271,8 +267,8 @@ export async function uploadNoticePdf(id: string, pdfBase64: string) {
     revalidatePath("/");
 
     return { success: true, filePath };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Upload notice PDF error:", error);
-    return { success: false, message: "Failed to upload PDF." };
+    return { success: false, message: `Failed to upload PDF: ${error?.message || error}` };
   }
 }

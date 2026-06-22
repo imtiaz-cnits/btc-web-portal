@@ -212,13 +212,18 @@ export async function saveNoticeWinners(id: string, tableData: string, pdfBase64
   try {
     let filePath = undefined;
     if (pdfBase64) {
-      const buffer = Buffer.from(pdfBase64, "base64");
-      const uploadDir = path.join(process.cwd(), "public", "assets", "pdf");
-      await fs.mkdir(uploadDir, { recursive: true });
-      const fileName = `${id}-result.pdf`;
-      const fullPath = path.join(uploadDir, fileName);
-      await fs.writeFile(fullPath, buffer);
-      filePath = `/assets/pdf/${fileName}`;
+      try {
+        const buffer = Buffer.from(pdfBase64, "base64");
+        const uploadDir = path.join(process.cwd(), "public", "assets", "pdf");
+        await fs.mkdir(uploadDir, { recursive: true });
+        const fileName = `${id}-result.pdf`;
+        const fullPath = path.join(uploadDir, fileName);
+        await fs.writeFile(fullPath, buffer);
+        filePath = `/assets/pdf/${fileName}`;
+      } catch (fsError: any) {
+        console.error("Warning: Could not write PDF to read-only filesystem (EROFS):", fsError);
+        // Fail-safe: do not crash, database write will continue.
+      }
     }
 
     await prisma.notice.update({
@@ -234,7 +239,7 @@ export async function saveNoticeWinners(id: string, tableData: string, pdfBase64
     revalidatePath(`/egp-notice/${id}`);
     revalidatePath("/egp-notice");
     revalidatePath("/");
-    return { success: true, message: "Winner list saved, PDF result generated, and notice category updated to Lottery Result." };
+    return { success: true, message: "Winner list saved, and notice category updated to Lottery Result." };
   } catch (error: any) {
     console.error("Save notice winners error:", error);
     return { success: false, message: `Failed to save winners: ${error?.message || error}` };

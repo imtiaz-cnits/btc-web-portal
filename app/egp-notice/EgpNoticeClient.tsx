@@ -110,7 +110,7 @@ export default function EgpNoticeClient({ initialNotices }: EgpNoticeClientProps
       {/* Notices Table */}
       <div className="table_section mb-6">
         <div className="custom-container">
-          <NoticeTable notices={paginatedNotices} />
+          <NoticeTable notices={paginatedNotices} category={activeTab} />
         </div>
       </div>
 

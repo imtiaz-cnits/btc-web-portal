@@ -77,10 +77,10 @@ const formatCellValue = (val: string, hdr: string) => {
         const [integerPart, decimalPart] = cleanVal.split(".");
         const parsedInt = parseFloat(integerPart);
         if (!isNaN(parsedInt)) {
-          return `${parsedInt.toLocaleString("en-US")}.${decimalPart}`;
+          return `${parsedInt.toLocaleString("en-IN")}.${decimalPart}`;
         }
       }
-      return num.toLocaleString("en-US");
+      return num.toLocaleString("en-IN");
     }
   }
   return formatDisplayDate(str);
@@ -337,14 +337,16 @@ export default function SingleNoticeClient({
               td:not([style*="background-color"]) {
                 background-color: transparent !important;
               }
-               th, td {
+              th, td {
                 border: 1px solid #9ca3af !important;
                 padding: 4px 6px !important;
                 text-align: left !important;
                 font-size: 7.2pt !important;
-                color: #000000 !important;
                 white-space: normal !important;
                 word-break: break-word !important;
+              }
+              td {
+                color: #000000 !important;
               }
               th.whitespace-nowrap, td.whitespace-nowrap {
                 white-space: normal !important;
@@ -353,7 +355,6 @@ export default function SingleNoticeClient({
                 text-align: right !important;
               }
               th {
-                background-color: #ccffff !important;
                 font-weight: bold !important;
               }
               .pwd-scroll-wrapper {
@@ -444,7 +445,19 @@ export default function SingleNoticeClient({
   };
 
   const formatMoney = (val: number) => {
-    return val.toLocaleString("en-US");
+    return val.toLocaleString("en-IN");
+  };
+
+  const getHeaderTextColor = (bgColor: string) => {
+    if (!bgColor) return "text-white";
+    const lower = bgColor.toLowerCase().trim();
+    const lightColors = ["#ffffff", "#fff", "#22d3ee", "#34d399", "#4ade80", "#fef08a", "#a7f3d0", "#bae6fd", "#fecdd3", "#ccffff"];
+    return lightColors.includes(lower) ? "text-slate-800" : "text-white";
+  };
+
+  const getHeaderTextColorHex = (bgColor: string) => {
+    const cls = getHeaderTextColor(bgColor);
+    return cls === "text-white" ? "#ffffff" : "#1e293b";
   };
 
   // 1. FULLSCREEN TABLE VIEW (Hides layout headers and footers for pure document presentation)
@@ -533,12 +546,12 @@ export default function SingleNoticeClient({
           className="w-full max-w-full px-2 sm:px-6 md:px-12 py-8 bg-white space-y-8"
         >
           {parsedTables.map((table, tIdx) => {
+            const defaultHeaderBg = notice.category === "OTM" ? "#059669" : "#0891b2";
             const headers =
               table.headers && table.headers.length > 0
                 ? table.headers
                 : table.type === "pwd_ltm"
                   ? [
-                    "SL No",
                     "Tender ID",
                     "Description",
                     "Location",
@@ -551,6 +564,11 @@ export default function SingleNoticeClient({
                   : [];
             const rawRows = table.rows || [];
 
+            const hasSl = headers.some((h: string) => {
+              const norm = (h || "").toLowerCase().replace(/\./g, "").trim();
+              return norm === "slno" || norm === "sl";
+            });
+
             // Safe normalization of rows into string arrays (supports both standard nested arrays and key-value objects)
             const normalizedRows = rawRows.map((row: any, rIdx: number) => {
               if (Array.isArray(row)) return row;
@@ -561,7 +579,6 @@ export default function SingleNoticeClient({
                   "description" in row
                 ) {
                   return [
-                    (rIdx + 1).toString(),
                     row.tenderId || "",
                     row.description || "",
                     row.location || "",
@@ -626,7 +643,10 @@ export default function SingleNoticeClient({
                 {/* Egp Published Date */}
                 {table.noticeDateBlock && (
                   <div className="flex justify-end mb-0">
-                    <div className="border border-black border-b-0 px-4 py-2 text-xs md:text-sm font-bold bg-[#ccffff] text-black tracking-wide">
+                    <div 
+                      className="border border-black border-b-0 px-4 py-2 text-xs md:text-sm font-bold tracking-wide"
+                      style={{ backgroundColor: table.headerBgColor || defaultHeaderBg, color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg) }}
+                    >
                       Egp Published Date : {formatDisplayDate(table.noticeDateBlock)}
                     </div>
                   </div>
@@ -657,16 +677,24 @@ export default function SingleNoticeClient({
                   </div>
 
                   <table className="w-full border-collapse text-left font-semibold text-black relative z-10 print:w-full">
-                    <thead className="border-b border-gray-400 text-black" style={{ backgroundColor: table.headerBgColor || "#ccffff" }}>
+                    <thead className="border-b border-gray-400 text-black" style={{ backgroundColor: table.headerBgColor || defaultHeaderBg }}>
                       <tr className="divide-x divide-gray-400">
+                        {!hasSl && (
+                          <th
+                            className="p-3 font-bold border border-gray-400 text-sm uppercase text-center whitespace-nowrap"
+                            style={{ backgroundColor: table.headerBgColor || defaultHeaderBg, color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg) }}
+                          >
+                            SL No
+                          </th>
+                        )}
                         {headers.map((hdr: string, idx: number) => {
                           const isDesc = (hdr || "").toLowerCase().includes("description");
                           return (
                             <th
                               key={idx}
-                              className={`p-3 font-bold border border-gray-400 text-black text-sm uppercase text-center ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"
+                              className={`p-3 font-bold border border-gray-400 text-sm uppercase text-center ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"
                                 }`}
-                              style={{ backgroundColor: table.headerBgColor || "#ccffff" }}
+                              style={{ backgroundColor: table.headerBgColor || defaultHeaderBg, color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg) }}
                             >
                               {hdr}
                             </th>
@@ -684,6 +712,14 @@ export default function SingleNoticeClient({
                               isWinnerRow ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500" : ""
                             }`}
                           >
+                            {!hasSl && (
+                              <td
+                                className="p-3 border border-gray-400 text-black text-sm font-bold text-left whitespace-nowrap"
+                                style={isWinnerRow ? { backgroundColor: "#fffbeb" } : table.columnColors?.[0] ? { backgroundColor: table.columnColors[0] } : undefined}
+                              >
+                                {rIdx + 1}
+                              </td>
+                            )}
                             {row.map((cell: string, cIdx: number) => {
                               const cellBg = isWinnerRow ? "#fffbeb" : table.columnColors?.[cIdx] || "#ffffff";
                               const isCurrency = isCurrencyColumn(headers[cIdx] || "");
@@ -721,7 +757,7 @@ export default function SingleNoticeClient({
                                 <td
                                   key={idx}
                                   className="p-3 border border-gray-400 text-right text-sm font-extrabold bg-[#ffffcc]"
-                                  colSpan={colSpanCount}
+                                  colSpan={colSpanCount + (!hasSl ? 1 : 0)}
                                 >
                                   Total Amount BD Tk =
                                 </td>
@@ -783,10 +819,11 @@ export default function SingleNoticeClient({
                         <i className="fa-solid fa-circle-info text-blue-600 print:hidden"></i>
                         Contact Info / e-Tender Solutions :
                       </span>
-                      <div className="text-black font-semibold text-sm leading-relaxed whitespace-pre-line">
-                        {`Engr. Md. Shah Alom B.Sc. Engr.(Civil)
-Mobile No: 01711-805086
-L M B Market 1st Floor, Pabna.`}
+                      <div className="text-black font-semibold text-sm leading-relaxed">
+                        Engr. Md. Shah Alom B.Sc. Engr.(Civil)<br />
+                        Mobile No: 01711-805086<br />
+                        L M B Market 1st Floor, Pabna.<br />
+                        Web: <a href="https://www.egpbtc.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">www.egpbtc.com</a>
                       </div>
                     </div>
                   </div>
@@ -917,8 +954,14 @@ L M B Market 1st Floor, Pabna.`}
             {parsedTables.length > 0 && (
               <div className="space-y-12">
                 {parsedTables.map((table, tIdx) => {
+                  const defaultHeaderBg = notice.category === "OTM" ? "#059669" : "#0891b2";
                   const headers = table.headers || [];
                   const rows = table.rows || [];
+
+                  const hasSl = headers.some((h: string) => {
+                    const norm = (h || "").toLowerCase().replace(/\./g, "").trim();
+                    return norm === "slno" || norm === "sl";
+                  });
 
                   // Safe normalization of rows into string arrays (supports both standard nested arrays and key-value objects)
                   const normalizedRows = rows.map((row: any, rIdx: number) => {
@@ -930,7 +973,6 @@ L M B Market 1st Floor, Pabna.`}
                         "description" in row
                       ) {
                         return [
-                          (rIdx + 1).toString(),
                           row.tenderId || "",
                           row.description || "",
                           row.location || "",
@@ -995,7 +1037,10 @@ L M B Market 1st Floor, Pabna.`}
                       {/* Egp Published Date */}
                       {table.noticeDateBlock && (
                         <div className="flex justify-end mb-0">
-                          <div className="border border-black border-b-0 px-4 py-2 text-xs md:text-sm font-bold bg-[#ccffff] text-black tracking-wide">
+                          <div 
+                            className="border border-black border-b-0 px-4 py-2 text-xs md:text-sm font-bold tracking-wide"
+                            style={{ backgroundColor: table.headerBgColor || defaultHeaderBg, color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg) }}
+                          >
                             Egp Published Date : {formatDisplayDate(table.noticeDateBlock)}
                           </div>
                         </div>
@@ -1026,16 +1071,24 @@ L M B Market 1st Floor, Pabna.`}
                         </div>
 
                         <table className="w-full border-collapse text-left font-semibold text-black relative z-10 print:w-full">
-                          <thead className="border-b border-gray-400 text-black" style={{ backgroundColor: table.headerBgColor || "#ccffff" }}>
+                          <thead className="border-b border-gray-400 text-black" style={{ backgroundColor: table.headerBgColor || defaultHeaderBg }}>
                             <tr className="divide-x divide-gray-400">
+                              {!hasSl && (
+                                <th
+                                  className="p-2.5 font-bold border border-gray-400 text-sm uppercase whitespace-nowrap text-center"
+                                  style={{ backgroundColor: table.headerBgColor || defaultHeaderBg, color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg) }}
+                                >
+                                  SL No
+                                </th>
+                              )}
                               {headers.map((hdr: string, idx: number) => {
                                 const isDesc = (hdr || "").toLowerCase().includes("description");
                                 return (
                                   <th
                                     key={idx}
-                                    className={`p-2.5 font-bold border border-gray-400 text-black text-sm uppercase ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"
+                                    className={`p-2.5 font-bold border border-gray-400 text-sm uppercase text-center ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"
                                       }`}
-                                    style={{ backgroundColor: table.headerBgColor || "#ccffff" }}
+                                    style={{ backgroundColor: table.headerBgColor || defaultHeaderBg, color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg) }}
                                   >
                                     {hdr}
                                   </th>
@@ -1053,6 +1106,14 @@ L M B Market 1st Floor, Pabna.`}
                                     isWinnerRow ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500" : ""
                                   }`}
                                 >
+                                  {!hasSl && (
+                                    <td
+                                      className="p-2.5 border border-gray-400 text-black text-sm font-bold text-left whitespace-nowrap"
+                                      style={isWinnerRow ? { backgroundColor: "#fffbeb" } : table.columnColors?.[0] ? { backgroundColor: table.columnColors[0] } : undefined}
+                                    >
+                                      {rIdx + 1}
+                                    </td>
+                                  )}
                                   {row.map((cell: string, cIdx: number) => {
                                     const cellBg = isWinnerRow ? "#fffbeb" : table.columnColors?.[cIdx] || "#ffffff";
                                     const isCurrency = isCurrencyColumn(headers[cIdx] || "");
@@ -1075,21 +1136,21 @@ L M B Market 1st Floor, Pabna.`}
                               );
                             })}
 
-                            {/* Sum Totals Row if any sum matches */}
-                            {(securityColIdx !== -1 || docFeesColIdx !== -1) && (
-                              <tr className="bg-[#ffffcc] font-bold text-black divide-x divide-gray-400 border-t-2 border-gray-500">
-                                {headers.map((hdr: string, idx: number) => {
-                                  if (idx === 0) {
-                                    const colSpanCount = Math.min(
-                                      securityColIdx !== -1 ? securityColIdx : docFeesColIdx,
-                                      headers.length,
-                                    );
-                                    return (
-                                      <td key={idx} className="p-2.5 border border-gray-400 text-right text-sm font-extrabold bg-[#ffffcc]" colSpan={colSpanCount}>
-                                        Total Amount BD Tk =
-                                      </td>
-                                    );
-                                  }
+                      {/* Sum Totals Row if any sum matches */}
+                      {(securityColIdx !== -1 || docFeesColIdx !== -1) && (
+                        <tr className="bg-[#ffffcc] font-bold text-black divide-x divide-gray-400 border-t-2 border-gray-500">
+                          {headers.map((hdr: string, idx: number) => {
+                            if (idx === 0) {
+                              const colSpanCount = Math.min(
+                                securityColIdx !== -1 ? securityColIdx : docFeesColIdx,
+                                headers.length,
+                              );
+                              return (
+                                <td key={idx} className="p-2.5 border border-gray-400 text-right text-sm font-extrabold bg-[#ffffcc]" colSpan={colSpanCount + (!hasSl ? 1 : 0)}>
+                                  Total Amount BD Tk =
+                                </td>
+                              );
+                            }
                                   const minTotalColIdx = Math.min(
                                     securityColIdx !== -1 ? securityColIdx : docFeesColIdx,
                                     headers.length,
@@ -1144,10 +1205,11 @@ L M B Market 1st Floor, Pabna.`}
                               <i className="fa-solid fa-circle-info text-blue-600 print:hidden"></i>
                               Contact Info / e-Tender Solutions :
                             </span>
-                            <div className="text-black font-semibold text-sm leading-relaxed whitespace-pre-line">
-                              {`Engr. Md. Shah Alom B.Sc. Engr.(Civil)
-Mobile No: 01711-805086
-L M B Market 1st Floor, Pabna.`}
+                            <div className="text-black font-semibold text-sm leading-relaxed">
+                              Engr. Md. Shah Alom B.Sc. Engr.(Civil)<br />
+                              Mobile No: 01711-805086<br />
+                              L M B Market 1st Floor, Pabna.<br />
+                              Web: <a href="https://www.egpbtc.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">www.egpbtc.com</a>
                             </div>
                           </div>
                         </div>

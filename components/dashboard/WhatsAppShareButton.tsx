@@ -62,12 +62,24 @@ const formatCellValue = (val: string, hdr: string) => {
       if (cleanVal.includes(".")) {
         const [integerPart, decimalPart] = cleanVal.split(".");
         const parsedInt = parseFloat(integerPart);
-        if (!isNaN(parsedInt)) return `${parsedInt.toLocaleString("en-US")}.${decimalPart}`;
+        if (!isNaN(parsedInt)) return `${parsedInt.toLocaleString("en-IN")}.${decimalPart}`;
       }
-      return num.toLocaleString("en-US");
+      return num.toLocaleString("en-IN");
     }
   }
   return str;
+};
+
+const getHeaderTextColor = (bgColor: string) => {
+  if (!bgColor) return "text-white";
+  const lower = bgColor.toLowerCase().trim();
+  const lightColors = ["#ffffff", "#fff", "#22d3ee", "#34d399", "#4ade80", "#fef08a", "#a7f3d0", "#bae6fd", "#fecdd3", "#ccffff"];
+  return lightColors.includes(lower) ? "text-slate-800" : "text-white";
+};
+
+const getHeaderTextColorHex = (bgColor: string) => {
+  const cls = getHeaderTextColor(bgColor);
+  return cls === "text-white" ? "#ffffff" : "#1e293b";
 };
 
 const parseTables = (tableData: string): any[] => {
@@ -77,7 +89,7 @@ const parseTables = (tableData: string): any[] => {
     if (parsed.isPwdTemplate) {
       return [{
         officeName: parsed.officeName || "",
-        headers: parsed.headers || ["SL No", "Tender ID", "Description", "Location", "AppCost (Tk)", "Solvency (Tk)", "Security (Tk)", "Doc Fees (Tk)", "Last Date & Time"],
+        headers: parsed.headers || ["Tender ID", "Description", "Location", "AppCost (Tk)", "Solvency (Tk)", "Security (Tk)", "Doc Fees (Tk)", "Last Date & Time"],
         rows: parsed.rows || [],
       }];
     }
@@ -264,18 +276,30 @@ export default function WhatsAppShareButton({ notice }: { notice: NoticeItem }) 
           {notice.type === "TABLE" && parsedTables.length > 0 && (
             <div>
               {parsedTables.map((table: any, tIdx: number) => {
-                const headerBg = table.headerBgColor || "#ccffff";
+                const defaultHeaderBg = notice.category === "OTM" ? "#059669" : "#0891b2";
+                const headerBg = table.headerBgColor || defaultHeaderBg;
                 const headers = table.headers || [];
                 const rows = table.rows || [];
                 const winnerColIdx = headers.findIndex((h: string) => h.toUpperCase().replace(/\./g, "").includes("WINNER"));
+                const hasSl = headers.some((h: string) => {
+                  const norm = (h || "").toLowerCase().replace(/\./g, "").trim();
+                  return norm === "slno" || norm === "sl";
+                });
                 return (
                   <div key={tIdx} style={{ marginBottom: "24px" }}>
                     {table.officeName && <p style={{ fontWeight: "bold", textAlign: "center", fontSize: "11px", marginBottom: "8px" }}>{table.officeName}</p>}
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "10px" }}>
                       <thead>
                         <tr style={{ backgroundColor: headerBg }}>
+                          {!hasSl && (
+                            <th style={{ padding: "6px 8px", textAlign: "left", fontWeight: "bold", border: "1px solid #cbd5e1", backgroundColor: headerBg, color: getHeaderTextColorHex(headerBg), fontSize: "9px" }}>
+                              SL No
+                            </th>
+                          )}
                           {headers.map((h: string, i: number) => (
-                            <th key={i} style={{ padding: "6px 8px", textAlign: "left", fontWeight: "bold", border: "1px solid #cbd5e1", backgroundColor: headerBg, fontSize: "9px" }}>{h}</th>
+                            <th key={i} style={{ padding: "6px 8px", textAlign: "left", fontWeight: "bold", border: "1px solid #cbd5e1", backgroundColor: headerBg, color: getHeaderTextColorHex(headerBg), fontSize: "9px" }}>
+                              {h}
+                            </th>
                           ))}
                         </tr>
                       </thead>
@@ -284,6 +308,11 @@ export default function WhatsAppShareButton({ notice }: { notice: NoticeItem }) 
                           const isWinner = winnerColIdx !== -1 && row[winnerColIdx]?.trim();
                           return (
                             <tr key={rIdx} style={{ backgroundColor: isWinner ? "#fffbeb" : rIdx % 2 === 0 ? "#fff" : "#f8fafc" }}>
+                              {!hasSl && (
+                                <td style={{ padding: "5px 8px", border: "1px solid #e2e8f0", color: "#1e293b", fontWeight: "bold" }}>
+                                  {rIdx + 1}
+                                </td>
+                              )}
                               {row.map((cell: string, cIdx: number) => (
                                 <td key={cIdx} style={{ padding: "5px 8px", border: "1px solid #e2e8f0", color: "#1e293b" }}>
                                   {cIdx === winnerColIdx && isWinner && "🏆 "}

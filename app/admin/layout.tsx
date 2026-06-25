@@ -27,26 +27,36 @@ function AdminSearchBar() {
   const pathname = usePathname();
   const router = useRouter();
   const [searchValue, setSearchValue] = useState(
-    searchParams.get("search") || "",
+    searchParams?.get("search") || "",
   );
 
   // Update search input when URL changes
   useEffect(() => {
-    setSearchValue(searchParams.get("search") || "");
+    setSearchValue(searchParams?.get("search") || "");
   }, [searchParams]);
 
+  // Debounce updating the URL search parameter
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      const currentSearch = searchParams?.get("search") || "";
+      if (searchValue !== currentSearch) {
+        const params = new URLSearchParams(window.location.search);
+        if (searchValue) {
+          params.set("search", searchValue);
+        } else {
+          params.delete("search");
+        }
+        // Always reset page to 1 when search query changes
+        params.delete("page");
+        router.push(`${pathname}?${params.toString()}`);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchValue, pathname, router, searchParams]);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setSearchValue(val);
-
-    const params = new URLSearchParams(window.location.search);
-    if (val) {
-      params.set("search", val);
-    } else {
-      params.delete("search");
-    }
-
-    router.push(`${pathname}?${params.toString()}`);
+    setSearchValue(e.target.value);
   };
 
   return (
@@ -169,8 +179,8 @@ export default function AdminLayout({
           }`}
         >
           {/* Logo Brand (Centered when collapsed) */}
-          <div className="h-16 flex items-center border-b border-slate-800 shrink-0 px-[13px] transition-all duration-300 w-full overflow-hidden">
-            <div className="flex items-center gap-4 overflow-hidden w-full shrink-0 justify-start">
+          <div className="h-16 flex items-center justify-between border-b border-slate-800 shrink-0 px-[13px] transition-all duration-300 w-full overflow-hidden">
+            <div className="flex items-center gap-4 overflow-hidden justify-start">
               <div className="w-8 h-8 rounded-lg bg-[var(--primary-color)] flex items-center justify-center font-bold text-white shadow-lg shrink-0">
                 B
               </div>
@@ -303,7 +313,7 @@ export default function AdminLayout({
                 : "bg-white/90 border-slate-200"
             }`}
           >
-            <div className="flex items-center gap-4 min-w-0">
+            <div className="flex items-center min-w-0">
               {/* Header Logo (ONLY visible on mobile, hidden on desktop!) */}
               <div className="flex items-center gap-2 mr-3 shrink-0 md:hidden">
                 <div className="w-8 h-8 rounded-lg bg-[var(--primary-color)] flex items-center justify-center font-bold text-white shadow-lg shrink-0">

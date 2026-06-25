@@ -277,3 +277,26 @@ export async function uploadNoticePdf(id: string, pdfBase64: string) {
     return { success: false, message: `Failed to upload PDF: ${error?.message || error}` };
   }
 }
+
+export async function getNoticeCountsByTitle() {
+  try {
+    const counts = await prisma.notice.groupBy({
+      by: ["title"],
+      _count: {
+        id: true,
+      },
+    });
+
+    const countsMap: Record<string, number> = {};
+    counts.forEach((item) => {
+      if (item.title) {
+        countsMap[item.title] = item._count.id;
+      }
+    });
+
+    return { success: true, counts: countsMap };
+  } catch (error) {
+    console.error("Failed to get notice counts by title:", error);
+    return { success: false, counts: {} };
+  }
+}

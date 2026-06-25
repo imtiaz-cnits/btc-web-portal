@@ -74,13 +74,20 @@ const formatCellValue = (val: string, hdr: string) => {
         const [integerPart, decimalPart] = cleanVal.split(".");
         const parsedInt = parseFloat(integerPart);
         if (!isNaN(parsedInt)) {
-          return `${parsedInt.toLocaleString("en-US")}.${decimalPart}`;
+          return `${parsedInt.toLocaleString("en-IN")}.${decimalPart}`;
         }
       }
-      return num.toLocaleString("en-US");
+      return num.toLocaleString("en-IN");
     }
   }
   return str;
+};
+
+const getHeaderTextColor = (bgColor: string) => {
+  if (!bgColor) return "text-white";
+  const lower = bgColor.toLowerCase().trim();
+  const lightColors = ["#ffffff", "#fff", "#22d3ee", "#34d399", "#4ade80", "#fef08a", "#a7f3d0", "#bae6fd", "#fecdd3", "#ccffff"];
+  return lightColors.includes(lower) ? "text-slate-800" : "text-white";
 };
 
 function TableDataPreview({ tableData }: { tableData: string }) {
@@ -96,6 +103,10 @@ function TableDataPreview({ tableData }: { tableData: string }) {
             const isCustomHeader = !!headerBg;
             const headers = table.headers || [];
             const rows = table.rows || [];
+            const hasSl = headers.some((h: string) => {
+              const norm = (h || "").toLowerCase().replace(/\./g, "").trim();
+              return norm === "slno" || norm === "sl";
+            });
 
             const securityColIdx = headers.findIndex((h: string) =>
               h.toLowerCase().includes("security"),
@@ -114,7 +125,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
             };
 
             const formatMoney = (val: number) => {
-              return val.toLocaleString("en-US");
+              return val.toLocaleString("en-IN");
             };
 
             const totalSecurity =
@@ -146,15 +157,25 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                   <table className="w-full text-xs border-collapse">
                     <thead>
                       <tr 
-                        style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
-                        className={isCustomHeader ? "text-slate-800" : "bg-[#1b4332] text-white"}
+                        style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
+                        className={getHeaderTextColor(headerBg || "#1b4332")}
                       >
+                        {!hasSl && (
+                          <th
+                            style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
+                            className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide border-slate-200 ${
+                              getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
+                            }`}
+                          >
+                            SL No
+                          </th>
+                        )}
                         {headers.map((h: string, i: number) => (
                           <th 
                             key={i} 
-                            style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
-                            className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide ${
-                              isCustomHeader ? "border-slate-200 !text-slate-800" : "border-[#2d6a4f] !text-white"
+                            style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
+                            className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide border-slate-200 ${
+                              getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
                             }`}
                           >
                             {h}
@@ -176,6 +197,14 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                                   : "bg-slate-50"
                             }
                           >
+                            {!hasSl && (
+                              <td
+                                style={isWinnerRow ? { backgroundColor: "#fffbeb" } : table.columnColors?.[0] ? { backgroundColor: table.columnColors[0] } : undefined}
+                                className="px-3 py-2 border border-slate-200 !text-slate-800 text-left whitespace-nowrap font-bold"
+                              >
+                                {rIdx + 1}
+                              </td>
+                            )}
                             {row.map((cell: string, cIdx: number) => {
                               const cellBg = isWinnerRow ? "#fffbeb" : table.columnColors?.[cIdx];
                               const isDesc = (headers[cIdx] || "").toLowerCase().includes("description");
@@ -213,7 +242,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                                 <td
                                   key={idx}
                                   className="px-3 py-2 text-right font-extrabold bg-[#ffffcc] border border-slate-200 !text-slate-800"
-                                  colSpan={colSpanCount}
+                                  colSpan={colSpanCount + (!hasSl ? 1 : 0)}
                                 >
                                   Total Amount BD Tk =
                                 </td>
@@ -271,11 +300,15 @@ function TableDataPreview({ tableData }: { tableData: string }) {
     // PWD template
     if (parsed.isPwdTemplate) {
       const headerBg = parsed.headerBgColor;
-      const isCustomHeader = !!headerBg;
       const headers = parsed.headers || [];
+      const rows = parsed.rows || [];
       const winnerColIdx = headers.findIndex((h: string) =>
         h.toUpperCase().replace(/\./g, "").includes("WINNER")
       );
+      const hasSl = headers.some((h: string) => {
+        const norm = (h || "").toLowerCase().replace(/\./g, "").trim();
+        return norm === "slno" || norm === "sl";
+      });
       return (
         <div className="space-y-2 custom-table-preview">
           {parsed.officeName && (
@@ -285,15 +318,25 @@ function TableDataPreview({ tableData }: { tableData: string }) {
             <table className="w-full text-xs border-collapse">
               <thead>
                 <tr 
-                  style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
-                  className={isCustomHeader ? "text-slate-800" : "bg-[#1b4332] text-white"}
+                  style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
+                  className={getHeaderTextColor(headerBg || "#1b4332")}
                 >
+                  {!hasSl && (
+                    <th 
+                      style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
+                      className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide border-slate-200 ${
+                        getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
+                      }`}
+                    >
+                      SL No
+                    </th>
+                  )}
                   {headers.map((h: string, i: number) => (
                     <th 
                       key={i} 
-                      style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
-                      className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide ${
-                        isCustomHeader ? "border-slate-200 !text-slate-800" : "border-[#2d6a4f] !text-white"
+                      style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
+                      className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide border-slate-200 ${
+                        getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
                       }`}
                     >
                       {h}
@@ -302,7 +345,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                 </tr>
               </thead>
               <tbody>
-                {(parsed.rows || []).map((row: string[], rIdx: number) => {
+                {(rows || []).map((row: string[], rIdx: number) => {
                   const isWinnerRow = winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
                   return (
                     <tr 
@@ -315,6 +358,14 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                             : "bg-slate-50"
                       }
                     >
+                      {!hasSl && (
+                        <td
+                          style={isWinnerRow ? { backgroundColor: "#fffbeb" } : parsed.columnColors?.[0] ? { backgroundColor: parsed.columnColors[0] } : undefined}
+                          className="px-3 py-2 border border-slate-200 !text-slate-800 text-left whitespace-nowrap font-bold"
+                        >
+                          {rIdx + 1}
+                        </td>
+                      )}
                       {row.map((cell: string, cIdx: number) => {
                         const cellBg = isWinnerRow ? "#fffbeb" : parsed.columnColors?.[cIdx];
                         const isDesc = (headers?.[cIdx] || "").toLowerCase().includes("description");
@@ -345,25 +396,39 @@ function TableDataPreview({ tableData }: { tableData: string }) {
     // Legacy simple format
     if (parsed.headers && parsed.rows) {
       const headerBg = parsed.headerBgColor;
-      const isCustomHeader = !!headerBg;
       const headers = parsed.headers || [];
+      const rows = parsed.rows || [];
       const winnerColIdx = headers.findIndex((h: string) =>
         h.toUpperCase().replace(/\./g, "").includes("WINNER")
       );
+      const hasSl = headers.some((h: string) => {
+        const norm = (h || "").toLowerCase().replace(/\./g, "").trim();
+        return norm === "slno" || norm === "sl";
+      });
       return (
         <div className="overflow-x-auto rounded-xl border border-slate-200 custom-table-preview">
           <table className="w-full text-xs border-collapse">
             <thead>
               <tr 
-                style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
-                className={isCustomHeader ? "text-slate-800" : "bg-[#1b4332] text-white"}
+                style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
+                className={getHeaderTextColor(headerBg || "#1b4332")}
               >
+                {!hasSl && (
+                  <th 
+                    style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
+                    className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide border-slate-200 ${
+                      getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
+                    }`}
+                  >
+                    SL No
+                  </th>
+                )}
                 {headers.map((h: string, i: number) => (
                   <th 
                     key={i} 
-                    style={isCustomHeader ? { backgroundColor: headerBg } : undefined}
-                    className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide ${
-                      isCustomHeader ? "border-slate-200 !text-slate-800" : "border-[#2d6a4f] !text-white"
+                    style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
+                    className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide border-slate-200 ${
+                      getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
                     }`}
                   >
                     {h}
@@ -372,7 +437,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
               </tr>
             </thead>
             <tbody>
-              {(parsed.rows || []).map((row: string[], rIdx: number) => {
+              {(rows || []).map((row: string[], rIdx: number) => {
                 const isWinnerRow = winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
                 return (
                   <tr 
@@ -385,6 +450,14 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                           : "bg-slate-50"
                     }
                   >
+                    {!hasSl && (
+                      <td
+                        style={isWinnerRow ? { backgroundColor: "#fffbeb" } : parsed.columnColors?.[0] ? { backgroundColor: parsed.columnColors[0] } : undefined}
+                        className="px-3 py-2 border border-slate-200 !text-slate-800 text-left whitespace-nowrap font-bold"
+                      >
+                        {rIdx + 1}
+                      </td>
+                    )}
                     {row.map((cell: string, cIdx: number) => {
                       const cellBg = isWinnerRow ? "#fffbeb" : parsed.columnColors?.[cIdx];
                       const isDesc = (headers?.[cIdx] || "").toLowerCase().includes("description");
@@ -886,6 +959,10 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                     const winnerColIdx = headers.findIndex((h: string) =>
                       h.toUpperCase().replace(/\./g, "").includes("WINNER")
                     );
+                    const hasSl = headers.some((h: string) => {
+                      const norm = (h || "").toLowerCase().replace(/\./g, "").trim();
+                      return norm === "slno" || norm === "sl";
+                    });
 
                     return (
                       <div key={tIdx} className="space-y-2">
@@ -895,12 +972,24 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                         <div className="overflow-x-auto rounded-xl border border-slate-200">
                           <table className="w-full text-xs border-collapse">
                             <thead>
-                              <tr style={{ backgroundColor: headerBg }} className="text-slate-800">
+                              <tr style={{ backgroundColor: headerBg }} className={getHeaderTextColor(headerBg)}>
+                                {!hasSl && (
+                                  <th 
+                                    style={{ backgroundColor: headerBg }}
+                                    className={`px-3 py-2 text-left font-bold border border-slate-200 text-[10px] uppercase tracking-wide whitespace-nowrap ${
+                                      getHeaderTextColor(headerBg) === "text-white" ? "!text-white" : "!text-slate-800"
+                                    }`}
+                                  >
+                                    SL No
+                                  </th>
+                                )}
                                 {headers.map((h: string, i: number) => (
                                   <th 
                                     key={i} 
                                     style={{ backgroundColor: headerBg }}
-                                    className="px-3 py-2 text-left font-bold border border-slate-200 text-[10px] uppercase tracking-wide !text-slate-800 whitespace-nowrap"
+                                    className={`px-3 py-2 text-left font-bold border border-slate-200 text-[10px] uppercase tracking-wide whitespace-nowrap ${
+                                      getHeaderTextColor(headerBg) === "text-white" ? "!text-white" : "!text-slate-800"
+                                    }`}
                                   >
                                     {h}
                                   </th>
@@ -915,6 +1004,11 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                                     key={rIdx} 
                                     className={isWinnerRow ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500" : rIdx % 2 === 0 ? "bg-white" : "bg-slate-50"}
                                   >
+                                    {!hasSl && (
+                                      <td className="px-3 py-2 border border-slate-200 text-slate-800 font-bold">
+                                        {rIdx + 1}
+                                      </td>
+                                    )}
                                     {row.map((cell: string, cIdx: number) => {
                                       const isWinnerCell = cIdx === winnerColIdx;
                                       return (
@@ -1059,7 +1153,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
           {/* Force strict light mode rendering inside PDF capture element */}
           <style dangerouslySetInnerHTML={{ __html: `
             #pdf-render-capture,
-            #pdf-render-capture * {
+            #pdf-render-capture *:not(th) {
               color: #000000 !important;
               border-color: #cbd5e1 !important;
             }
@@ -1068,7 +1162,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
               width: 100% !important;
             }
             #pdf-render-capture th {
-              color: #000000 !important;
+              border-color: #cbd5e1 !important;
             }
             #pdf-render-capture td {
               background-color: #ffffff !important;
@@ -1104,6 +1198,15 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
             const winnerColIdx = headers.findIndex((h: string) =>
               h.toUpperCase().replace(/\./g, "").includes("WINNER")
             );
+            const hasSl = headers.some((h: string) => {
+              const norm = (h || "").toLowerCase().replace(/\./g, "").trim();
+              return norm === "slno" || norm === "sl";
+            });
+
+            const getHeaderTextColorHex = (bgColor: string) => {
+              const cls = getHeaderTextColor(bgColor);
+              return cls === "text-white" ? "#ffffff" : "#1e293b";
+            };
 
             return (
               <div key={tIdx} className="space-y-2.5">
@@ -1116,12 +1219,20 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                 <div className="border border-slate-300 rounded-lg overflow-hidden">
                   <table className="w-full text-xs border-collapse">
                     <thead>
-                      <tr style={{ backgroundColor: headerBg }} className="text-slate-800 border-b border-slate-300">
+                      <tr style={{ backgroundColor: headerBg }} className="border-b border-slate-300">
+                        {!hasSl && (
+                          <th 
+                            style={{ backgroundColor: headerBg, color: getHeaderTextColorHex(headerBg) }}
+                            className="px-3 py-2 text-left font-bold border-r border-slate-300 text-[10px] uppercase tracking-wide"
+                          >
+                            SL No
+                          </th>
+                        )}
                         {headers.map((h: string, i: number) => (
                           <th 
                             key={i} 
-                            style={{ backgroundColor: headerBg }}
-                            className="px-3 py-2 text-left font-bold border-r border-slate-300 text-[10px] uppercase tracking-wide !text-slate-800"
+                            style={{ backgroundColor: headerBg, color: getHeaderTextColorHex(headerBg) }}
+                            className="px-3 py-2 text-left font-bold border-r border-slate-300 text-[10px] uppercase tracking-wide"
                           >
                             {h}
                           </th>
@@ -1136,6 +1247,13 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                             key={rIdx} 
                             className={isWinnerRow ? "bg-[#fffbeb] font-bold" : rIdx % 2 === 0 ? "bg-white" : "bg-slate-50"}
                           >
+                            {!hasSl && (
+                              <td 
+                                className="px-3 py-2 border-r border-b border-slate-300 text-slate-800 text-[11px] font-bold"
+                              >
+                                {rIdx + 1}
+                              </td>
+                            )}
                             {row.map((cell: string, cIdx: number) => {
                               const isWinnerCell = cIdx === winnerColIdx;
                               return (

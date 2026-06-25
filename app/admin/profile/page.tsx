@@ -115,7 +115,7 @@ export default function AdminProfilePage() {
   const isAdmin = userRole === "ADMIN";
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="w-full space-y-8">
       {/* Page Title */}
       <div>
         <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">

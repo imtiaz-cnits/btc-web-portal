@@ -123,7 +123,7 @@ export default async function AdminNoticesPage({
 
       {/* Premium Filter Tabs & Limit Selector */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-200 pb-px shrink-0 select-none">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <Link
             href={`/admin/egp-notices?filter=all${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
             className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "all"

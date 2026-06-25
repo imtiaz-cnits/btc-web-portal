@@ -17,6 +17,7 @@ interface Notice {
 
 interface NoticeTableProps {
   notices: Notice[];
+  category?: string;
 }
 
 // -----------------------------------------------
@@ -54,17 +55,17 @@ const formatCellValue = (val: string, hdr: string) => {
         const [integerPart, decimalPart] = cleanVal.split(".");
         const parsedInt = parseFloat(integerPart);
         if (!isNaN(parsedInt)) {
-          return `${parsedInt.toLocaleString("en-US")}.${decimalPart}`;
+          return `${parsedInt.toLocaleString("en-IN")}.${decimalPart}`;
         }
       }
-      return num.toLocaleString("en-US");
+      return num.toLocaleString("en-IN");
     }
   }
   return str;
 };
 
 // Renders the table data into a printable-friendly HTML table
-function TablePdfPreview({ tableData, title }: { tableData: string; title: string }) {
+function TablePdfPreview({ tableData, title, category }: { tableData: string; title: string; category?: string }) {
   try {
     const parsed = JSON.parse(tableData);
     let tables: any[] = [];
@@ -77,6 +78,20 @@ function TablePdfPreview({ tableData, title }: { tableData: string; title: strin
       tables = [{ ...parsed, headers: parsed.headers || [], rows: parsed.rows || [] }];
     }
 
+    const getHeaderTextColor = (bgColor: string) => {
+      if (!bgColor) return "text-white";
+      const lower = bgColor.toLowerCase().trim();
+      const lightColors = ["#ffffff", "#fff", "#22d3ee", "#34d399", "#4ade80", "#fef08a", "#a7f3d0", "#bae6fd", "#fecdd3", "#ccffff"];
+      return lightColors.includes(lower) ? "text-slate-800" : "text-white";
+    };
+
+    const getHeaderTextColorHex = (bgColor: string) => {
+      const cls = getHeaderTextColor(bgColor);
+      return cls === "text-white" ? "#ffffff" : "#1e293b";
+    };
+
+    const defaultHeaderBg = category === "OTM" ? "#059669" : "#0891b2";
+
     return (
       <div className="space-y-6">
         <div className="text-center pb-4 border-b-2 border-[#1b4332] space-y-1">
@@ -84,11 +99,16 @@ function TablePdfPreview({ tableData, title }: { tableData: string; title: strin
           <p className="text-sm font-bold text-slate-700">Lottery Winner Result Publication</p>
         </div>
         {tables.map((table: any, tIdx: number) => {
+          const headerBg = table.headerBgColor || defaultHeaderBg;
           const headers = table.headers || [];
           const rows = table.rows || [];
           const winnerColIdx = headers.findIndex((h: string) =>
             h.toUpperCase().replace(/\./g, "").includes("WINNER")
           );
+          const hasSl = headers.some((h: string) => {
+            const norm = (h || "").toLowerCase().replace(/\./g, "").trim();
+            return norm === "slno" || norm === "sl";
+          });
           return (
             <div key={tIdx} className="space-y-2">
               {table.officeName && (
@@ -97,11 +117,20 @@ function TablePdfPreview({ tableData, title }: { tableData: string; title: strin
               <div className="overflow-x-auto rounded border border-slate-200">
                 <table className="w-full text-xs border-collapse">
                   <thead>
-                    <tr className="bg-[#1b4332] text-white">
+                    <tr style={{ backgroundColor: headerBg }} className={getHeaderTextColor(headerBg)}>
+                      {!hasSl && (
+                        <th
+                          style={{ backgroundColor: headerBg, color: getHeaderTextColorHex(headerBg) }}
+                          className="px-3 py-2 text-left font-bold border border-slate-200 text-[10px] uppercase tracking-wide whitespace-nowrap"
+                        >
+                          SL No
+                        </th>
+                      )}
                       {headers.map((h: string, i: number) => (
                         <th
                           key={i}
-                          className="px-3 py-2 text-left font-bold border border-[#2d6a4f] text-[10px] uppercase tracking-wide whitespace-nowrap"
+                          style={{ backgroundColor: headerBg, color: getHeaderTextColorHex(headerBg) }}
+                          className="px-3 py-2 text-left font-bold border border-slate-200 text-[10px] uppercase tracking-wide whitespace-nowrap"
                         >
                           {h}
                         </th>
@@ -123,12 +152,22 @@ function TablePdfPreview({ tableData, title }: { tableData: string; title: strin
                               : "bg-slate-50"
                           }
                         >
+                          {!hasSl && (
+                            <td
+                              style={isWinnerRow ? { backgroundColor: "#fffbeb" } : table.columnColors?.[0] ? { backgroundColor: table.columnColors[0] } : undefined}
+                              className="px-3 py-2 border border-slate-200 text-slate-800 text-left whitespace-nowrap font-bold"
+                            >
+                              {rIdx + 1}
+                            </td>
+                          )}
                           {row.map((cell: string, cIdx: number) => {
                             const isCurrency = isCurrencyColumn(headers[cIdx] || "");
                             const isWinnerCell = cIdx === winnerColIdx;
+                            const cellBg = isWinnerRow ? "#fffbeb" : table.columnColors?.[cIdx];
                             return (
                               <td
                                 key={cIdx}
+                                style={cellBg ? { backgroundColor: cellBg } : undefined}
                                 className={`px-3 py-2 border border-slate-200 text-slate-800 ${
                                   isCurrency ? "text-right" : "text-left"
                                 } whitespace-nowrap`}
@@ -233,7 +272,7 @@ function TableDownloadButton({
             .pdf-cap td { background-color: #ffffff !important; color: #000000 !important; }
           ` }} />
           <div className="pdf-cap">
-            <TablePdfPreview tableData={notice.tableData!} title={notice.title} />
+            <TablePdfPreview tableData={notice.tableData!} title={notice.title} category={notice.category} />
           </div>
         </div>
       </div>
@@ -258,7 +297,13 @@ function TableDownloadButton({
 // -----------------------------------------------
 // Main NoticeTable component
 // -----------------------------------------------
-const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
+const NoticeTable: React.FC<NoticeTableProps> = ({ notices, category }) => {
+  // Determine if we show publish date (only for OTM and LTM tabs)
+  const currentCategory = category || (notices.length > 0 ? notices[0].category : null);
+  const showPublishDate = currentCategory
+    ? (currentCategory.toLowerCase() === "otm" || currentCategory.toLowerCase() === "ltm")
+    : true; // Default to true if not specified and notices array is empty
+
   const isLotteryResult = notices.length > 0 && notices.some(n =>
     n.category === "Lottery Result" ||
     n.category === "Lottery Pending" ||
@@ -315,9 +360,11 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
               <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm">
                 Procuring Entity / Title
               </th>
-              <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-40 text-center">
-                Publish Date
-              </th>
+              {showPublishDate && (
+                <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-40 text-center">
+                  Publish Date
+                </th>
+              )}
               <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-40 text-center">
                 Last Date
               </th>
@@ -344,11 +391,13 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
                       {notice.title}
                     </h4>
                   </td>
-                  <td className="py-2.5 px-4 text-center">
-                    <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-text-2 text-sm font-bold">
-                      {notice.publishDate || "N/A"}
-                    </div>
-                  </td>
+                  {showPublishDate && (
+                    <td className="py-2.5 px-4 text-center">
+                      <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-text-2 text-sm font-bold">
+                        {notice.publishDate || "N/A"}
+                      </div>
+                    </td>
+                  )}
                   <td className="py-2.5 px-4 text-center">
                     <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-text-2 text-sm font-bold">
                       {notice.date}
@@ -377,7 +426,7 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
             ) : (
               <tr>
                 <td
-                  colSpan={isLotteryResult ? 6 : 5}
+                  colSpan={isLotteryResult ? (showPublishDate ? 6 : 5) : (showPublishDate ? 5 : 4)}
                   className="p-10 text-center text-text-2 font-medium italic"
                 >
                   No notices found in this category.
@@ -406,10 +455,12 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices }) => {
                   </span>
                 </div>
                 <div className="flex flex-col items-end gap-1">
-                  <div className="text-[11px] text-text-2 font-bold uppercase flex items-center gap-1">
-                    <i className="fa-solid fa-calendar-plus text-primary text-xs"></i>
-                    Pub: {notice.publishDate || "N/A"}
-                  </div>
+                  {showPublishDate && (
+                    <div className="text-[11px] text-text-2 font-bold uppercase flex items-center gap-1">
+                      <i className="fa-solid fa-calendar-plus text-primary text-xs"></i>
+                      Pub: {notice.publishDate || "N/A"}
+                    </div>
+                  )}
                   <div className="text-[11px] text-text-2 font-bold uppercase flex items-center gap-1">
                     <i className="fa-solid fa-calendar-day text-primary text-xs"></i>
                     Last: {notice.date}

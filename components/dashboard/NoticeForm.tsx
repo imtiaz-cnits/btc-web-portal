@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import { useRouter } from "next/navigation";
-import { createNotice, updateNotice } from "@/app/actions/notices";
+import { createNotice, updateNotice, getNoticeCountsByTitle } from "@/app/actions/notices";
 import {
   Plus,
   Trash2,
@@ -28,6 +28,25 @@ import {
 interface NoticeFormProps {
   notice?: any; // If provided, we are in EDIT mode
 }
+
+interface TableSpec {
+  id: string;
+  type: string;
+  officeName?: string;
+  subTitle?: string;
+  workLocation?: string;
+  noticeDateBlock?: string;
+  lastDateBlock?: string;
+  lotteryDateBlock?: string;
+  payOrderTo?: string;
+  moreInfo?: string;
+  bottomWarning?: string;
+  headers: string[];
+  rows: any[];
+  columnColors?: string[];
+  headerBgColor?: string;
+}
+
 
 // ----------------------------------------------------
 // Work Location Suggestions
@@ -58,113 +77,192 @@ function LocationAutocompleteInput({
   const [open, setOpen] = useState(false);
   const [highlighted, setHighlighted] = useState(-1);
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
-  const inputRef = useRef<HTMLInputElement>(null);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [locationOptions, setLocationOptions] = useState<string[]>([]);
+  const [dropdownSearch, setDropdownSearch] = useState("");
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const filtered = value.trim()
-    ? LOCATION_SUGGESTIONS.filter((s) =>
-        s.toLowerCase().includes(value.toLowerCase()),
+  // Load from localStorage on mount and when changed
+  useEffect(() => {
+    const saved = localStorage.getItem("btc_notice_location_options");
+    let initialOptions = LOCATION_SUGGESTIONS;
+    if (saved) {
+      try {
+        initialOptions = JSON.parse(saved);
+      } catch (e) {}
+    }
+    setLocationOptions(initialOptions);
+    if (open) {
+      setDropdownSearch("");
+    }
+  }, [open]);
+
+  const filtered = dropdownSearch.trim()
+    ? locationOptions.filter((s) =>
+        s.toLowerCase().includes(dropdownSearch.toLowerCase()),
       )
-    : LOCATION_SUGGESTIONS;
+    : locationOptions;
 
   const updatePosition = () => {
-    if (!inputRef.current) return;
-    const rect = inputRef.current.getBoundingClientRect();
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
     setDropdownStyle({
       position: "fixed",
       top: rect.bottom + 2,
       left: rect.left,
-      width: Math.max(rect.width, 200),
+      width: Math.max(rect.width, 240),
       zIndex: 99999,
     });
   };
 
-  const handleMouseEnter = () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    updatePosition();
-    setOpen(true);
+  useEffect(() => {
+    if (open) {
+      updatePosition();
+      const handleResize = () => updatePosition();
+      const handleClickOutside = (e: MouseEvent) => {
+        if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+          const portalDropdown = document.querySelector(".portal-location-dropdown");
+          if (portalDropdown && portalDropdown.contains(e.target as Node)) {
+            return;
+          }
+          setOpen(false);
+        }
+      };
+      window.addEventListener("resize", handleResize);
+      window.addEventListener("scroll", handleResize, true);
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        window.removeEventListener("resize", handleResize);
+        window.removeEventListener("scroll", handleResize, true);
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [open]);
+
+  const handleAddOption = (optVal: string) => {
+    const trimmed = optVal.trim();
+    if (!trimmed) return;
+    let updated = locationOptions;
+    if (!locationOptions.includes(trimmed)) {
+      updated = [trimmed, ...locationOptions];
+      setLocationOptions(updated);
+      localStorage.setItem("btc_notice_location_options", JSON.stringify(updated));
+    }
+    onChange(trimmed);
   };
 
-  const handleMouseLeave = () => {
-    closeTimer.current = setTimeout(() => setOpen(false), 300);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!open) {
-      if (e.key === "ArrowDown") {
-        updatePosition();
-        setOpen(true);
-      }
-      return;
-    }
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setHighlighted((h) => Math.min(h + 1, filtered.length - 1));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setHighlighted((h) => Math.max(h - 1, 0));
-    } else if (e.key === "Enter" && highlighted >= 0) {
-      e.preventDefault();
-      onChange(filtered[highlighted]);
-      setOpen(false);
-      setHighlighted(-1);
-    } else if (e.key === "Escape") {
-      setOpen(false);
-    }
+  const handleDeleteOption = (e: React.MouseEvent, optVal: string) => {
+    e.stopPropagation();
+    const updated = locationOptions.filter((o) => o !== optVal);
+    setLocationOptions(updated);
+    localStorage.setItem("btc_notice_location_options", JSON.stringify(updated));
   };
 
   const dropdown =
-    open && filtered.length > 0 ? (
-      <ul
+    open ? (
+      <div
         style={dropdownStyle}
-        onMouseEnter={() => {
-          if (closeTimer.current) clearTimeout(closeTimer.current);
-        }}
-        onMouseLeave={handleMouseLeave}
-        className="bg-white border border-slate-200 rounded-lg shadow-xl max-h-48 overflow-y-auto text-xs"
+        className="portal-location-dropdown bg-white border border-slate-200 rounded-xl shadow-2xl max-h-64 overflow-y-auto text-[11px] z-[99999] p-1 divide-y divide-slate-100 flex flex-col animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
       >
-        {filtered.map((s, i) => (
-          <li
-            key={s}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              onChange(s);
-              setOpen(false);
+        <div className="p-2 bg-slate-50 flex gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+          <input
+            type="text"
+            autoFocus
+            value={dropdownSearch}
+            onChange={(e) => {
+              setDropdownSearch(e.target.value);
               setHighlighted(-1);
             }}
-            className={`px-3 py-2 cursor-pointer font-semibold transition-colors ${
-              i === highlighted
-                ? "bg-green-600 text-white"
-                : "hover:bg-green-50 hover:text-green-700 text-slate-700"
-            }`}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setHighlighted((h) => Math.min(h + 1, filtered.length - 1));
+              } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setHighlighted((h) => Math.max(h - 1, 0));
+              } else if (e.key === "Enter") {
+                e.preventDefault();
+                if (highlighted >= 0 && filtered[highlighted]) {
+                  onChange(filtered[highlighted]);
+                  setOpen(false);
+                  setHighlighted(-1);
+                } else if (dropdownSearch.trim()) {
+                  handleAddOption(dropdownSearch.trim());
+                  setOpen(false);
+                }
+              } else if (e.key === "Escape") {
+                setOpen(false);
+              }
+            }}
+            placeholder="Type to search or add location..."
+            className="flex-1 bg-white border border-slate-200 rounded px-2 py-1 text-[11px] outline-none text-slate-800 focus:border-green-600 focus:ring-1 focus:ring-green-500 font-semibold"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              if (dropdownSearch.trim()) {
+                handleAddOption(dropdownSearch.trim());
+                setOpen(false);
+              }
+            }}
+            className="bg-green-600 hover:bg-green-700 text-white font-extrabold px-2 py-1 rounded text-[11px] transition border-0 cursor-pointer active:scale-95 whitespace-nowrap shrink-0 flex items-center justify-center h-full"
           >
-            📍 {s}
-          </li>
-        ))}
-      </ul>
+            Add
+          </button>
+        </div>
+
+        <div className="overflow-y-auto max-h-40 flex-1">
+          {filtered.map((s, i) => (
+            <div
+              key={s}
+              onClick={() => {
+                onChange(s);
+                setOpen(false);
+                setHighlighted(-1);
+              }}
+              className={`px-3 py-1.5 cursor-pointer font-semibold transition-colors flex items-center justify-between group rounded ${
+                i === highlighted
+                  ? "bg-green-50 text-green-700 font-bold"
+                  : "hover:bg-green-50 hover:text-green-700 text-slate-700"
+              }`}
+            >
+              <span className="truncate">{s}</span>
+              <button
+                type="button"
+                onClick={(e) => handleDeleteOption(e, s)}
+                className="text-slate-400 hover:text-red-650 p-1 rounded-md border-0 bg-transparent transition opacity-100 md:opacity-0 group-hover:opacity-100 cursor-pointer flex items-center justify-center hover:bg-red-50"
+                title="Delete Option"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+
+          {filtered.length === 0 && (
+            <div className="px-3 py-3 text-slate-400 font-semibold italic text-center">
+              No matching locations. Type above and click Add!
+            </div>
+          )}
+        </div>
+      </div>
     ) : null;
 
   return (
-    <div
-      className="relative w-full"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <input
-        ref={inputRef}
-        type="text"
-        value={value}
-        onChange={(e) => {
-          onChange(e.target.value);
-          updatePosition();
-          setOpen(true);
+    <div ref={containerRef} className="relative w-full">
+      <div
+        ref={triggerRef}
+        onClick={() => {
+          setOpen(!open);
           setHighlighted(-1);
         }}
-        onKeyDown={handleKeyDown}
-        className={className}
-        placeholder={placeholder || "Type location..."}
-        autoComplete="off"
-      />
+        className="w-full min-h-[18px] bg-white dark:bg-[#0f172a] text-slate-800 dark:text-white text-[10px] font-semibold px-1 py-0.6 rounded cursor-pointer transition-colors flex justify-between items-center select-none"
+      >
+        <span className="truncate flex-1 text-left">
+          {value || placeholder || "Select location..."}
+        </span>
+        <ChevronDown className="w-3 h-3 text-slate-400 shrink-0 ml-1" />
+      </div>
       {typeof document !== "undefined" &&
         ReactDOM.createPortal(dropdown, document.body)}
     </div>
@@ -248,7 +346,6 @@ function CustomSelect({
 // ----------------------------------------------------
 const HEADERS_MAP: Record<string, string[]> = {
   LTM: [
-    "SL.NO",
     "Tender Id",
     "Brief Description of Works",
     "Work Location",
@@ -260,7 +357,6 @@ const HEADERS_MAP: Record<string, string[]> = {
     "Schedule & BD Last Selling Date",
   ],
   LOTTERY_PENDING: [
-    "SL.NO",
     "Tender Id",
     "Brief Description of Works",
     "Work Location",
@@ -272,7 +368,6 @@ const HEADERS_MAP: Record<string, string[]> = {
     "Schedule & BD Last Selling Date",
   ],
   LOTTERY_RESULT: [
-    "SL.NO",
     "Tender Id",
     "Brief Description of Works",
     "Work Location",
@@ -285,7 +380,6 @@ const HEADERS_MAP: Record<string, string[]> = {
     "WINNER LIST NAME",
   ],
   OTM: [
-    "SL.NO",
     "Tender Id",
     "Brief Description of Works",
     "Work Location",
@@ -375,6 +469,13 @@ const isCurrencyColumn = (hdr: string) => {
   );
 };
 
+const getHeaderTextColor = (bgColor: string) => {
+  if (!bgColor) return "text-white";
+  const lower = bgColor.toLowerCase().trim();
+  const lightColors = ["#ffffff", "#fff", "#22d3ee", "#34d399", "#4ade80", "#fef08a", "#a7f3d0", "#bae6fd", "#fecdd3", "#ccffff"];
+  return lightColors.includes(lower) ? "text-slate-800" : "text-white";
+};
+
 const formatInputCurrency = (value: string) => {
   if (!value) return "";
   let clean = value.replace(/,/g, "");
@@ -384,7 +485,7 @@ const formatInputCurrency = (value: string) => {
   }
   const integerPart = parts[0].replace(/\D/g, "");
   let formatted = integerPart
-    ? parseInt(integerPart, 10).toLocaleString("en-US")
+    ? parseInt(integerPart, 10).toLocaleString("en-IN")
     : "";
   if (parts.length > 1) {
     const decimalPart = parts[1].replace(/\D/g, "");
@@ -458,6 +559,7 @@ const DEFAULT_TITLE_OPTIONS = [
   "সড়ক ও জনপথ বিভাগ, পাবনা। (RHD)",
   "বাংলাদেশ কৃষি উন্নয়ন কর্পোরেশন, পাবনা। (BADC)",
   "পানি উন্নয়ন বোর্ড, পাবনা। (BWDB)",
+  "পাবনা পৌরসভা, পাবনা",
   "শিক্ষা প্রকৌশল অধিদপ্তর, পাবনা। (EED)",
   "স্বাস্থ্য প্রকৌশল অধিদপ্তর, পাবনা। (HED)",
   "জনস্বাস্থ্য প্রকৌশল অধিদপ্তর, পাবনা। (DPHE)",
@@ -488,6 +590,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   const [titleOptions, setTitleOptions] = useState<string[]>([]);
   const [newOptionInput, setNewOptionInput] = useState("");
   const [showTitleDropdown, setShowTitleDropdown] = useState(false);
+  const [titleCounts, setTitleCounts] = useState<Record<string, number>>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -529,6 +632,15 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     }
 
     setTitleOptions(initialOptions);
+
+    // Fetch dynamic counts grouped by title
+    async function fetchCounts() {
+      const res = await getNoticeCountsByTitle();
+      if (res.success) {
+        setTitleCounts(res.counts);
+      }
+    }
+    fetchCounts();
   }, [notice]);
 
   // Warning custom dropdown states
@@ -581,6 +693,89 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     setWarningOptions(initialOptions);
   }, [notice]);
 
+  // Location custom dropdown states
+  const [locationOptions, setLocationOptions] = useState<string[]>([]);
+  const [newLocationOptionInput, setNewLocationOptionInput] = useState("");
+  const [activeLocationDropdown, setActiveLocationDropdown] = useState<number | null>(null);
+
+  const handleAddLocationOption = (val: string) => {
+    const trimmed = val.trim();
+    if (!trimmed) return;
+    if (locationOptions.includes(trimmed)) return;
+    const updated = [trimmed, ...locationOptions];
+    setLocationOptions(updated);
+    localStorage.setItem("btc_notice_location_options", JSON.stringify(updated));
+  };
+
+  const handleDeleteLocationOption = (
+    e: React.MouseEvent,
+    optionToDelete: string,
+  ) => {
+    e.stopPropagation();
+    const updated = locationOptions.filter((o) => o !== optionToDelete);
+    setLocationOptions(updated);
+    localStorage.setItem("btc_notice_location_options", JSON.stringify(updated));
+  };
+
+  const handleLocationChange = (tIdx: number, val: string) => {
+    setTablesList((prev) =>
+      prev.map((t, idx) => {
+        if (idx !== tIdx) return t;
+
+        // Find Location column index
+        const locIdx = (t.headers || []).findIndex((h: string) => {
+          const lower = (h || "").toLowerCase();
+          return (
+            lower.includes("location") ||
+            lower.includes("লোকেশন") ||
+            lower.includes("স্থান")
+          );
+        });
+
+        const updatedRows = t.rows.map((row: any) => {
+          if (locIdx !== -1 && Array.isArray(row)) {
+            const nextRow = [...row];
+            nextRow[locIdx] = val;
+            return nextRow;
+          }
+          return row;
+        });
+
+        return {
+          ...t,
+          workLocation: val,
+          rows: updatedRows,
+        };
+      }),
+    );
+  };
+
+  // Sync location options
+  useEffect(() => {
+    const saved = localStorage.getItem("btc_notice_location_options");
+    let initialOptions = LOCATION_SUGGESTIONS;
+    if (saved) {
+      try {
+        initialOptions = JSON.parse(saved);
+      } catch (e) {}
+    }
+
+    if (notice?.tableData) {
+      try {
+        const parsed = JSON.parse(notice.tableData);
+        if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
+          parsed.tables.forEach((table: any) => {
+            if (table.workLocation && !initialOptions.includes(table.workLocation)) {
+              initialOptions = [...initialOptions, table.workLocation];
+            }
+          });
+        }
+      } catch (err) {}
+    }
+
+    setLocationOptions(initialOptions);
+  }, [notice]);
+
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       if (
@@ -593,6 +788,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       const target = e.target as HTMLElement;
       if (!target.closest(".warning-dropdown-container")) {
         setActiveWarningDropdown(null);
+      }
+      if (!target.closest(".location-dropdown-container")) {
+        setActiveLocationDropdown(null);
       }
     };
     document.addEventListener("mousedown", handleOutsideClick);
@@ -759,7 +957,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   const [content, setContent] = useState(notice?.content || "");
 
   // Multiple Tables Array
-  const [tablesList, setTablesList] = useState<any[]>(
+  const [tablesList, setTablesList] = useState<TableSpec[]>(
     notice?.tableData
       ? []
       : [
@@ -772,10 +970,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
             lotteryDateBlock: "",
             payOrderTo: "Executive Engineer, Pabna PWD Division, Pabna",
             moreInfo:
-              "Engr. Md. Shah Alom B.Sc. Engr.(Civil)\nMobile No: 01711-805086\nL M B Market 1st Floor, Pabna.",
+              "Engr. Md. Shah Alom B.Sc. Engr.(Civil)\nMobile No: 01711-805086\nL M B Market 1st Floor, Pabna.\nWeb: www.egpbtc.com",
             bottomWarning: "ব্যাংক স্টেটমেন্ট অথবা ক্রেডিট কমিটমেন্ট দিতে হবে।",
             headers: [
-              "SL No",
               "Tender ID",
               "Description",
               "Location",
@@ -787,7 +984,6 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
             ],
             rows: [
               [
-                "1",
                 "1251464",
                 "Necessary repair works...",
                 "Pabna sadar",
@@ -1037,10 +1233,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                   ),
                   payOrderTo: parsed.payOrderTo || "",
                   moreInfo:
-                    "Engr. Md. Shah Alom B.Sc. Engr.(Civil)\nMobile No: 01711-805086\nL M B Market 1st Floor, Pabna.",
+                    "Engr. Md. Shah Alom B.Sc. Engr.(Civil)\nMobile No: 01711-805086\nL M B Market 1st Floor, Pabna.\nWeb: www.egpbtc.com",
                   bottomWarning: parsed.bottomWarning || "",
                   headers: [
-                    "SL No",
                     "Tender ID",
                     "Description",
                     "Location",
@@ -1099,9 +1294,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         });
 
         const initialColors = targetHeaders.map((hdr) =>
-          hdr === "WINNER LIST NAME" ? "#ffffcc" : "#ffffff",
+          hdr === "WINNER LIST NAME" ? "#fde047" : "#ffffff",
         );
-        const defaultHeaderBg = category === "OTM" ? "#c2ffd8" : "#ccffff";
+        const defaultHeaderBg = category === "OTM" ? "#059669" : "#0891b2";
 
         setTablesList([
           {
@@ -1113,7 +1308,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
             lotteryDateBlock: "",
             payOrderTo: "Executive Engineer, Pabna PWD Division, Pabna",
             moreInfo:
-              "Engr. Md. Shah Alom B.Sc. Engr.(Civil)\nMobile No: 01711-805086\nL M B Market 1st Floor, Pabna.",
+              "Engr. Md. Shah Alom B.Sc. Engr.(Civil)\nMobile No: 01711-805086\nL M B Market 1st Floor, Pabna.\nWeb: www.egpbtc.com",
             bottomWarning: "ব্যাংক স্টেটমেন্ট অথবা ক্রেডিট কমিটমেন্ট দিতে হবে।",
             headers: targetHeaders,
             rows: [initialRow],
@@ -1213,8 +1408,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         // Setup/Migrate column background colors
         const currentColors = table.columnColors || [];
         const migratedColors = targetHeaders.map((newHdr, newColIdx) => {
-          // Defaults: light yellow for WINNER LIST NAME
-          if (newHdr === "WINNER LIST NAME") return "#ffffcc";
+          // Defaults: deep yellow for WINNER LIST NAME
+          if (newHdr === "WINNER LIST NAME") return "#fde047";
 
           // Match existing color if possible
           const oldColIdx = currentHeaders.findIndex((oldHdr: string) => {
@@ -1230,14 +1425,19 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           return "#ffffff"; // default cell bg
         });
 
-        // Set dynamic default header colors based on LTM vs OTM style
         let defaultHeaderBg = table.headerBgColor;
+
+        // Set dynamic default header colors based on LTM vs OTM style
         if (
           !defaultHeaderBg ||
           defaultHeaderBg === "#ccffff" ||
-          defaultHeaderBg === "#c2ffd8"
+          defaultHeaderBg === "#c2ffd8" ||
+          defaultHeaderBg === "#22d3ee" ||
+          defaultHeaderBg === "#34d399" ||
+          defaultHeaderBg === "#0891b2" ||
+          defaultHeaderBg === "#059669"
         ) {
-          defaultHeaderBg = category === "OTM" ? "#c2ffd8" : "#ccffff";
+          defaultHeaderBg = category === "OTM" ? "#059669" : "#0891b2";
         }
 
         return {
@@ -1273,9 +1473,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       });
 
       const initialColors = targetHeaders.map((hdr) =>
-        hdr === "WINNER LIST NAME" ? "#ffffcc" : "#ffffff",
+        hdr === "WINNER LIST NAME" ? "#fde047" : "#ffffff",
       );
-      const defaultHeaderBg = category === "OTM" ? "#c2ffd8" : "#ccffff";
+      const defaultHeaderBg = category === "OTM" ? "#059669" : "#0891b2";
 
       return [
         ...prev,
@@ -1288,7 +1488,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           lotteryDateBlock: "",
           payOrderTo: "Executive Engineer, Pabna PWD Division, Pabna",
           moreInfo:
-            "Engr. Md. Shah Alom B.Sc. Engr.(Civil)\nMobile No: 01711-805086\nL M B Market 1st Floor, Pabna.",
+            "Engr. Md. Shah Alom B.Sc. Engr.(Civil)\nMobile No: 01711-805086\nL M B Market 1st Floor, Pabna.\nWeb: www.egpbtc.com",
           bottomWarning: "ব্যাংক স্টেটমেন্ট অথবা ক্রেডিট কমিটমেন্ট দিতে হবে।",
           headers: targetHeaders,
           rows: [initialRow],
@@ -1337,9 +1537,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       prev.map((t, idx) => {
         if (idx !== tIdx) return t;
         const newRow = Array(t.headers.length).fill("");
-        if (t.headers.length > 0) {
-          newRow[0] = (t.rows.length + 1).toString();
-        }
+        
+        // Auto-populate last date for PWD template if present
         const lastDateColIdx = getLastDateColIdx(t.headers || []);
         if (
           t.type === "pwd_ltm" &&
@@ -1356,6 +1555,19 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         });
         if (methodColIdx !== -1 && newRow.length > methodColIdx) {
           newRow[methodColIdx] = category === "OTM" ? "OTM" : "LTM SOCIAL";
+        }
+
+        // Auto-populate Location from table's workLocation if selected
+        const locColIdx = (t.headers || []).findIndex((h: string) => {
+          const lower = (h || "").toLowerCase();
+          return (
+            lower.includes("location") ||
+            lower.includes("লোকেশন") ||
+            lower.includes("স্থান")
+          );
+        });
+        if (locColIdx !== -1 && newRow.length > locColIdx && t.workLocation) {
+          newRow[locColIdx] = t.workLocation;
         }
 
         return {
@@ -1409,7 +1621,18 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         const updated = [...t.rows];
         updated[rowIndex] = [...updated[rowIndex]];
         updated[rowIndex][colIndex] = formattedVal;
-        return { ...t, rows: updated };
+
+        const normHdr = hdr.toLowerCase().trim();
+        const isLocationCol =
+          normHdr.includes("location") ||
+          normHdr.includes("লোকেশন") ||
+          normHdr.includes("স্থান");
+
+        return {
+          ...t,
+          rows: updated,
+          ...(isLocationCol ? { workLocation: formattedVal } : {}),
+        };
       }),
     );
   };
@@ -1665,9 +1888,34 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       }
 
       if (enableTables && tablesList.length > 0) {
+        // Automatically recalculate and format the SL No column values sequentially before saving
+        const updatedTablesList = tablesList.map((table) => {
+          const slIdx = (table.headers || []).findIndex((hdr: string) => {
+            const lowerHdr = (hdr || "").toLowerCase().trim();
+            return (
+              lowerHdr === "sl.no" ||
+              lowerHdr === "sl no" ||
+              lowerHdr === "sl. no" ||
+              lowerHdr === "sl"
+            );
+          });
+          if (slIdx !== -1 && Array.isArray(table.rows)) {
+            const updatedRows = table.rows.map((row: any, rIdx: number) => {
+              if (Array.isArray(row)) {
+                const nextRow = [...row];
+                nextRow[slIdx] = (rIdx + 1).toString();
+                return nextRow;
+              }
+              return row;
+            });
+            return { ...table, rows: updatedRows };
+          }
+          return table;
+        });
+
         const serializedData = JSON.stringify({
           version: "v2",
-          tables: tablesList,
+          tables: updatedTablesList,
         });
         formData.append("tableData", serializedData);
       } else {
@@ -1757,7 +2005,18 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
               onClick={() => setShowTitleDropdown(!showTitleDropdown)}
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 text-sm font-semibold focus:border-[var(--primary-color)] hover:border-slate-350 transition cursor-pointer flex justify-between items-center shadow-xs"
             >
-              <span>{title || "Select Notice Type..."}</span>
+              <span className="flex items-center gap-2">
+                {title ? (
+                  <>
+                    <span>{title}</span>
+                    <span className="text-green-600 font-extrabold text-[10px] bg-green-50 px-2 py-0.5 rounded-full">
+                      ({titleCounts[title] || 0})
+                    </span>
+                  </>
+                ) : (
+                  "Select Notice Type..."
+                )}
+              </span>
               <ChevronDown
                 className={`w-4 h-4 text-slate-400 transition-transform ${showTitleDropdown ? "rotate-180" : ""}`}
               />
@@ -1840,7 +2099,12 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                       }}
                       className="px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-green-50 hover:text-green-800 transition cursor-pointer flex items-center justify-between group"
                     >
-                      <span className="truncate">{opt}</span>
+                      <span className="truncate flex items-center gap-2">
+                        <span>{opt}</span>
+                        <span className="text-green-600 font-extrabold text-[10px] bg-green-50 px-2 py-0.5 rounded-full shrink-0">
+                          ({titleCounts[opt] || 0})
+                        </span>
+                      </span>
                       <button
                         type="button"
                         onClick={(e) => handleDeleteTitleOption(e, opt)}
@@ -2266,11 +2530,11 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                       </label>
                       <div className="flex items-center gap-1.5 h-8">
                         {[
-                          { hex: "#ccffff", name: "Cyan" },
-                          { hex: "#ccffcc", name: "Green" },
-                          { hex: "#c2ffd8", name: "Sage" },
-                          { hex: "#fed7aa", name: "Orange" },
-                          { hex: "#e2e8f0", name: "Slate" },
+                          { hex: "#0891b2", name: "Cyan" },
+                          { hex: "#16a34a", name: "Green" },
+                          { hex: "#0d9488", name: "Teal" },
+                          { hex: "#ea580c", name: "Orange" },
+                          { hex: "#475569", name: "Slate" },
                         ].map((clr) => (
                           <button
                             key={clr.hex}
@@ -2283,7 +2547,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                               )
                             }
                             className={`w-6 h-6 rounded-lg border transition transform hover:scale-110 active:scale-95 cursor-pointer ${
-                              (table.headerBgColor || "#ccffff") === clr.hex
+                              (table.headerBgColor || (category === "OTM" ? "#059669" : "#0891b2")) === clr.hex
                                 ? "border-slate-800 ring-2 ring-slate-400"
                                 : "border-slate-200"
                             }`}
@@ -2323,13 +2587,16 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                     {/* Table grid */}
                     <div className="w-full overflow-x-auto rounded-xl border border-slate-200 shadow-inner max-h-[350px] bg-white">
                       <table className="w-full border-collapse text-left text-xs bg-white studio-table">
-                        <thead className="bg-[#ccffff] border-b border-slate-200 text-black sticky top-0 font-bold">
+                        <thead
+                          className="border-b border-slate-200 sticky top-0 font-bold"
+                          style={{
+                            backgroundColor:
+                              table.headerBgColor || (category === "OTM" ? "#059669" : "#0891b2"),
+                          }}
+                        >
                           <tr className="divide-x divide-slate-200">
                             {(table.headers || []).map(
                               (hdr: string, cIdx: number) => {
-                                const headerBg =
-                                  table.headerBgColor || "#ccffff";
-                                const minWidthValue = getColumnMinWidth(hdr);
                                 const lowerHdr = (hdr || "")
                                   .toLowerCase()
                                   .trim();
@@ -2338,12 +2605,17 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                   lowerHdr === "sl no" ||
                                   lowerHdr === "sl. no" ||
                                   lowerHdr === "sl";
+                                if (isSlNo) return null;
+
+                                const headerBg =
+                                  table.headerBgColor || (category === "OTM" ? "#059669" : "#0891b2");
+                                const minWidthValue = getColumnMinWidth(hdr);
                                 const showLabel =
                                   parseInt(minWidthValue) >= 120;
                                 return (
                                   <th
                                     key={cIdx}
-                                    className="p-1 text-black"
+                                    className={`p-1 ${getHeaderTextColor(headerBg)}`}
                                     style={{
                                       backgroundColor: headerBg,
                                       minWidth: minWidthValue,
@@ -2384,57 +2656,56 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                       </div>
 
                                       {/* Column Cell Color Customizer */}
-                                      {!isSlNo && (
-                                        <div className="flex items-center justify-between px-0.5 mt-0.5">
-                                          <span className="text-[9px] text-slate-700 font-extrabold uppercase tracking-wider">
-                                            Cell Color:
-                                          </span>
-                                          <div className="flex gap-0.5 ml-auto">
-                                            {[
-                                              { hex: "#ffffff", name: "White" },
-                                              {
-                                                hex: "#ffffcc",
-                                                name: "Yellow",
-                                              },
-                                              { hex: "#d1fae5", name: "Green" },
-                                              { hex: "#e0f2fe", name: "Blue" },
-                                              { hex: "#ffe4e6", name: "Pink" },
-                                            ].map((clr) => (
-                                              <button
-                                                key={clr.hex}
-                                                type="button"
-                                                onClick={() =>
-                                                  handleColumnColorChange(
-                                                    tIdx,
-                                                    cIdx,
-                                                    clr.hex,
-                                                  )
-                                                }
-                                                className={`w-2 h-2 rounded-full border border-slate-400 transition transform hover:scale-120 active:scale-95 cursor-pointer ${
-                                                  (table.columnColors?.[cIdx] ||
-                                                    "#ffffff") === clr.hex
-                                                    ? "ring-1 ring-slate-600"
-                                                    : ""
-                                                }`}
-                                                style={{
-                                                  backgroundColor: clr.hex,
-                                                }}
-                                                title={`Set cell background to ${clr.name}`}
-                                              />
-                                            ))}
-                                          </div>
+                                      <div className="flex items-center justify-between px-0.5 mt-0.5">
+                                        <span className={`text-[9px] font-extrabold uppercase tracking-wider ${getHeaderTextColor(headerBg) === "text-white" ? "text-slate-200" : "text-slate-700"}`}>
+                                          Cell Color:
+                                        </span>
+                                        <div className="flex gap-0.5 ml-auto">
+                                          {[
+                                            { hex: "#ffffff", name: "White" },
+                                            { hex: "#fde047", name: "Yellow" },
+                                            { hex: "#86efac", name: "Green" },
+                                            { hex: "#93c5fd", name: "Blue" },
+                                            { hex: "#fca5a5", name: "Pink" },
+                                          ].map((clr) => (
+                                            <button
+                                              key={clr.hex}
+                                              type="button"
+                                              onClick={() =>
+                                                handleColumnColorChange(
+                                                  tIdx,
+                                                  cIdx,
+                                                  clr.hex,
+                                                )
+                                              }
+                                              className={`w-2 h-2 rounded-full border border-slate-400 transition transform hover:scale-120 active:scale-95 cursor-pointer ${
+                                                (table.columnColors?.[cIdx] ||
+                                                  "#ffffff") === clr.hex
+                                                  ? "ring-1 ring-slate-600"
+                                                  : ""
+                                              }`}
+                                              style={{
+                                                backgroundColor: clr.hex,
+                                              }}
+                                              title={`Set cell background to ${clr.name}`}
+                                            />
+                                          ))}
                                         </div>
-                                      )}
+                                      </div>
                                     </div>
                                   </th>
                                 );
                               },
                             )}
                             <th
-                              className="p-1 w-8 text-center text-slate-700 text-[10px]"
+                              className={`p-1 w-8 text-center text-[10px] ${
+                                getHeaderTextColor(table.headerBgColor || (category === "OTM" ? "#059669" : "#0891b2")) === "text-white"
+                                  ? "text-white"
+                                  : "text-slate-700"
+                              }`}
                               style={{
                                 backgroundColor:
-                                  table.headerBgColor || "#ccffff",
+                                  table.headerBgColor || (category === "OTM" ? "#059669" : "#0891b2"),
                               }}
                             >
                               Del
@@ -2451,7 +2722,14 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                 {row.map((cell: string, cIdx: number) => {
                                   const headerName = (
                                     table.headers[cIdx] || ""
-                                  ).toLowerCase();
+                                  ).toLowerCase().trim();
+                                  const isSlNo =
+                                    headerName === "sl.no" ||
+                                    headerName === "sl no" ||
+                                    headerName === "sl. no" ||
+                                    headerName === "sl";
+                                  if (isSlNo) return null;
+
                                   const isDateField =
                                     headerName.includes("date") ||
                                     headerName.includes("time") ||
@@ -2587,7 +2865,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                         </label>
                         <div className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-500 text-xs font-semibold cursor-not-allowed select-none leading-relaxed whitespace-pre-line">
                           Engr. Md. Shah Alom B.Sc. Engr.(Civil){"\n"}Mobile No:
-                          01711-805086{"\n"}L M B Market 1st Floor, Pabna.
+                          01711-805086{"\n"}L M B Market 1st Floor, Pabna.{"\n"}Web: www.egpbtc.com
                         </div>
                         <p className="text-[9px] text-slate-400 italic flex items-center gap-1 mt-0.5">
                           <Info className="w-3 h-3" /> This field is fixed and

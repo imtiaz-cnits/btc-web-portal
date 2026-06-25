@@ -29,7 +29,7 @@ export default function HomeNoticesSection({ notices }: HomeNoticesSectionProps)
   const latestNotices = filtered.slice(0, 10);
 
   return (
-    <section className="bg-shade-1/20 border-t border-b border-ac-2/50 pb-12 lg:pb-16">
+    <section className="bg-shade-1/20 border-t border-b border-ac-2/50 py-12 lg:py-16">
       <div className="custom-container">
 
         {/* Categories Tab selector */}
@@ -52,7 +52,7 @@ export default function HomeNoticesSection({ notices }: HomeNoticesSectionProps)
 
         {/* Notices Table / Grid using shared NoticeTable */}
         <div className="mb-8">
-          <NoticeTable notices={latestNotices} />
+          <NoticeTable notices={latestNotices} category={activeTab} />
         </div>
 
         {/* View All Notice Button */}

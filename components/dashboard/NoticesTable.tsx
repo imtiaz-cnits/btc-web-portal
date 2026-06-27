@@ -174,7 +174,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                           <th 
                             key={i} 
                             style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
-                            className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide border-slate-200 ${
+                            className={`px-3 py-2 text-left font-bold whitespace-normal border text-[10px] uppercase tracking-wide border-slate-200 ${
                               getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
                             }`}
                           >
@@ -200,7 +200,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                             {!hasSl && (
                               <td
                                 style={isWinnerRow ? { backgroundColor: "#fffbeb" } : table.columnColors?.[0] ? { backgroundColor: table.columnColors[0] } : undefined}
-                                className="px-3 py-2 border border-slate-200 !text-slate-800 text-left whitespace-nowrap font-bold"
+                                className="px-3 py-2 border border-slate-200 !text-slate-800 text-left whitespace-normal font-bold"
                               >
                                 {rIdx + 1}
                               </td>
@@ -215,7 +215,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                                   key={cIdx} 
                                   style={cellBg ? { backgroundColor: cellBg } : undefined}
                                   className={`px-3 py-2 border border-slate-200 !text-slate-800 ${
-                                    isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-nowrap"
+                                    isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-normal"
                                   } ${isCurrency ? "text-right" : "text-left"}`}
                                 >
                                   {isWinnerCell && isWinnerRow && <span className="inline-block mr-1">🏆</span>}
@@ -262,7 +262,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                               return (
                                 <td
                                   key={idx}
-                                  className="px-3 py-2 font-extrabold !text-slate-800 bg-[#ffffcc] border border-slate-200 text-right whitespace-nowrap"
+                                  className="px-3 py-2 font-extrabold !text-slate-800 bg-[#ffffcc] border border-slate-200 text-right whitespace-normal"
                                 >
                                   {formatMoney(totalSecurity)}
                                 </td>
@@ -272,7 +272,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                               return (
                                 <td
                                   key={idx}
-                                  className="px-3 py-2 font-extrabold !text-slate-800 bg-[#ffffcc] border border-slate-200 text-right whitespace-nowrap"
+                                  className="px-3 py-2 font-extrabold !text-slate-800 bg-[#ffffcc] border border-slate-200 text-right whitespace-normal"
                                 >
                                   {formatMoney(totalDocFees)}
                                 </td>
@@ -324,7 +324,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                   {!hasSl && (
                     <th 
                       style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
-                      className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide border-slate-200 ${
+                      className={`px-3 py-2 text-left font-bold whitespace-normal border text-[10px] uppercase tracking-wide border-slate-200 ${
                         getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
                       }`}
                     >
@@ -335,7 +335,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                     <th 
                       key={i} 
                       style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
-                      className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide border-slate-200 ${
+                      className={`px-3 py-2 text-left font-bold whitespace-normal border text-[10px] uppercase tracking-wide border-slate-200 ${
                         getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
                       }`}
                     >
@@ -361,7 +361,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                       {!hasSl && (
                         <td
                           style={isWinnerRow ? { backgroundColor: "#fffbeb" } : parsed.columnColors?.[0] ? { backgroundColor: parsed.columnColors[0] } : undefined}
-                          className="px-3 py-2 border border-slate-200 !text-slate-800 text-left whitespace-nowrap font-bold"
+                          className="px-3 py-2 border border-slate-200 !text-slate-800 text-left whitespace-normal font-bold"
                         >
                           {rIdx + 1}
                         </td>
@@ -375,7 +375,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                             key={cIdx} 
                             style={cellBg ? { backgroundColor: cellBg } : undefined}
                             className={`px-3 py-2 border border-slate-200 !text-slate-800 ${
-                              isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-nowrap"
+                              isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-normal"
                             }`}
                           >
                             {isWinnerCell && isWinnerRow && <span className="inline-block mr-1">🏆</span>}
@@ -416,7 +416,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                 {!hasSl && (
                   <th 
                     style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
-                    className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide border-slate-200 ${
+                    className={`px-3 py-2 text-left font-bold whitespace-normal border text-[10px] uppercase tracking-wide border-slate-200 ${
                       getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
                     }`}
                   >
@@ -427,7 +427,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                   <th 
                     key={i} 
                     style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
-                    className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide border-slate-200 ${
+                    className={`px-3 py-2 text-left font-bold whitespace-normal border text-[10px] uppercase tracking-wide border-slate-200 ${
                       getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
                     }`}
                   >
@@ -453,7 +453,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                     {!hasSl && (
                       <td
                         style={isWinnerRow ? { backgroundColor: "#fffbeb" } : parsed.columnColors?.[0] ? { backgroundColor: parsed.columnColors[0] } : undefined}
-                        className="px-3 py-2 border border-slate-200 !text-slate-800 text-left whitespace-nowrap font-bold"
+                        className="px-3 py-2 border border-slate-200 !text-slate-800 text-left whitespace-normal font-bold"
                       >
                         {rIdx + 1}
                       </td>
@@ -467,7 +467,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                           key={cIdx} 
                           style={cellBg ? { backgroundColor: cellBg } : undefined}
                           className={`px-3 py-2 border border-slate-200 !text-slate-800 ${
-                            isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-nowrap"
+                            isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-normal"
                           }`}
                         >
                           {isWinnerCell && isWinnerRow && <span className="inline-block mr-1">🏆</span>}
@@ -976,7 +976,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                                 {!hasSl && (
                                   <th 
                                     style={{ backgroundColor: headerBg }}
-                                    className={`px-3 py-2 text-left font-bold border border-slate-200 text-[10px] uppercase tracking-wide whitespace-nowrap ${
+                                    className={`px-3 py-2 text-left font-bold border border-slate-200 text-[10px] uppercase tracking-wide whitespace-normal ${
                                       getHeaderTextColor(headerBg) === "text-white" ? "!text-white" : "!text-slate-800"
                                     }`}
                                   >
@@ -987,7 +987,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                                   <th 
                                     key={i} 
                                     style={{ backgroundColor: headerBg }}
-                                    className={`px-3 py-2 text-left font-bold border border-slate-200 text-[10px] uppercase tracking-wide whitespace-nowrap ${
+                                    className={`px-3 py-2 text-left font-bold border border-slate-200 text-[10px] uppercase tracking-wide whitespace-normal ${
                                       getHeaderTextColor(headerBg) === "text-white" ? "!text-white" : "!text-slate-800"
                                     }`}
                                   >

@@ -692,7 +692,7 @@ export default function SingleNoticeClient({
                           return (
                             <th
                               key={idx}
-                              className={`p-3 font-bold border border-gray-400 text-sm uppercase text-center ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"
+                              className={`p-3 font-bold border border-gray-400 text-sm uppercase text-center ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-normal"
                                 }`}
                               style={{ backgroundColor: table.headerBgColor || defaultHeaderBg, color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg) }}
                             >
@@ -730,7 +730,7 @@ export default function SingleNoticeClient({
                                 <td
                                   key={cIdx}
                                   className={`p-3 border border-gray-400 text-black text-sm font-semibold font-bangla ${isCurrency ? "text-right" : "text-left"
-                                    } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"}`}
+                                    } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-normal"}`}
                                   style={hasCustomBg ? { backgroundColor: cellBg } : undefined}
                                 >
                                   {isWinnerCell && isWinnerRow && <span className="inline-block mr-1">🏆</span>}

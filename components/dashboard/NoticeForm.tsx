@@ -3,7 +3,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import { useRouter } from "next/navigation";
-import { createNotice, updateNotice, getNoticeCountsByTitle } from "@/app/actions/notices";
+import {
+  createNotice,
+  updateNotice,
+  getNoticeCountsByTitle,
+} from "@/app/actions/notices";
 import {
   Plus,
   Trash2,
@@ -46,7 +50,6 @@ interface TableSpec {
   columnColors?: string[];
   headerBgColor?: string;
 }
-
 
 // ----------------------------------------------------
 // Work Location Suggestions
@@ -120,8 +123,13 @@ function LocationAutocompleteInput({
       updatePosition();
       const handleResize = () => updatePosition();
       const handleClickOutside = (e: MouseEvent) => {
-        if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-          const portalDropdown = document.querySelector(".portal-location-dropdown");
+        if (
+          containerRef.current &&
+          !containerRef.current.contains(e.target as Node)
+        ) {
+          const portalDropdown = document.querySelector(
+            ".portal-location-dropdown",
+          );
           if (portalDropdown && portalDropdown.contains(e.target as Node)) {
             return;
           }
@@ -146,7 +154,10 @@ function LocationAutocompleteInput({
     if (!locationOptions.includes(trimmed)) {
       updated = [trimmed, ...locationOptions];
       setLocationOptions(updated);
-      localStorage.setItem("btc_notice_location_options", JSON.stringify(updated));
+      localStorage.setItem(
+        "btc_notice_location_options",
+        JSON.stringify(updated),
+      );
     }
     onChange(trimmed);
   };
@@ -155,98 +166,103 @@ function LocationAutocompleteInput({
     e.stopPropagation();
     const updated = locationOptions.filter((o) => o !== optVal);
     setLocationOptions(updated);
-    localStorage.setItem("btc_notice_location_options", JSON.stringify(updated));
+    localStorage.setItem(
+      "btc_notice_location_options",
+      JSON.stringify(updated),
+    );
   };
 
-  const dropdown =
-    open ? (
+  const dropdown = open ? (
+    <div
+      style={dropdownStyle}
+      className="portal-location-dropdown bg-white border border-slate-200 rounded-xl shadow-2xl max-h-64 overflow-y-auto text-[11px] z-[99999] p-1 divide-y divide-slate-100 flex flex-col animate-scale-in"
+      onClick={(e) => e.stopPropagation()}
+    >
       <div
-        style={dropdownStyle}
-        className="portal-location-dropdown bg-white border border-slate-200 rounded-xl shadow-2xl max-h-64 overflow-y-auto text-[11px] z-[99999] p-1 divide-y divide-slate-100 flex flex-col animate-scale-in"
+        className="p-2 bg-slate-50 flex gap-1.5 shrink-0"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-2 bg-slate-50 flex gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
-          <input
-            type="text"
-            autoFocus
-            value={dropdownSearch}
-            onChange={(e) => {
-              setDropdownSearch(e.target.value);
-              setHighlighted(-1);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowDown") {
-                e.preventDefault();
-                setHighlighted((h) => Math.min(h + 1, filtered.length - 1));
-              } else if (e.key === "ArrowUp") {
-                e.preventDefault();
-                setHighlighted((h) => Math.max(h - 1, 0));
-              } else if (e.key === "Enter") {
-                e.preventDefault();
-                if (highlighted >= 0 && filtered[highlighted]) {
-                  onChange(filtered[highlighted]);
-                  setOpen(false);
-                  setHighlighted(-1);
-                } else if (dropdownSearch.trim()) {
-                  handleAddOption(dropdownSearch.trim());
-                  setOpen(false);
-                }
-              } else if (e.key === "Escape") {
+        <input
+          type="text"
+          autoFocus
+          value={dropdownSearch}
+          onChange={(e) => {
+            setDropdownSearch(e.target.value);
+            setHighlighted(-1);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              setHighlighted((h) => Math.min(h + 1, filtered.length - 1));
+            } else if (e.key === "ArrowUp") {
+              e.preventDefault();
+              setHighlighted((h) => Math.max(h - 1, 0));
+            } else if (e.key === "Enter") {
+              e.preventDefault();
+              if (highlighted >= 0 && filtered[highlighted]) {
+                onChange(filtered[highlighted]);
                 setOpen(false);
-              }
-            }}
-            placeholder="Type to search or add location..."
-            className="flex-1 bg-white border border-slate-200 rounded px-2 py-1 text-[11px] outline-none text-slate-800 focus:border-green-600 focus:ring-1 focus:ring-green-500 font-semibold"
-          />
-          <button
-            type="button"
-            onClick={() => {
-              if (dropdownSearch.trim()) {
+                setHighlighted(-1);
+              } else if (dropdownSearch.trim()) {
                 handleAddOption(dropdownSearch.trim());
                 setOpen(false);
               }
-            }}
-            className="bg-green-600 hover:bg-green-700 text-white font-extrabold px-2 py-1 rounded text-[11px] transition border-0 cursor-pointer active:scale-95 whitespace-nowrap shrink-0 flex items-center justify-center h-full"
-          >
-            Add
-          </button>
-        </div>
-
-        <div className="overflow-y-auto max-h-40 flex-1">
-          {filtered.map((s, i) => (
-            <div
-              key={s}
-              onClick={() => {
-                onChange(s);
-                setOpen(false);
-                setHighlighted(-1);
-              }}
-              className={`px-3 py-1.5 cursor-pointer font-semibold transition-colors flex items-center justify-between group rounded ${
-                i === highlighted
-                  ? "bg-green-50 text-green-700 font-bold"
-                  : "hover:bg-green-50 hover:text-green-700 text-slate-700"
-              }`}
-            >
-              <span className="truncate">{s}</span>
-              <button
-                type="button"
-                onClick={(e) => handleDeleteOption(e, s)}
-                className="text-slate-400 hover:text-red-650 p-1 rounded-md border-0 bg-transparent transition opacity-100 md:opacity-0 group-hover:opacity-100 cursor-pointer flex items-center justify-center hover:bg-red-50"
-                title="Delete Option"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ))}
-
-          {filtered.length === 0 && (
-            <div className="px-3 py-3 text-slate-400 font-semibold italic text-center">
-              No matching locations. Type above and click Add!
-            </div>
-          )}
-        </div>
+            } else if (e.key === "Escape") {
+              setOpen(false);
+            }
+          }}
+          placeholder="Type to search or add location..."
+          className="flex-1 bg-white border border-slate-200 rounded px-2 py-1 text-[11px] outline-none text-slate-800 focus:border-green-600 focus:ring-1 focus:ring-green-500 font-semibold"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            if (dropdownSearch.trim()) {
+              handleAddOption(dropdownSearch.trim());
+              setOpen(false);
+            }
+          }}
+          className="bg-green-600 hover:bg-green-700 text-white font-extrabold px-2 py-1 rounded text-[11px] transition border-0 cursor-pointer active:scale-95 whitespace-nowrap shrink-0 flex items-center justify-center h-full"
+        >
+          Add
+        </button>
       </div>
-    ) : null;
+
+      <div className="overflow-y-auto max-h-40 flex-1">
+        {filtered.map((s, i) => (
+          <div
+            key={s}
+            onClick={() => {
+              onChange(s);
+              setOpen(false);
+              setHighlighted(-1);
+            }}
+            className={`px-3 py-1.5 cursor-pointer font-semibold transition-colors flex items-center justify-between group rounded ${
+              i === highlighted
+                ? "bg-green-50 text-green-700 font-bold"
+                : "hover:bg-green-50 hover:text-green-700 text-slate-700"
+            }`}
+          >
+            <span className="truncate">{s}</span>
+            <button
+              type="button"
+              onClick={(e) => handleDeleteOption(e, s)}
+              className="text-slate-400 hover:text-red-650 p-1 rounded-md border-0 bg-transparent transition opacity-100 md:opacity-0 group-hover:opacity-100 cursor-pointer flex items-center justify-center hover:bg-red-50"
+              title="Delete Option"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ))}
+
+        {filtered.length === 0 && (
+          <div className="px-3 py-3 text-slate-400 font-semibold italic text-center">
+            No matching locations. Type above and click Add!
+          </div>
+        )}
+      </div>
+    </div>
+  ) : null;
 
   return (
     <div ref={containerRef} className="relative w-full">
@@ -472,7 +488,18 @@ const isCurrencyColumn = (hdr: string) => {
 const getHeaderTextColor = (bgColor: string) => {
   if (!bgColor) return "text-white";
   const lower = bgColor.toLowerCase().trim();
-  const lightColors = ["#ffffff", "#fff", "#22d3ee", "#34d399", "#4ade80", "#fef08a", "#a7f3d0", "#bae6fd", "#fecdd3", "#ccffff"];
+  const lightColors = [
+    "#ffffff",
+    "#fff",
+    "#22d3ee",
+    "#34d399",
+    "#4ade80",
+    "#fef08a",
+    "#a7f3d0",
+    "#bae6fd",
+    "#fecdd3",
+    "#ccffff",
+  ];
   return lightColors.includes(lower) ? "text-slate-800" : "text-white";
 };
 
@@ -646,7 +673,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   // Warning custom dropdown states
   const [warningOptions, setWarningOptions] = useState<string[]>([]);
   const [newWarningOptionInput, setNewWarningOptionInput] = useState("");
-  const [activeWarningDropdown, setActiveWarningDropdown] = useState<number | null>(null);
+  const [activeWarningDropdown, setActiveWarningDropdown] = useState<
+    number | null
+  >(null);
 
   const handleAddWarningOption = (val: string) => {
     const trimmed = val.trim();
@@ -682,7 +711,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         const parsed = JSON.parse(notice.tableData);
         if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
           parsed.tables.forEach((table: any) => {
-            if (table.bottomWarning && !initialOptions.includes(table.bottomWarning)) {
+            if (
+              table.bottomWarning &&
+              !initialOptions.includes(table.bottomWarning)
+            ) {
               initialOptions = [...initialOptions, table.bottomWarning];
             }
           });
@@ -696,7 +728,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   // Location custom dropdown states
   const [locationOptions, setLocationOptions] = useState<string[]>([]);
   const [newLocationOptionInput, setNewLocationOptionInput] = useState("");
-  const [activeLocationDropdown, setActiveLocationDropdown] = useState<number | null>(null);
+  const [activeLocationDropdown, setActiveLocationDropdown] = useState<
+    number | null
+  >(null);
 
   const handleAddLocationOption = (val: string) => {
     const trimmed = val.trim();
@@ -704,7 +738,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     if (locationOptions.includes(trimmed)) return;
     const updated = [trimmed, ...locationOptions];
     setLocationOptions(updated);
-    localStorage.setItem("btc_notice_location_options", JSON.stringify(updated));
+    localStorage.setItem(
+      "btc_notice_location_options",
+      JSON.stringify(updated),
+    );
   };
 
   const handleDeleteLocationOption = (
@@ -714,7 +751,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     e.stopPropagation();
     const updated = locationOptions.filter((o) => o !== optionToDelete);
     setLocationOptions(updated);
-    localStorage.setItem("btc_notice_location_options", JSON.stringify(updated));
+    localStorage.setItem(
+      "btc_notice_location_options",
+      JSON.stringify(updated),
+    );
   };
 
   const handleLocationChange = (tIdx: number, val: string) => {
@@ -765,7 +805,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         const parsed = JSON.parse(notice.tableData);
         if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
           parsed.tables.forEach((table: any) => {
-            if (table.workLocation && !initialOptions.includes(table.workLocation)) {
+            if (
+              table.workLocation &&
+              !initialOptions.includes(table.workLocation)
+            ) {
               initialOptions = [...initialOptions, table.workLocation];
             }
           });
@@ -1537,7 +1580,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       prev.map((t, idx) => {
         if (idx !== tIdx) return t;
         const newRow = Array(t.headers.length).fill("");
-        
+
         // Auto-populate last date for PWD template if present
         const lastDateColIdx = getLastDateColIdx(t.headers || []);
         if (
@@ -1851,9 +1894,13 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       }
 
       // lotteryDate: only parse/set when category supports it
-      const lotteryDateStr = (category === "LOTTERY_RESULT" || category === "LOTTERY_PENDING" || category === "OTM" || category === "LTM")
-        ? (formData.get("lotteryDate") as string)
-        : "";
+      const lotteryDateStr =
+        category === "LOTTERY_RESULT" ||
+        category === "LOTTERY_PENDING" ||
+        category === "OTM" ||
+        category === "LTM"
+          ? (formData.get("lotteryDate") as string)
+          : "";
       const lotteryDateObj = parseDateTimeDmyToDate(lotteryDateStr);
       if (lotteryDateObj) {
         formData.set("lotteryDate", lotteryDateObj.toISOString());
@@ -2183,7 +2230,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           </div>
         </div>
 
-        {(category === "LOTTERY_RESULT" || category === "LOTTERY_PENDING" || category === "OTM" || category === "LTM") && (
+        {(category === "LOTTERY_RESULT" ||
+          category === "LOTTERY_PENDING" ||
+          category === "OTM" ||
+          category === "LTM") && (
           <div className="space-y-2 relative animate-scale-in">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-slate-400" /> Lottery Date
@@ -2547,7 +2597,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                               )
                             }
                             className={`w-6 h-6 rounded-lg border transition transform hover:scale-110 active:scale-95 cursor-pointer ${
-                              (table.headerBgColor || (category === "OTM" ? "#059669" : "#0891b2")) === clr.hex
+                              (table.headerBgColor ||
+                                (category === "OTM"
+                                  ? "#059669"
+                                  : "#0891b2")) === clr.hex
                                 ? "border-slate-800 ring-2 ring-slate-400"
                                 : "border-slate-200"
                             }`}
@@ -2591,7 +2644,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                           className="border-b border-slate-200 sticky top-0 font-bold"
                           style={{
                             backgroundColor:
-                              table.headerBgColor || (category === "OTM" ? "#059669" : "#0891b2"),
+                              table.headerBgColor ||
+                              (category === "OTM" ? "#059669" : "#0891b2"),
                           }}
                         >
                           <tr className="divide-x divide-slate-200">
@@ -2608,7 +2662,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                 if (isSlNo) return null;
 
                                 const headerBg =
-                                  table.headerBgColor || (category === "OTM" ? "#059669" : "#0891b2");
+                                  table.headerBgColor ||
+                                  (category === "OTM" ? "#059669" : "#0891b2");
                                 const minWidthValue = getColumnMinWidth(hdr);
                                 const showLabel =
                                   parseInt(minWidthValue) >= 120;
@@ -2657,7 +2712,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
                                       {/* Column Cell Color Customizer */}
                                       <div className="flex items-center justify-between px-0.5 mt-0.5">
-                                        <span className={`text-[9px] font-extrabold uppercase tracking-wider ${getHeaderTextColor(headerBg) === "text-white" ? "text-slate-200" : "text-slate-700"}`}>
+                                        <span
+                                          className={`text-[9px] font-extrabold uppercase tracking-wider ${getHeaderTextColor(headerBg) === "text-white" ? "text-slate-200" : "text-slate-700"}`}
+                                        >
                                           Cell Color:
                                         </span>
                                         <div className="flex gap-0.5 ml-auto">
@@ -2699,13 +2756,19 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                             )}
                             <th
                               className={`p-1 w-8 text-center text-[10px] ${
-                                getHeaderTextColor(table.headerBgColor || (category === "OTM" ? "#059669" : "#0891b2")) === "text-white"
+                                getHeaderTextColor(
+                                  table.headerBgColor ||
+                                    (category === "OTM"
+                                      ? "#059669"
+                                      : "#0891b2"),
+                                ) === "text-white"
                                   ? "text-white"
                                   : "text-slate-700"
                               }`}
                               style={{
                                 backgroundColor:
-                                  table.headerBgColor || (category === "OTM" ? "#059669" : "#0891b2"),
+                                  table.headerBgColor ||
+                                  (category === "OTM" ? "#059669" : "#0891b2"),
                               }}
                             >
                               Del
@@ -2720,9 +2783,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                 className="hover:bg-slate-50/50 transition"
                               >
                                 {row.map((cell: string, cIdx: number) => {
-                                  const headerName = (
-                                    table.headers[cIdx] || ""
-                                  ).toLowerCase().trim();
+                                  const headerName = (table.headers[cIdx] || "")
+                                    .toLowerCase()
+                                    .trim();
                                   const isSlNo =
                                     headerName === "sl.no" ||
                                     headerName === "sl no" ||
@@ -2865,7 +2928,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                         </label>
                         <div className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-500 text-xs font-semibold cursor-not-allowed select-none leading-relaxed whitespace-pre-line">
                           Engr. Md. Shah Alom B.Sc. Engr.(Civil){"\n"}Mobile No:
-                          01711-805086{"\n"}L M B Market 1st Floor, Pabna.{"\n"}Web: www.egpbtc.com
+                          01711-805086{"\n"}L M B Market 1st Floor, Pabna.{"\n"}
+                          Web: www.egpbtc.com
                         </div>
                         <p className="text-[9px] text-slate-400 italic flex items-center gap-1 mt-0.5">
                           <Info className="w-3 h-3" /> This field is fixed and
@@ -2882,15 +2946,20 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                           <div
                             onClick={() =>
                               setActiveWarningDropdown(
-                                activeWarningDropdown === tIdx ? null : tIdx
+                                activeWarningDropdown === tIdx ? null : tIdx,
                               )
                             }
                             className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-red-650 text-xs font-bold focus:border-red-500 hover:border-slate-350 transition cursor-pointer flex justify-between items-center shadow-xs"
                           >
-                            <span className="truncate">{table.bottomWarning || "Select Warning Alert Info..."}</span>
+                            <span className="truncate">
+                              {table.bottomWarning ||
+                                "Select Warning Alert Info..."}
+                            </span>
                             <ChevronDown
                               className={`w-3.5 h-3.5 text-slate-400 transition-transform ${
-                                activeWarningDropdown === tIdx ? "rotate-180" : ""
+                                activeWarningDropdown === tIdx
+                                  ? "rotate-180"
+                                  : ""
                               }`}
                             />
                           </div>
@@ -2906,16 +2975,20 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                               <input
                                 type="text"
                                 value={newWarningOptionInput}
-                                onChange={(e) => setNewWarningOptionInput(e.target.value)}
+                                onChange={(e) =>
+                                  setNewWarningOptionInput(e.target.value)
+                                }
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter") {
                                     e.preventDefault();
                                     if (newWarningOptionInput.trim()) {
-                                      handleAddWarningOption(newWarningOptionInput.trim());
+                                      handleAddWarningOption(
+                                        newWarningOptionInput.trim(),
+                                      );
                                       handlePwdFieldChange(
                                         tIdx,
                                         "bottomWarning",
-                                        newWarningOptionInput.trim()
+                                        newWarningOptionInput.trim(),
                                       );
                                       setNewWarningOptionInput("");
                                       setActiveWarningDropdown(null);
@@ -2929,11 +3002,13 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                 type="button"
                                 onClick={() => {
                                   if (newWarningOptionInput.trim()) {
-                                    handleAddWarningOption(newWarningOptionInput.trim());
+                                    handleAddWarningOption(
+                                      newWarningOptionInput.trim(),
+                                    );
                                     handlePwdFieldChange(
                                       tIdx,
                                       "bottomWarning",
-                                      newWarningOptionInput.trim()
+                                      newWarningOptionInput.trim(),
                                     );
                                     setNewWarningOptionInput("");
                                     setActiveWarningDropdown(null);
@@ -2949,13 +3024,21 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                             <div className="max-h-[180px] overflow-y-auto divide-y divide-slate-50">
                               {warningOptions
                                 .filter((opt) =>
-                                  opt.toLowerCase().includes(newWarningOptionInput.toLowerCase())
+                                  opt
+                                    .toLowerCase()
+                                    .includes(
+                                      newWarningOptionInput.toLowerCase(),
+                                    ),
                                 )
                                 .map((opt) => (
                                   <div
                                     key={opt}
                                     onClick={() => {
-                                      handlePwdFieldChange(tIdx, "bottomWarning", opt);
+                                      handlePwdFieldChange(
+                                        tIdx,
+                                        "bottomWarning",
+                                        opt,
+                                      );
                                       setActiveWarningDropdown(null);
                                     }}
                                     className="px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition cursor-pointer flex items-center justify-between group"
@@ -2963,7 +3046,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                     <span className="truncate">{opt}</span>
                                     <button
                                       type="button"
-                                      onClick={(e) => handleDeleteWarningOption(e, opt)}
+                                      onClick={(e) =>
+                                        handleDeleteWarningOption(e, opt)
+                                      }
                                       className="text-slate-400 hover:text-red-650 p-1 rounded-md border-0 bg-transparent transition opacity-100 md:opacity-0 group-hover:opacity-100 cursor-pointer flex items-center justify-center hover:bg-red-50"
                                       title="Delete Option"
                                     >
@@ -2973,7 +3058,11 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                 ))}
 
                               {warningOptions.filter((opt) =>
-                                opt.toLowerCase().includes(newWarningOptionInput.toLowerCase())
+                                opt
+                                  .toLowerCase()
+                                  .includes(
+                                    newWarningOptionInput.toLowerCase(),
+                                  ),
                               ).length === 0 && (
                                 <div className="px-4 py-3 text-xs text-slate-400 font-semibold italic text-center">
                                   No matching options. Type above and click Add!

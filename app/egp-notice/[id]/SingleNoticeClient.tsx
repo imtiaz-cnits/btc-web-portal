@@ -36,8 +36,8 @@ const formatDisplayDate = (dateStr: any) => {
   const parsed = Date.parse(str);
   if (!isNaN(parsed)) {
     const dateObj = new Date(parsed);
-    const d = String(dateObj.getDate()).padStart(2, '0');
-    const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const d = String(dateObj.getDate()).padStart(2, "0");
+    const m = String(dateObj.getMonth() + 1).padStart(2, "0");
     const y = dateObj.getFullYear();
     return `${d}-${m}-${y}`;
   }
@@ -48,7 +48,8 @@ const formatDisplayDate = (dateStr: any) => {
 const isCurrencyColumn = (hdr: string) => {
   if (!hdr) return false;
   const lower = hdr.toLowerCase();
-  return lower.includes("cost") ||
+  return (
+    lower.includes("cost") ||
     lower.includes("tk") ||
     lower.includes("taka") ||
     lower.includes("security") ||
@@ -61,7 +62,8 @@ const isCurrencyColumn = (hdr: string) => {
     lower.includes("similar work") ||
     lower.includes("similar") ||
     lower.includes("credit") ||
-    lower.includes("টাকা");
+    lower.includes("টাকা")
+  );
 };
 
 const formatCellValue = (val: string, hdr: string) => {
@@ -199,42 +201,45 @@ export default function SingleNoticeClient({
     if (isPdf && notice.filePath) {
       // PDF print handling using a hidden iframe with Chrome query parameters
       // Bypasses browser PDF viewer layout bugs, scrollbars, sidebars, and multi-page print cuts!
-      const pdfUrl = notice.filePath.startsWith('/') || notice.filePath.startsWith('http') 
-        ? notice.filePath 
-        : '/' + notice.filePath;
+      const pdfUrl =
+        notice.filePath.startsWith("/") || notice.filePath.startsWith("http")
+          ? notice.filePath
+          : "/" + notice.filePath;
 
       // Add query parameters to hide toolbars/navpanes and center-fit the document
-      const cleanPdfUrl = pdfUrl + '#toolbar=0&navpanes=0&scrollbar=0&view=Fit';
+      const cleanPdfUrl = pdfUrl + "#toolbar=0&navpanes=0&scrollbar=0&view=Fit";
 
-      let iframe = document.getElementById('pdf-print-iframe') as HTMLIFrameElement;
+      let iframe = document.getElementById(
+        "pdf-print-iframe",
+      ) as HTMLIFrameElement;
       if (iframe) {
         document.body.removeChild(iframe);
       }
-      
-      iframe = document.createElement('iframe');
-      iframe.id = 'pdf-print-iframe';
-      iframe.style.position = 'fixed';
-      iframe.style.right = '0';
-      iframe.style.bottom = '0';
-      iframe.style.width = '0';
-      iframe.style.height = '0';
-      iframe.style.border = '0';
+
+      iframe = document.createElement("iframe");
+      iframe.id = "pdf-print-iframe";
+      iframe.style.position = "fixed";
+      iframe.style.right = "0";
+      iframe.style.bottom = "0";
+      iframe.style.width = "0";
+      iframe.style.height = "0";
+      iframe.style.border = "0";
       iframe.src = cleanPdfUrl;
-      
+
       document.body.appendChild(iframe);
-      
-      iframe.onload = function() {
+
+      iframe.onload = function () {
         try {
           iframe.contentWindow?.focus();
           iframe.contentWindow?.print();
           // Remove the iframe after print dialog opens
           setTimeout(() => {
-            const el = document.getElementById('pdf-print-iframe');
+            const el = document.getElementById("pdf-print-iframe");
             if (el) document.body.removeChild(el);
           }, 5000);
         } catch (e) {
           // Fallback if cross-origin print blocks
-          window.open(pdfUrl, '_blank');
+          window.open(pdfUrl, "_blank");
         }
       };
       return;
@@ -324,8 +329,8 @@ export default function SingleNoticeClient({
                 width: 100% !important;
                 max-width: 100% !important;
                 border-collapse: collapse !important;
-                margin-top: 10pt !important;
-                margin-bottom: 10pt !important;
+                margin-top: 0 !important;
+                margin-bottom: 0 !important;
                 page-break-inside: avoid;
                 overflow: visible !important;
                 table-layout: auto !important;
@@ -366,8 +371,48 @@ export default function SingleNoticeClient({
                 border: 1px solid #9ca3af !important;
                 border-left: 4px solid #9ca3af !important;
                 border-radius: 8px !important;
-                padding: 10px 12px !important;
+                padding: 0 !important;
                 margin-bottom: 4px !important;
+                overflow: hidden !important;
+              }
+              .footer-card-label {
+                display: inline-block !important;
+                border-right: 1px solid #9ca3af !important;
+                border-bottom: 1px solid #9ca3af !important;
+                border-top: none !important;
+                border-left: none !important;
+                border-bottom-right-radius: 8px !important;
+                padding: 4px 10px !important;
+                background-color: #f3f4f6 !important;
+                font-weight: 800 !important;
+                font-size: 8pt !important;
+                text-transform: uppercase !important;
+              }
+              .footer-card-content {
+                padding: 10px 12px !important;
+              }
+              .warning-card {
+                border: 1px solid #9ca3af !important;
+                border-left: 4px solid #dc2626 !important;
+                border-radius: 8px !important;
+                padding: 0 !important;
+                margin-top: 10pt !important;
+                margin-bottom: 4px !important;
+                overflow: hidden !important;
+              }
+              .warning-card-label {
+                display: inline-block !important;
+                border-right: 1px solid #9ca3af !important;
+                border-bottom: 1px solid #9ca3af !important;
+                border-top: none !important;
+                border-left: none !important;
+                border-bottom-right-radius: 8px !important;
+                padding: 4px 10px !important;
+                background-color: #fee2e2 !important;
+                color: #dc2626 !important;
+                font-weight: 800 !important;
+                font-size: 8pt !important;
+                text-transform: uppercase !important;
               }
               img {
                 width: 100% !important;
@@ -408,16 +453,20 @@ export default function SingleNoticeClient({
           </head>
           <body>
             <div class="print-container">
-              ${!isLandscape ? `
+              ${
+                !isLandscape
+                  ? `
                 <div class="print-header">
                   <h1 class="notice-title">${notice.title}</h1>
                   <div class="notice-details-bar">
                     <span class="detail-item"><strong>Category:</strong> ${notice.category}</span>
                     <span class="detail-item"><strong>Publish Date:</strong> ${notice.publishDate}</span>
-                    ${notice.lastDate ? `<span class="detail-item"><strong>Last Date:</strong> ${notice.lastDate}</span>` : ''}
+                    ${notice.lastDate ? `<span class="detail-item"><strong>Last Date:</strong> ${notice.lastDate}</span>` : ""}
                   </div>
                 </div>
-              ` : ''}
+              `
+                  : ""
+              }
               ${printContents}
             </div>
           </body>
@@ -428,12 +477,12 @@ export default function SingleNoticeClient({
       setTimeout(() => {
         window.print();
         document.body.innerHTML = originalContents;
-        
+
         // Dynamic reload callback when clicking back to bypass standard React router removeChild crash
-        window.addEventListener('popstate', () => {
+        window.addEventListener("popstate", () => {
           window.location.reload();
         });
-        
+
         window.location.reload(); // Restore full React DOM
       }, 1000);
     }
@@ -451,7 +500,18 @@ export default function SingleNoticeClient({
   const getHeaderTextColor = (bgColor: string) => {
     if (!bgColor) return "text-white";
     const lower = bgColor.toLowerCase().trim();
-    const lightColors = ["#ffffff", "#fff", "#22d3ee", "#34d399", "#4ade80", "#fef08a", "#a7f3d0", "#bae6fd", "#fecdd3", "#ccffff"];
+    const lightColors = [
+      "#ffffff",
+      "#fff",
+      "#22d3ee",
+      "#34d399",
+      "#4ade80",
+      "#fef08a",
+      "#a7f3d0",
+      "#bae6fd",
+      "#fecdd3",
+      "#ccffff",
+    ];
     return lightColors.includes(lower) ? "text-slate-800" : "text-white";
   };
 
@@ -532,9 +592,13 @@ export default function SingleNoticeClient({
               className="bg-[#2980b9] hover:bg-[#3498db] !text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-1.5 shadow-sm transition-all cursor-pointer disabled:opacity-60"
             >
               {pdfDownloading ? (
-                <><i className="fa-solid fa-spinner fa-spin"></i> Generating...</>
+                <>
+                  <i className="fa-solid fa-spinner fa-spin"></i> Generating...
+                </>
               ) : (
-                <><i className="fa-solid fa-download"></i> Download PDF</>
+                <>
+                  <i className="fa-solid fa-download"></i> Download PDF
+                </>
               )}
             </button>
           ) : null}
@@ -546,21 +610,22 @@ export default function SingleNoticeClient({
           className="w-full max-w-full px-2 sm:px-6 md:px-12 py-8 bg-white space-y-8"
         >
           {parsedTables.map((table, tIdx) => {
-            const defaultHeaderBg = notice.category === "OTM" ? "#059669" : "#0891b2";
+            const defaultHeaderBg =
+              notice.category === "OTM" ? "#059669" : "#0891b2";
             const headers =
               table.headers && table.headers.length > 0
                 ? table.headers
                 : table.type === "pwd_ltm"
                   ? [
-                    "Tender ID",
-                    "Description",
-                    "Location",
-                    "AppCost (Tk)",
-                    "Solvency (Tk)",
-                    "Security (Tk)",
-                    "Doc Fees (Tk)",
-                    "Last Date & Time",
-                  ]
+                      "Tender ID",
+                      "Description",
+                      "Location",
+                      "AppCost (Tk)",
+                      "Solvency (Tk)",
+                      "Security (Tk)",
+                      "Doc Fees (Tk)",
+                      "Last Date & Time",
+                    ]
                   : [];
             const rawRows = table.rows || [];
 
@@ -603,24 +668,24 @@ export default function SingleNoticeClient({
               return lower.includes("fee") || lower.includes("price");
             });
             const winnerColIdx = headers.findIndex((h: string) =>
-              h.toUpperCase().replace(/\./g, "").includes("WINNER")
+              h.toUpperCase().replace(/\./g, "").includes("WINNER"),
             );
 
             const totalSecurity =
               securityColIdx !== -1
                 ? normalizedRows.reduce(
-                  (sum: number, r: string[]) =>
-                    sum + parseMoney(r[securityColIdx]),
-                  0,
-                )
+                    (sum: number, r: string[]) =>
+                      sum + parseMoney(r[securityColIdx]),
+                    0,
+                  )
                 : 0;
             const totalDocFees =
               docFeesColIdx !== -1
                 ? normalizedRows.reduce(
-                  (sum: number, r: string[]) =>
-                    sum + parseMoney(r[docFeesColIdx]),
-                  0,
-                )
+                    (sum: number, r: string[]) =>
+                      sum + parseMoney(r[docFeesColIdx]),
+                    0,
+                  )
                 : 0;
 
             return (
@@ -643,11 +708,17 @@ export default function SingleNoticeClient({
                 {/* Egp Published Date */}
                 {table.noticeDateBlock && (
                   <div className="flex justify-end mb-0">
-                    <div 
+                    <div
                       className="border border-black border-b-0 px-4 py-2 text-xs md:text-sm font-bold tracking-wide"
-                      style={{ backgroundColor: table.headerBgColor || defaultHeaderBg, color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg) }}
+                      style={{
+                        backgroundColor: table.headerBgColor || defaultHeaderBg,
+                        color: getHeaderTextColorHex(
+                          table.headerBgColor || defaultHeaderBg,
+                        ),
+                      }}
                     >
-                      Egp Published Date : {formatDisplayDate(table.noticeDateBlock)}
+                      Egp Published Date :{" "}
+                      {formatDisplayDate(table.noticeDateBlock)}
                     </div>
                   </div>
                 )}
@@ -676,25 +747,47 @@ export default function SingleNoticeClient({
                     />
                   </div>
 
-                  <table className="w-full border-collapse text-left font-semibold text-black relative z-10 print:w-full">
-                    <thead className="border-b border-gray-400 text-black" style={{ backgroundColor: table.headerBgColor || defaultHeaderBg }}>
+                  <table className="w-full text-left font-semibold text-black relative z-10 print:w-full">
+                    <thead
+                      className="border-b border-gray-400 text-black"
+                      style={{
+                        backgroundColor: table.headerBgColor || defaultHeaderBg,
+                      }}
+                    >
                       <tr className="divide-x divide-gray-400">
                         {!hasSl && (
                           <th
                             className="p-3 font-bold border border-gray-400 text-sm uppercase text-center whitespace-nowrap"
-                            style={{ backgroundColor: table.headerBgColor || defaultHeaderBg, color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg) }}
+                            style={{
+                              backgroundColor:
+                                table.headerBgColor || defaultHeaderBg,
+                              color: getHeaderTextColorHex(
+                                table.headerBgColor || defaultHeaderBg,
+                              ),
+                            }}
                           >
                             SL No
                           </th>
                         )}
                         {headers.map((hdr: string, idx: number) => {
-                          const isDesc = (hdr || "").toLowerCase().includes("description");
+                          const isDesc = (hdr || "")
+                            .toLowerCase()
+                            .includes("description");
                           return (
                             <th
                               key={idx}
-                              className={`p-3 font-bold border border-gray-400 text-sm uppercase text-center ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-normal"
-                                }`}
-                              style={{ backgroundColor: table.headerBgColor || defaultHeaderBg, color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg) }}
+                              className={`p-3 font-bold border border-gray-400 text-sm uppercase text-center ${
+                                isDesc
+                                  ? "w-[30%] min-w-[220px]"
+                                  : "whitespace-normal"
+                              }`}
+                              style={{
+                                backgroundColor:
+                                  table.headerBgColor || defaultHeaderBg,
+                                color: getHeaderTextColorHex(
+                                  table.headerBgColor || defaultHeaderBg,
+                                ),
+                              }}
                             >
                               {hdr}
                             </th>
@@ -704,36 +797,68 @@ export default function SingleNoticeClient({
                     </thead>
                     <tbody className="divide-y divide-gray-400">
                       {normalizedRows.map((row: string[], rIdx: number) => {
-                        const isWinnerRow = winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
+                        const isWinnerRow =
+                          winnerColIdx !== -1 &&
+                          row[winnerColIdx] &&
+                          row[winnerColIdx].trim() !== "";
                         return (
                           <tr
                             key={rIdx}
                             className={`hover:bg-slate-50/50 transition divide-x divide-gray-400 ${
-                              isWinnerRow ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500" : ""
+                              isWinnerRow
+                                ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500"
+                                : ""
                             }`}
                           >
                             {!hasSl && (
                               <td
                                 className="p-3 border border-gray-400 text-black text-sm font-bold text-left whitespace-nowrap"
-                                style={isWinnerRow ? { backgroundColor: "#fffbeb" } : table.columnColors?.[0] ? { backgroundColor: table.columnColors[0] } : undefined}
+                                style={
+                                  isWinnerRow
+                                    ? { backgroundColor: "#fffbeb" }
+                                    : table.columnColors?.[0]
+                                      ? {
+                                          backgroundColor:
+                                            table.columnColors[0],
+                                        }
+                                      : undefined
+                                }
                               >
                                 {rIdx + 1}
                               </td>
                             )}
                             {row.map((cell: string, cIdx: number) => {
-                              const cellBg = isWinnerRow ? "#fffbeb" : table.columnColors?.[cIdx] || "#ffffff";
-                              const isCurrency = isCurrencyColumn(headers[cIdx] || "");
-                              const isDesc = (headers[cIdx] || "").toLowerCase().includes("description");
+                              const cellBg = isWinnerRow
+                                ? "#fffbeb"
+                                : table.columnColors?.[cIdx] || "#ffffff";
+                              const isCurrency = isCurrencyColumn(
+                                headers[cIdx] || "",
+                              );
+                              const isDesc = (headers[cIdx] || "")
+                                .toLowerCase()
+                                .includes("description");
                               const isWinnerCell = cIdx === winnerColIdx;
-                              const hasCustomBg = cellBg && cellBg !== "#ffffff" && cellBg !== "#fff";
+                              const hasCustomBg =
+                                cellBg &&
+                                cellBg !== "#ffffff" &&
+                                cellBg !== "#fff";
                               return (
                                 <td
                                   key={cIdx}
-                                  className={`p-3 border border-gray-400 text-black text-sm font-semibold font-bangla ${isCurrency ? "text-right" : "text-left"
-                                    } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-normal"}`}
-                                  style={hasCustomBg ? { backgroundColor: cellBg } : undefined}
+                                  className={`p-3 border border-gray-400 text-black text-sm font-semibold font-bangla ${
+                                    isCurrency ? "text-right" : "text-left"
+                                  } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-normal"}`}
+                                  style={
+                                    hasCustomBg
+                                      ? { backgroundColor: cellBg }
+                                      : undefined
+                                  }
                                 >
-                                  {isWinnerCell && isWinnerRow && <span className="inline-block mr-1">🏆</span>}
+                                  {isWinnerCell && isWinnerRow && (
+                                    <span className="inline-block mr-1">
+                                      🏆
+                                    </span>
+                                  )}
                                   {formatCellValue(cell, headers[cIdx] || "")}
                                 </td>
                               );
@@ -772,26 +897,40 @@ export default function SingleNoticeClient({
                             if (idx < minTotalColIdx) return null;
                             if (idx === securityColIdx) {
                               return (
-                                <td key={idx} className="p-3 border border-gray-400 text-sm font-extrabold text-black bg-[#ffffcc] text-right">
+                                <td
+                                  key={idx}
+                                  className="p-3 border border-gray-400 text-sm font-extrabold text-black bg-[#ffffcc] text-right"
+                                >
                                   {formatMoney(totalSecurity)}
                                 </td>
                               );
                             }
                             if (idx === docFeesColIdx) {
                               return (
-                                <td key={idx} className="p-3 border border-gray-400 text-sm font-extrabold text-black bg-[#ffffcc] text-right">
+                                <td
+                                  key={idx}
+                                  className="p-3 border border-gray-400 text-sm font-extrabold text-black bg-[#ffffcc] text-right"
+                                >
                                   {formatMoney(totalDocFees)}
                                 </td>
                               );
                             }
-                            return <td key={idx} className="p-3 border border-gray-400 bg-[#ffffcc]"></td>;
+                            return (
+                              <td
+                                key={idx}
+                                className="p-3 border border-gray-400 bg-[#ffffcc]"
+                              ></td>
+                            );
                           })}
                         </tr>
                       )}
 
                       {normalizedRows.length === 0 && (
                         <tr>
-                          <td colSpan={headers.length || 1} className="p-8 text-center text-slate-400 italic">
+                          <td
+                            colSpan={headers.length || 1}
+                            className="p-8 text-center text-slate-400 italic"
+                          >
                             No tender entries available.
                           </td>
                         </tr>
@@ -804,26 +943,39 @@ export default function SingleNoticeClient({
                 {(table.payOrderTo || true) && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 print:mt-3 print:grid-cols-2 font-bangla text-black">
                     {table.payOrderTo && (
-                      <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-emerald-600 border-y border-r border-slate-200/80 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
-                        <span className="flex items-center gap-2 text-sm font-extrabold text-slate-700 uppercase tracking-wider mb-2 print:text-black">
+                      <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-emerald-600 border-y border-r border-slate-200/80 rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+                        <div className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold text-slate-700 uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2 bg-slate-100/80 print:text-black">
                           <i className="fa-solid fa-building-columns text-emerald-600 print:hidden"></i>
                           BD Pay Order To :
-                        </span>
-                        <div className="text-black font-semibold text-sm leading-relaxed whitespace-pre-line">
+                        </div>
+                        <div className="footer-card-content p-4 text-black font-semibold text-sm leading-relaxed whitespace-pre-line">
                           {table.payOrderTo}
                         </div>
                       </div>
                     )}
-                    <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-blue-600 border-y border-r border-slate-200/80 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
-                      <span className="flex items-center gap-2 text-sm font-extrabold text-slate-700 uppercase tracking-wider mb-2 print:text-black">
+                    <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-blue-600 border-y border-r border-slate-200/80 rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+                      <div className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold text-slate-700 uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2 bg-slate-100/80 print:text-black">
                         <i className="fa-solid fa-circle-info text-blue-600 print:hidden"></i>
                         Contact Info / e-Tender Solutions :
-                      </span>
-                      <div className="text-black font-semibold text-sm leading-relaxed">
-                        Engr. Md. Shah Alom B.Sc. Engr.(Civil)<br />
-                        Mobile No: 01711-805086<br />
-                        L M B Market 1st Floor, Pabna.<br />
-                        Web: <a href="https://www.egpbtc.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">www.egpbtc.com</a>
+                      </div>
+                      <div className="footer-card-content p-4 text-black font-semibold text-sm leading-relaxed">
+                        Engr. Md. Shah Alom B.Sc. Engr.(Civil)
+                        <br />
+                        Mobile No: 01711-805086, 01972-805086
+                        <br />
+                        L M B Market 1st Floor, Pabna.
+                        <br />
+                        salomdhaka@gmail.com
+                        <br />
+                        Web:{" "}
+                        <a
+                          href="https://www.egpbtc.com"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          www.egpbtc.com
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -831,8 +983,14 @@ export default function SingleNoticeClient({
 
                 {/* Red Warning alert below table */}
                 {table.bottomWarning && notice.category !== "OTM" && (
-                  <div className="mt-4 text-red-600 font-extrabold text-sm font-bangla text-left leading-relaxed">
-                    {table.bottomWarning}
+                  <div className="footer-card warning-card bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-red-600 border-y border-r border-slate-200/80 rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden mt-4">
+                    <div className="footer-card-label warning-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold text-red-700 uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2 bg-red-50/80 print:text-red-700">
+                      <i className="fa-solid fa-circle-exclamation text-red-600 print:hidden"></i>
+                      Information :
+                    </div>
+                    <div className="footer-card-content p-4 text-red-600 font-extrabold text-sm leading-relaxed font-bangla">
+                      {table.bottomWarning}
+                    </div>
                   </div>
                 )}
               </div>
@@ -954,12 +1112,16 @@ export default function SingleNoticeClient({
             {parsedTables.length > 0 && (
               <div className="space-y-12">
                 {parsedTables.map((table, tIdx) => {
-                  const defaultHeaderBg = notice.category === "OTM" ? "#059669" : "#0891b2";
+                  const defaultHeaderBg =
+                    notice.category === "OTM" ? "#059669" : "#0891b2";
                   const headers = table.headers || [];
                   const rows = table.rows || [];
 
                   const hasSl = headers.some((h: string) => {
-                    const norm = (h || "").toLowerCase().replace(/\./g, "").trim();
+                    const norm = (h || "")
+                      .toLowerCase()
+                      .replace(/\./g, "")
+                      .trim();
                     return norm === "slno" || norm === "sl";
                   });
 
@@ -983,7 +1145,9 @@ export default function SingleNoticeClient({
                           row.lastDateTime || row.lastDate || "",
                         ];
                       }
-                      return Object.values(row).map((val) => (val ?? "").toString());
+                      return Object.values(row).map((val) =>
+                        (val ?? "").toString(),
+                      );
                     }
                     return [];
                   });
@@ -1000,21 +1164,21 @@ export default function SingleNoticeClient({
                   const totalSecurity =
                     securityColIdx !== -1
                       ? normalizedRows.reduce(
-                        (sum: number, r: string[]) =>
-                          sum + parseMoney(r[securityColIdx]),
-                        0,
-                      )
+                          (sum: number, r: string[]) =>
+                            sum + parseMoney(r[securityColIdx]),
+                          0,
+                        )
                       : 0;
                   const totalDocFees =
                     docFeesColIdx !== -1
                       ? normalizedRows.reduce(
-                        (sum: number, r: string[]) =>
-                          sum + parseMoney(r[docFeesColIdx]),
-                        0,
-                      )
+                          (sum: number, r: string[]) =>
+                            sum + parseMoney(r[docFeesColIdx]),
+                          0,
+                        )
                       : 0;
                   const winnerColIdx = headers.findIndex((h: string) =>
-                    h.toUpperCase().replace(/\./g, "").includes("WINNER")
+                    h.toUpperCase().replace(/\./g, "").includes("WINNER"),
                   );
 
                   return (
@@ -1037,11 +1201,18 @@ export default function SingleNoticeClient({
                       {/* Egp Published Date */}
                       {table.noticeDateBlock && (
                         <div className="flex justify-end mb-0">
-                          <div 
+                          <div
                             className="border border-black border-b-0 px-4 py-2 text-xs md:text-sm font-bold tracking-wide"
-                            style={{ backgroundColor: table.headerBgColor || defaultHeaderBg, color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg) }}
+                            style={{
+                              backgroundColor:
+                                table.headerBgColor || defaultHeaderBg,
+                              color: getHeaderTextColorHex(
+                                table.headerBgColor || defaultHeaderBg,
+                              ),
+                            }}
                           >
-                            Egp Published Date : {formatDisplayDate(table.noticeDateBlock)}
+                            Egp Published Date :{" "}
+                            {formatDisplayDate(table.noticeDateBlock)}
                           </div>
                         </div>
                       )}
@@ -1071,24 +1242,47 @@ export default function SingleNoticeClient({
                         </div>
 
                         <table className="w-full border-collapse text-left font-semibold text-black relative z-10 print:w-full">
-                          <thead className="border-b border-gray-400 text-black" style={{ backgroundColor: table.headerBgColor || defaultHeaderBg }}>
+                          <thead
+                            className="border-b border-gray-400 text-black"
+                            style={{
+                              backgroundColor:
+                                table.headerBgColor || defaultHeaderBg,
+                            }}
+                          >
                             <tr className="divide-x divide-gray-400">
                               {!hasSl && (
                                 <th
                                   className="p-2.5 font-bold border border-gray-400 text-sm uppercase whitespace-nowrap text-center"
-                                  style={{ backgroundColor: table.headerBgColor || defaultHeaderBg, color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg) }}
+                                  style={{
+                                    backgroundColor:
+                                      table.headerBgColor || defaultHeaderBg,
+                                    color: getHeaderTextColorHex(
+                                      table.headerBgColor || defaultHeaderBg,
+                                    ),
+                                  }}
                                 >
                                   SL No
                                 </th>
                               )}
                               {headers.map((hdr: string, idx: number) => {
-                                const isDesc = (hdr || "").toLowerCase().includes("description");
+                                const isDesc = (hdr || "")
+                                  .toLowerCase()
+                                  .includes("description");
                                 return (
                                   <th
                                     key={idx}
-                                    className={`p-2.5 font-bold border border-gray-400 text-sm uppercase text-center ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"
-                                      }`}
-                                    style={{ backgroundColor: table.headerBgColor || defaultHeaderBg, color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg) }}
+                                    className={`p-2.5 font-bold border border-gray-400 text-sm uppercase text-center ${
+                                      isDesc
+                                        ? "w-[30%] min-w-[220px]"
+                                        : "whitespace-nowrap"
+                                    }`}
+                                    style={{
+                                      backgroundColor:
+                                        table.headerBgColor || defaultHeaderBg,
+                                      color: getHeaderTextColorHex(
+                                        table.headerBgColor || defaultHeaderBg,
+                                      ),
+                                    }}
                                   >
                                     {hdr}
                                   </th>
@@ -1097,87 +1291,153 @@ export default function SingleNoticeClient({
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-400">
-                            {normalizedRows.map((row: string[], rIdx: number) => {
-                              const isWinnerRow = winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
-                              return (
-                                <tr
-                                  key={rIdx}
-                                  className={`hover:bg-slate-50/50 transition divide-x divide-gray-400 ${
-                                    isWinnerRow ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500" : ""
-                                  }`}
-                                >
-                                  {!hasSl && (
-                                    <td
-                                      className="p-2.5 border border-gray-400 text-black text-sm font-bold text-left whitespace-nowrap"
-                                      style={isWinnerRow ? { backgroundColor: "#fffbeb" } : table.columnColors?.[0] ? { backgroundColor: table.columnColors[0] } : undefined}
-                                    >
-                                      {rIdx + 1}
-                                    </td>
-                                  )}
-                                  {row.map((cell: string, cIdx: number) => {
-                                    const cellBg = isWinnerRow ? "#fffbeb" : table.columnColors?.[cIdx] || "#ffffff";
-                                    const isCurrency = isCurrencyColumn(headers[cIdx] || "");
-                                    const isDesc = (headers[cIdx] || "").toLowerCase().includes("description");
-                                    const isWinnerCell = cIdx === winnerColIdx;
-                                    const hasCustomBg = cellBg && cellBg !== "#ffffff" && cellBg !== "#fff";
+                            {normalizedRows.map(
+                              (row: string[], rIdx: number) => {
+                                const isWinnerRow =
+                                  winnerColIdx !== -1 &&
+                                  row[winnerColIdx] &&
+                                  row[winnerColIdx].trim() !== "";
+                                return (
+                                  <tr
+                                    key={rIdx}
+                                    className={`hover:bg-slate-50/50 transition divide-x divide-gray-400 ${
+                                      isWinnerRow
+                                        ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500"
+                                        : ""
+                                    }`}
+                                  >
+                                    {!hasSl && (
+                                      <td
+                                        className="p-2.5 border border-gray-400 text-black text-sm font-bold text-left whitespace-nowrap"
+                                        style={
+                                          isWinnerRow
+                                            ? { backgroundColor: "#fffbeb" }
+                                            : table.columnColors?.[0]
+                                              ? {
+                                                  backgroundColor:
+                                                    table.columnColors[0],
+                                                }
+                                              : undefined
+                                        }
+                                      >
+                                        {rIdx + 1}
+                                      </td>
+                                    )}
+                                    {row.map((cell: string, cIdx: number) => {
+                                      const cellBg = isWinnerRow
+                                        ? "#fffbeb"
+                                        : table.columnColors?.[cIdx] ||
+                                          "#ffffff";
+                                      const isCurrency = isCurrencyColumn(
+                                        headers[cIdx] || "",
+                                      );
+                                      const isDesc = (headers[cIdx] || "")
+                                        .toLowerCase()
+                                        .includes("description");
+                                      const isWinnerCell =
+                                        cIdx === winnerColIdx;
+                                      const hasCustomBg =
+                                        cellBg &&
+                                        cellBg !== "#ffffff" &&
+                                        cellBg !== "#fff";
+                                      return (
+                                        <td
+                                          key={cIdx}
+                                          className={`p-2.5 border border-gray-400 text-black text-sm font-semibold font-bangla ${
+                                            isCurrency
+                                              ? "text-right"
+                                              : "text-left"
+                                          } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"}`}
+                                          style={
+                                            hasCustomBg
+                                              ? { backgroundColor: cellBg }
+                                              : undefined
+                                          }
+                                        >
+                                          {isWinnerCell && isWinnerRow && (
+                                            <span className="inline-block mr-1">
+                                              🏆
+                                            </span>
+                                          )}
+                                          {formatCellValue(
+                                            cell,
+                                            headers[cIdx] || "",
+                                          )}
+                                        </td>
+                                      );
+                                    })}
+                                  </tr>
+                                );
+                              },
+                            )}
+
+                            {/* Sum Totals Row if any sum matches */}
+                            {(securityColIdx !== -1 ||
+                              docFeesColIdx !== -1) && (
+                              <tr className="bg-[#ffffcc] font-bold text-black divide-x divide-gray-400 border-t-2 border-gray-500">
+                                {headers.map((hdr: string, idx: number) => {
+                                  if (idx === 0) {
+                                    const colSpanCount = Math.min(
+                                      securityColIdx !== -1
+                                        ? securityColIdx
+                                        : docFeesColIdx,
+                                      headers.length,
+                                    );
                                     return (
                                       <td
-                                        key={cIdx}
-                                        className={`p-2.5 border border-gray-400 text-black text-sm font-semibold font-bangla ${isCurrency ? "text-right" : "text-left"
-                                          } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"}`}
-                                        style={hasCustomBg ? { backgroundColor: cellBg } : undefined}
+                                        key={idx}
+                                        className="p-2.5 border border-gray-400 text-right text-sm font-extrabold bg-[#ffffcc]"
+                                        colSpan={
+                                          colSpanCount + (!hasSl ? 1 : 0)
+                                        }
                                       >
-                                        {isWinnerCell && isWinnerRow && <span className="inline-block mr-1">🏆</span>}
-                                        {formatCellValue(cell, headers[cIdx] || "")}
+                                        Total Amount BD Tk =
                                       </td>
                                     );
-                                  })}
-                                </tr>
-                              );
-                            })}
-
-                      {/* Sum Totals Row if any sum matches */}
-                      {(securityColIdx !== -1 || docFeesColIdx !== -1) && (
-                        <tr className="bg-[#ffffcc] font-bold text-black divide-x divide-gray-400 border-t-2 border-gray-500">
-                          {headers.map((hdr: string, idx: number) => {
-                            if (idx === 0) {
-                              const colSpanCount = Math.min(
-                                securityColIdx !== -1 ? securityColIdx : docFeesColIdx,
-                                headers.length,
-                              );
-                              return (
-                                <td key={idx} className="p-2.5 border border-gray-400 text-right text-sm font-extrabold bg-[#ffffcc]" colSpan={colSpanCount + (!hasSl ? 1 : 0)}>
-                                  Total Amount BD Tk =
-                                </td>
-                              );
-                            }
+                                  }
                                   const minTotalColIdx = Math.min(
-                                    securityColIdx !== -1 ? securityColIdx : docFeesColIdx,
+                                    securityColIdx !== -1
+                                      ? securityColIdx
+                                      : docFeesColIdx,
                                     headers.length,
                                   );
                                   if (idx < minTotalColIdx) return null;
                                   if (idx === securityColIdx) {
                                     return (
-                                      <td key={idx} className="p-2.5 border border-gray-400 text-sm font-extrabold text-black bg-[#ffffcc] text-right">
+                                      <td
+                                        key={idx}
+                                        className="p-2.5 border border-gray-400 text-sm font-extrabold text-black bg-[#ffffcc] text-right"
+                                      >
                                         {formatMoney(totalSecurity)}
                                       </td>
                                     );
                                   }
                                   if (idx === docFeesColIdx) {
                                     return (
-                                      <td key={idx} className="p-2.5 border border-gray-400 text-sm font-extrabold text-black bg-[#ffffcc] text-right">
+                                      <td
+                                        key={idx}
+                                        className="p-2.5 border border-gray-400 text-sm font-extrabold text-black bg-[#ffffcc] text-right"
+                                      >
                                         {formatMoney(totalDocFees)}
                                       </td>
                                     );
                                   }
-                                  return <td key={idx} className="p-2.5 border border-gray-400 bg-[#ffffcc]"></td>;
+                                  return (
+                                    <td
+                                      key={idx}
+                                      className="p-2.5 border border-gray-400 bg-[#ffffcc]"
+                                    ></td>
+                                  );
                                 })}
                               </tr>
                             )}
 
                             {normalizedRows.length === 0 && (
                               <tr>
-                                <td colSpan={headers.length || 1} className="p-8 text-center text-slate-400 italic">
+                                <td
+                                  colSpan={headers.length || 1}
+                                  className="p-8 text-center text-slate-400 italic"
+                                >
                                   No tender entries available.
                                 </td>
                               </tr>
@@ -1190,26 +1450,37 @@ export default function SingleNoticeClient({
                       {(table.payOrderTo || true) && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 print:mt-3 print:grid-cols-2 font-bangla text-black">
                           {table.payOrderTo && (
-                            <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-emerald-600 border-y border-r border-slate-200/80 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
-                              <span className="flex items-center gap-2 text-sm font-extrabold text-slate-700 uppercase tracking-wider mb-2 print:text-black">
+                            <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-emerald-600 border-y border-r border-slate-200/80 rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+                              <div className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold text-slate-700 uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2 bg-slate-100/80 print:text-black">
                                 <i className="fa-solid fa-building-columns text-emerald-600 print:hidden"></i>
                                 BD Pay Order To :
-                              </span>
-                              <div className="text-black font-semibold text-sm leading-relaxed whitespace-pre-line">
+                              </div>
+                              <div className="footer-card-content p-4 text-black font-semibold text-sm leading-relaxed whitespace-pre-line">
                                 {table.payOrderTo}
                               </div>
                             </div>
                           )}
-                          <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-blue-600 border-y border-r border-slate-200/80 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
-                            <span className="flex items-center gap-2 text-sm font-extrabold text-slate-700 uppercase tracking-wider mb-2 print:text-black">
+                          <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-blue-600 border-y border-r border-slate-200/80 rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+                            <div className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold text-slate-700 uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2 bg-slate-100/80 print:text-black">
                               <i className="fa-solid fa-circle-info text-blue-600 print:hidden"></i>
                               Contact Info / e-Tender Solutions :
-                            </span>
-                            <div className="text-black font-semibold text-sm leading-relaxed">
-                              Engr. Md. Shah Alom B.Sc. Engr.(Civil)<br />
-                              Mobile No: 01711-805086<br />
-                              L M B Market 1st Floor, Pabna.<br />
-                              Web: <a href="https://www.egpbtc.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">www.egpbtc.com</a>
+                            </div>
+                            <div className="footer-card-content p-4 text-black font-semibold text-sm leading-relaxed">
+                              Engr. Md. Shah Alom B.Sc. Engr.(Civil)
+                              <br />
+                              Mobile No: 01711-805086
+                              <br />
+                              L M B Market 1st Floor, Pabna.
+                              <br />
+                              Web:{" "}
+                              <a
+                                href="https://www.egpbtc.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline"
+                              >
+                                www.egpbtc.com
+                              </a>
                             </div>
                           </div>
                         </div>
@@ -1217,8 +1488,14 @@ export default function SingleNoticeClient({
 
                       {/* Red Warning alert below table */}
                       {table.bottomWarning && notice.category !== "OTM" && (
-                        <div className="mt-3 text-red-600 font-extrabold text-sm font-bangla text-left leading-relaxed">
-                          {table.bottomWarning}
+                        <div className="footer-card warning-card bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-red-600 border-y border-r border-slate-200/80 rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden mt-4">
+                          <div className="footer-card-label warning-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold text-red-700 uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2 bg-red-50/80 print:text-red-700">
+                            <i className="fa-solid fa-circle-exclamation text-red-600 print:hidden"></i>
+                            Information :
+                          </div>
+                          <div className="footer-card-content p-4 text-red-600 font-extrabold text-sm leading-relaxed font-bangla">
+                            {table.bottomWarning}
+                          </div>
                         </div>
                       )}
                     </div>

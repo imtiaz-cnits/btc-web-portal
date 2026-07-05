@@ -75,10 +75,12 @@ const formatCellValue = (val: string, hdr: string) => {
     const num = parseFloat(cleanVal);
     // Ensure it's a valid number and only numeric chars
     if (!isNaN(num) && /^\d+(\.\d+)?$/.test(cleanVal)) {
-      if (num >= 10000000) { // 1 Crore
+      if (num >= 10000000) {
+        // 1 Crore
         const crVal = num / 10000000;
         return `${parseFloat(crVal.toFixed(2))} Cr`;
-      } else if (num >= 100000) { // 1 Lakh
+      } else if (num >= 100000) {
+        // 1 Lakh
         const lacVal = num / 100000;
         return `${parseFloat(lacVal.toFixed(2))} Lac`;
       }
@@ -86,7 +88,12 @@ const formatCellValue = (val: string, hdr: string) => {
       if (num % 1 === 0) {
         return num.toLocaleString("en-IN");
       } else {
-        return num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, "");
+        return num
+          .toLocaleString("en-IN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+          .replace(/\.00$/, "");
       }
     }
   }
@@ -259,16 +266,16 @@ export default function SingleNoticeClient({
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-        hour12: true
+        hour12: true,
       };
       const formatter = new Intl.DateTimeFormat("en-GB", formatOptions);
       const parts = formatter.formatToParts(now);
-      const day = parts.find(p => p.type === 'day')?.value;
-      const month = parts.find(p => p.type === 'month')?.value;
-      const year = parts.find(p => p.type === 'year')?.value;
-      let hour = parts.find(p => p.type === 'hour')?.value || "";
-      const minute = parts.find(p => p.type === 'minute')?.value;
-      let dayPeriod = parts.find(p => p.type === 'dayPeriod')?.value || "";
+      const day = parts.find((p) => p.type === "day")?.value;
+      const month = parts.find((p) => p.type === "month")?.value;
+      const year = parts.find((p) => p.type === "year")?.value;
+      let hour = parts.find((p) => p.type === "hour")?.value || "";
+      const minute = parts.find((p) => p.type === "minute")?.value;
+      let dayPeriod = parts.find((p) => p.type === "dayPeriod")?.value || "";
       dayPeriod = dayPeriod.toUpperCase();
 
       return `${day}/${month}/${year}, ${hour}:${minute} ${dayPeriod}`;
@@ -485,15 +492,6 @@ export default function SingleNoticeClient({
           </head>
           <body>
             <div class="print-container">
-              <div class="print-top-header" style="display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important; padding-bottom: 20px !important; font-family: Arial, sans-serif !important; font-size: 8.5pt !important; font-weight: normal !important; color: #555555 !important;">
-                <div style="width: 25% !important;"></div>
-                <div style="width: 50% !important; text-align: center !important; font-size: 8.5pt !important; font-weight: normal !important; color: #555555 !important;">
-                  Salom Egp consultant
-                </div>
-                <div style="width: 25% !important; text-align: right !important; font-size: 8.5pt !important; font-weight: normal !important; color: #555555 !important;">
-                  Print: ${getFormattedPrintDateTime()}
-                </div>
-              </div>
               ${
                 !isLandscape
                   ? `
@@ -536,17 +534,24 @@ export default function SingleNoticeClient({
   };
 
   const formatMoney = (val: number) => {
-    if (val >= 10000000) { // 1 Crore
+    if (val >= 10000000) {
+      // 1 Crore
       const crVal = val / 10000000;
       return `${parseFloat(crVal.toFixed(2))} Cr`;
-    } else if (val >= 100000) { // 1 Lakh
+    } else if (val >= 100000) {
+      // 1 Lakh
       const lacVal = val / 100000;
       return `${parseFloat(lacVal.toFixed(2))} Lac`;
     }
     if (val % 1 === 0) {
       return val.toLocaleString("en-IN");
     } else {
-      return val.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, "");
+      return val
+        .toLocaleString("en-IN", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })
+        .replace(/\.00$/, "");
     }
   };
 
@@ -823,24 +828,22 @@ export default function SingleNoticeClient({
                           </th>
                         )}
                         {headers.map((hdr: string, idx: number) => {
-                          const isDesc = (hdr || "")
-                            .toLowerCase()
-                            .includes("description") ||
-                            (hdr || "")
-                            .toLowerCase()
-                            .includes("works");
+                          const isDesc =
+                            (hdr || "").toLowerCase().includes("description") ||
+                            (hdr || "").toLowerCase().includes("works");
                           const isTender = (hdr || "")
                             .toLowerCase()
                             .replace(/\s/g, "")
                             .includes("tenderid");
-                          const isSl = (hdr || "")
-                            .toLowerCase()
-                            .replace(/\s/g, "")
-                            .includes("slno") || 
+                          const isSl =
                             (hdr || "")
-                            .toLowerCase()
-                            .replace(/\s/g, "")
-                            .includes("sl");
+                              .toLowerCase()
+                              .replace(/\s/g, "")
+                              .includes("slno") ||
+                            (hdr || "")
+                              .toLowerCase()
+                              .replace(/\s/g, "")
+                              .includes("sl");
                           return (
                             <th
                               key={idx}
@@ -904,38 +907,44 @@ export default function SingleNoticeClient({
                               const isCurrency = isCurrencyColumn(
                                 headers[cIdx] || "",
                               );
-                              const isDesc = (headers[cIdx] || "")
-                                .toLowerCase()
-                                .includes("description") ||
+                              const isDesc =
                                 (headers[cIdx] || "")
-                                .toLowerCase()
-                                .includes("works");
+                                  .toLowerCase()
+                                  .includes("description") ||
+                                (headers[cIdx] || "")
+                                  .toLowerCase()
+                                  .includes("works");
                               const isTender = (headers[cIdx] || "")
                                 .toLowerCase()
                                 .replace(/\s/g, "")
                                 .includes("tenderid");
-                              const isSl = (headers[cIdx] || "")
-                                .toLowerCase()
-                                .replace(/\s/g, "")
-                                .includes("slno") || 
+                              const isSl =
                                 (headers[cIdx] || "")
-                                .toLowerCase()
-                                .replace(/\s/g, "")
-                                .includes("sl");
+                                  .toLowerCase()
+                                  .replace(/\s/g, "")
+                                  .includes("slno") ||
+                                (headers[cIdx] || "")
+                                  .toLowerCase()
+                                  .replace(/\s/g, "")
+                                  .includes("sl");
                               const isWinnerCell = cIdx === winnerColIdx;
                               const hasCustomBg =
                                 cellBg &&
                                 cellBg !== "#ffffff" &&
                                 cellBg !== "#fff";
 
-                              const isSellingDateCol = (headers[cIdx] || "")
-                                .toLowerCase()
-                                .includes("selling") ||
+                              const isSellingDateCol =
                                 (headers[cIdx] || "")
-                                .toLowerCase()
-                                .includes("last date");
+                                  .toLowerCase()
+                                  .includes("selling") ||
+                                (headers[cIdx] || "")
+                                  .toLowerCase()
+                                  .includes("last date");
 
-                              const formattedVal = formatCellValue(cell, headers[cIdx] || "");
+                              const formattedVal = formatCellValue(
+                                cell,
+                                headers[cIdx] || "",
+                              );
 
                               return (
                                 <td
@@ -943,8 +952,8 @@ export default function SingleNoticeClient({
                                   className={`p-3 border border-gray-400 text-black text-base font-semibold font-bangla ${
                                     isCurrency ? "text-right" : "text-left"
                                   } ${
-                                    isDesc 
-                                      ? "w-[32%] min-w-[220px] whitespace-normal text-left" 
+                                    isDesc
+                                      ? "w-[32%] min-w-[220px] whitespace-normal text-left"
                                       : isTender || isSl
                                         ? "whitespace-nowrap"
                                         : "whitespace-normal"
@@ -961,15 +970,23 @@ export default function SingleNoticeClient({
                                     </span>
                                   )}
                                   {(() => {
-                                    if (isSellingDateCol && formattedVal && formattedVal !== "N/A") {
+                                    if (
+                                      isSellingDateCol &&
+                                      formattedVal &&
+                                      formattedVal !== "N/A"
+                                    ) {
                                       const parts = formattedVal.split(/\s+/);
                                       const datePart = parts[0];
                                       const timePart = parts.slice(1).join(" ");
                                       if (timePart) {
                                         return (
                                           <div className="flex flex-col text-center">
-                                            <span className="whitespace-nowrap">{datePart}</span>
-                                            <span className="text-[10px] text-gray-500 font-bold mt-0.5 whitespace-nowrap">{timePart}</span>
+                                            <span className="whitespace-nowrap">
+                                              {datePart}
+                                            </span>
+                                            <span className="text-[10px] text-gray-500 font-bold mt-0.5 whitespace-nowrap">
+                                              {timePart}
+                                            </span>
                                           </div>
                                         );
                                       }
@@ -1059,7 +1076,7 @@ export default function SingleNoticeClient({
                 {(table.payOrderTo || true) && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 print:mt-3 print:grid-cols-2 font-bangla text-black">
                     {table.payOrderTo && (
-                      <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-emerald-600 border-y border-r border-slate-200/80 rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+                      <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-emerald-600 border-4 border-r-emerald-600 border-y rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
                         <div className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold text-slate-700 uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2 bg-slate-100/80 print:text-black">
                           <i className="fa-solid fa-building-columns text-emerald-600 print:hidden"></i>
                           BD Pay Order To :
@@ -1069,7 +1086,7 @@ export default function SingleNoticeClient({
                         </div>
                       </div>
                     )}
-                    <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-blue-600 border-y border-r border-slate-200/80 rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+                    <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-blue-600 border-4 border-r-blue-600 border-y rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
                       <div className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold text-slate-700 uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2 bg-slate-100/80 print:text-black">
                         <i className="fa-solid fa-circle-info text-blue-600 print:hidden"></i>
                         Contact Info / e-Tender Solutions :
@@ -1099,7 +1116,7 @@ export default function SingleNoticeClient({
 
                 {/* Red Warning alert below table */}
                 {table.bottomWarning && notice.category !== "OTM" && (
-                  <div className="footer-card warning-card bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-red-600 border-y border-r border-slate-200/80 rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden mt-4">
+                  <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-red-600 border-4 border-r-red-600 border-y rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
                     <div className="footer-card-label warning-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold text-red-700 uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2 bg-red-50/80 print:text-red-700">
                       <i className="fa-solid fa-circle-exclamation text-red-600 print:hidden"></i>
                       Information :

@@ -592,6 +592,107 @@ const DEFAULT_TITLE_OPTIONS = [
   "জনস্বাস্থ্য প্রকৌশল অধিদপ্তর, পাবনা। (DPHE)",
 ];
 
+const DEFAULT_SUBTITLE_OPTIONS = [
+  "Public Works Department, Pabna (PWD)",
+  "Local Government Engineering Department, Pabna (LGED)",
+  "Roads and Highways Department, Pabna (RHD)",
+  "Bangladesh Agricultural Development Corporation, Pabna (BADC)",
+  "Bangladesh Water Development Board, Pabna (BWDB)",
+  "Pabna Pourashava, Pabna",
+  "Education Engineering Department, Pabna (EED)",
+  "Health Engineering Department, Pabna (HED)",
+  "Department of Public Health Engineering, Pabna (DPHE)",
+];
+
+const TITLE_TO_SUBTITLE_MAP: Record<string, string> = {
+  "গণপূর্ত বিভাগ, পাবনা। (PWD)": "Public Works Department, Pabna (PWD)",
+  "স্থানীয় সরকার প্রকৌশল অধিদপ্তর, পাবনা। (LGED)": "Local Government Engineering Department, Pabna (LGED)",
+  "স্থানীয় সরকার প্রকৌশল অধিদপ্তর, পাবনা। (LGED)": "Local Government Engineering Department, Pabna (LGED)",
+  "সড়ক ও জনপথ বিভাগ, পাবনা। (RHD)": "Roads and Highways Department, Pabna (RHD)",
+  "সড়ক ও জনপথ বিভাগ, পাবনা। (RHD)": "Roads and Highways Department, Pabna (RHD)",
+  "বাংলাদেশ কৃষি উন্নয়ন কর্পোরেশন, পাবনা। (BADC)": "Bangladesh Agricultural Development Corporation, Pabna (BADC)",
+  "বাংলাদেশ কৃষি উন্নয়ন কর্পোরেশন, পাবনা। (BADC)": "Bangladesh Agricultural Development Corporation, Pabna (BADC)",
+  "পানি উন্নয়ন বোর্ড, পাবনা। (BWDB)": "Bangladesh Water Development Board, Pabna (BWDB)",
+  "পানি উন্নয়ন বোর্ড, পাবনা। (BWDB)": "Bangladesh Water Development Board, Pabna (BWDB)",
+  "পাবনা পৌরসভা, পাবনা": "Pabna Pourashava, Pabna",
+  "শিক্ষা প্রকৌশল অধিদপ্তর, পাবনা। (EED)": "Education Engineering Department, Pabna (EED)",
+  "স্বাস্থ্য প্রকৌশল অধিদপ্তর, পাবনা। (HED)": "Health Engineering Department, Pabna (HED)",
+  "জনস্বাস্থ্য প্রকৌশল অধিদপ্তর, পাবনা। (DPHE)": "Department of Public Health Engineering, Pabna (DPHE)",
+};
+
+const translateOfficeName = (bangla: string): string => {
+  const normalized = bangla.trim();
+  if (TITLE_TO_SUBTITLE_MAP[normalized]) {
+    return TITLE_TO_SUBTITLE_MAP[normalized];
+  }
+  const spellingNormalized = normalized
+    .replace(/স্থানীয়/g, "স্থানীয")
+    .replace(/উন্নয়ন/g, "উন্নয়ণ")
+    .replace(/সড়ক/g, "সড়ক");
+  for (const [key, val] of Object.entries(TITLE_TO_SUBTITLE_MAP)) {
+    const keyNorm = key
+      .replace(/স্থানীয়/g, "স্থানীয")
+      .replace(/উন্নয়ন/g, "উন্নয়ণ")
+      .replace(/সড়ক/g, "সড়ক");
+    if (keyNorm === spellingNormalized) {
+      return val;
+    }
+  }
+
+  let english = normalized;
+  const placeMap: Record<string, string> = {
+    "পাবনা": "Pabna",
+    "ঢাকা": "Dhaka",
+    "ফরিদপুর": "Faridpur",
+    "বেড়া": "Bera",
+    "চাটমোহর": "Chatmohar",
+    "সুজানগর": "Sujanagar",
+    "ঈশ্বরদী": "Ishwardi",
+    "ভাঙ্গুড়া": "Bhangura",
+    "আটঘরিয়া": "Atgharia",
+    "সাথিয়া": "Santhia",
+    "সাঁথিয়া": "Santhia",
+  };
+  const phraseMap: Record<string, string> = {
+    "গণপূর্ত বিভাগ": "Public Works Department",
+    "স্থানীয় সরকার প্রকৌশল অধিদপ্তর": "Local Government Engineering Department",
+    "স্থানীয় সরকার প্রকৌশল অধিদপ্তর": "Local Government Engineering Department",
+    "সড়ক ও জনপথ বিভাগ": "Roads and Highways Department",
+    "সড়ক ও জনপথ বিভাগ": "Roads and Highways Department",
+    "বাংলাদেশ কৃষি উন্নয়ন কর্পোরেশন": "Bangladesh Agricultural Development Corporation",
+    "বাংলাদেশ কৃষি উন্নয়ন কর্পোরেশন": "Bangladesh Agricultural Development Corporation",
+    "পানি উন্নয়ন বোর্ড": "Bangladesh Water Development Board",
+    "পানি উন্নয়ন বোর্ড": "Bangladesh Water Development Board",
+    "শিক্ষা প্রকৌশল অধিদপ্তর": "Education Engineering Department",
+    "স্বাস্থ্য প্রকৌশল অধিদপ্তর": "Health Engineering Department",
+    "জনস্বাস্থ্য প্রকৌশল অধিদপ্তর": "Department of Public Health Engineering",
+  };
+
+  for (const [bnPhrase, enPhrase] of Object.entries(phraseMap)) {
+    if (english.includes(bnPhrase)) {
+      english = english.replace(bnPhrase, enPhrase);
+    }
+  }
+  for (const [bnPlace, enPlace] of Object.entries(placeMap)) {
+    if (english.includes(bnPlace)) {
+      english = english.replace(bnPlace, enPlace);
+    }
+  }
+
+  english = english
+    .replace(/পৌরসভা/g, "Pourashava")
+    .replace(/বিভাগ/g, "Department")
+    .replace(/অধিদপ্তর/g, "Department")
+    .replace(/অধিদপ্ততর/g, "Department")
+    .replace(/বোর্ড/g, "Board")
+    .replace(/কর্পোরেশন/g, "Corporation")
+    .replace(/।/g, "")
+    .trim();
+
+  english = english.replace(/\s+/g, " ");
+  return english;
+};
+
 const DEFAULT_WARNING_OPTIONS = [
   "ব্যাংক স্টেটমেন্ট অথবা ক্রেডিট কমিটমেন্ট দিতে হবে।",
   "শুধুমাত্র পাবনা জেলার লাইসেন্সধারী ঠিকাদারগণ অংশগ্রহণ করতে পারবেন।",
@@ -621,6 +722,30 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
+  // Subtitle custom dropdown states
+  const [subTitleOptions, setSubTitleOptions] = useState<string[]>([]);
+  const [newSubTitleInput, setNewSubTitleInput] = useState("");
+  const [activeSubTitleDropdown, setActiveSubTitleDropdown] = useState<number | null>(null);
+
+  const handleAddSubTitleOption = (val: string) => {
+    const trimmed = val.trim();
+    if (!trimmed) return;
+    if (subTitleOptions.includes(trimmed)) return;
+    const updated = [trimmed, ...subTitleOptions];
+    setSubTitleOptions(updated);
+    localStorage.setItem("btc_notice_subtitle_options", JSON.stringify(updated));
+  };
+
+  const handleDeleteSubTitleOption = (
+    e: React.MouseEvent,
+    optionToDelete: string,
+  ) => {
+    e.stopPropagation();
+    const updated = subTitleOptions.filter((o) => o !== optionToDelete);
+    setSubTitleOptions(updated);
+    localStorage.setItem("btc_notice_subtitle_options", JSON.stringify(updated));
+  };
+
   const handleAddTitleOption = (val: string) => {
     const trimmed = val.trim();
     if (!trimmed) return;
@@ -628,6 +753,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     const updated = [trimmed, ...titleOptions];
     setTitleOptions(updated);
     localStorage.setItem("btc_notice_title_options", JSON.stringify(updated));
+
+    // Auto translate and add subtitle option
+    const enTranslation = translateOfficeName(trimmed);
+    handleAddSubTitleOption(enTranslation);
   };
 
   const handleDeleteTitleOption = (
@@ -642,11 +771,11 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
   // Sync title options and click outside listeners
   useEffect(() => {
-    const saved = localStorage.getItem("btc_notice_title_options");
+    const savedTitle = localStorage.getItem("btc_notice_title_options");
     let initialOptions = DEFAULT_TITLE_OPTIONS;
-    if (saved) {
+    if (savedTitle) {
       try {
-        initialOptions = JSON.parse(saved);
+        initialOptions = JSON.parse(savedTitle);
       } catch (e) {}
     }
 
@@ -659,6 +788,30 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     }
 
     setTitleOptions(initialOptions);
+
+    // Sync subTitle options
+    const savedSub = localStorage.getItem("btc_notice_subtitle_options");
+    let initialSubOptions = DEFAULT_SUBTITLE_OPTIONS;
+    if (savedSub) {
+      try {
+        initialSubOptions = JSON.parse(savedSub);
+      } catch (e) {}
+    }
+
+    if (notice?.tableData) {
+      try {
+        const parsed = JSON.parse(notice.tableData);
+        if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
+          parsed.tables.forEach((table: any) => {
+            if (table.subTitle && !initialSubOptions.includes(table.subTitle)) {
+              initialSubOptions = [...initialSubOptions, table.subTitle];
+            }
+          });
+        }
+      } catch (err) {}
+    }
+
+    setSubTitleOptions(initialSubOptions);
 
     // Fetch dynamic counts grouped by title
     async function fetchCounts() {
@@ -834,6 +987,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       }
       if (!target.closest(".location-dropdown-container")) {
         setActiveLocationDropdown(null);
+      }
+      if (!target.closest(".subtitle-dropdown-container")) {
+        setActiveSubTitleDropdown(null);
       }
     };
     document.addEventListener("mousedown", handleOutsideClick);
@@ -2148,12 +2304,13 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                       if (newOptionInput.trim()) {
                         handleAddTitleOption(newOptionInput.trim());
                         setTitle(newOptionInput.trim());
+                        const enTranslation = translateOfficeName(newOptionInput.trim());
                         setTablesList((prev) =>
-                          prev.map((t, idx) =>
-                            idx === 0
-                              ? { ...t, officeName: newOptionInput.trim() }
-                              : t,
-                          ),
+                          prev.map((t) => ({
+                            ...t,
+                            officeName: newOptionInput.trim(),
+                            subTitle: enTranslation,
+                          })),
                         );
                         setNewOptionInput("");
                         setShowTitleDropdown(false);
@@ -2169,12 +2326,13 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                     if (newOptionInput.trim()) {
                       handleAddTitleOption(newOptionInput.trim());
                       setTitle(newOptionInput.trim());
+                      const enTranslation = translateOfficeName(newOptionInput.trim());
                       setTablesList((prev) =>
-                        prev.map((t, idx) =>
-                          idx === 0
-                            ? { ...t, officeName: newOptionInput.trim() }
-                            : t,
-                        ),
+                        prev.map((t) => ({
+                          ...t,
+                          officeName: newOptionInput.trim(),
+                          subTitle: enTranslation,
+                        })),
                       );
                       setNewOptionInput("");
                       setShowTitleDropdown(false);
@@ -2197,10 +2355,13 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                       key={opt}
                       onClick={() => {
                         setTitle(opt);
+                        const enTranslation = translateOfficeName(opt);
                         setTablesList((prev) =>
-                          prev.map((t, idx) =>
-                            idx === 0 ? { ...t, officeName: opt } : t,
-                          ),
+                          prev.map((t) => ({
+                            ...t,
+                            officeName: opt,
+                            subTitle: enTranslation,
+                          })),
                         );
                         setShowTitleDropdown(false);
                       }}
@@ -2617,20 +2778,113 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                       />
                     </div>
 
-                    <div className="space-y-1">
+                    <div className="space-y-1 relative subtitle-dropdown-container">
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
                         <Info className="w-3.5 h-3.5 text-green-600" /> Notice
                         Sub-Title (Optional)
                       </label>
-                      <input
-                        type="text"
-                        value={table.subTitle || ""}
-                        onChange={(e) =>
-                          handlePwdFieldChange(tIdx, "subTitle", e.target.value)
-                        }
-                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 outline-none text-xs font-bold focus:border-[var(--primary-color)] transition"
-                        placeholder="যেমন: BADC POLY SEED (OTM Mathod)"
-                      />
+                      <div className="relative">
+                        <div
+                          onClick={() =>
+                            setActiveSubTitleDropdown(
+                              activeSubTitleDropdown === tIdx ? null : tIdx
+                            )
+                          }
+                          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 outline-none text-xs font-bold focus:border-[var(--primary-color)] transition cursor-pointer flex justify-between items-center"
+                        >
+                          <span className="truncate">
+                            {table.subTitle || "যেমন: BADC POLY SEED (OTM Method)"}
+                          </span>
+                          <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1" />
+                        </div>
+                      </div>
+
+                      {activeSubTitleDropdown === tIdx && (
+                        <div className="absolute top-[100%] left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-55 overflow-hidden divide-y divide-slate-100 animate-scale-in">
+                          {/* Search or Add Input inside the Subtitle Dropdown */}
+                          <div
+                            className="p-2 bg-slate-50 flex gap-2"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <input
+                              type="text"
+                              value={newSubTitleInput}
+                              onChange={(e) => setNewSubTitleInput(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  if (newSubTitleInput.trim()) {
+                                    handleAddSubTitleOption(newSubTitleInput.trim());
+                                    handlePwdFieldChange(
+                                      tIdx,
+                                      "subTitle",
+                                      newSubTitleInput.trim()
+                                    );
+                                    setNewSubTitleInput("");
+                                    setActiveSubTitleDropdown(null);
+                                  }
+                                }
+                              }}
+                              placeholder="Type to search or add subtitle..."
+                              className="flex-1 bg-white border border-slate-250 rounded-lg px-2 py-1 text-[11px] font-semibold focus:border-[var(--primary-color)] outline-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (newSubTitleInput.trim()) {
+                                  handleAddSubTitleOption(newSubTitleInput.trim());
+                                  handlePwdFieldChange(
+                                    tIdx,
+                                    "subTitle",
+                                    newSubTitleInput.trim()
+                                  );
+                                  setNewSubTitleInput("");
+                                  setActiveSubTitleDropdown(null);
+                                }
+                              }}
+                              className="bg-green-600 hover:bg-green-700 text-white font-bold px-2.5 py-1 rounded-lg text-[11px] transition border-0 cursor-pointer whitespace-nowrap active:scale-95"
+                            >
+                              Add
+                            </button>
+                          </div>
+
+                          {/* Options List */}
+                          <div className="max-h-[160px] overflow-y-auto divide-y divide-slate-50">
+                            {subTitleOptions
+                              .filter((opt) =>
+                                opt.toLowerCase().includes(newSubTitleInput.toLowerCase())
+                              )
+                              .map((opt) => (
+                                <div
+                                  key={opt}
+                                  onClick={() => {
+                                    handlePwdFieldChange(tIdx, "subTitle", opt);
+                                    setActiveSubTitleDropdown(null);
+                                  }}
+                                  className="px-3 py-2 text-[11px] font-bold text-slate-700 hover:bg-green-50 hover:text-green-800 transition cursor-pointer flex items-center justify-between group"
+                                >
+                                  <span className="truncate">{opt}</span>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => handleDeleteSubTitleOption(e, opt)}
+                                    className="text-slate-400 hover:text-red-650 p-1 rounded-md border-0 bg-transparent transition opacity-100 md:opacity-0 group-hover:opacity-100 cursor-pointer flex items-center justify-center hover:bg-red-50"
+                                    title="Delete Option"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              ))}
+
+                            {subTitleOptions.filter((opt) =>
+                              opt.toLowerCase().includes(newSubTitleInput.toLowerCase())
+                            ).length === 0 && (
+                              <div className="px-3 py-2 text-[11px] text-slate-400 font-semibold italic text-center">
+                                No matching options. Type above and click Add!
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Header Background Color selector */}

@@ -7,6 +7,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import fs from "fs/promises";
 import path from "path";
+import { getEndOfDayDhaka, isDateBeforeDhaka } from "@/lib/date";
 
 export async function createNotice(formData: FormData) {
   const session = await getServerSession(authOptions);
@@ -31,9 +32,7 @@ export async function createNotice(formData: FormData) {
   }
 
   if (lastDate && lotteryDate) {
-    const lastDateObj = new Date(lastDate);
-    const lotteryDateObj = new Date(lotteryDate);
-    if (!isNaN(lastDateObj.getTime()) && !isNaN(lotteryDateObj.getTime()) && lotteryDateObj < lastDateObj) {
+    if (isDateBeforeDhaka(lotteryDate, lastDate)) {
       return { success: false, message: "Lottery Date cannot be before the Last Date of submission." };
     }
   }
@@ -55,7 +54,7 @@ export async function createNotice(formData: FormData) {
         category,
         status,
         publishDate: publishDate ? new Date(publishDate) : null,
-        lastDate: lastDate ? new Date(lastDate) : null,
+        lastDate: lastDate ? getEndOfDayDhaka(lastDate) : null,
         lotteryDate: lotteryDate ? new Date(lotteryDate) : null,
         authorId,
         filePath: filePath || null,
@@ -94,9 +93,7 @@ export async function updateNotice(id: string, formData: FormData) {
   }
 
   if (lastDate && lotteryDate) {
-    const lastDateObj = new Date(lastDate);
-    const lotteryDateObj = new Date(lotteryDate);
-    if (!isNaN(lastDateObj.getTime()) && !isNaN(lotteryDateObj.getTime()) && lotteryDateObj < lastDateObj) {
+    if (isDateBeforeDhaka(lotteryDate, lastDate)) {
       return { success: false, message: "Lottery Date cannot be before the Last Date of submission." };
     }
   }
@@ -126,7 +123,7 @@ export async function updateNotice(id: string, formData: FormData) {
         category,
         status,
         publishDate: publishDate ? new Date(publishDate) : null,
-        lastDate: lastDate ? new Date(lastDate) : null,
+        lastDate: lastDate ? getEndOfDayDhaka(lastDate) : null,
         lotteryDate: lotteryDate ? new Date(lotteryDate) : null,
         filePath: filePath || null,
       },

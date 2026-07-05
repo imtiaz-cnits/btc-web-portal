@@ -51,14 +51,19 @@ const formatCellValue = (val: string, hdr: string) => {
     const cleanVal = str.replace(/,/g, "").trim();
     const num = parseFloat(cleanVal);
     if (!isNaN(num) && /^\d+(\.\d+)?$/.test(cleanVal)) {
-      if (cleanVal.includes(".")) {
-        const [integerPart, decimalPart] = cleanVal.split(".");
-        const parsedInt = parseFloat(integerPart);
-        if (!isNaN(parsedInt)) {
-          return `${parsedInt.toLocaleString("en-IN")}.${decimalPart}`;
-        }
+      if (num >= 10000000) { // 1 Crore
+        const crVal = num / 10000000;
+        return `${parseFloat(crVal.toFixed(2))} Cr`;
+      } else if (num >= 100000) { // 1 Lakh
+        const lacVal = num / 100000;
+        return `${parseFloat(lacVal.toFixed(2))} Lac`;
       }
-      return num.toLocaleString("en-IN");
+
+      if (num % 1 === 0) {
+        return num.toLocaleString("en-IN");
+      } else {
+        return num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, "");
+      }
     }
   }
   return str;
@@ -354,26 +359,26 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices, category }) => {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-shade-1 border-b border-ac-2">
-              <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-16">
+              <th className="py-3 px-4 font-bold text-text-1 uppercase text-base w-16">
                 #
               </th>
-              <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm">
+              <th className="py-3 px-4 font-bold text-text-1 uppercase text-base">
                 Procuring Entity / Title
               </th>
               {showPublishDate && (
-                <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-40 text-center">
+                <th className="py-3 px-4 font-bold text-text-1 uppercase text-base w-40 text-center">
                   Publish Date
                 </th>
               )}
-              <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-40 text-center">
+              <th className="py-3 px-4 font-bold text-text-1 uppercase text-base w-40 text-center">
                 Last Date
               </th>
               {isLotteryResult && (
-                <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-40 text-center">
+                <th className="py-3 px-4 font-bold text-text-1 uppercase text-base w-40 text-center">
                   Lottery Date
                 </th>
               )}
-              <th className="py-3 px-4 font-bold text-text-1 uppercase text-sm w-48 text-center">
+              <th className="py-3 px-4 font-bold text-text-1 uppercase text-base w-48 text-center">
                 Action
               </th>
             </tr>
@@ -385,7 +390,7 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices, category }) => {
                   key={notice.id}
                   className="border-b border-ac-2 hover:bg-slate-50 transition-colors single_notice"
                 >
-                  <td className="py-2.5 px-4 text-text-2 font-medium">{index + 1}</td>
+                  <td className="py-2.5 px-4 text-text-2 font-medium text-base">{index + 1}</td>
                   <td className="py-2.5 px-4">
                     <h4 className="text-text-1 font-semibold leading-tight font-bangla text-base lg:text-lg">
                       {notice.title}
@@ -393,19 +398,19 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices, category }) => {
                   </td>
                   {showPublishDate && (
                     <td className="py-2.5 px-4 text-center">
-                      <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-text-2 text-sm font-bold">
+                      <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-text-2 text-base font-bold">
                         {notice.publishDate || "N/A"}
                       </div>
                     </td>
                   )}
                   <td className="py-2.5 px-4 text-center">
-                    <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-text-2 text-sm font-bold">
+                    <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-text-2 text-base font-bold">
                       {notice.date}
                     </div>
                   </td>
                   {isLotteryResult && (
                     <td className="py-2.5 px-4 text-center">
-                      <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-emerald-600 text-sm font-bold bg-green-50/50">
+                      <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-emerald-600 text-base font-bold bg-green-50/50">
                         {notice.lotteryDate || "N/A"}
                       </div>
                     </td>

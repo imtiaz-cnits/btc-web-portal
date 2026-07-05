@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { deleteNotice, saveNoticeWinners } from "@/app/actions/notices";
+import { isNoticeExpired } from "@/lib/date";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
 import DeleteButton from "@/components/dashboard/DeleteButton";
@@ -70,14 +71,19 @@ const formatCellValue = (val: string, hdr: string) => {
     const cleanVal = str.replace(/,/g, "").trim();
     const num = parseFloat(cleanVal);
     if (!isNaN(num) && /^\d+(\.\d+)?$/.test(cleanVal)) {
-      if (cleanVal.includes(".")) {
-        const [integerPart, decimalPart] = cleanVal.split(".");
-        const parsedInt = parseFloat(integerPart);
-        if (!isNaN(parsedInt)) {
-          return `${parsedInt.toLocaleString("en-IN")}.${decimalPart}`;
-        }
+      if (num >= 10000000) { // 1 Crore
+        const crVal = num / 10000000;
+        return `${parseFloat(crVal.toFixed(2))} Cr`;
+      } else if (num >= 100000) { // 1 Lakh
+        const lacVal = num / 100000;
+        return `${parseFloat(lacVal.toFixed(2))} Lac`;
       }
-      return num.toLocaleString("en-IN");
+
+      if (num % 1 === 0) {
+        return num.toLocaleString("en-IN");
+      } else {
+        return num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, "");
+      }
     }
   }
   return str;
@@ -125,7 +131,18 @@ function TableDataPreview({ tableData }: { tableData: string }) {
             };
 
             const formatMoney = (val: number) => {
-              return val.toLocaleString("en-IN");
+              if (val >= 10000000) { // 1 Crore
+                const crVal = val / 10000000;
+                return `${parseFloat(crVal.toFixed(2))} Cr`;
+              } else if (val >= 100000) { // 1 Lakh
+                const lacVal = val / 100000;
+                return `${parseFloat(lacVal.toFixed(2))} Lac`;
+              }
+              if (val % 1 === 0) {
+                return val.toLocaleString("en-IN");
+              } else {
+                return val.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, "");
+              }
             };
 
             const totalSecurity =
@@ -511,15 +528,30 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
     if (!notice.lastDate) return "N/A";
     const d = new Date(notice.lastDate);
     if (isNaN(d.getTime())) return "N/A";
-    const dateStr = `${String(d.getDate()).padStart(2, "0")}-${String(d.getMonth() + 1).padStart(2, "0")}-${d.getFullYear()}`;
-    const hasTime = d.getHours() !== 0 || d.getMinutes() !== 0;
+    
+    // Format date in Asia/Dhaka
+    const dateStr = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Dhaka",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    }).format(d).replace(/\//g, "-");
+
+    // Check if it's the end of day (23:59:59.999 Dhaka time)
+    // Dhaka is UTC+6, so 23:59:59.999 Dhaka is 17:59:59.999 UTC.
+    const isDhakaEndOfDay = d.getUTCHours() === 17 && d.getUTCMinutes() === 59;
+    const isDhakaMidnight = d.getUTCHours() === 18 && d.getUTCMinutes() === 0;
+
+    const hasTime = !isDhakaEndOfDay && !isDhakaMidnight && (d.getUTCHours() !== 18 || d.getUTCMinutes() !== 0);
+
     if (hasTime) {
-      let hrs = d.getHours();
-      const mins = String(d.getMinutes()).padStart(2, "0");
-      const ampm = hrs >= 12 ? "PM" : "AM";
-      hrs = hrs % 12;
-      hrs = hrs ? hrs : 12;
-      return `${dateStr} ${String(hrs).padStart(2, "0")}:${mins} ${ampm}`;
+      const timeStr = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Dhaka",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      }).format(d);
+      return `${dateStr} ${timeStr}`;
     }
     return dateStr;
   };
@@ -645,16 +677,28 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
   const formatPublishDate = (notice: Notice) => {
     if (!notice.publishDate) return "N/A";
     const d = new Date(notice.publishDate);
-    const dateStr = `${String(d.getDate()).padStart(2, "0")}-${String(d.getMonth() + 1).padStart(2, "0")}-${d.getFullYear()}`;
-    const isScheduled = notice.status === "active" && new Date(notice.publishDate) > nowDate;
-    const hasTime = d.getHours() !== 0 || d.getMinutes() !== 0;
+    if (isNaN(d.getTime())) return "N/A";
+
+    // Format date in Asia/Dhaka
+    const dateStr = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Dhaka",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    }).format(d).replace(/\//g, "-");
+
+    const isScheduled = notice.status === "active" && d > nowDate;
+    const isDhakaMidnight = d.getUTCHours() === 18 && d.getUTCMinutes() === 0;
+    const hasTime = !isDhakaMidnight && (d.getUTCHours() !== 18 || d.getUTCMinutes() !== 0);
+
     if (isScheduled || hasTime) {
-      let hrs = d.getHours();
-      const mins = String(d.getMinutes()).padStart(2, "0");
-      const ampm = hrs >= 12 ? "PM" : "AM";
-      hrs = hrs % 12;
-      hrs = hrs ? hrs : 12;
-      return `${dateStr} ${String(hrs).padStart(2, "0")}:${mins} ${ampm}`;
+      const timeStr = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Dhaka",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      }).format(d);
+      return `${dateStr} ${timeStr}`;
     }
     return dateStr;
   };
@@ -674,7 +718,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
       return { label: "Winner Publish", cls: "bg-[#fffbeb] text-[#b45309] border border-[#fde68a]" };
     }
 
-    const isPending = notice.lastDate && new Date(notice.lastDate) < nowDate;
+    const isPending = notice.lastDate && isNoticeExpired(notice.lastDate, nowDate);
     if (isPending) {
       return { label: "Pending", cls: "bg-purple-50 text-purple-600 border border-purple-100" };
     }
@@ -809,7 +853,12 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                         <CheckCircle2 className="w-3 h-3 shrink-0 text-emerald-600" />
                         <span>Lottery: {(() => {
                           const d = new Date(notice.lotteryDate);
-                          return `${String(d.getDate()).padStart(2, "0")}-${String(d.getMonth() + 1).padStart(2, "0")}-${d.getFullYear()}`;
+                          return new Intl.DateTimeFormat("en-GB", {
+                            timeZone: "Asia/Dhaka",
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric"
+                          }).format(d).replace(/\//g, "-");
                         })()}</span>
                       </div>
                     )}
@@ -923,10 +972,15 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                   {quickViewNotice.lotteryDate && (
                     <span className="flex items-center gap-1 text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md font-extrabold uppercase text-[10px]">
                       <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                      Lottery: {(() => {
-                        const d = new Date(quickViewNotice.lotteryDate);
-                        return `${String(d.getDate()).padStart(2, "0")}-${String(d.getMonth() + 1).padStart(2, "0")}-${d.getFullYear()}`;
-                      })()}
+                       Lottery: {(() => {
+                         const d = new Date(quickViewNotice.lotteryDate);
+                         return new Intl.DateTimeFormat("en-GB", {
+                           timeZone: "Asia/Dhaka",
+                           day: "2-digit",
+                           month: "2-digit",
+                           year: "numeric"
+                         }).format(d).replace(/\//g, "-");
+                       })()}
                     </span>
                   )}
                 </div>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getNotices } from "@/app/actions/notices";
+import { formatDateDhaka, isNoticeExpired } from "@/lib/date";
 
 export const revalidate = 0; // Live data on every load, prevents build-time database fetch failures
 
@@ -8,7 +9,7 @@ export default async function PublicNoticesPage() {
   const activeNotices = notices.filter(n => 
     n.status === 'active' && 
     (!n.publishDate || new Date(n.publishDate) <= new Date()) &&
-    (n.category === 'LOTTERY_RESULT' || !n.lastDate || new Date(n.lastDate) >= new Date())
+    (n.category === 'LOTTERY_RESULT' || !n.lastDate || !isNoticeExpired(n.lastDate))
   );
 
   return (
@@ -32,10 +33,7 @@ export default async function PublicNoticesPage() {
                       {notice.category}
                     </span>
                     <span className="text-gray-400 text-sm">
-                      Published: {notice.publishDate ? (() => {
-                        const d = new Date(notice.publishDate);
-                        return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
-                      })() : 'N/A'}
+                      Published: {notice.publishDate ? formatDateDhaka(notice.publishDate) : 'N/A'}
                     </span>
                   </div>
                   <h2 className="text-xl font-bold text-gray-800 group-hover:text-[var(--primary-color)] transition">

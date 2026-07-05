@@ -861,18 +861,44 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     return isoStr;
   };
 
-  const formatIsoToDmyHms = (dateObj: Date) => {
-    if (!dateObj || isNaN(dateObj.getTime())) return "";
-    const d = String(dateObj.getDate()).padStart(2, "0");
-    const m = String(dateObj.getMonth() + 1).padStart(2, "0");
-    const y = dateObj.getFullYear();
-    let hours = dateObj.getHours();
-    const minutes = String(dateObj.getMinutes()).padStart(2, "0");
-    const ampm = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12;
-    hours = hours ? hours : 12; // 0 should be 12
-    const h = String(hours).padStart(2, "0");
-    return `${d}-${m}-${y} ${h}:${minutes} ${ampm}`;
+  const formatIsoToDmyHms = (dateValue: any) => {
+    if (!dateValue) return "";
+    const dateObj = new Date(dateValue);
+    if (isNaN(dateObj.getTime())) return "";
+
+    try {
+      // Date in Asia/Dhaka
+      const dateParts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Dhaka",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).format(dateObj).split("-"); // [YYYY, MM, DD]
+
+      // Time in Asia/Dhaka
+      const timeParts = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Dhaka",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      }).format(dateObj).split(" "); // e.g. ["10:30", "AM"]
+
+      const dateStr = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+      const timeStr = timeParts.join(" ");
+      return `${dateStr} ${timeStr}`;
+    } catch (e) {
+      // Fallback to local browser formatting
+      const d = String(dateObj.getDate()).padStart(2, "0");
+      const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const y = dateObj.getFullYear();
+      let hours = dateObj.getHours();
+      const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+      const ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      const h = String(hours).padStart(2, "0");
+      return `${d}-${m}-${y} ${h}:${minutes} ${ampm}`;
+    }
   };
 
   const formatPublishDateForState = (dateValue: any) => {
@@ -880,19 +906,47 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     const dateObj = new Date(dateValue);
     if (isNaN(dateObj.getTime())) return "";
 
-    // If it has a time component (not exactly midnight local time) OR if it is in the future
+    // Check time in Dhaka timezone
+    let dhakaHours = 0;
+    let dhakaMinutes = 0;
+    try {
+      const timeParts = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Dhaka",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).format(dateObj).split(":");
+      dhakaHours = parseInt(timeParts[0]);
+      dhakaMinutes = parseInt(timeParts[1]);
+    } catch (e) {
+      // Fallback to local time if Intl fails
+      dhakaHours = dateObj.getHours();
+      dhakaMinutes = dateObj.getMinutes();
+    }
+
+    const hasTime = !(dhakaHours === 0 && dhakaMinutes === 0) && !(dhakaHours === 23 && dhakaMinutes === 59);
     const isFuture = dateObj > new Date();
-    const hasTime = dateObj.getHours() !== 0 || dateObj.getMinutes() !== 0;
 
     if (isFuture || hasTime) {
       return formatIsoToDmyHms(dateObj);
     }
 
-    // Otherwise, standard DD-MM-YYYY
-    const d = String(dateObj.getDate()).padStart(2, "0");
-    const m = String(dateObj.getMonth() + 1).padStart(2, "0");
-    const y = dateObj.getFullYear();
-    return `${d}-${m}-${y}`;
+    // Otherwise, standard DD-MM-YYYY in Asia/Dhaka timezone
+    try {
+      const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Dhaka",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).format(dateObj).split("-");
+      // parts is [YYYY, MM, DD]
+      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    } catch (e) {
+      const d = String(dateObj.getDate()).padStart(2, "0");
+      const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const y = dateObj.getFullYear();
+      return `${d}-${m}-${y}`;
+    }
   };
 
   const parseDateTimeDmyToDate = (str: string): Date | null => {
@@ -1909,12 +1963,18 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       }
 
       // Check if Lottery Date is before Last Date of Submission
-      if (lastDateObj && lotteryDateObj && lotteryDateObj < lastDateObj) {
-        setErrorMessage(
-          "Lottery Date cannot be before the Last Date of submission.",
-        );
-        setLoading(false);
-        return;
+      if (lastDateObj && lotteryDateObj) {
+        // Compare date strings (YYYY-MM-DD format) in local time
+        const lastDateDateStr = `${lastDateObj.getFullYear()}-${String(lastDateObj.getMonth() + 1).padStart(2, "0")}-${String(lastDateObj.getDate()).padStart(2, "0")}`;
+        const lotteryDateDateStr = `${lotteryDateObj.getFullYear()}-${String(lotteryDateObj.getMonth() + 1).padStart(2, "0")}-${String(lotteryDateObj.getDate()).padStart(2, "0")}`;
+        
+        if (lotteryDateDateStr < lastDateDateStr) {
+          setErrorMessage(
+            "Lottery Date cannot be before the Last Date of submission.",
+          );
+          setLoading(false);
+          return;
+        }
       }
 
       // Add additional attributes manually

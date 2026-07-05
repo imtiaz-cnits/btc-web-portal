@@ -75,14 +75,19 @@ const formatCellValue = (val: string, hdr: string) => {
     const num = parseFloat(cleanVal);
     // Ensure it's a valid number and only numeric chars
     if (!isNaN(num) && /^\d+(\.\d+)?$/.test(cleanVal)) {
-      if (cleanVal.includes(".")) {
-        const [integerPart, decimalPart] = cleanVal.split(".");
-        const parsedInt = parseFloat(integerPart);
-        if (!isNaN(parsedInt)) {
-          return `${parsedInt.toLocaleString("en-IN")}.${decimalPart}`;
-        }
+      if (num >= 10000000) { // 1 Crore
+        const crVal = num / 10000000;
+        return `${parseFloat(crVal.toFixed(2))} Cr`;
+      } else if (num >= 100000) { // 1 Lakh
+        const lacVal = num / 100000;
+        return `${parseFloat(lacVal.toFixed(2))} Lac`;
       }
-      return num.toLocaleString("en-IN");
+
+      if (num % 1 === 0) {
+        return num.toLocaleString("en-IN");
+      } else {
+        return num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, "");
+      }
     }
   }
   return formatDisplayDate(str);
@@ -245,12 +250,38 @@ export default function SingleNoticeClient({
       return;
     }
 
+    const getFormattedPrintDateTime = () => {
+      const now = new Date();
+      const formatOptions: Intl.DateTimeFormatOptions = {
+        timeZone: "Asia/Dhaka",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      };
+      const formatter = new Intl.DateTimeFormat("en-GB", formatOptions);
+      const parts = formatter.formatToParts(now);
+      const day = parts.find(p => p.type === 'day')?.value;
+      const month = parts.find(p => p.type === 'month')?.value;
+      const year = parts.find(p => p.type === 'year')?.value;
+      let hour = parts.find(p => p.type === 'hour')?.value || "";
+      const minute = parts.find(p => p.type === 'minute')?.value;
+      let dayPeriod = parts.find(p => p.type === 'dayPeriod')?.value || "";
+      dayPeriod = dayPeriod.toUpperCase();
+
+      return `${day}/${month}/${year}, ${hour}:${minute} ${dayPeriod}`;
+    };
+
     // Restore original DOM replacement logic for standard web tables/text as requested by the user
     // This keeps the original styles, colors, margins, fonts, and print layouts exactly the same!
     const isLandscape = parsedTables.length > 0;
     const printContents = printAreaRef.current?.innerHTML;
     if (printContents) {
       const originalContents = document.body.innerHTML;
+      const originalTitle = document.title;
+      document.title = "Salom Egp consultant";
       document.body.innerHTML = `
         <html>
           <head>
@@ -261,7 +292,7 @@ export default function SingleNoticeClient({
                 margin: 0 !important;
               }
               body {
-                padding: 5mm 5mm 5mm 5mm !important;
+                padding: 6mm 8mm 6mm 8mm !important;
                 margin: 0;
                 font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
                 background-color: white !important;
@@ -347,13 +378,14 @@ export default function SingleNoticeClient({
                 padding: 4px 6px !important;
                 text-align: left !important;
                 font-size: 7.2pt !important;
-                white-space: normal !important;
-                word-break: break-word !important;
               }
               td {
                 color: #000000 !important;
               }
-              th.whitespace-nowrap, td.whitespace-nowrap {
+              th.whitespace-nowrap, td.whitespace-nowrap, .whitespace-nowrap {
+                white-space: nowrap !important;
+              }
+              th.whitespace-normal, td.whitespace-normal, .whitespace-normal {
                 white-space: normal !important;
               }
               th.text-right, td.text-right {
@@ -432,13 +464,13 @@ export default function SingleNoticeClient({
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                opacity: 0.2 !important;
+                opacity: 0.25 !important;
                 z-index: 0 !important;
                 pointer-events: none !important;
               }
               img.watermark-img {
-                width: 320px !important;
-                max-width: 320px !important;
+                width: 480px !important;
+                max-width: 480px !important;
                 height: auto !important;
                 display: block !important;
                 margin: 0 auto !important;
@@ -453,6 +485,15 @@ export default function SingleNoticeClient({
           </head>
           <body>
             <div class="print-container">
+              <div class="print-top-header" style="display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important; border-bottom: 1.5px solid #1b4332 !important; padding-bottom: 5px !important; margin-bottom: 15px !important; font-family: Arial, sans-serif !important;">
+                <div style="width: 25% !important;"></div>
+                <div style="width: 50% !important; text-align: center !important; font-size: 11pt !important; font-weight: 800 !important; color: #000000 !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; margin: 0 auto !important; display: block !important;">
+                  Salom Egp consultant
+                </div>
+                <div style="width: 25% !important; text-align: right !important; font-size: 8.5pt !important; font-weight: 700 !important; color: #000000 !important; font-family: sans-serif !important;">
+                  Print: ${getFormattedPrintDateTime()}
+                </div>
+              </div>
               ${
                 !isLandscape
                   ? `
@@ -477,6 +518,7 @@ export default function SingleNoticeClient({
       setTimeout(() => {
         window.print();
         document.body.innerHTML = originalContents;
+        document.title = originalTitle;
 
         // Dynamic reload callback when clicking back to bypass standard React router removeChild crash
         window.addEventListener("popstate", () => {
@@ -494,7 +536,18 @@ export default function SingleNoticeClient({
   };
 
   const formatMoney = (val: number) => {
-    return val.toLocaleString("en-IN");
+    if (val >= 10000000) { // 1 Crore
+      const crVal = val / 10000000;
+      return `${parseFloat(crVal.toFixed(2))} Cr`;
+    } else if (val >= 100000) { // 1 Lakh
+      const lacVal = val / 100000;
+      return `${parseFloat(lacVal.toFixed(2))} Lac`;
+    }
+    if (val % 1 === 0) {
+      return val.toLocaleString("en-IN");
+    } else {
+      return val.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, "");
+    }
   };
 
   const getHeaderTextColor = (bgColor: string) => {
@@ -733,11 +786,11 @@ export default function SingleNoticeClient({
                   }}
                 >
                   {/* Centred Watermark Image with Plural/Singular Fallback */}
-                  <div className="watermark-container absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.07] select-none z-0">
+                  <div className="watermark-container absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.09] select-none z-0">
                     <img
                       src="/assets/icon/watermark.png"
                       alt="Watermark"
-                      className="watermark-img w-[300px] md:w-[350px] h-auto max-h-[85%] object-contain"
+                      className="watermark-img w-[400px] md:w-[480px] h-auto max-h-[85%] object-contain"
                       onError={(e) => {
                         const target = e.currentTarget;
                         if (target.src.includes("/assets/")) {
@@ -772,14 +825,31 @@ export default function SingleNoticeClient({
                         {headers.map((hdr: string, idx: number) => {
                           const isDesc = (hdr || "")
                             .toLowerCase()
-                            .includes("description");
+                            .includes("description") ||
+                            (hdr || "")
+                            .toLowerCase()
+                            .includes("works");
+                          const isTender = (hdr || "")
+                            .toLowerCase()
+                            .replace(/\s/g, "")
+                            .includes("tenderid");
+                          const isSl = (hdr || "")
+                            .toLowerCase()
+                            .replace(/\s/g, "")
+                            .includes("slno") || 
+                            (hdr || "")
+                            .toLowerCase()
+                            .replace(/\s/g, "")
+                            .includes("sl");
                           return (
                             <th
                               key={idx}
-                              className={`p-3 font-bold border border-gray-400 text-sm uppercase text-center ${
+                              className={`p-3 font-bold border border-gray-400 text-base uppercase text-center ${
                                 isDesc
-                                  ? "w-[30%] min-w-[220px]"
-                                  : "whitespace-normal"
+                                  ? "w-[32%] min-w-[220px] whitespace-normal text-left"
+                                  : isTender || isSl
+                                    ? "whitespace-nowrap"
+                                    : "whitespace-normal"
                               }`}
                               style={{
                                 backgroundColor:
@@ -812,7 +882,7 @@ export default function SingleNoticeClient({
                           >
                             {!hasSl && (
                               <td
-                                className="p-3 border border-gray-400 text-black text-sm font-bold text-left whitespace-nowrap"
+                                className="p-3 border border-gray-400 text-black text-base font-bold text-left whitespace-nowrap"
                                 style={
                                   isWinnerRow
                                     ? { backgroundColor: "#fffbeb" }
@@ -836,18 +906,49 @@ export default function SingleNoticeClient({
                               );
                               const isDesc = (headers[cIdx] || "")
                                 .toLowerCase()
-                                .includes("description");
+                                .includes("description") ||
+                                (headers[cIdx] || "")
+                                .toLowerCase()
+                                .includes("works");
+                              const isTender = (headers[cIdx] || "")
+                                .toLowerCase()
+                                .replace(/\s/g, "")
+                                .includes("tenderid");
+                              const isSl = (headers[cIdx] || "")
+                                .toLowerCase()
+                                .replace(/\s/g, "")
+                                .includes("slno") || 
+                                (headers[cIdx] || "")
+                                .toLowerCase()
+                                .replace(/\s/g, "")
+                                .includes("sl");
                               const isWinnerCell = cIdx === winnerColIdx;
                               const hasCustomBg =
                                 cellBg &&
                                 cellBg !== "#ffffff" &&
                                 cellBg !== "#fff";
+
+                              const isSellingDateCol = (headers[cIdx] || "")
+                                .toLowerCase()
+                                .includes("selling") ||
+                                (headers[cIdx] || "")
+                                .toLowerCase()
+                                .includes("last date");
+
+                              const formattedVal = formatCellValue(cell, headers[cIdx] || "");
+
                               return (
                                 <td
                                   key={cIdx}
-                                  className={`p-3 border border-gray-400 text-black text-sm font-semibold font-bangla ${
+                                  className={`p-3 border border-gray-400 text-black text-base font-semibold font-bangla ${
                                     isCurrency ? "text-right" : "text-left"
-                                  } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-normal"}`}
+                                  } ${
+                                    isDesc 
+                                      ? "w-[32%] min-w-[220px] whitespace-normal text-left" 
+                                      : isTender || isSl
+                                        ? "whitespace-nowrap"
+                                        : "whitespace-normal"
+                                  }`}
                                   style={
                                     hasCustomBg
                                       ? { backgroundColor: cellBg }
@@ -859,7 +960,22 @@ export default function SingleNoticeClient({
                                       🏆
                                     </span>
                                   )}
-                                  {formatCellValue(cell, headers[cIdx] || "")}
+                                  {(() => {
+                                    if (isSellingDateCol && formattedVal && formattedVal !== "N/A") {
+                                      const parts = formattedVal.split(/\s+/);
+                                      const datePart = parts[0];
+                                      const timePart = parts.slice(1).join(" ");
+                                      if (timePart) {
+                                        return (
+                                          <div className="flex flex-col text-center">
+                                            <span className="whitespace-nowrap">{datePart}</span>
+                                            <span className="text-[10px] text-gray-500 font-bold mt-0.5 whitespace-nowrap">{timePart}</span>
+                                          </div>
+                                        );
+                                      }
+                                    }
+                                    return formattedVal;
+                                  })()}
                                 </td>
                               );
                             })}
@@ -881,7 +997,7 @@ export default function SingleNoticeClient({
                               return (
                                 <td
                                   key={idx}
-                                  className="p-3 border border-gray-400 text-right text-sm font-extrabold bg-[#ffffcc]"
+                                  className="p-3 border border-gray-400 text-right text-base font-extrabold bg-[#ffffcc]"
                                   colSpan={colSpanCount + (!hasSl ? 1 : 0)}
                                 >
                                   Total Amount BD Tk =
@@ -899,7 +1015,7 @@ export default function SingleNoticeClient({
                               return (
                                 <td
                                   key={idx}
-                                  className="p-3 border border-gray-400 text-sm font-extrabold text-black bg-[#ffffcc] text-right"
+                                  className="p-3 border border-gray-400 text-base font-extrabold text-black bg-[#ffffcc] text-right"
                                 >
                                   {formatMoney(totalSecurity)}
                                 </td>

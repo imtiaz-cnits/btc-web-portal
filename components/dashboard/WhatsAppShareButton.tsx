@@ -59,12 +59,19 @@ const formatCellValue = (val: string, hdr: string) => {
     const cleanVal = str.replace(/,/g, "").trim();
     const num = parseFloat(cleanVal);
     if (!isNaN(num) && /^\d+(\.\d+)?$/.test(cleanVal)) {
-      if (cleanVal.includes(".")) {
-        const [integerPart, decimalPart] = cleanVal.split(".");
-        const parsedInt = parseFloat(integerPart);
-        if (!isNaN(parsedInt)) return `${parsedInt.toLocaleString("en-IN")}.${decimalPart}`;
+      if (num >= 10000000) { // 1 Crore
+        const crVal = num / 10000000;
+        return `${parseFloat(crVal.toFixed(2))} Cr`;
+      } else if (num >= 100000) { // 1 Lakh
+        const lacVal = num / 100000;
+        return `${parseFloat(lacVal.toFixed(2))} Lac`;
       }
-      return num.toLocaleString("en-IN");
+
+      if (num % 1 === 0) {
+        return num.toLocaleString("en-IN");
+      } else {
+        return num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, "");
+      }
     }
   }
   return str;

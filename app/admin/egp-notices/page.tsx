@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getNotices } from "@/app/actions/notices";
 import NoticeLimitDropdown from "@/components/dashboard/NoticeLimitDropdown";
+import { isNoticeExpired } from "@/lib/date";
 import NoticesTable from "@/components/dashboard/NoticesTable";
 import {
   Plus,
@@ -39,14 +40,14 @@ export default async function AdminNoticesPage({
   const activeCount = filtered.filter(n => 
     n.status === "active" && 
     (!n.publishDate || new Date(n.publishDate) <= now) &&
-    (n.category === "LOTTERY_RESULT" || !n.lastDate || new Date(n.lastDate) >= now)
+    (n.category === "LOTTERY_RESULT" || !n.lastDate || !isNoticeExpired(n.lastDate, now))
   ).length;
   const draftCount = filtered.filter(n => n.status !== "active").length;
   const scheduledCount = filtered.filter(n => n.status === "active" && n.publishDate && new Date(n.publishDate) > now).length;
   const pendingCount = filtered.filter(n => 
     n.status === "active" && 
     n.lastDate && 
-    new Date(n.lastDate) < now && 
+    isNoticeExpired(n.lastDate, now) && 
     n.category !== "LOTTERY_RESULT"
   ).length;
   const winnersCount = filtered.filter(n => 
@@ -62,7 +63,7 @@ export default async function AdminNoticesPage({
     notices = filtered.filter(n => 
       n.status === "active" && 
       (!n.publishDate || new Date(n.publishDate) <= now) &&
-      (n.category === "LOTTERY_RESULT" || !n.lastDate || new Date(n.lastDate) >= now)
+      (n.category === "LOTTERY_RESULT" || !n.lastDate || !isNoticeExpired(n.lastDate, now))
     );
   } else if (filter === "draft") {
     notices = filtered.filter(n => n.status !== "active");
@@ -72,7 +73,7 @@ export default async function AdminNoticesPage({
     notices = filtered.filter(n => 
       n.status === "active" && 
       n.lastDate && 
-      new Date(n.lastDate) < now && 
+      isNoticeExpired(n.lastDate, now) && 
       n.category !== "LOTTERY_RESULT"
     );
   } else if (filter === "winners") {

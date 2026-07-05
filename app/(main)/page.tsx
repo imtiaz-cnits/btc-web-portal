@@ -6,6 +6,7 @@ import ProjectsSection from "@/components/ProjectsSection";
 import ClientSlider from "@/components/ClientSlider";
 import HomeNoticesSection from "@/components/HomeNoticesSection";
 import prisma from "@/lib/prisma";
+import { formatDateDhaka, isNoticeExpired } from "@/lib/date";
 
 export const revalidate = 0; // Live data on every load
 
@@ -37,26 +38,19 @@ export default async function HomePage() {
   const homepageNotices = allActiveNotices.map((notice) => {
     let formattedPublishDate = "N/A";
     if (notice.publishDate) {
-      const pd = new Date(notice.publishDate);
-      formattedPublishDate = `${String(pd.getDate()).padStart(2, '0')}-${String(pd.getMonth() + 1).padStart(2, '0')}-${pd.getFullYear()}`;
+      formattedPublishDate = formatDateDhaka(notice.publishDate);
     } else if (notice.createdAt) {
-      const pd = new Date(notice.createdAt);
-      formattedPublishDate = `${String(pd.getDate()).padStart(2, '0')}-${String(pd.getMonth() + 1).padStart(2, '0')}-${pd.getFullYear()}`;
+      formattedPublishDate = formatDateDhaka(notice.createdAt);
     }
 
-    let formattedLastDate = "N/A";
-    if (notice.lastDate) {
-      const ld = new Date(notice.lastDate);
-      formattedLastDate = `${String(ld.getDate()).padStart(2, '0')}-${String(ld.getMonth() + 1).padStart(2, '0')}-${ld.getFullYear()}`;
-    }
+    const formattedLastDate = formatDateDhaka(notice.lastDate);
 
     let formattedLotteryDate = "";
     if (notice.lotteryDate) {
-      const ld = new Date(notice.lotteryDate);
-      formattedLotteryDate = `${String(ld.getDate()).padStart(2, '0')}-${String(ld.getMonth() + 1).padStart(2, '0')}-${ld.getFullYear()}`;
+      formattedLotteryDate = formatDateDhaka(notice.lotteryDate);
     }
 
-    const isExpired = notice.lastDate && new Date(notice.lastDate) < new Date();
+    const isExpired = isNoticeExpired(notice.lastDate);
     const finalCategory = (isExpired && notice.category !== "LOTTERY_RESULT") 
       ? "LOTTERY_PENDING" 
       : notice.category;

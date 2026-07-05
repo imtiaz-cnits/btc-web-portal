@@ -606,18 +606,29 @@ const DEFAULT_SUBTITLE_OPTIONS = [
 
 const TITLE_TO_SUBTITLE_MAP: Record<string, string> = {
   "গণপূর্ত বিভাগ, পাবনা। (PWD)": "Public Works Department, Pabna (PWD)",
-  "স্থানীয় সরকার প্রকৌশল অধিদপ্তর, পাবনা। (LGED)": "Local Government Engineering Department, Pabna (LGED)",
-  "স্থানীয় সরকার প্রকৌশল অধিদপ্তর, পাবনা। (LGED)": "Local Government Engineering Department, Pabna (LGED)",
-  "সড়ক ও জনপথ বিভাগ, পাবনা। (RHD)": "Roads and Highways Department, Pabna (RHD)",
-  "সড়ক ও জনপথ বিভাগ, পাবনা। (RHD)": "Roads and Highways Department, Pabna (RHD)",
-  "বাংলাদেশ কৃষি উন্নয়ন কর্পোরেশন, পাবনা। (BADC)": "Bangladesh Agricultural Development Corporation, Pabna (BADC)",
-  "বাংলাদেশ কৃষি উন্নয়ন কর্পোরেশন, পাবনা। (BADC)": "Bangladesh Agricultural Development Corporation, Pabna (BADC)",
-  "পানি উন্নয়ন বোর্ড, পাবনা। (BWDB)": "Bangladesh Water Development Board, Pabna (BWDB)",
-  "পানি উন্নয়ন বোর্ড, পাবনা। (BWDB)": "Bangladesh Water Development Board, Pabna (BWDB)",
+  "স্থানীয় সরকার প্রকৌশল অধিদপ্তর, পাবনা। (LGED)":
+    "Local Government Engineering Department, Pabna (LGED)",
+  "স্থানীয় সরকার প্রকৌশল অধিদপ্তর, পাবনা। (LGED)":
+    "Local Government Engineering Department, Pabna (LGED)",
+  "সড়ক ও জনপথ বিভাগ, পাবনা। (RHD)":
+    "Roads and Highways Department, Pabna (RHD)",
+  "সড়ক ও জনপথ বিভাগ, পাবনা। (RHD)":
+    "Roads and Highways Department, Pabna (RHD)",
+  "বাংলাদেশ কৃষি উন্নয়ন কর্পোরেশন, পাবনা। (BADC)":
+    "Bangladesh Agricultural Development Corporation, Pabna (BADC)",
+  "বাংলাদেশ কৃষি উন্নয়ন কর্পোরেশন, পাবনা। (BADC)":
+    "Bangladesh Agricultural Development Corporation, Pabna (BADC)",
+  "পানি উন্নয়ন বোর্ড, পাবনা। (BWDB)":
+    "Bangladesh Water Development Board, Pabna (BWDB)",
+  "পানি উন্নয়ন বোর্ড, পাবনা। (BWDB)":
+    "Bangladesh Water Development Board, Pabna (BWDB)",
   "পাবনা পৌরসভা, পাবনা": "Pabna Pourashava, Pabna",
-  "শিক্ষা প্রকৌশল অধিদপ্তর, পাবনা। (EED)": "Education Engineering Department, Pabna (EED)",
-  "স্বাস্থ্য প্রকৌশল অধিদপ্তর, পাবনা। (HED)": "Health Engineering Department, Pabna (HED)",
-  "জনস্বাস্থ্য প্রকৌশল অধিদপ্তর, পাবনা। (DPHE)": "Department of Public Health Engineering, Pabna (DPHE)",
+  "শিক্ষা প্রকৌশল অধিদপ্তর, পাবনা। (EED)":
+    "Education Engineering Department, Pabna (EED)",
+  "স্বাস্থ্য প্রকৌশল অধিদপ্তর, পাবনা। (HED)":
+    "Health Engineering Department, Pabna (HED)",
+  "জনস্বাস্থ্য প্রকৌশল অধিদপ্তর, পাবনা। (DPHE)":
+    "Department of Public Health Engineering, Pabna (DPHE)",
 };
 
 const translateOfficeName = (bangla: string): string => {
@@ -641,26 +652,29 @@ const translateOfficeName = (bangla: string): string => {
 
   let english = normalized;
   const placeMap: Record<string, string> = {
-    "পাবনা": "Pabna",
-    "ঢাকা": "Dhaka",
-    "ফরিদপুর": "Faridpur",
-    "বেড়া": "Bera",
-    "চাটমোহর": "Chatmohar",
-    "সুজানগর": "Sujanagar",
-    "ঈশ্বরদী": "Ishwardi",
-    "ভাঙ্গুড়া": "Bhangura",
-    "আটঘরিয়া": "Atgharia",
-    "সাথিয়া": "Santhia",
-    "সাঁথিয়া": "Santhia",
+    পাবনা: "Pabna",
+    ঢাকা: "Dhaka",
+    ফরিদপুর: "Faridpur",
+    বেড়া: "Bera",
+    চাটমোহর: "Chatmohar",
+    সুজানগর: "Sujanagar",
+    ঈশ্বরদী: "Ishwardi",
+    ভাঙ্গুড়া: "Bhangura",
+    আটঘরিয়া: "Atgharia",
+    সাথিয়া: "Santhia",
+    সাঁথিয়া: "Santhia",
   };
   const phraseMap: Record<string, string> = {
     "গণপূর্ত বিভাগ": "Public Works Department",
     "স্থানীয় সরকার প্রকৌশল অধিদপ্তর": "Local Government Engineering Department",
-    "স্থানীয় সরকার প্রকৌশল অধিদপ্তর": "Local Government Engineering Department",
+    "স্থানীয় সরকার প্রকৌশল অধিদপ্তর":
+      "Local Government Engineering Department",
     "সড়ক ও জনপথ বিভাগ": "Roads and Highways Department",
     "সড়ক ও জনপথ বিভাগ": "Roads and Highways Department",
-    "বাংলাদেশ কৃষি উন্নয়ন কর্পোরেশন": "Bangladesh Agricultural Development Corporation",
-    "বাংলাদেশ কৃষি উন্নয়ন কর্পোরেশন": "Bangladesh Agricultural Development Corporation",
+    "বাংলাদেশ কৃষি উন্নয়ন কর্পোরেশন":
+      "Bangladesh Agricultural Development Corporation",
+    "বাংলাদেশ কৃষি উন্নয়ন কর্পোরেশন":
+      "Bangladesh Agricultural Development Corporation",
     "পানি উন্নয়ন বোর্ড": "Bangladesh Water Development Board",
     "পানি উন্নয়ন বোর্ড": "Bangladesh Water Development Board",
     "শিক্ষা প্রকৌশল অধিদপ্তর": "Education Engineering Department",
@@ -723,9 +737,14 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
 
   // Subtitle custom dropdown states
+  const [subTitle, setSubTitle] = useState("");
+  const [showSubTitleDropdown, setShowSubTitleDropdown] = useState(false);
+  const subTitleDropdownRef = useRef<HTMLDivElement>(null);
   const [subTitleOptions, setSubTitleOptions] = useState<string[]>([]);
   const [newSubTitleInput, setNewSubTitleInput] = useState("");
-  const [activeSubTitleDropdown, setActiveSubTitleDropdown] = useState<number | null>(null);
+  const [activeSubTitleDropdown, setActiveSubTitleDropdown] = useState<
+    number | null
+  >(null);
 
   const handleAddSubTitleOption = (val: string) => {
     const trimmed = val.trim();
@@ -733,7 +752,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     if (subTitleOptions.includes(trimmed)) return;
     const updated = [trimmed, ...subTitleOptions];
     setSubTitleOptions(updated);
-    localStorage.setItem("btc_notice_subtitle_options", JSON.stringify(updated));
+    localStorage.setItem(
+      "btc_notice_subtitle_options",
+      JSON.stringify(updated),
+    );
   };
 
   const handleDeleteSubTitleOption = (
@@ -743,7 +765,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     e.stopPropagation();
     const updated = subTitleOptions.filter((o) => o !== optionToDelete);
     setSubTitleOptions(updated);
-    localStorage.setItem("btc_notice_subtitle_options", JSON.stringify(updated));
+    localStorage.setItem(
+      "btc_notice_subtitle_options",
+      JSON.stringify(updated),
+    );
   };
 
   const handleAddTitleOption = (val: string) => {
@@ -753,10 +778,6 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     const updated = [trimmed, ...titleOptions];
     setTitleOptions(updated);
     localStorage.setItem("btc_notice_title_options", JSON.stringify(updated));
-
-    // Auto translate and add subtitle option
-    const enTranslation = translateOfficeName(trimmed);
-    handleAddSubTitleOption(enTranslation);
   };
 
   const handleDeleteTitleOption = (
@@ -807,6 +828,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
               initialSubOptions = [...initialSubOptions, table.subTitle];
             }
           });
+          if (parsed.tables.length > 0) {
+            setSubTitle(parsed.tables[0].subTitle || "");
+          }
         }
       } catch (err) {}
     }
@@ -981,6 +1005,13 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         setShowTitleDropdown(false);
       }
 
+      if (
+        subTitleDropdownRef.current &&
+        !subTitleDropdownRef.current.contains(e.target as Node)
+      ) {
+        setShowSubTitleDropdown(false);
+      }
+
       const target = e.target as HTMLElement;
       if (!target.closest(".warning-dropdown-container")) {
         setActiveWarningDropdown(null);
@@ -1028,16 +1059,20 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         timeZone: "Asia/Dhaka",
         year: "numeric",
         month: "2-digit",
-        day: "2-digit"
-      }).format(dateObj).split("-"); // [YYYY, MM, DD]
+        day: "2-digit",
+      })
+        .format(dateObj)
+        .split("-"); // [YYYY, MM, DD]
 
       // Time in Asia/Dhaka
       const timeParts = new Intl.DateTimeFormat("en-US", {
         timeZone: "Asia/Dhaka",
         hour: "2-digit",
         minute: "2-digit",
-        hour12: true
-      }).format(dateObj).split(" "); // e.g. ["10:30", "AM"]
+        hour12: true,
+      })
+        .format(dateObj)
+        .split(" "); // e.g. ["10:30", "AM"]
 
       const dateStr = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
       const timeStr = timeParts.join(" ");
@@ -1070,8 +1105,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         timeZone: "Asia/Dhaka",
         hour: "2-digit",
         minute: "2-digit",
-        hour12: false
-      }).format(dateObj).split(":");
+        hour12: false,
+      })
+        .format(dateObj)
+        .split(":");
       dhakaHours = parseInt(timeParts[0]);
       dhakaMinutes = parseInt(timeParts[1]);
     } catch (e) {
@@ -1080,7 +1117,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       dhakaMinutes = dateObj.getMinutes();
     }
 
-    const hasTime = !(dhakaHours === 0 && dhakaMinutes === 0) && !(dhakaHours === 23 && dhakaMinutes === 59);
+    const hasTime =
+      !(dhakaHours === 0 && dhakaMinutes === 0) &&
+      !(dhakaHours === 23 && dhakaMinutes === 59);
     const isFuture = dateObj > new Date();
 
     if (isFuture || hasTime) {
@@ -1093,8 +1132,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         timeZone: "Asia/Dhaka",
         year: "numeric",
         month: "2-digit",
-        day: "2-digit"
-      }).format(dateObj).split("-");
+        day: "2-digit",
+      })
+        .format(dateObj)
+        .split("-");
       // parts is [YYYY, MM, DD]
       return `${parts[2]}-${parts[1]}-${parts[0]}`;
     } catch (e) {
@@ -2123,7 +2164,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         // Compare date strings (YYYY-MM-DD format) in local time
         const lastDateDateStr = `${lastDateObj.getFullYear()}-${String(lastDateObj.getMonth() + 1).padStart(2, "0")}-${String(lastDateObj.getDate()).padStart(2, "0")}`;
         const lotteryDateDateStr = `${lotteryDateObj.getFullYear()}-${String(lotteryDateObj.getMonth() + 1).padStart(2, "0")}-${String(lotteryDateObj.getDate()).padStart(2, "0")}`;
-        
+
         if (lotteryDateDateStr < lastDateDateStr) {
           setErrorMessage(
             "Lottery Date cannot be before the Last Date of submission.",
@@ -2162,8 +2203,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
               lowerHdr === "sl"
             );
           });
+          let updatedRows = table.rows;
           if (slIdx !== -1 && Array.isArray(table.rows)) {
-            const updatedRows = table.rows.map((row: any, rIdx: number) => {
+            updatedRows = table.rows.map((row: any, rIdx: number) => {
               if (Array.isArray(row)) {
                 const nextRow = [...row];
                 nextRow[slIdx] = (rIdx + 1).toString();
@@ -2171,9 +2213,13 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
               }
               return row;
             });
-            return { ...table, rows: updatedRows };
           }
-          return table;
+          return {
+            ...table,
+            officeName: title,
+            subTitle: subTitle,
+            rows: updatedRows,
+          };
         });
 
         const serializedData = JSON.stringify({
@@ -2259,9 +2305,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     >
       {/* Notice Basic Settings Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 shrink-0">
-        <div ref={dropdownRef} className="md:col-span-2 space-y-2 relative">
+        <div ref={dropdownRef} className="md:col-span-1 space-y-2 relative">
           <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-            Notice Type
+            Notice Title
           </label>
           <div className="relative">
             <div
@@ -2304,12 +2350,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                       if (newOptionInput.trim()) {
                         handleAddTitleOption(newOptionInput.trim());
                         setTitle(newOptionInput.trim());
-                        const enTranslation = translateOfficeName(newOptionInput.trim());
                         setTablesList((prev) =>
                           prev.map((t) => ({
                             ...t,
                             officeName: newOptionInput.trim(),
-                            subTitle: enTranslation,
                           })),
                         );
                         setNewOptionInput("");
@@ -2326,12 +2370,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                     if (newOptionInput.trim()) {
                       handleAddTitleOption(newOptionInput.trim());
                       setTitle(newOptionInput.trim());
-                      const enTranslation = translateOfficeName(newOptionInput.trim());
                       setTablesList((prev) =>
                         prev.map((t) => ({
                           ...t,
                           officeName: newOptionInput.trim(),
-                          subTitle: enTranslation,
                         })),
                       );
                       setNewOptionInput("");
@@ -2355,12 +2397,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                       key={opt}
                       onClick={() => {
                         setTitle(opt);
-                        const enTranslation = translateOfficeName(opt);
                         setTablesList((prev) =>
                           prev.map((t) => ({
                             ...t,
                             officeName: opt,
-                            subTitle: enTranslation,
                           })),
                         );
                         setShowTitleDropdown(false);
@@ -2396,6 +2436,111 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           )}
         </div>
 
+        <div
+          ref={subTitleDropdownRef}
+          className="md:col-span-1 space-y-2 relative"
+        >
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            Notice Sub-Title (Optional)
+          </label>
+          <div className="relative">
+            <div
+              onClick={() => setShowSubTitleDropdown(!showSubTitleDropdown)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 text-sm font-semibold focus:border-[var(--primary-color)] hover:border-slate-350 transition cursor-pointer flex justify-between items-center shadow-xs"
+            >
+              <span className="flex items-center gap-2">
+                {subTitle ? (
+                  <span>{subTitle}</span>
+                ) : (
+                  "Select Notice Sub-Title..."
+                )}
+              </span>
+              <ChevronDown
+                className={`w-4 h-4 text-slate-400 transition-transform ${showSubTitleDropdown ? "rotate-180" : ""}`}
+              />
+            </div>
+            <input type="hidden" name="subTitle" value={subTitle} />
+          </div>
+
+          {showSubTitleDropdown && (
+            <div className="absolute top-[100%] left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-55 overflow-hidden divide-y divide-slate-100 animate-scale-in">
+              {/* Add New Option Input Field Inside the Dropdown */}
+              <div
+                className="p-3 bg-slate-50 flex gap-2"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <input
+                  type="text"
+                  value={newSubTitleInput}
+                  onChange={(e) => setNewSubTitleInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      if (newSubTitleInput.trim()) {
+                        handleAddSubTitleOption(newSubTitleInput.trim());
+                        setSubTitle(newSubTitleInput.trim());
+                        setNewSubTitleInput("");
+                        setShowSubTitleDropdown(false);
+                      }
+                    }
+                  }}
+                  placeholder="Type to search or add subtitle..."
+                  className="flex-1 bg-white border border-slate-250 rounded-lg px-3 py-1.5 text-xs font-semibold focus:border-[var(--primary-color)] outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (newSubTitleInput.trim()) {
+                      handleAddSubTitleOption(newSubTitleInput.trim());
+                      setSubTitle(newSubTitleInput.trim());
+                      setNewSubTitleInput("");
+                      setShowSubTitleDropdown(false);
+                    }
+                  }}
+                  className="bg-green-600 hover:bg-green-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition border-0 cursor-pointer whitespace-nowrap active:scale-95"
+                >
+                  Add
+                </button>
+              </div>
+
+              {/* Options List */}
+              <div className="max-h-[220px] overflow-y-auto divide-y divide-slate-50">
+                {subTitleOptions
+                  .filter((opt) =>
+                    opt.toLowerCase().includes(newSubTitleInput.toLowerCase()),
+                  )
+                  .map((opt) => (
+                    <div
+                      key={opt}
+                      onClick={() => {
+                        setSubTitle(opt);
+                        setShowSubTitleDropdown(false);
+                      }}
+                      className="px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-green-50 hover:text-green-800 transition cursor-pointer flex items-center justify-between group"
+                    >
+                      <span className="truncate">{opt}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => handleDeleteSubTitleOption(e, opt)}
+                        className="text-slate-400 hover:text-red-650 p-1 rounded-md border-0 bg-transparent transition opacity-100 md:opacity-0 group-hover:opacity-100 cursor-pointer flex items-center justify-center hover:bg-red-50"
+                        title="Delete Option"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+
+                {subTitleOptions.filter((opt) =>
+                  opt.toLowerCase().includes(newSubTitleInput.toLowerCase()),
+                ).length === 0 && (
+                  <div className="px-4 py-3 text-xs text-slate-400 font-semibold italic text-center">
+                    No matching options. Type above and click Add!
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
         <CustomSelect
           label="Notice Category"
           value={category}
@@ -2739,218 +2884,76 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                   key={table.id || tIdx}
                   className="space-y-6 relative min-w-0 w-full overflow-hidden transition duration-300"
                 >
-                  {/* Table Block Header Actions */}
-                  <div className="flex justify-between items-center shrink-0">
-                    <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase border shadow-sm bg-green-50 border-green-200 text-green-700">
-                      <Sliders className="w-3.5 h-3.5" /> PWD LTM Custom
-                      Specification Studio Table #{tIdx + 1}
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={() => removeTableBlock(tIdx)}
-                      className="text-white hover:bg-red-700 bg-red-600 border-0 p-2 px-3 rounded-xl transition inline-flex items-center gap-1.5 text-xs font-bold shadow-xs active:scale-95 cursor-pointer"
-                      title="Delete Entire Table Block"
-                    >
-                      <Trash2 className="w-4 h-4" /> Delete Table
-                    </button>
-                  </div>
-
-                  {/* Procuring Entity & Dates Headers Config */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-xs shrink-0">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                        <Building2 className="w-3.5 h-3.5 text-green-600" />{" "}
-                        Procuring Office Name (Bangla)
-                      </label>
-                      <input
-                        type="text"
-                        value={table.officeName || ""}
-                        onChange={(e) =>
-                          handlePwdFieldChange(
-                            tIdx,
-                            "officeName",
-                            e.target.value,
-                          )
-                        }
-                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 outline-none text-xs font-bold focus:border-[var(--primary-color)] transition"
-                        placeholder="যেমন: গণপূর্ত বিভাগ, পাবনা।"
-                      />
-                    </div>
-
-                    <div className="space-y-1 relative subtitle-dropdown-container">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                        <Info className="w-3.5 h-3.5 text-green-600" /> Notice
-                        Sub-Title (Optional)
-                      </label>
-                      <div className="relative">
-                        <div
-                          onClick={() =>
-                            setActiveSubTitleDropdown(
-                              activeSubTitleDropdown === tIdx ? null : tIdx
-                            )
-                          }
-                          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 outline-none text-xs font-bold focus:border-[var(--primary-color)] transition cursor-pointer flex justify-between items-center"
-                        >
-                          <span className="truncate">
-                            {table.subTitle || "যেমন: BADC POLY SEED (OTM Method)"}
-                          </span>
-                          <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1" />
-                        </div>
-                      </div>
-
-                      {activeSubTitleDropdown === tIdx && (
-                        <div className="absolute top-[100%] left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-55 overflow-hidden divide-y divide-slate-100 animate-scale-in">
-                          {/* Search or Add Input inside the Subtitle Dropdown */}
-                          <div
-                            className="p-2 bg-slate-50 flex gap-2"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <input
-                              type="text"
-                              value={newSubTitleInput}
-                              onChange={(e) => setNewSubTitleInput(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault();
-                                  if (newSubTitleInput.trim()) {
-                                    handleAddSubTitleOption(newSubTitleInput.trim());
-                                    handlePwdFieldChange(
-                                      tIdx,
-                                      "subTitle",
-                                      newSubTitleInput.trim()
-                                    );
-                                    setNewSubTitleInput("");
-                                    setActiveSubTitleDropdown(null);
-                                  }
-                                }
-                              }}
-                              placeholder="Type to search or add subtitle..."
-                              className="flex-1 bg-white border border-slate-250 rounded-lg px-2 py-1 text-[11px] font-semibold focus:border-[var(--primary-color)] outline-none"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (newSubTitleInput.trim()) {
-                                  handleAddSubTitleOption(newSubTitleInput.trim());
-                                  handlePwdFieldChange(
-                                    tIdx,
-                                    "subTitle",
-                                    newSubTitleInput.trim()
-                                  );
-                                  setNewSubTitleInput("");
-                                  setActiveSubTitleDropdown(null);
-                                }
-                              }}
-                              className="bg-green-600 hover:bg-green-700 text-white font-bold px-2.5 py-1 rounded-lg text-[11px] transition border-0 cursor-pointer whitespace-nowrap active:scale-95"
-                            >
-                              Add
-                            </button>
-                          </div>
-
-                          {/* Options List */}
-                          <div className="max-h-[160px] overflow-y-auto divide-y divide-slate-50">
-                            {subTitleOptions
-                              .filter((opt) =>
-                                opt.toLowerCase().includes(newSubTitleInput.toLowerCase())
-                              )
-                              .map((opt) => (
-                                <div
-                                  key={opt}
-                                  onClick={() => {
-                                    handlePwdFieldChange(tIdx, "subTitle", opt);
-                                    setActiveSubTitleDropdown(null);
-                                  }}
-                                  className="px-3 py-2 text-[11px] font-bold text-slate-700 hover:bg-green-50 hover:text-green-800 transition cursor-pointer flex items-center justify-between group"
-                                >
-                                  <span className="truncate">{opt}</span>
-                                  <button
-                                    type="button"
-                                    onClick={(e) => handleDeleteSubTitleOption(e, opt)}
-                                    className="text-slate-400 hover:text-red-650 p-1 rounded-md border-0 bg-transparent transition opacity-100 md:opacity-0 group-hover:opacity-100 cursor-pointer flex items-center justify-center hover:bg-red-50"
-                                    title="Delete Option"
-                                  >
-                                    <Trash2 className="w-3 h-3" />
-                                  </button>
-                                </div>
-                              ))}
-
-                            {subTitleOptions.filter((opt) =>
-                              opt.toLowerCase().includes(newSubTitleInput.toLowerCase())
-                            ).length === 0 && (
-                              <div className="px-3 py-2 text-[11px] text-slate-400 font-semibold italic text-center">
-                                No matching options. Type above and click Add!
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Header Background Color selector */}
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
-                        Header BG Color
-                      </label>
-                      <div className="flex items-center gap-1.5 h-8">
-                        {[
-                          { hex: "#0891b2", name: "Cyan" },
-                          { hex: "#16a34a", name: "Green" },
-                          { hex: "#0d9488", name: "Teal" },
-                          { hex: "#ea580c", name: "Orange" },
-                          { hex: "#475569", name: "Slate" },
-                        ].map((clr) => (
-                          <button
-                            key={clr.hex}
-                            type="button"
-                            onClick={() =>
-                              handlePwdFieldChange(
-                                tIdx,
-                                "headerBgColor",
-                                clr.hex,
-                              )
-                            }
-                            className={`w-6 h-6 rounded-lg border transition transform hover:scale-110 active:scale-95 cursor-pointer ${
-                              (table.headerBgColor ||
-                                (category === "OTM"
-                                  ? "#059669"
-                                  : "#0891b2")) === clr.hex
-                                ? "border-slate-800 ring-2 ring-slate-400"
-                                : "border-slate-200"
-                            }`}
-                            style={{ backgroundColor: clr.hex }}
-                            title={`Set header bg to ${clr.name}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Columns & Rows Controls */}
                   <div className="space-y-4 min-w-0 w-full overflow-hidden">
-                    <div className="flex justify-between items-center border-b pb-2 border-slate-200 shrink-0">
+                    <div className="flex flex-col md:flex-row justify-between md:items-center border-b pb-2 border-slate-200 shrink-0 gap-3">
                       <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
                         <TableIcon className="w-3.5 h-3.5 text-green-600" />{" "}
-                        Spreadsheet Columns & Rows
+                        Spreadsheet Table #{tIdx + 1}
                       </span>
-                      <div className="flex gap-2">
+
+                      <div className="flex flex-wrap items-center gap-3">
+                        {/* Header BG Color Selector */}
+                        <div className="flex items-center gap-1 mr-2">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">
+                            BG:
+                          </span>
+                          {[
+                            { hex: "#0891b2", name: "Cyan" },
+                            { hex: "#16a34a", name: "Green" },
+                            { hex: "#0d9488", name: "Teal" },
+                            { hex: "#ea580c", name: "Orange" },
+                            { hex: "#475569", name: "Slate" },
+                          ].map((clr) => (
+                            <button
+                              key={clr.hex}
+                              type="button"
+                              onClick={() =>
+                                handlePwdFieldChange(
+                                  tIdx,
+                                  "headerBgColor",
+                                  clr.hex,
+                                )
+                              }
+                              className={`w-5 h-5 rounded-md border transition transform hover:scale-110 active:scale-95 cursor-pointer ${
+                                (table.headerBgColor ||
+                                  (category === "OTM"
+                                    ? "#059669"
+                                    : "#0891b2")) === clr.hex
+                                  ? "border-slate-800 ring-1 ring-slate-400"
+                                  : "border-slate-200"
+                              }`}
+                              style={{ backgroundColor: clr.hex }}
+                              title={`Set header bg to ${clr.name}`}
+                            />
+                          ))}
+                        </div>
+
+                        {/* Add Column, Add Row, Delete Table Buttons */}
                         <button
                           type="button"
                           onClick={() => addColumn(tIdx)}
-                          className="bg-slate-600 hover:bg-slate-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 border-0 shadow-xs active:scale-95 cursor-pointer"
+                          className="bg-slate-600 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 border-0 shadow-xs active:scale-95 cursor-pointer"
                         >
-                          <Plus className="w-3.5 h-3.5" /> Add Column
+                          <Plus className="w-3.5 h-3.5" /> Column
                         </button>
                         <button
                           type="button"
                           onClick={() => addRow(tIdx)}
-                          className="bg-[var(--primary-color)] hover:bg-green-700 !text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-xs cursor-pointer border-0"
+                          className="bg-[var(--primary-color)] hover:bg-green-700 !text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-xs cursor-pointer border-0"
                         >
-                          <Plus className="w-3.5 h-3.5 !text-white" /> Add Row
+                          <Plus className="w-3.5 h-3.5 !text-white" /> Row
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeTableBlock(tIdx)}
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-xs cursor-pointer border-0 active:scale-95"
+                          title="Delete Entire Table Block"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Delete Table
                         </button>
                       </div>
                     </div>
-
                     {/* Table grid */}
                     <div className="w-full overflow-x-auto rounded-xl border border-slate-200 shadow-inner max-h-[350px] bg-white">
                       <table className="w-full border-collapse text-left text-xs bg-white studio-table">

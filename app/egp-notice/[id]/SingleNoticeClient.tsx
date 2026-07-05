@@ -362,7 +362,7 @@ export default function SingleNoticeClient({
                 border-collapse: collapse !important;
                 margin-top: 0 !important;
                 margin-bottom: 0 !important;
-                page-break-inside: avoid;
+                page-break-inside: auto !important;
                 overflow: visible !important;
                 table-layout: auto !important;
                 background-color: transparent !important;
@@ -485,12 +485,12 @@ export default function SingleNoticeClient({
           </head>
           <body>
             <div class="print-container">
-              <div class="print-top-header" style="display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important; border-bottom: 1.5px solid #1b4332 !important; padding-bottom: 5px !important; margin-bottom: 15px !important; font-family: Arial, sans-serif !important;">
+              <div class="print-top-header" style="display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important; padding-bottom: 20px !important; font-family: Arial, sans-serif !important; font-size: 8.5pt !important; font-weight: normal !important; color: #555555 !important;">
                 <div style="width: 25% !important;"></div>
-                <div style="width: 50% !important; text-align: center !important; font-size: 11pt !important; font-weight: 800 !important; color: #000000 !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; margin: 0 auto !important; display: block !important;">
+                <div style="width: 50% !important; text-align: center !important; font-size: 8.5pt !important; font-weight: normal !important; color: #555555 !important;">
                   Salom Egp consultant
                 </div>
-                <div style="width: 25% !important; text-align: right !important; font-size: 8.5pt !important; font-weight: 700 !important; color: #000000 !important; font-family: sans-serif !important;">
+                <div style="width: 25% !important; text-align: right !important; font-size: 8.5pt !important; font-weight: normal !important; color: #555555 !important;">
                   Print: ${getFormattedPrintDateTime()}
                 </div>
               </div>

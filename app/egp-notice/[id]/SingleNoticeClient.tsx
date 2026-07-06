@@ -324,7 +324,7 @@ export default function SingleNoticeClient({
                 word-wrap: break-word !important;
               }
               .desc-column {
-                width: 32% !important;
+                width: 28% !important;
                 white-space: normal !important;
               }
               .print-office-name {
@@ -409,24 +409,18 @@ export default function SingleNoticeClient({
               }
               th, td {
                 border: 1px solid #9ca3af !important;
-                padding: 4px 6px !important;
+                padding: 4px 4px !important;
                 text-align: left !important;
-                font-size: 18px !important;
+                word-wrap: break-word !important;
+                word-break: break-all !important;
               }
               td {
                 color: #000000 !important;
-              }
-              th.whitespace-nowrap, td.whitespace-nowrap, .whitespace-nowrap {
-                white-space: nowrap !important;
-              }
-              th.whitespace-normal, td.whitespace-normal, .whitespace-normal {
-                white-space: normal !important;
-              }
-              th.text-right, td.text-right {
-                text-align: right !important;
+                font-size: 18px !important;
               }
               th {
                 font-weight: bold !important;
+                font-size: 13px !important;
               }
               .pwd-scroll-wrapper {
                 border: 1px solid #9ca3af !important;

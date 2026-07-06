@@ -416,7 +416,7 @@ export default function SingleNoticeClient({
               }
               td {
                 color: #000000 !important;
-                font-size: 18px !important;
+                font-size: 13px !important;
               }
               th {
                 font-weight: bold !important;
@@ -496,7 +496,7 @@ export default function SingleNoticeClient({
                 height: 100vh !important;
                 align-items: center !important;
                 justify-content: center !important;
-                z-index: -100 !important;
+                z-index: 9999 !important;
                 pointer-events: none !important;
                 opacity: 0.08 !important;
               }
@@ -520,7 +520,7 @@ export default function SingleNoticeClient({
                 print-color-adjust: exact !important;
               }
               .total-amount-row td {
-                font-size: 20px !important;
+                font-size: 13px !important;
               }
             </style>
           </head>
@@ -791,14 +791,14 @@ export default function SingleNoticeClient({
                 className="pwd-table-block space-y-0 p-0 bg-white relative font-bangla text-black print:p-0 print:border-0"
               >
                 {/* Unified Standalone Header Box (Renders only on 1st Page, doesn't repeat on page split) */}
-                <div className="border border-gray-300 rounded-t-xl bg-white w-full text-center print:rounded-t-none">
+                <div className="border border-gray-400 rounded-t-xl bg-white w-full text-center print:rounded-t-none">
                   {table.officeName && (
-                    <div className="p-3 font-extrabold text-2xl md:text-3xl border-b border-gray-300 text-center text-black bg-white print-office-name">
+                    <div className="p-3 font-extrabold text-2xl md:text-3xl border-b border-gray-400 text-center text-black bg-white print-office-name">
                       {table.officeName}
                     </div>
                   )}
                   {table.subTitle && (
-                    <div className="p-2 font-bold text-sm md:text-base border-b border-gray-300 text-center text-black bg-white print-subtitle">
+                    <div className="p-2 font-bold text-sm md:text-base border-b border-gray-400 text-center text-black bg-white print-subtitle">
                       {table.subTitle}
                     </div>
                   )}
@@ -811,7 +811,7 @@ export default function SingleNoticeClient({
 
                 {/* Table Specs with Watermark */}
                 <div
-                  className="pwd-scroll-wrapper w-full overflow-x-auto overflow-y-hidden bg-white relative rounded-b-xl rounded-t-none border border-gray-300 border-t-0"
+                  className="pwd-scroll-wrapper w-full overflow-x-auto overflow-y-hidden bg-white relative rounded-b-xl rounded-t-none border border-gray-400 border-t-0"
                   style={{
                     overflowY: "hidden",
                     height: "auto",
@@ -819,7 +819,7 @@ export default function SingleNoticeClient({
                   }}
                 >
                   {/* Centred Watermark Image with Plural/Singular Fallback */}
-                  <div className="watermark-container absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.09] select-none z-0">
+                  <div className="watermark-container absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.09] select-none z-20">
                     <img
                       src="/assets/icon/watermark.png"
                       alt="Watermark"
@@ -1352,14 +1352,14 @@ export default function SingleNoticeClient({
                       className="pwd-table-block space-y-0 p-0 bg-white relative font-bangla text-black print:p-0 print:border-0 select-none"
                     >
                       {/* Unified Standalone Header Box (Renders only on 1st Page, doesn't repeat on page split) */}
-                      <div className="border border-gray-300 rounded-t-xl bg-white w-full text-center print:rounded-t-none">
+                      <div className="border border-gray-400 rounded-t-xl bg-white w-full text-center print:rounded-t-none">
                         {table.officeName && (
-                          <div className="p-3 font-extrabold text-2xl md:text-3xl border-b border-gray-300 text-center text-black bg-white print-office-name">
+                          <div className="p-3 font-extrabold text-2xl md:text-3xl border-b border-gray-400 text-center text-black bg-white print-office-name">
                             {table.officeName}
                           </div>
                         )}
                         {table.subTitle && (
-                          <div className="p-2 font-bold text-sm md:text-base border-b border-gray-300 text-center text-black bg-white print-subtitle">
+                          <div className="p-2 font-bold text-sm md:text-base border-b border-gray-400 text-center text-black bg-white print-subtitle">
                             {table.subTitle}
                           </div>
                         )}
@@ -1372,7 +1372,7 @@ export default function SingleNoticeClient({
 
                       {/* Table Specs with Watermark */}
                       <div
-                        className="pwd-scroll-wrapper w-full overflow-x-auto overflow-y-hidden bg-white relative rounded-b-xl rounded-t-none border border-gray-300 border-t-0"
+                        className="pwd-scroll-wrapper w-full overflow-x-auto overflow-y-hidden bg-white relative rounded-b-xl rounded-t-none border border-gray-400 border-t-0"
                         style={{
                           overflowY: "hidden",
                           height: "auto",
@@ -1380,7 +1380,7 @@ export default function SingleNoticeClient({
                         }}
                       >
                         {/* Centred Watermark Image with Plural/Singular Fallback */}
-                        <div className="watermark-container absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.07] select-none z-0">
+                        <div className="watermark-container absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.07] select-none z-20">
                           <img
                             src="/assets/icon/watermark.png"
                             alt="Watermark"

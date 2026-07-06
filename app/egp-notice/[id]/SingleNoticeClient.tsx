@@ -296,16 +296,16 @@ export default function SingleNoticeClient({
             <style>
               @page {
                 size: A4 ${isLandscape ? "landscape" : "portrait"};
-                margin: 0 !important;
+                margin: 20px 8mm 20px 8mm !important;
               }
               body {
-                padding: 6mm 8mm 6mm 8mm !important;
+                padding: 0 !important;
                 margin: 0;
                 font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
                 background-color: white !important;
                 color: #000000 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
                 line-height: 1.5;
               }
               .print-container {
@@ -314,6 +314,31 @@ export default function SingleNoticeClient({
                 margin: 0 auto;
                 padding: 0 !important;
                 background-color: white;
+              }
+              /* Column widths for print */
+              .auto-column {
+                width: auto !important;
+                min-width: unset !important;
+                max-width: unset !important;
+                white-space: nowrap !important;
+              }
+              .desc-column {
+                width: 32% !important;
+                white-space: normal !important;
+              }
+              .print-office-name {
+                font-size: 24pt !important;
+                text-align: center !important;
+                font-weight: bold !important;
+                background-color: white !important;
+                color: black !important;
+              }
+              .print-subtitle {
+                font-size: 14pt !important;
+                text-align: center !important;
+                font-weight: bold !important;
+                background-color: white !important;
+                color: black !important;
               }
               /* Minimal Print Header Styles */
               .print-header {
@@ -376,6 +401,7 @@ export default function SingleNoticeClient({
               }
               tr {
                 background-color: transparent !important;
+                page-break-inside: avoid !important;
               }
               td:not([style*="background-color"]) {
                 background-color: transparent !important;
@@ -384,7 +410,7 @@ export default function SingleNoticeClient({
                 border: 1px solid #9ca3af !important;
                 padding: 4px 6px !important;
                 text-align: left !important;
-                font-size: 7.2pt !important;
+                font-size: 18px !important;
               }
               td {
                 color: #000000 !important;
@@ -463,17 +489,18 @@ export default function SingleNoticeClient({
                 page-break-inside: avoid;
               }
               .watermark-container {
-                position: absolute !important;
-                top: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
-                bottom: 0 !important;
+                position: fixed !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                opacity: 0.25 !important;
-                z-index: 0 !important;
+                opacity: 0.08 !important;
+                z-index: -10 !important;
                 pointer-events: none !important;
+                width: auto !important;
+                height: auto !important;
               }
               img.watermark-img {
                 width: 480px !important;
@@ -488,10 +515,24 @@ export default function SingleNoticeClient({
               .no-print, button, .btn, h4, .print-hidden, [class*="print:hidden"] {
                 display: none !important;
               }
+              /* Print optimizations for yellow totals row */
+              .total-amount-row, .total-amount-row td {
+                background-color: #ffffcc !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              .total-amount-row td {
+                font-size: 20px !important;
+              }
             </style>
           </head>
           <body>
             <div class="print-container">
+              <div class="custom-print-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding-bottom: 4px; margin-bottom: 12px; font-family: sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                <div style="width: 30%;"></div>
+                <div style="width: 40%; text-align: center; font-size: 12px; font-weight: bold; color: #000000;">Salom Egp consultant</div>
+                <div style="width: 30%; text-align: right; font-size: 12px; color: #000000; font-weight: bold;">Print: ${getFormattedPrintDateTime()}</div>
+              </div>
               ${
                 !isLandscape
                   ? `
@@ -749,41 +790,30 @@ export default function SingleNoticeClient({
             return (
               <div
                 key={table.id || tIdx}
-                className="pwd-table-block space-y-4 p-0 bg-white relative font-bangla text-black print:p-0 print:border-0"
+                className="pwd-table-block space-y-0 p-0 bg-white relative font-bangla text-black print:p-0 print:border-0"
               >
-                {/* Main Title & Subtitle */}
-                {table.officeName && (
-                  <div className="text-center font-extrabold text-3xl md:text-4xl text-black mb-2 tracking-wide leading-tight">
-                    {table.officeName}
-                  </div>
-                )}
-                {table.subTitle && (
-                  <div className="w-full text-center font-bold text-sm md:text-base text-black mb-4 tracking-wide leading-normal bg-white">
-                    {table.subTitle}
-                  </div>
-                )}
-
-                {/* Egp Published Date */}
-                {table.noticeDateBlock && (
-                  <div className="flex justify-end mb-0">
-                    <div
-                      className="border border-black border-b-0 px-4 py-2 text-xs md:text-sm font-bold tracking-wide"
-                      style={{
-                        backgroundColor: table.headerBgColor || defaultHeaderBg,
-                        color: getHeaderTextColorHex(
-                          table.headerBgColor || defaultHeaderBg,
-                        ),
-                      }}
-                    >
-                      Egp Published Date :{" "}
-                      {formatDisplayDate(table.noticeDateBlock)}
+                {/* Unified Standalone Header Box (Renders only on 1st Page, doesn't repeat on page split) */}
+                <div className="border border-gray-300 rounded-t-xl bg-white w-full text-center print:rounded-t-none">
+                  {table.officeName && (
+                    <div className="p-3 font-extrabold text-2xl md:text-3xl border-b border-gray-300 text-center text-black bg-white print-office-name">
+                      {table.officeName}
                     </div>
-                  </div>
-                )}
+                  )}
+                  {table.subTitle && (
+                    <div className="p-2 font-bold text-sm md:text-base border-b border-gray-300 text-center text-black bg-white print-subtitle">
+                      {table.subTitle}
+                    </div>
+                  )}
+                  {table.noticeDateBlock && (
+                    <div className="p-2 font-bold text-xs md:text-sm text-right text-black bg-white pr-4">
+                      Egp Published Date : {formatDisplayDate(table.noticeDateBlock)}
+                    </div>
+                  )}
+                </div>
 
                 {/* Table Specs with Watermark */}
                 <div
-                  className="pwd-scroll-wrapper w-full overflow-x-auto overflow-y-hidden bg-white relative rounded-xl border border-gray-300"
+                  className="pwd-scroll-wrapper w-full overflow-x-auto overflow-y-hidden bg-white relative rounded-b-xl rounded-t-none border border-gray-300 border-t-0"
                   style={{
                     overflowY: "hidden",
                     height: "auto",
@@ -849,10 +879,12 @@ export default function SingleNoticeClient({
                               key={idx}
                               className={`p-3 font-bold border border-gray-400 text-base uppercase text-center ${
                                 isDesc
-                                  ? "w-[32%] min-w-[220px] whitespace-normal text-left"
-                                  : isTender || isSl
-                                    ? "whitespace-nowrap"
-                                    : "whitespace-normal"
+                                  ? "desc-column w-[32%] min-w-[220px] whitespace-normal text-left"
+                                  : "auto-column"
+                              } ${
+                                isTender || isSl
+                                  ? "whitespace-nowrap"
+                                  : ""
                               }`}
                               style={{
                                 backgroundColor:
@@ -953,10 +985,12 @@ export default function SingleNoticeClient({
                                     isCurrency ? "text-right" : "text-left"
                                   } ${
                                     isDesc
-                                      ? "w-[32%] min-w-[220px] whitespace-normal text-left"
-                                      : isTender || isSl
-                                        ? "whitespace-nowrap"
-                                        : "whitespace-normal"
+                                      ? "desc-column w-[32%] min-w-[220px] whitespace-normal text-left"
+                                      : "auto-column"
+                                  } ${
+                                    isTender || isSl
+                                      ? "whitespace-nowrap"
+                                      : ""
                                   }`}
                                   style={
                                     hasCustomBg
@@ -1002,7 +1036,7 @@ export default function SingleNoticeClient({
 
                       {/* Sum Totals Row if any sum matches */}
                       {(securityColIdx !== -1 || docFeesColIdx !== -1) && (
-                        <tr className="bg-[#ffffcc] font-bold text-black divide-x divide-gray-400 border-t-2 border-gray-500">
+                        <tr className="bg-[#ffffcc] font-bold text-black divide-x divide-gray-400 border-t-2 border-gray-500 total-amount-row">
                           {headers.map((hdr: string, idx: number) => {
                             if (idx === 0) {
                               const colSpanCount = Math.min(
@@ -1317,42 +1351,30 @@ export default function SingleNoticeClient({
                   return (
                     <div
                       key={table.id || tIdx}
-                      className="pwd-table-block space-y-4 p-0 bg-white relative font-bangla text-black print:p-0 print:border-0 select-none"
+                      className="pwd-table-block space-y-0 p-0 bg-white relative font-bangla text-black print:p-0 print:border-0 select-none"
                     >
-                      {/* Main Title & Subtitle */}
-                      {table.officeName && (
-                        <div className="text-center font-extrabold text-3xl text-black mb-2 tracking-wide">
-                          {table.officeName}
-                        </div>
-                      )}
-                      {table.subTitle && (
-                        <div className="w-full text-center font-bold text-sm md:text-base text-black mb-4 tracking-wide leading-normal bg-white">
-                          {table.subTitle}
-                        </div>
-                      )}
-
-                      {/* Egp Published Date */}
-                      {table.noticeDateBlock && (
-                        <div className="flex justify-end mb-0">
-                          <div
-                            className="border border-black border-b-0 px-4 py-2 text-xs md:text-sm font-bold tracking-wide"
-                            style={{
-                              backgroundColor:
-                                table.headerBgColor || defaultHeaderBg,
-                              color: getHeaderTextColorHex(
-                                table.headerBgColor || defaultHeaderBg,
-                              ),
-                            }}
-                          >
-                            Egp Published Date :{" "}
-                            {formatDisplayDate(table.noticeDateBlock)}
+                      {/* Unified Standalone Header Box (Renders only on 1st Page, doesn't repeat on page split) */}
+                      <div className="border border-gray-300 rounded-t-xl bg-white w-full text-center print:rounded-t-none">
+                        {table.officeName && (
+                          <div className="p-3 font-extrabold text-2xl md:text-3xl border-b border-gray-300 text-center text-black bg-white print-office-name">
+                            {table.officeName}
                           </div>
-                        </div>
-                      )}
+                        )}
+                        {table.subTitle && (
+                          <div className="p-2 font-bold text-sm md:text-base border-b border-gray-300 text-center text-black bg-white print-subtitle">
+                            {table.subTitle}
+                          </div>
+                        )}
+                        {table.noticeDateBlock && (
+                          <div className="p-2 font-bold text-xs md:text-sm text-right text-black bg-white pr-4">
+                            Egp Published Date : {formatDisplayDate(table.noticeDateBlock)}
+                          </div>
+                        )}
+                      </div>
 
                       {/* Table Specs with Watermark */}
                       <div
-                        className="pwd-scroll-wrapper w-full overflow-x-auto overflow-y-hidden bg-white relative rounded-xl border border-gray-300 print:rounded-none print:border-0"
+                        className="pwd-scroll-wrapper w-full overflow-x-auto overflow-y-hidden bg-white relative rounded-b-xl rounded-t-none border border-gray-300 border-t-0"
                         style={{
                           overflowY: "hidden",
                           height: "auto",
@@ -1406,8 +1428,8 @@ export default function SingleNoticeClient({
                                     key={idx}
                                     className={`p-2.5 font-bold border border-gray-400 text-sm uppercase text-center ${
                                       isDesc
-                                        ? "w-[30%] min-w-[220px]"
-                                        : "whitespace-nowrap"
+                                        ? "desc-column w-[30%] min-w-[220px]"
+                                        : "auto-column whitespace-nowrap"
                                     }`}
                                     style={{
                                       backgroundColor:
@@ -1480,7 +1502,11 @@ export default function SingleNoticeClient({
                                             isCurrency
                                               ? "text-right"
                                               : "text-left"
-                                          } ${isDesc ? "w-[30%] min-w-[220px]" : "whitespace-nowrap"}`}
+                                          } ${
+                                            isDesc
+                                              ? "desc-column w-[30%] min-w-[220px]"
+                                              : "auto-column whitespace-nowrap"
+                                          }`}
                                           style={
                                             hasCustomBg
                                               ? { backgroundColor: cellBg }
@@ -1507,7 +1533,7 @@ export default function SingleNoticeClient({
                             {/* Sum Totals Row if any sum matches */}
                             {(securityColIdx !== -1 ||
                               docFeesColIdx !== -1) && (
-                              <tr className="bg-[#ffffcc] font-bold text-black divide-x divide-gray-400 border-t-2 border-gray-500">
+                              <tr className="bg-[#ffffcc] font-bold text-black divide-x divide-gray-400 border-t-2 border-gray-500 total-amount-row">
                                 {headers.map((hdr: string, idx: number) => {
                                   if (idx === 0) {
                                     const colSpanCount = Math.min(

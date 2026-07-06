@@ -430,7 +430,11 @@ function migrateTableRows(
         newHdr.toLowerCase().includes("method") ||
         newHdr.toLowerCase().includes("matho")
       ) {
-        return newCategory === "OTM" ? "OTM" : "LTM SOCIAL";
+        if (newCategory === "OTM") return "OTM";
+        if (newCategory === "LTM") return "LTM";
+        if (newCategory === "LOTTERY_PENDING") return "Lottery Pending";
+        if (newCategory === "LOTTERY_RESULT") return "Lottery Result";
+        return newCategory;
       }
 
       // 3. Match from existing headers using normalized strings
@@ -1582,8 +1586,13 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           if (
             hdr.toLowerCase().includes("method") ||
             hdr.toLowerCase().includes("matho")
-          )
-            return category === "OTM" ? "OTM" : "LTM SOCIAL";
+          ) {
+            if (category === "OTM") return "OTM";
+            if (category === "LTM") return "LTM";
+            if (category === "LOTTERY_PENDING") return "Lottery Pending";
+            if (category === "LOTTERY_RESULT") return "Lottery Result";
+            return category;
+          }
           return "";
         });
 
@@ -1761,8 +1770,13 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         if (
           hdr.toLowerCase().includes("method") ||
           hdr.toLowerCase().includes("matho")
-        )
-          return category === "OTM" ? "OTM" : "LTM SOCIAL";
+        ) {
+          if (category === "OTM") return "OTM";
+          if (category === "LTM") return "LTM";
+          if (category === "LOTTERY_PENDING") return "Lottery Pending";
+          if (category === "LOTTERY_RESULT") return "Lottery Result";
+          return category;
+        }
         return "";
       });
 
@@ -1848,7 +1862,11 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           return lower.includes("method") || lower.includes("matho");
         });
         if (methodColIdx !== -1 && newRow.length > methodColIdx) {
-          newRow[methodColIdx] = category === "OTM" ? "OTM" : "LTM SOCIAL";
+          if (category === "OTM") newRow[methodColIdx] = "OTM";
+          else if (category === "LTM") newRow[methodColIdx] = "LTM";
+          else if (category === "LOTTERY_PENDING") newRow[methodColIdx] = "Lottery Pending";
+          else if (category === "LOTTERY_RESULT") newRow[methodColIdx] = "Lottery Result";
+          else newRow[methodColIdx] = category;
         }
 
         // Auto-populate Location from table's workLocation if selected

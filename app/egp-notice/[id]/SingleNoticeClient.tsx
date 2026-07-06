@@ -296,7 +296,7 @@ export default function SingleNoticeClient({
             <style>
               @page {
                 size: A4 ${isLandscape ? "landscape" : "portrait"};
-                margin: 20px 8mm 20px 8mm !important;
+                margin: 4mm 4mm 4mm 4mm !important;
               }
               body {
                 padding: 0 !important;
@@ -313,14 +313,15 @@ export default function SingleNoticeClient({
                 max-width: 100% !important;
                 margin: 0 auto;
                 padding: 0 !important;
-                background-color: white;
+                background-color: transparent !important;
               }
               /* Column widths for print */
               .auto-column {
                 width: auto !important;
                 min-width: unset !important;
                 max-width: unset !important;
-                white-space: nowrap !important;
+                white-space: normal !important;
+                word-wrap: break-word !important;
               }
               .desc-column {
                 width: 32% !important;
@@ -439,6 +440,8 @@ export default function SingleNoticeClient({
                 padding: 0 !important;
                 margin-bottom: 4px !important;
                 overflow: hidden !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
               }
               .footer-card-label {
                 display: inline-block !important;
@@ -464,6 +467,8 @@ export default function SingleNoticeClient({
                 margin-top: 10pt !important;
                 margin-bottom: 4px !important;
                 overflow: hidden !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
               }
               .warning-card-label {
                 display: inline-block !important;
@@ -489,18 +494,17 @@ export default function SingleNoticeClient({
                 page-break-inside: avoid;
               }
               .watermark-container {
-                position: fixed !important;
-                top: 50% !important;
-                left: 50% !important;
-                transform: translate(-50%, -50%) !important;
                 display: flex !important;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
                 align-items: center !important;
                 justify-content: center !important;
-                opacity: 0.08 !important;
-                z-index: -10 !important;
+                z-index: -100 !important;
                 pointer-events: none !important;
-                width: auto !important;
-                height: auto !important;
+                opacity: 0.08 !important;
               }
               img.watermark-img {
                 width: 480px !important;

@@ -3002,14 +3002,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                         >
                           <Plus className="w-3.5 h-3.5 !text-white" /> Row
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => removeTableBlock(tIdx)}
-                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-xs cursor-pointer border-0 active:scale-95"
-                          title="Delete Entire Table Block"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" /> Delete Table
-                        </button>
+
                       </div>
                     </div>
                     {/* Table grid */}

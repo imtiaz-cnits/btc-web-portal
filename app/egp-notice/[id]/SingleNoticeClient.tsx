@@ -318,7 +318,7 @@ export default function SingleNoticeClient({
                 padding: 0 !important;
                 background-color: transparent !important;
               }
-              .print-wrapper-box {
+              .print-container > div {
                 padding-left: 0px !important;
                 padding-right: 0px !important;
                 padding-top: 0px !important;
@@ -454,7 +454,8 @@ export default function SingleNoticeClient({
                 print-color-adjust: exact !important;
               }
               .footer-card-label {
-                display: inline-block !important;
+                display: block !important;
+                width: fit-content !important;
                 border-right: 1px solid #9ca3af !important;
                 border-bottom: 1px solid #9ca3af !important;
                 border-top: none !important;
@@ -482,7 +483,8 @@ export default function SingleNoticeClient({
                 print-color-adjust: exact !important;
               }
               .warning-card-label {
-                display: inline-block !important;
+                display: block !important;
+                width: fit-content !important;
                 border-right: 1px solid #9ca3af !important;
                 border-bottom: 1px solid #9ca3af !important;
                 border-top: none !important;
@@ -1176,10 +1178,14 @@ export default function SingleNoticeClient({
                         }}
                       >
                         <div 
-                          className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
+                          className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
                           style={{
                             backgroundColor: table.headerBgColor || defaultHeaderBg,
                             color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                            display: "flex",
+                            width: "max-content",
+                            alignItems: "center",
+                            gap: "8px",
                           }}
                         >
                           <i className="fa-solid fa-building-columns print:hidden"></i>
@@ -1200,10 +1206,14 @@ export default function SingleNoticeClient({
                       }}
                     >
                       <div 
-                        className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
+                        className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
                         style={{
                           backgroundColor: table.headerBgColor || defaultHeaderBg,
                           color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                          display: "flex",
+                          width: "max-content",
+                          alignItems: "center",
+                          gap: "8px",
                         }}
                       >
                         <i className="fa-solid fa-circle-info print:hidden"></i>
@@ -1244,10 +1254,14 @@ export default function SingleNoticeClient({
                     }}
                   >
                     <div 
-                      className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2"
+                      className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2"
                       style={{
                         backgroundColor: "#dc2626",
                         color: "#ffffff",
+                        display: "flex",
+                        width: "max-content",
+                        alignItems: "center",
+                        gap: "8px",
                       }}
                     >
                       <i className="fa-solid fa-circle-exclamation text-white print:hidden"></i>
@@ -1766,10 +1780,14 @@ export default function SingleNoticeClient({
                               }}
                             >
                               <div 
-                                className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
+                                className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
                                 style={{
                                   backgroundColor: table.headerBgColor || defaultHeaderBg,
                                   color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                                  display: "flex",
+                                  width: "max-content",
+                                  alignItems: "center",
+                                  gap: "8px",
                                 }}
                               >
                                 <i className="fa-solid fa-building-columns print:hidden"></i>
@@ -1790,10 +1808,14 @@ export default function SingleNoticeClient({
                             }}
                           >
                             <div 
-                              className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
+                              className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
                               style={{
                                 backgroundColor: table.headerBgColor || defaultHeaderBg,
                                 color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                                display: "flex",
+                                width: "max-content",
+                                alignItems: "center",
+                                gap: "8px",
                               }}
                             >
                               <i className="fa-solid fa-circle-info print:hidden"></i>
@@ -1832,10 +1854,14 @@ export default function SingleNoticeClient({
                           }}
                         >
                           <div 
-                            className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2"
+                            className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2"
                             style={{
                               backgroundColor: "#dc2626",
                               color: "#ffffff",
+                              display: "flex",
+                              width: "max-content",
+                              alignItems: "center",
+                              gap: "8px",
                             }}
                           >
                             <i className="fa-solid fa-circle-exclamation text-white print:hidden"></i>

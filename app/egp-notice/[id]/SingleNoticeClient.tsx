@@ -420,7 +420,7 @@ export default function SingleNoticeClient({
                 background-color: transparent !important;
               }
               th, td {
-                border: 1px solid #9ca3af !important;
+                border: 1px solid #374151 !important;
                 padding: 4px 4px !important;
                 word-wrap: break-word !important;
                 word-break: normal !important;
@@ -439,7 +439,6 @@ export default function SingleNoticeClient({
                 print-color-adjust: exact !important;
               }
               .pwd-scroll-wrapper {
-                border: 1px solid #9ca3af !important;
                 border-radius: 0 !important;
                 overflow: hidden !important;
               }
@@ -540,6 +539,10 @@ export default function SingleNoticeClient({
               }
               .total-amount-row td {
                 font-size: 13px !important;
+              }
+              .print-container th, 
+              .print-container td {
+                border-color: #000000 !important;
               }
             </style>
           </head>
@@ -813,28 +816,46 @@ export default function SingleNoticeClient({
                 className="pwd-table-block space-y-0 p-0 bg-white relative font-bangla text-black print:p-0 print:border-0"
               >
                 {/* Unified Standalone Header Box (Renders only on 1st Page, doesn't repeat on page split) */}
-                <div className="border border-gray-400 rounded-t-xl bg-white w-full text-center print:rounded-t-none">
+                <div
+                  className="bg-white w-full text-center print:rounded-t-none"
+                  style={{
+                    border: `2px solid #374151`,
+                  }}
+                >
                   {table.officeName && (
-                    <div className="p-3 font-extrabold text-2xl md:text-3xl border-b border-gray-400 text-center text-black bg-white print-office-name">
+                    <div
+                      className="p-3 font-extrabold text-2xl md:text-3xl text-center text-black bg-white print-office-name"
+                      style={{ borderBottom: `2px solid #374151` }}
+                    >
                       {table.officeName}
                     </div>
                   )}
                   {table.subTitle && (
-                    <div className="p-2 font-bold text-sm md:text-base border-b border-gray-400 text-center text-black bg-white print-subtitle">
+                    <div
+                      className="p-2 font-bold text-sm md:text-base text-center text-black bg-white print-subtitle"
+                      style={{ borderBottom: `2px solid #374151` }}
+                    >
                       {table.subTitle}
                     </div>
                   )}
                   {table.noticeDateBlock && (
-                    <div className="p-0 text-right bg-white pr-4" style={{ padding: "0px !important" }}>
-                      <span 
+                    <div
+                      className="p-0 text-right bg-white pr-4"
+                      style={{ padding: "0px !important" }}
+                    >
+                      <span
                         className="inline-block font-bold text-xs md:text-sm"
                         style={{
-                          backgroundColor: table.headerBgColor || defaultHeaderBg,
-                          color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                          backgroundColor:
+                            table.headerBgColor || defaultHeaderBg,
+                          color: getHeaderTextColorHex(
+                            table.headerBgColor || defaultHeaderBg,
+                          ),
                           padding: "4px 8px !important",
                         }}
                       >
-                        Egp Published Date : {formatDisplayDate(table.noticeDateBlock)}
+                        Egp Published Date :{" "}
+                        {formatDisplayDate(table.noticeDateBlock)}
                       </span>
                     </div>
                   )}
@@ -842,8 +863,10 @@ export default function SingleNoticeClient({
 
                 {/* Table Specs with Watermark */}
                 <div
-                  className="pwd-scroll-wrapper w-full overflow-x-auto overflow-y-hidden bg-white relative rounded-b-xl rounded-t-none border border-gray-400 border-t-0"
+                  className="pwd-scroll-wrapper w-full overflow-x-auto overflow-y-hidden bg-white relative print:border-t-none"
                   style={{
+                    border: `2px solid #374151`,
+                    borderTop: 0,
                     overflowY: "hidden",
                     height: "auto",
                     maxHeight: "none",
@@ -911,11 +934,7 @@ export default function SingleNoticeClient({
                                 isDesc
                                   ? "desc-column w-[32%] min-w-[220px] whitespace-normal"
                                   : "auto-column"
-                              } ${
-                                isTender || isSl
-                                  ? "whitespace-nowrap"
-                                  : ""
-                              }`}
+                              } ${isTender || isSl ? "whitespace-nowrap" : ""}`}
                               style={{
                                 backgroundColor:
                                   table.headerBgColor || defaultHeaderBg,
@@ -1005,11 +1024,13 @@ export default function SingleNoticeClient({
                                 headers[cIdx] || "",
                               );
 
-                              const colHdr = (headers[cIdx] || "").toLowerCase().trim();
-                              const isCenterAlignCol = 
-                                colHdr === "sl.no" || 
-                                colHdr === "sl no" || 
-                                colHdr === "sl. no" || 
+                              const colHdr = (headers[cIdx] || "")
+                                .toLowerCase()
+                                .trim();
+                              const isCenterAlignCol =
+                                colHdr === "sl.no" ||
+                                colHdr === "sl no" ||
+                                colHdr === "sl. no" ||
                                 colHdr === "sl" ||
                                 colHdr.includes("method") ||
                                 colHdr.includes("mathod");
@@ -1027,10 +1048,10 @@ export default function SingleNoticeClient({
                                 colHdr.includes("similar") ||
                                 colHdr.includes("tk");
 
-                              const cellAlignClass = isCenterAlignCol 
-                                ? "text-center" 
-                                : isCurrencyAlignCol 
-                                  ? "text-right" 
+                              const cellAlignClass = isCenterAlignCol
+                                ? "text-center"
+                                : isCurrencyAlignCol
+                                  ? "text-right"
                                   : "text-left";
 
                               return (
@@ -1041,13 +1062,15 @@ export default function SingleNoticeClient({
                                       ? "desc-column w-[32%] min-w-[220px] whitespace-normal text-left"
                                       : "auto-column"
                                   } ${
-                                    isTender || isSl
-                                      ? "whitespace-nowrap"
-                                      : ""
+                                    isTender || isSl ? "whitespace-nowrap" : ""
                                   }`}
                                   style={{
                                     backgroundColor: cellBg,
-                                    textAlign: isCenterAlignCol ? "center" : isCurrencyAlignCol ? "right" : "left",
+                                    textAlign: isCenterAlignCol
+                                      ? "center"
+                                      : isCurrencyAlignCol
+                                        ? "right"
+                                        : "left",
                                     WebkitPrintColorAdjust: "exact",
                                     printColorAdjust: "exact",
                                   }}
@@ -1090,7 +1113,10 @@ export default function SingleNoticeClient({
 
                       {/* Sum Totals Row if any sum matches */}
                       {(securityColIdx !== -1 || docFeesColIdx !== -1) && (
-                        <tr className="bg-[#facc15] font-bold text-black divide-x divide-gray-400 border-t-2 border-gray-500 total-amount-row" style={{ backgroundColor: "#facc15" }}>
+                        <tr
+                          className="bg-[#facc15] font-bold text-black divide-x divide-gray-400 border-t-2 border-gray-500 total-amount-row"
+                          style={{ backgroundColor: "#facc15" }}
+                        >
                           {headers.map((hdr: string, idx: number) => {
                             if (idx === 0) {
                               const colSpanCount = Math.min(
@@ -1103,7 +1129,10 @@ export default function SingleNoticeClient({
                                 <td
                                   key={idx}
                                   className="p-3 border border-gray-400 text-right text-base font-extrabold bg-[#facc15]"
-                                  style={{ backgroundColor: "#facc15", textAlign: "right" }}
+                                  style={{
+                                    backgroundColor: "#facc15",
+                                    textAlign: "right",
+                                  }}
                                   colSpan={colSpanCount + (!hasSl ? 1 : 0)}
                                 >
                                   Total Amount BD Tk =
@@ -1122,7 +1151,10 @@ export default function SingleNoticeClient({
                                 <td
                                   key={idx}
                                   className="p-3 border border-gray-400 text-base font-extrabold text-black bg-[#facc15] text-right"
-                                  style={{ backgroundColor: "#facc15", textAlign: "right" }}
+                                  style={{
+                                    backgroundColor: "#facc15",
+                                    textAlign: "right",
+                                  }}
                                 >
                                   {formatMoney(totalSecurity)}
                                 </td>
@@ -1133,7 +1165,10 @@ export default function SingleNoticeClient({
                                 <td
                                   key={idx}
                                   className="p-3 border border-gray-400 text-sm font-extrabold text-black bg-[#facc15] text-right"
-                                  style={{ backgroundColor: "#facc15", textAlign: "right" }}
+                                  style={{
+                                    backgroundColor: "#facc15",
+                                    textAlign: "right",
+                                  }}
                                 >
                                   {formatMoney(totalDocFees)}
                                 </td>
@@ -1168,20 +1203,23 @@ export default function SingleNoticeClient({
                 {(table.payOrderTo || true) && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 print:mt-3 print:grid-cols-2 font-bangla text-black">
                     {table.payOrderTo && (
-                      <div 
+                      <div
                         className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
                         style={{
                           borderLeft: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
                           borderRight: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
-                          borderTop: "1px solid #9ca3af",
-                          borderBottom: "1px solid #9ca3af",
+                          borderTop: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
+                          borderBottom: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
                         }}
                       >
-                        <div 
+                        <div
                           className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
                           style={{
-                            backgroundColor: table.headerBgColor || defaultHeaderBg,
-                            color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                            backgroundColor:
+                              table.headerBgColor || defaultHeaderBg,
+                            color: getHeaderTextColorHex(
+                              table.headerBgColor || defaultHeaderBg,
+                            ),
                             display: "flex",
                             width: "max-content",
                             alignItems: "center",
@@ -1196,20 +1234,23 @@ export default function SingleNoticeClient({
                         </div>
                       </div>
                     )}
-                    <div 
+                    <div
                       className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
                       style={{
                         borderLeft: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
                         borderRight: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
-                        borderTop: "1px solid #9ca3af",
-                        borderBottom: "1px solid #9ca3af",
+                        borderTop: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
+                        borderBottom: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
                       }}
                     >
-                      <div 
+                      <div
                         className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
                         style={{
-                          backgroundColor: table.headerBgColor || defaultHeaderBg,
-                          color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                          backgroundColor:
+                            table.headerBgColor || defaultHeaderBg,
+                          color: getHeaderTextColorHex(
+                            table.headerBgColor || defaultHeaderBg,
+                          ),
                           display: "flex",
                           width: "max-content",
                           alignItems: "center",
@@ -1244,16 +1285,16 @@ export default function SingleNoticeClient({
 
                 {/* Red Warning alert below table */}
                 {table.bottomWarning && notice.category !== "OTM" && (
-                  <div 
+                  <div
                     className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
                     style={{
                       borderLeft: "4px solid #dc2626",
                       borderRight: "4px solid #dc2626",
-                      borderTop: "1px solid #fee2e2",
-                      borderBottom: "1px solid #fee2e2",
+                      borderTop: "2px solid #dc2626",
+                      borderBottom: "2px solid #dc2626",
                     }}
                   >
-                    <div 
+                    <div
                       className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2"
                       style={{
                         backgroundColor: "#dc2626",
@@ -1267,7 +1308,7 @@ export default function SingleNoticeClient({
                       <i className="fa-solid fa-circle-exclamation text-white print:hidden"></i>
                       Information :
                     </div>
-                    <div 
+                    <div
                       className="footer-card-content p-4 text-red-650 font-extrabold text-sm leading-relaxed font-bangla"
                       style={{ color: "#dc2626" }}
                     >
@@ -1286,11 +1327,15 @@ export default function SingleNoticeClient({
   // 2. STANDARD NOTICE LAYOUT
   return (
     <div className="single_notice_page bg-secondary py-16 min-h-screen">
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         .single_notice_page * {
           font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
         }
-      `}} />
+      `,
+        }}
+      />
       <div className="custom-container">
         {/* Header Section */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-6">
@@ -1349,7 +1394,10 @@ export default function SingleNoticeClient({
 
         {/* Dynamic Content Display Area */}
         <div className="bg-white rounded-[32px] border border-ac-2 shadow-xl overflow-hidden p-6 md:p-10">
-          <div ref={printAreaRef} className="print-wrapper-box w-full space-y-10">
+          <div
+            ref={printAreaRef}
+            className="print-wrapper-box w-full space-y-10"
+          >
             {/* 1. ATTACHMENT VIEW (Renders if present) */}
             {notice.filePath && (
               <div className="w-full relative bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 p-2">
@@ -1474,28 +1522,44 @@ export default function SingleNoticeClient({
                       className="pwd-table-block space-y-0 p-0 bg-white relative font-bangla text-black print:p-0 print:border-0 select-none"
                     >
                       {/* Unified Standalone Header Box (Renders only on 1st Page, doesn't repeat on page split) */}
-                      <div className="border border-gray-400 rounded-t-xl bg-white w-full text-center print:rounded-t-none">
+                      <div
+                        className=" bg-white w-full text-center print:rounded-t-none"
+                        style={{ border: `2px solid #374151` }}
+                      >
                         {table.officeName && (
-                          <div className="p-3 font-extrabold text-2xl md:text-3xl border-b border-gray-400 text-center text-black bg-white print-office-name">
+                          <div
+                            className="p-3 font-extrabold text-2xl md:text-3xl text-center text-black bg-white print-office-name"
+                            style={{ borderBottom: `2px solid #374151` }}
+                          >
                             {table.officeName}
                           </div>
                         )}
                         {table.subTitle && (
-                          <div className="p-2 font-bold text-sm md:text-base border-b border-gray-400 text-center text-black bg-white print-subtitle">
+                          <div
+                            className="p-2 font-bold text-sm md:text-base text-center text-black bg-white print-subtitle"
+                            style={{ borderBottom: `2px solid #374151` }}
+                          >
                             {table.subTitle}
                           </div>
                         )}
                         {table.noticeDateBlock && (
-                          <div className="p-0 text-right bg-white pr-4" style={{ padding: "0px !important" }}>
-                            <span 
+                          <div
+                            className="p-0 text-right bg-white pr-4"
+                            style={{ padding: "0px !important" }}
+                          >
+                            <span
                               className="inline-block font-bold text-xs md:text-sm"
                               style={{
-                                backgroundColor: table.headerBgColor || defaultHeaderBg,
-                                color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                                backgroundColor:
+                                  table.headerBgColor || defaultHeaderBg,
+                                color: getHeaderTextColorHex(
+                                  table.headerBgColor || defaultHeaderBg,
+                                ),
                                 padding: "4px 8px !important",
                               }}
                             >
-                              Egp Published Date : {formatDisplayDate(table.noticeDateBlock)}
+                              Egp Published Date :{" "}
+                              {formatDisplayDate(table.noticeDateBlock)}
                             </span>
                           </div>
                         )}
@@ -1503,8 +1567,10 @@ export default function SingleNoticeClient({
 
                       {/* Table Specs with Watermark */}
                       <div
-                        className="pwd-scroll-wrapper w-full overflow-x-auto overflow-y-hidden bg-white relative rounded-b-xl rounded-t-none border border-gray-400 border-t-0"
+                        className="pwd-scroll-wrapper w-full overflow-x-auto overflow-y-hidden bg-white relative print:border-t-none"
                         style={{
+                          border: `2px solid #374151`,
+                          borderTop: 0,
                           overflowY: "hidden",
                           height: "auto",
                           maxHeight: "none",
@@ -1624,11 +1690,13 @@ export default function SingleNoticeClient({
                                         cellBg !== "#ffffff" &&
                                         cellBg !== "#fff";
 
-                                      const colHdr = (headers[cIdx] || "").toLowerCase().trim();
-                                      const isCenterAlignCol = 
-                                        colHdr === "sl.no" || 
-                                        colHdr === "sl no" || 
-                                        colHdr === "sl. no" || 
+                                      const colHdr = (headers[cIdx] || "")
+                                        .toLowerCase()
+                                        .trim();
+                                      const isCenterAlignCol =
+                                        colHdr === "sl.no" ||
+                                        colHdr === "sl no" ||
+                                        colHdr === "sl. no" ||
                                         colHdr === "sl" ||
                                         colHdr.includes("method") ||
                                         colHdr.includes("mathod");
@@ -1646,10 +1714,10 @@ export default function SingleNoticeClient({
                                         colHdr.includes("similar") ||
                                         colHdr.includes("tk");
 
-                                      const cellAlignClass = isCenterAlignCol 
-                                        ? "text-center" 
-                                        : isCurrencyAlignCol 
-                                          ? "text-right" 
+                                      const cellAlignClass = isCenterAlignCol
+                                        ? "text-center"
+                                        : isCurrencyAlignCol
+                                          ? "text-right"
                                           : "text-left";
 
                                       return (
@@ -1662,7 +1730,11 @@ export default function SingleNoticeClient({
                                           }`}
                                           style={{
                                             backgroundColor: cellBg,
-                                            textAlign: isCenterAlignCol ? "center" : isCurrencyAlignCol ? "right" : "left",
+                                            textAlign: isCenterAlignCol
+                                              ? "center"
+                                              : isCurrencyAlignCol
+                                                ? "right"
+                                                : "left",
                                             WebkitPrintColorAdjust: "exact",
                                             printColorAdjust: "exact",
                                           }}
@@ -1687,7 +1759,7 @@ export default function SingleNoticeClient({
                             {/* Sum Totals Row if any sum matches */}
                             {(securityColIdx !== -1 ||
                               docFeesColIdx !== -1) && (
-                              <tr 
+                              <tr
                                 className="bg-[#facc15] font-bold text-black divide-x divide-gray-400 border-t-2 border-gray-500 total-amount-row"
                                 style={{ backgroundColor: "#facc15" }}
                               >
@@ -1703,7 +1775,10 @@ export default function SingleNoticeClient({
                                       <td
                                         key={idx}
                                         className="p-2.5 border border-gray-400 text-right text-sm font-extrabold bg-[#facc15]"
-                                        style={{ backgroundColor: "#facc15", textAlign: "right" }}
+                                        style={{
+                                          backgroundColor: "#facc15",
+                                          textAlign: "right",
+                                        }}
                                         colSpan={
                                           colSpanCount + (!hasSl ? 1 : 0)
                                         }
@@ -1724,7 +1799,10 @@ export default function SingleNoticeClient({
                                       <td
                                         key={idx}
                                         className="p-2.5 border border-gray-400 text-sm font-extrabold text-black bg-[#facc15] text-right"
-                                        style={{ backgroundColor: "#facc15", textAlign: "right" }}
+                                        style={{
+                                          backgroundColor: "#facc15",
+                                          textAlign: "right",
+                                        }}
                                       >
                                         {formatMoney(totalSecurity)}
                                       </td>
@@ -1735,7 +1813,10 @@ export default function SingleNoticeClient({
                                       <td
                                         key={idx}
                                         className="p-2.5 border border-gray-400 text-sm font-extrabold text-black bg-[#facc15] text-right"
-                                        style={{ backgroundColor: "#facc15", textAlign: "right" }}
+                                        style={{
+                                          backgroundColor: "#facc15",
+                                          textAlign: "right",
+                                        }}
                                       >
                                         {formatMoney(totalDocFees)}
                                       </td>
@@ -1770,20 +1851,23 @@ export default function SingleNoticeClient({
                       {(table.payOrderTo || true) && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 print:mt-3 print:grid-cols-2 font-bangla text-black">
                           {table.payOrderTo && (
-                            <div 
+                            <div
                               className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
                               style={{
                                 borderLeft: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
                                 borderRight: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
-                                borderTop: "1px solid #9ca3af",
-                                borderBottom: "1px solid #9ca3af",
+                                borderTop: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
+                                borderBottom: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
                               }}
                             >
-                              <div 
+                              <div
                                 className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
                                 style={{
-                                  backgroundColor: table.headerBgColor || defaultHeaderBg,
-                                  color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                                  backgroundColor:
+                                    table.headerBgColor || defaultHeaderBg,
+                                  color: getHeaderTextColorHex(
+                                    table.headerBgColor || defaultHeaderBg,
+                                  ),
                                   display: "flex",
                                   width: "max-content",
                                   alignItems: "center",
@@ -1798,20 +1882,23 @@ export default function SingleNoticeClient({
                               </div>
                             </div>
                           )}
-                          <div 
+                          <div
                             className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
                             style={{
                               borderLeft: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
                               borderRight: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
-                              borderTop: "1px solid #9ca3af",
-                              borderBottom: "1px solid #9ca3af",
+                              borderTop: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
+                              borderBottom: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
                             }}
                           >
-                            <div 
+                            <div
                               className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
                               style={{
-                                backgroundColor: table.headerBgColor || defaultHeaderBg,
-                                color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                                backgroundColor:
+                                  table.headerBgColor || defaultHeaderBg,
+                                color: getHeaderTextColorHex(
+                                  table.headerBgColor || defaultHeaderBg,
+                                ),
                                 display: "flex",
                                 width: "max-content",
                                 alignItems: "center",
@@ -1844,16 +1931,16 @@ export default function SingleNoticeClient({
 
                       {/* Red Warning alert below table */}
                       {table.bottomWarning && notice.category !== "OTM" && (
-                        <div 
+                        <div
                           className="footer-card rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden mt-4"
                           style={{
                             borderLeft: "4px solid #dc2626",
                             borderRight: "4px solid #dc2626",
-                            borderTop: "1px solid #fee2e2",
-                            borderBottom: "1px solid #fee2e2",
+                            borderTop: "2px solid #dc2626",
+                            borderBottom: "2px solid #dc2626",
                           }}
                         >
-                          <div 
+                          <div
                             className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2"
                             style={{
                               backgroundColor: "#dc2626",
@@ -1867,7 +1954,7 @@ export default function SingleNoticeClient({
                             <i className="fa-solid fa-circle-exclamation text-white print:hidden"></i>
                             Information :
                           </div>
-                          <div 
+                          <div
                             className="footer-card-content p-4 text-red-650 font-extrabold text-sm leading-relaxed font-bangla"
                             style={{ color: "#dc2626" }}
                           >

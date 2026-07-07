@@ -294,11 +294,15 @@ export default function SingleNoticeClient({
           <head>
             <title>&nbsp;</title>
             <style>
+              @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla&display=swap');
               @page {
                 size: A4 ${isLandscape ? "landscape" : "portrait"};
                 margin: 4mm 4mm 4mm 4mm !important;
               }
               * {
+                font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+              }
+              *[class]:not(.print-office-name), *[style]:not(.print-office-name), .font-bangla:not(.print-office-name), [style*="font-family"]:not(.print-office-name) {
                 font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
               }
               body {
@@ -343,6 +347,7 @@ export default function SingleNoticeClient({
                 font-size: 24pt !important;
                 text-align: center !important;
                 font-weight: bold !important;
+                font-family: 'Tiro Bangla', serif !important;
                 background-color: white !important;
                 color: black !important;
               }
@@ -350,6 +355,7 @@ export default function SingleNoticeClient({
                 font-size: 14pt !important;
                 text-align: center !important;
                 font-weight: bold !important;
+                font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
                 background-color: white !important;
                 color: black !important;
               }
@@ -358,7 +364,7 @@ export default function SingleNoticeClient({
                 border-bottom: 2px solid #1b4332 !important;
                 padding-bottom: 10pt !important;
                 margin-bottom: 15pt !important;
-                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
               }
               .notice-title {
                 font-size: 18pt !important;
@@ -367,7 +373,7 @@ export default function SingleNoticeClient({
                 margin: 0 0 8pt 0 !important;
                 line-height: 1.4 !important;
                 text-align: left !important;
-                font-family: 'Space Grotesk', 'Tiro Bangla', sans-serif !important;
+                font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
               }
               .notice-details-bar {
                 display: flex !important;
@@ -671,8 +677,12 @@ export default function SingleNoticeClient({
             width: 100% !important;
             max-width: 100% !important;
           }
-          * {
+          @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla&display=swap');
+          *, *[class]:not(.print-office-name), *[style]:not(.print-office-name), .font-bangla:not(.print-office-name), [style*="font-family"]:not(.print-office-name) {
             font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+          }
+          .print-office-name {
+            font-family: 'Tiro Bangla', serif !important;
           }
         `,
           }}
@@ -825,7 +835,9 @@ export default function SingleNoticeClient({
                   {table.officeName && (
                     <div
                       className="p-3 font-extrabold text-2xl md:text-3xl text-center text-black bg-white print-office-name"
-                      style={{ borderBottom: `2px solid #374151` }}
+                      style={{ 
+                        borderBottom: `2px solid #374151`,
+                      }}
                     >
                       {table.officeName}
                     </div>
@@ -1330,8 +1342,12 @@ export default function SingleNoticeClient({
       <style
         dangerouslySetInnerHTML={{
           __html: `
-        .single_notice_page * {
+        @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla&display=swap');
+        .single_notice_page *, .single_notice_page *[class]:not(.print-office-name), .single_notice_page *[style]:not(.print-office-name), .single_notice_page .font-bangla:not(.print-office-name), .single_notice_page [style*="font-family"]:not(.print-office-name) {
           font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+        }
+        .single_notice_page .print-office-name {
+          font-family: 'Tiro Bangla', serif !important;
         }
       `,
         }}
@@ -1529,7 +1545,9 @@ export default function SingleNoticeClient({
                         {table.officeName && (
                           <div
                             className="p-3 font-extrabold text-2xl md:text-3xl text-center text-black bg-white print-office-name"
-                            style={{ borderBottom: `2px solid #374151` }}
+                            style={{ 
+                              borderBottom: `2px solid #374151`,
+                            }}
                           >
                             {table.officeName}
                           </div>

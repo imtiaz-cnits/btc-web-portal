@@ -537,6 +537,20 @@ const getLastDateColIdx = (headers: string[]) => {
   });
 };
 
+const getFormattedSubTitle = (sub: string, cat: string): string => {
+  let cleaned = (sub || "")
+    .replace(/\s*\(OTM\s+Method\)/gi, "")
+    .replace(/\s*\(LTM\s+Method\)/gi, "")
+    .trim();
+  if (cat === "OTM") {
+    return cleaned ? `${cleaned} (OTM Method)` : " (OTM Method)".trim();
+  }
+  if (cat === "LTM") {
+    return cleaned ? `${cleaned} (LTM Method)` : " (LTM Method)".trim();
+  }
+  return cleaned;
+};
+
 const getColumnMinWidth = (hdr: string): string => {
   const lower = (hdr || "").toLowerCase().trim();
   if (
@@ -1691,6 +1705,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
   // Dynamically migrate table columns and structures based on the Notice Category selected
   useEffect(() => {
+    setSubTitle((prev) => getFormattedSubTitle(prev, category));
+
     setTablesList((prev) => {
       if (prev.length === 0) return prev;
       return prev.map((table) => {
@@ -1743,12 +1759,15 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           defaultHeaderBg = category === "OTM" ? "#059669" : "#0891b2";
         }
 
+        const updatedSub = getFormattedSubTitle(table.subTitle || "", category);
+
         return {
           ...table,
           headers: targetHeaders,
           rows: migratedRows,
           columnColors: migratedColors,
           headerBgColor: defaultHeaderBg,
+          subTitle: updatedSub,
         };
       });
     });
@@ -2495,8 +2514,15 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                     if (e.key === "Enter") {
                       e.preventDefault();
                       if (newSubTitleInput.trim()) {
+                        const formatted = getFormattedSubTitle(newSubTitleInput.trim(), category);
                         handleAddSubTitleOption(newSubTitleInput.trim());
-                        setSubTitle(newSubTitleInput.trim());
+                        setSubTitle(formatted);
+                        setTablesList((prev) =>
+                          prev.map((t) => ({
+                            ...t,
+                            subTitle: formatted,
+                          })),
+                        );
                         setNewSubTitleInput("");
                         setShowSubTitleDropdown(false);
                       }
@@ -2509,8 +2535,15 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                   type="button"
                   onClick={() => {
                     if (newSubTitleInput.trim()) {
+                      const formatted = getFormattedSubTitle(newSubTitleInput.trim(), category);
                       handleAddSubTitleOption(newSubTitleInput.trim());
-                      setSubTitle(newSubTitleInput.trim());
+                      setSubTitle(formatted);
+                      setTablesList((prev) =>
+                        prev.map((t) => ({
+                          ...t,
+                          subTitle: formatted,
+                        })),
+                      );
                       setNewSubTitleInput("");
                       setShowSubTitleDropdown(false);
                     }
@@ -2531,7 +2564,14 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                     <div
                       key={opt}
                       onClick={() => {
-                        setSubTitle(opt);
+                        const formatted = getFormattedSubTitle(opt, category);
+                        setSubTitle(formatted);
+                        setTablesList((prev) =>
+                          prev.map((t) => ({
+                            ...t,
+                            subTitle: formatted,
+                          })),
+                        );
                         setShowSubTitleDropdown(false);
                       }}
                       className="px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-green-50 hover:text-green-800 transition cursor-pointer flex items-center justify-between group"

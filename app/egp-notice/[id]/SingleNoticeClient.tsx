@@ -298,10 +298,13 @@ export default function SingleNoticeClient({
                 size: A4 ${isLandscape ? "landscape" : "portrait"};
                 margin: 4mm 4mm 4mm 4mm !important;
               }
+              * {
+                font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+              }
               body {
                 padding: 0 !important;
                 margin: 0;
-                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
                 background-color: white !important;
                 color: #000000 !important;
                 -webkit-print-color-adjust: exact !important;
@@ -314,6 +317,15 @@ export default function SingleNoticeClient({
                 margin: 0 auto;
                 padding: 0 !important;
                 background-color: transparent !important;
+              }
+              .print-wrapper-box {
+                padding-left: 0px !important;
+                padding-right: 0px !important;
+                padding-top: 0px !important;
+                margin-left: 0px !important;
+                margin-right: 0px !important;
+                width: 100% !important;
+                max-width: 100% !important;
               }
               /* Column widths for print */
               .auto-column {
@@ -410,9 +422,9 @@ export default function SingleNoticeClient({
               th, td {
                 border: 1px solid #9ca3af !important;
                 padding: 4px 4px !important;
-                text-align: left !important;
                 word-wrap: break-word !important;
-                word-break: break-all !important;
+                word-break: normal !important;
+                overflow-wrap: break-word !important;
               }
               td {
                 color: #000000 !important;
@@ -421,21 +433,25 @@ export default function SingleNoticeClient({
               th {
                 font-weight: bold !important;
                 font-size: 13px !important;
+                text-align: center !important;
+                vertical-align: middle !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
               }
               .pwd-scroll-wrapper {
                 border: 1px solid #9ca3af !important;
-                border-radius: 8px !important;
+                border-radius: 0 !important;
                 overflow: hidden !important;
               }
               .footer-card {
-                border: 1px solid #9ca3af !important;
-                border-left: 4px solid #9ca3af !important;
                 border-radius: 8px !important;
                 padding: 0 !important;
                 margin-bottom: 4px !important;
                 overflow: hidden !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
               }
               .footer-card-label {
                 display: inline-block !important;
@@ -445,17 +461,16 @@ export default function SingleNoticeClient({
                 border-left: none !important;
                 border-bottom-right-radius: 8px !important;
                 padding: 4px 10px !important;
-                background-color: #f3f4f6 !important;
                 font-weight: 800 !important;
                 font-size: 8pt !important;
                 text-transform: uppercase !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
               }
               .footer-card-content {
                 padding: 10px 12px !important;
               }
               .warning-card {
-                border: 1px solid #9ca3af !important;
-                border-left: 4px solid #dc2626 !important;
                 border-radius: 8px !important;
                 padding: 0 !important;
                 margin-top: 10pt !important;
@@ -463,6 +478,8 @@ export default function SingleNoticeClient({
                 overflow: hidden !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
               }
               .warning-card-label {
                 display: inline-block !important;
@@ -472,11 +489,11 @@ export default function SingleNoticeClient({
                 border-left: none !important;
                 border-bottom-right-radius: 8px !important;
                 padding: 4px 10px !important;
-                background-color: #fee2e2 !important;
-                color: #dc2626 !important;
                 font-weight: 800 !important;
                 font-size: 8pt !important;
                 text-transform: uppercase !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
               }
               img {
                 width: 100% !important;
@@ -515,7 +532,7 @@ export default function SingleNoticeClient({
               }
               /* Print optimizations for yellow totals row */
               .total-amount-row, .total-amount-row td {
-                background-color: #ffffcc !important;
+                background-color: #facc15 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
               }
@@ -649,6 +666,9 @@ export default function SingleNoticeClient({
             width: 100% !important;
             max-width: 100% !important;
           }
+          * {
+            font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+          }
         `,
           }}
         />
@@ -704,7 +724,7 @@ export default function SingleNoticeClient({
         {/* Fullscreen Table Content Wrapper */}
         <div
           ref={printAreaRef}
-          className="w-full max-w-full px-2 sm:px-6 md:px-12 py-8 bg-white space-y-8"
+          className="print-wrapper-box w-full max-w-full px-2 sm:px-6 md:px-12 py-8 bg-white space-y-8"
         >
           {parsedTables.map((table, tIdx) => {
             const defaultHeaderBg =
@@ -803,8 +823,17 @@ export default function SingleNoticeClient({
                     </div>
                   )}
                   {table.noticeDateBlock && (
-                    <div className="p-2 font-bold text-xs md:text-sm text-right text-black bg-white pr-4">
-                      Egp Published Date : {formatDisplayDate(table.noticeDateBlock)}
+                    <div className="p-0 text-right bg-white pr-4" style={{ padding: "0px !important" }}>
+                      <span 
+                        className="inline-block font-bold text-xs md:text-sm"
+                        style={{
+                          backgroundColor: table.headerBgColor || defaultHeaderBg,
+                          color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                          padding: "4px 8px !important",
+                        }}
+                      >
+                        Egp Published Date : {formatDisplayDate(table.noticeDateBlock)}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -850,6 +879,7 @@ export default function SingleNoticeClient({
                               color: getHeaderTextColorHex(
                                 table.headerBgColor || defaultHeaderBg,
                               ),
+                              textAlign: "center",
                             }}
                           >
                             SL No
@@ -877,7 +907,7 @@ export default function SingleNoticeClient({
                               key={idx}
                               className={`p-3 font-bold border border-gray-400 text-base uppercase text-center ${
                                 isDesc
-                                  ? "desc-column w-[32%] min-w-[220px] whitespace-normal text-left"
+                                  ? "desc-column w-[32%] min-w-[220px] whitespace-normal"
                                   : "auto-column"
                               } ${
                                 isTender || isSl
@@ -915,7 +945,7 @@ export default function SingleNoticeClient({
                           >
                             {!hasSl && (
                               <td
-                                className="p-3 border border-gray-400 text-black text-base font-bold text-left whitespace-nowrap"
+                                className="p-3 border border-gray-400 text-black text-base font-bold text-center whitespace-nowrap"
                                 style={
                                   isWinnerRow
                                     ? { backgroundColor: "#fffbeb" }
@@ -934,9 +964,6 @@ export default function SingleNoticeClient({
                               const cellBg = isWinnerRow
                                 ? "#fffbeb"
                                 : table.columnColors?.[cIdx] || "#ffffff";
-                              const isCurrency = isCurrencyColumn(
-                                headers[cIdx] || "",
-                              );
                               const isDesc =
                                 (headers[cIdx] || "")
                                   .toLowerCase()
@@ -976,12 +1003,38 @@ export default function SingleNoticeClient({
                                 headers[cIdx] || "",
                               );
 
+                              const colHdr = (headers[cIdx] || "").toLowerCase().trim();
+                              const isCenterAlignCol = 
+                                colHdr === "sl.no" || 
+                                colHdr === "sl no" || 
+                                colHdr === "sl. no" || 
+                                colHdr === "sl" ||
+                                colHdr.includes("method") ||
+                                colHdr.includes("mathod");
+
+                              const isCurrencyAlignCol =
+                                colHdr.includes("cost") ||
+                                colHdr.includes("price") ||
+                                colHdr.includes("fee") ||
+                                colHdr.includes("security") ||
+                                colHdr.includes("solvency") ||
+                                colHdr.includes("credit") ||
+                                colHdr.includes("turnover") ||
+                                colHdr.includes("turn over") ||
+                                colHdr.includes("amount") ||
+                                colHdr.includes("similar") ||
+                                colHdr.includes("tk");
+
+                              const cellAlignClass = isCenterAlignCol 
+                                ? "text-center" 
+                                : isCurrencyAlignCol 
+                                  ? "text-right" 
+                                  : "text-left";
+
                               return (
                                 <td
                                   key={cIdx}
-                                  className={`p-3 border border-gray-400 text-black text-base font-semibold font-bangla ${
-                                    isCurrency ? "text-right" : "text-left"
-                                  } ${
+                                  className={`p-3 border border-gray-400 text-black text-base font-semibold font-bangla ${cellAlignClass} ${
                                     isDesc
                                       ? "desc-column w-[32%] min-w-[220px] whitespace-normal text-left"
                                       : "auto-column"
@@ -990,11 +1043,12 @@ export default function SingleNoticeClient({
                                       ? "whitespace-nowrap"
                                       : ""
                                   }`}
-                                  style={
-                                    hasCustomBg
-                                      ? { backgroundColor: cellBg }
-                                      : undefined
-                                  }
+                                  style={{
+                                    backgroundColor: cellBg,
+                                    textAlign: isCenterAlignCol ? "center" : isCurrencyAlignCol ? "right" : "left",
+                                    WebkitPrintColorAdjust: "exact",
+                                    printColorAdjust: "exact",
+                                  }}
                                 >
                                   {isWinnerCell && isWinnerRow && (
                                     <span className="inline-block mr-1">
@@ -1034,7 +1088,7 @@ export default function SingleNoticeClient({
 
                       {/* Sum Totals Row if any sum matches */}
                       {(securityColIdx !== -1 || docFeesColIdx !== -1) && (
-                        <tr className="bg-[#ffffcc] font-bold text-black divide-x divide-gray-400 border-t-2 border-gray-500 total-amount-row">
+                        <tr className="bg-[#facc15] font-bold text-black divide-x divide-gray-400 border-t-2 border-gray-500 total-amount-row" style={{ backgroundColor: "#facc15" }}>
                           {headers.map((hdr: string, idx: number) => {
                             if (idx === 0) {
                               const colSpanCount = Math.min(
@@ -1046,7 +1100,8 @@ export default function SingleNoticeClient({
                               return (
                                 <td
                                   key={idx}
-                                  className="p-3 border border-gray-400 text-right text-base font-extrabold bg-[#ffffcc]"
+                                  className="p-3 border border-gray-400 text-right text-base font-extrabold bg-[#facc15]"
+                                  style={{ backgroundColor: "#facc15", textAlign: "right" }}
                                   colSpan={colSpanCount + (!hasSl ? 1 : 0)}
                                 >
                                   Total Amount BD Tk =
@@ -1064,7 +1119,8 @@ export default function SingleNoticeClient({
                               return (
                                 <td
                                   key={idx}
-                                  className="p-3 border border-gray-400 text-base font-extrabold text-black bg-[#ffffcc] text-right"
+                                  className="p-3 border border-gray-400 text-base font-extrabold text-black bg-[#facc15] text-right"
+                                  style={{ backgroundColor: "#facc15", textAlign: "right" }}
                                 >
                                   {formatMoney(totalSecurity)}
                                 </td>
@@ -1074,7 +1130,8 @@ export default function SingleNoticeClient({
                               return (
                                 <td
                                   key={idx}
-                                  className="p-3 border border-gray-400 text-sm font-extrabold text-black bg-[#ffffcc] text-right"
+                                  className="p-3 border border-gray-400 text-sm font-extrabold text-black bg-[#facc15] text-right"
+                                  style={{ backgroundColor: "#facc15", textAlign: "right" }}
                                 >
                                   {formatMoney(totalDocFees)}
                                 </td>
@@ -1083,7 +1140,8 @@ export default function SingleNoticeClient({
                             return (
                               <td
                                 key={idx}
-                                className="p-3 border border-gray-400 bg-[#ffffcc]"
+                                className="p-3 border border-gray-400 bg-[#facc15]"
+                                style={{ backgroundColor: "#facc15" }}
                               ></td>
                             );
                           })}
@@ -1108,9 +1166,23 @@ export default function SingleNoticeClient({
                 {(table.payOrderTo || true) && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 print:mt-3 print:grid-cols-2 font-bangla text-black">
                     {table.payOrderTo && (
-                      <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-emerald-600 border-4 border-r-emerald-600 border-y rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
-                        <div className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold text-slate-700 uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2 bg-slate-100/80 print:text-black">
-                          <i className="fa-solid fa-building-columns text-emerald-600 print:hidden"></i>
+                      <div 
+                        className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+                        style={{
+                          borderLeft: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
+                          borderRight: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
+                          borderTop: "1px solid #9ca3af",
+                          borderBottom: "1px solid #9ca3af",
+                        }}
+                      >
+                        <div 
+                          className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
+                          style={{
+                            backgroundColor: table.headerBgColor || defaultHeaderBg,
+                            color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                          }}
+                        >
+                          <i className="fa-solid fa-building-columns print:hidden"></i>
                           BD Pay Order To :
                         </div>
                         <div className="footer-card-content p-4 text-black font-semibold text-sm leading-relaxed whitespace-pre-line">
@@ -1118,9 +1190,23 @@ export default function SingleNoticeClient({
                         </div>
                       </div>
                     )}
-                    <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-blue-600 border-4 border-r-blue-600 border-y rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
-                      <div className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold text-slate-700 uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2 bg-slate-100/80 print:text-black">
-                        <i className="fa-solid fa-circle-info text-blue-600 print:hidden"></i>
+                    <div 
+                      className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+                      style={{
+                        borderLeft: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
+                        borderRight: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
+                        borderTop: "1px solid #9ca3af",
+                        borderBottom: "1px solid #9ca3af",
+                      }}
+                    >
+                      <div 
+                        className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
+                        style={{
+                          backgroundColor: table.headerBgColor || defaultHeaderBg,
+                          color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                        }}
+                      >
+                        <i className="fa-solid fa-circle-info print:hidden"></i>
                         Contact Info / e-Tender Solutions :
                       </div>
                       <div className="footer-card-content p-4 text-black font-semibold text-sm leading-relaxed">
@@ -1148,12 +1234,29 @@ export default function SingleNoticeClient({
 
                 {/* Red Warning alert below table */}
                 {table.bottomWarning && notice.category !== "OTM" && (
-                  <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-red-600 border-4 border-r-red-600 border-y rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
-                    <div className="footer-card-label warning-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold text-red-700 uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2 bg-red-50/80 print:text-red-700">
-                      <i className="fa-solid fa-circle-exclamation text-red-600 print:hidden"></i>
+                  <div 
+                    className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+                    style={{
+                      borderLeft: "4px solid #dc2626",
+                      borderRight: "4px solid #dc2626",
+                      borderTop: "1px solid #fee2e2",
+                      borderBottom: "1px solid #fee2e2",
+                    }}
+                  >
+                    <div 
+                      className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2"
+                      style={{
+                        backgroundColor: "#dc2626",
+                        color: "#ffffff",
+                      }}
+                    >
+                      <i className="fa-solid fa-circle-exclamation text-white print:hidden"></i>
                       Information :
                     </div>
-                    <div className="footer-card-content p-4 text-red-600 font-extrabold text-sm leading-relaxed font-bangla">
+                    <div 
+                      className="footer-card-content p-4 text-red-650 font-extrabold text-sm leading-relaxed font-bangla"
+                      style={{ color: "#dc2626" }}
+                    >
                       {table.bottomWarning}
                     </div>
                   </div>
@@ -1169,6 +1272,11 @@ export default function SingleNoticeClient({
   // 2. STANDARD NOTICE LAYOUT
   return (
     <div className="single_notice_page bg-secondary py-16 min-h-screen">
+      <style dangerouslySetInnerHTML={{ __html: `
+        .single_notice_page * {
+          font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+        }
+      `}} />
       <div className="custom-container">
         {/* Header Section */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-6">
@@ -1227,7 +1335,7 @@ export default function SingleNoticeClient({
 
         {/* Dynamic Content Display Area */}
         <div className="bg-white rounded-[32px] border border-ac-2 shadow-xl overflow-hidden p-6 md:p-10">
-          <div ref={printAreaRef} className="w-full space-y-10">
+          <div ref={printAreaRef} className="print-wrapper-box w-full space-y-10">
             {/* 1. ATTACHMENT VIEW (Renders if present) */}
             {notice.filePath && (
               <div className="w-full relative bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 p-2">
@@ -1364,8 +1472,17 @@ export default function SingleNoticeClient({
                           </div>
                         )}
                         {table.noticeDateBlock && (
-                          <div className="p-2 font-bold text-xs md:text-sm text-right text-black bg-white pr-4">
-                            Egp Published Date : {formatDisplayDate(table.noticeDateBlock)}
+                          <div className="p-0 text-right bg-white pr-4" style={{ padding: "0px !important" }}>
+                            <span 
+                              className="inline-block font-bold text-xs md:text-sm"
+                              style={{
+                                backgroundColor: table.headerBgColor || defaultHeaderBg,
+                                color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                                padding: "4px 8px !important",
+                              }}
+                            >
+                              Egp Published Date : {formatDisplayDate(table.noticeDateBlock)}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -1412,6 +1529,7 @@ export default function SingleNoticeClient({
                                     color: getHeaderTextColorHex(
                                       table.headerBgColor || defaultHeaderBg,
                                     ),
+                                    textAlign: "center",
                                   }}
                                 >
                                   SL No
@@ -1435,6 +1553,7 @@ export default function SingleNoticeClient({
                                       color: getHeaderTextColorHex(
                                         table.headerBgColor || defaultHeaderBg,
                                       ),
+                                      textAlign: "center",
                                     }}
                                   >
                                     {hdr}
@@ -1461,7 +1580,7 @@ export default function SingleNoticeClient({
                                   >
                                     {!hasSl && (
                                       <td
-                                        className="p-2.5 border border-gray-400 text-black text-sm font-bold text-left whitespace-nowrap"
+                                        className="p-2.5 border border-gray-400 text-black text-sm font-bold text-center whitespace-nowrap"
                                         style={
                                           isWinnerRow
                                             ? { backgroundColor: "#fffbeb" }
@@ -1481,9 +1600,6 @@ export default function SingleNoticeClient({
                                         ? "#fffbeb"
                                         : table.columnColors?.[cIdx] ||
                                           "#ffffff";
-                                      const isCurrency = isCurrencyColumn(
-                                        headers[cIdx] || "",
-                                      );
                                       const isDesc = (headers[cIdx] || "")
                                         .toLowerCase()
                                         .includes("description");
@@ -1493,23 +1609,49 @@ export default function SingleNoticeClient({
                                         cellBg &&
                                         cellBg !== "#ffffff" &&
                                         cellBg !== "#fff";
+
+                                      const colHdr = (headers[cIdx] || "").toLowerCase().trim();
+                                      const isCenterAlignCol = 
+                                        colHdr === "sl.no" || 
+                                        colHdr === "sl no" || 
+                                        colHdr === "sl. no" || 
+                                        colHdr === "sl" ||
+                                        colHdr.includes("method") ||
+                                        colHdr.includes("mathod");
+
+                                      const isCurrencyAlignCol =
+                                        colHdr.includes("cost") ||
+                                        colHdr.includes("price") ||
+                                        colHdr.includes("fee") ||
+                                        colHdr.includes("security") ||
+                                        colHdr.includes("solvency") ||
+                                        colHdr.includes("credit") ||
+                                        colHdr.includes("turnover") ||
+                                        colHdr.includes("turn over") ||
+                                        colHdr.includes("amount") ||
+                                        colHdr.includes("similar") ||
+                                        colHdr.includes("tk");
+
+                                      const cellAlignClass = isCenterAlignCol 
+                                        ? "text-center" 
+                                        : isCurrencyAlignCol 
+                                          ? "text-right" 
+                                          : "text-left";
+
                                       return (
                                         <td
                                           key={cIdx}
-                                          className={`p-2.5 border border-gray-400 text-black text-sm font-semibold font-bangla ${
-                                            isCurrency
-                                              ? "text-right"
-                                              : "text-left"
-                                          } ${
+                                          className={`p-2.5 border border-gray-400 text-black text-sm font-semibold font-bangla ${cellAlignClass} ${
                                             isDesc
-                                              ? "desc-column w-[30%] min-w-[220px]"
+                                              ? "desc-column w-[30%] min-w-[220px] text-left"
                                               : "auto-column whitespace-nowrap"
                                           }`}
-                                          style={
-                                            hasCustomBg
-                                              ? { backgroundColor: cellBg }
-                                              : undefined
-                                          }
+                                          style={{
+                                            backgroundColor: cellBg,
+                                            textAlign: isCenterAlignCol ? "center" : isCurrencyAlignCol ? "right" : "left",
+                                            WebkitPrintColorAdjust: "exact",
+                                            printColorAdjust: "exact",
+                                          }}
                                         >
                                           {isWinnerCell && isWinnerRow && (
                                             <span className="inline-block mr-1">
@@ -1531,7 +1673,10 @@ export default function SingleNoticeClient({
                             {/* Sum Totals Row if any sum matches */}
                             {(securityColIdx !== -1 ||
                               docFeesColIdx !== -1) && (
-                              <tr className="bg-[#ffffcc] font-bold text-black divide-x divide-gray-400 border-t-2 border-gray-500 total-amount-row">
+                              <tr 
+                                className="bg-[#facc15] font-bold text-black divide-x divide-gray-400 border-t-2 border-gray-500 total-amount-row"
+                                style={{ backgroundColor: "#facc15" }}
+                              >
                                 {headers.map((hdr: string, idx: number) => {
                                   if (idx === 0) {
                                     const colSpanCount = Math.min(
@@ -1543,7 +1688,8 @@ export default function SingleNoticeClient({
                                     return (
                                       <td
                                         key={idx}
-                                        className="p-2.5 border border-gray-400 text-right text-sm font-extrabold bg-[#ffffcc]"
+                                        className="p-2.5 border border-gray-400 text-right text-sm font-extrabold bg-[#facc15]"
+                                        style={{ backgroundColor: "#facc15", textAlign: "right" }}
                                         colSpan={
                                           colSpanCount + (!hasSl ? 1 : 0)
                                         }
@@ -1563,7 +1709,8 @@ export default function SingleNoticeClient({
                                     return (
                                       <td
                                         key={idx}
-                                        className="p-2.5 border border-gray-400 text-sm font-extrabold text-black bg-[#ffffcc] text-right"
+                                        className="p-2.5 border border-gray-400 text-sm font-extrabold text-black bg-[#facc15] text-right"
+                                        style={{ backgroundColor: "#facc15", textAlign: "right" }}
                                       >
                                         {formatMoney(totalSecurity)}
                                       </td>
@@ -1573,7 +1720,8 @@ export default function SingleNoticeClient({
                                     return (
                                       <td
                                         key={idx}
-                                        className="p-2.5 border border-gray-400 text-sm font-extrabold text-black bg-[#ffffcc] text-right"
+                                        className="p-2.5 border border-gray-400 text-sm font-extrabold text-black bg-[#facc15] text-right"
+                                        style={{ backgroundColor: "#facc15", textAlign: "right" }}
                                       >
                                         {formatMoney(totalDocFees)}
                                       </td>
@@ -1582,7 +1730,8 @@ export default function SingleNoticeClient({
                                   return (
                                     <td
                                       key={idx}
-                                      className="p-2.5 border border-gray-400 bg-[#ffffcc]"
+                                      className="p-2.5 border border-gray-400 bg-[#facc15]"
+                                      style={{ backgroundColor: "#facc15" }}
                                     ></td>
                                   );
                                 })}
@@ -1607,9 +1756,23 @@ export default function SingleNoticeClient({
                       {(table.payOrderTo || true) && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 print:mt-3 print:grid-cols-2 font-bangla text-black">
                           {table.payOrderTo && (
-                            <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-emerald-600 border-y border-r border-slate-200/80 rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
-                              <div className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold text-slate-700 uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2 bg-slate-100/80 print:text-black">
-                                <i className="fa-solid fa-building-columns text-emerald-600 print:hidden"></i>
+                            <div 
+                              className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+                              style={{
+                                borderLeft: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
+                                borderRight: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
+                                borderTop: "1px solid #9ca3af",
+                                borderBottom: "1px solid #9ca3af",
+                              }}
+                            >
+                              <div 
+                                className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
+                                style={{
+                                  backgroundColor: table.headerBgColor || defaultHeaderBg,
+                                  color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                                }}
+                              >
+                                <i className="fa-solid fa-building-columns print:hidden"></i>
                                 BD Pay Order To :
                               </div>
                               <div className="footer-card-content p-4 text-black font-semibold text-sm leading-relaxed whitespace-pre-line">
@@ -1617,9 +1780,23 @@ export default function SingleNoticeClient({
                               </div>
                             </div>
                           )}
-                          <div className="footer-card bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-blue-600 border-y border-r border-slate-200/80 rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
-                            <div className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold text-slate-700 uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2 bg-slate-100/80 print:text-black">
-                              <i className="fa-solid fa-circle-info text-blue-600 print:hidden"></i>
+                          <div 
+                            className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+                            style={{
+                              borderLeft: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
+                              borderRight: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
+                              borderTop: "1px solid #9ca3af",
+                              borderBottom: "1px solid #9ca3af",
+                            }}
+                          >
+                            <div 
+                              className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
+                              style={{
+                                backgroundColor: table.headerBgColor || defaultHeaderBg,
+                                color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                              }}
+                            >
+                              <i className="fa-solid fa-circle-info print:hidden"></i>
                               Contact Info / e-Tender Solutions :
                             </div>
                             <div className="footer-card-content p-4 text-black font-semibold text-sm leading-relaxed">
@@ -1645,12 +1822,29 @@ export default function SingleNoticeClient({
 
                       {/* Red Warning alert below table */}
                       {table.bottomWarning && notice.category !== "OTM" && (
-                        <div className="footer-card warning-card bg-gradient-to-br from-slate-50 to-white border-l-4 border-l-red-600 border-y border-r border-slate-200/80 rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden mt-4">
-                          <div className="footer-card-label warning-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold text-red-700 uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2 bg-red-50/80 print:text-red-700">
-                            <i className="fa-solid fa-circle-exclamation text-red-600 print:hidden"></i>
+                        <div 
+                          className="footer-card rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden mt-4"
+                          style={{
+                            borderLeft: "4px solid #dc2626",
+                            borderRight: "4px solid #dc2626",
+                            borderTop: "1px solid #fee2e2",
+                            borderBottom: "1px solid #fee2e2",
+                          }}
+                        >
+                          <div 
+                            className="footer-card-label inline-flex items-center gap-2 text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2"
+                            style={{
+                              backgroundColor: "#dc2626",
+                              color: "#ffffff",
+                            }}
+                          >
+                            <i className="fa-solid fa-circle-exclamation text-white print:hidden"></i>
                             Information :
                           </div>
-                          <div className="footer-card-content p-4 text-red-600 font-extrabold text-sm leading-relaxed font-bangla">
+                          <div 
+                            className="footer-card-content p-4 text-red-650 font-extrabold text-sm leading-relaxed font-bangla"
+                            style={{ color: "#dc2626" }}
+                          >
                             {table.bottomWarning}
                           </div>
                         </div>

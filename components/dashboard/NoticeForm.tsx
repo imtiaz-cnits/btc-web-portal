@@ -3194,6 +3194,44 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                             />
                                           );
                                         }
+
+                                        const isDescCol =
+                                          headerName.includes("description") ||
+                                          headerName.includes("works") ||
+                                          headerName.includes("details") ||
+                                          headerName.includes("বিবরণ") ||
+                                          headerName.includes("work");
+
+                                        if (isDescCol) {
+                                          return (
+                                            <textarea
+                                              rows={1}
+                                              data-tidx={tIdx}
+                                              data-ridx={rIdx}
+                                              data-cidx={cIdx}
+                                              value={cell}
+                                              onChange={(e) => {
+                                                handleCellChange(
+                                                  tIdx,
+                                                  rIdx,
+                                                  cIdx,
+                                                  e.target.value,
+                                                );
+                                                e.target.style.height = "auto";
+                                                e.target.style.height = `${e.target.scrollHeight}px`;
+                                              }}
+                                              ref={(el) => {
+                                                if (el) {
+                                                  el.style.height = "auto";
+                                                  el.style.height = `${Math.max(28, el.scrollHeight)}px`;
+                                                }
+                                              }}
+                                              className="bg-transparent border-0 outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded px-1 py-0.5 font-semibold text-slate-800 text-[10px] leading-snug resize-none overflow-hidden"
+                                              placeholder="Enter description..."
+                                            />
+                                          );
+                                        }
+
                                         return (
                                           <input
                                             type="text"

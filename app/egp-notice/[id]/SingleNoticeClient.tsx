@@ -170,6 +170,14 @@ const formatHeaderTitle = (hdr: string) => {
   if (lower.includes("work location") || lower.includes("worklocation")) return "Location";
   if (lower.includes("type of method") || lower.includes("type of mathod") || lower.includes("typeofmethod")) return "Method";
   if (lower.includes("selling") || lower.includes("last date")) return "Schedule & Selling Date";
+  if (lower.includes("tender security") || lower.includes("security")) {
+    return (
+      <div className="flex flex-col items-center justify-center leading-tight">
+        <span>Tender</span>
+        <span>Security (BD)</span>
+      </div>
+    );
+  }
 
   return str;
 };
@@ -515,8 +523,17 @@ export default function SingleNoticeClient({
                 background-color: transparent !important;
                 page-break-inside: avoid !important;
               }
-              td:not([style*="background-color"]) {
-                background-color: transparent !important;
+              @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Tiro+Bangla&display=swap');
+              
+              *, *[class]:not(.print-office-name), *[style]:not(.print-office-name), .font-bangla:not(.print-office-name), [style*="font-family"]:not(.print-office-name) {
+                font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+              }
+              .print-office-name {
+                font-family: 'Tiro Bangla', serif !important;
+              }
+              .print-subtitle {
+                font-size: 22px !important;
+                font-weight: bold !important;
               }
               th, td {
                 border: 1px solid #374151 !important;
@@ -525,15 +542,16 @@ export default function SingleNoticeClient({
                 word-break: normal !important;
                 overflow-wrap: break-word !important;
                 box-sizing: border-box !important;
+                font-size: 13.8px !important;
               }
               td {
                 color: #000000 !important;
-                font-size: 14pt !important;
+                font-size: 13.8px !important;
                 font-weight: 600 !important;
               }
               th {
                 font-weight: bold !important;
-                font-size: 13.5px !important;
+                font-size: 13.8px !important;
                 text-transform: capitalize !important;
                 text-align: center !important;
                 vertical-align: middle !important;
@@ -562,16 +580,16 @@ export default function SingleNoticeClient({
                 border-top: none !important;
                 border-left: none !important;
                 border-bottom-right-radius: 8px !important;
-                padding: 6px 14px !important;
+                padding: 5px 12px !important;
                 font-weight: 800 !important;
-                font-size: 13pt !important;
+                font-size: 13.8px !important;
                 text-transform: uppercase !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
               }
               .footer-card-content {
-                padding: 10px 14px !important;
-                font-size: 14pt !important;
+                padding: 8px 12px !important;
+                font-size: 13.8px !important;
                 font-weight: 700 !important;
                 line-height: 1.5 !important;
                 color: #000000 !important;
@@ -595,9 +613,9 @@ export default function SingleNoticeClient({
                 border-top: none !important;
                 border-left: none !important;
                 border-bottom-right-radius: 8px !important;
-                padding: 6px 14px !important;
+                padding: 5px 12px !important;
                 font-weight: 800 !important;
-                font-size: 13pt !important;
+                font-size: 13.8px !important;
                 text-transform: uppercase !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
@@ -644,7 +662,7 @@ export default function SingleNoticeClient({
                 print-color-adjust: exact !important;
               }
               .total-amount-row td {
-                font-size: 16pt !important;
+                font-size: 13.8px !important;
                 font-weight: 800 !important;
               }
               .print-container th, 
@@ -779,9 +797,9 @@ export default function SingleNoticeClient({
             width: 100% !important;
             max-width: 100% !important;
           }
-          @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Tiro+Bangla&display=swap');
           *, *[class]:not(.print-office-name), *[style]:not(.print-office-name), .font-bangla:not(.print-office-name), [style*="font-family"]:not(.print-office-name) {
-            font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
           }
           .print-office-name {
             font-family: 'Tiro Bangla', serif !important;
@@ -979,7 +997,7 @@ export default function SingleNoticeClient({
                         <tr>
                           <th
                             colSpan={totalCols}
-                            className="p-2 font-bold text-[18px] md:text-[22px] print:!text-[20px] text-center text-black bg-white print-subtitle"
+                            className="p-2 font-bold text-[18px] md:text-[22px] print:!text-[22px] text-center text-black bg-white print-subtitle"
                             style={{
                               border: "1px solid #374151",
                               borderTop: 0,
@@ -1189,6 +1207,16 @@ export default function SingleNoticeClient({
                                 : isCurrencyAlignCol
                                   ? "text-right"
                                   : "text-left";
+                              
+                              const isCreditCol =
+                                colHdr.includes("credit") ||
+                                colHdr.includes("solvency") ||
+                                colHdr.includes("line");
+                              const isNoWrapCell =
+                                isTender ||
+                                isSl ||
+                                isCreditCol ||
+                                /lac|cr/i.test(formattedVal);
 
                               return (
                                 <td
@@ -1196,7 +1224,7 @@ export default function SingleNoticeClient({
                                   className={`p-3 border border-gray-400 text-black text-base font-semibold font-bangla ${cellAlignClass} ${isDesc
                                     ? "desc-column w-[32%] min-w-[220px] whitespace-normal text-left"
                                     : "auto-column"
-                                    } ${isTender || isSl ? "whitespace-nowrap" : ""
+                                    } ${isNoWrapCell ? "whitespace-nowrap" : ""
                                     }`}
                                   style={{
                                     backgroundColor: cellBg,
@@ -1205,6 +1233,7 @@ export default function SingleNoticeClient({
                                       : isCurrencyAlignCol
                                         ? "right"
                                         : "left",
+                                    whiteSpace: isNoWrapCell ? "nowrap" : undefined,
                                     WebkitPrintColorAdjust: "exact",
                                     printColorAdjust: "exact",
                                   }}
@@ -1706,7 +1735,7 @@ export default function SingleNoticeClient({
                               <tr>
                                 <th
                                   colSpan={totalCols}
-                                  className="p-2 font-bold text-[18px] md:text-[22px] print:!text-[20px] text-center text-black bg-white print-subtitle"
+                                  className="p-2 font-bold text-[18px] md:text-[22px] print:!text-[22px] text-center text-black bg-white print-subtitle"
                                   style={{
                                     border: "1px solid #374151",
                                     borderTop: 0,
@@ -1892,6 +1921,7 @@ export default function SingleNoticeClient({
                                               : isCurrencyAlignCol
                                                 ? "right"
                                                 : "left",
+                                            whiteSpace: !isDesc ? "nowrap" : undefined,
                                             WebkitPrintColorAdjust: "exact",
                                             printColorAdjust: "exact",
                                           }}

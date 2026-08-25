@@ -92,7 +92,7 @@ function LocationAutocompleteInput({
     if (saved) {
       try {
         initialOptions = JSON.parse(saved);
-      } catch (e) {}
+      } catch (e) { }
     }
     setLocationOptions(initialOptions);
     if (open) {
@@ -102,8 +102,8 @@ function LocationAutocompleteInput({
 
   const filtered = dropdownSearch.trim()
     ? locationOptions.filter((s) =>
-        s.toLowerCase().includes(dropdownSearch.toLowerCase()),
-      )
+      s.toLowerCase().includes(dropdownSearch.toLowerCase()),
+    )
     : locationOptions;
 
   const updatePosition = () => {
@@ -237,11 +237,10 @@ function LocationAutocompleteInput({
               setOpen(false);
               setHighlighted(-1);
             }}
-            className={`px-3 py-1.5 cursor-pointer font-semibold transition-colors flex items-center justify-between group rounded ${
-              i === highlighted
+            className={`px-3 py-1.5 cursor-pointer font-semibold transition-colors flex items-center justify-between group rounded ${i === highlighted
                 ? "bg-green-50 text-green-700 font-bold"
                 : "hover:bg-green-50 hover:text-green-700 text-slate-700"
-            }`}
+              }`}
           >
             <span className="truncate">{s}</span>
             <button
@@ -339,11 +338,10 @@ function CustomSelect({
                 onChange(opt.value);
                 onToggle();
               }}
-              className={`px-4 py-3 text-xs font-semibold hover:bg-green-50 hover:text-green-700 transition cursor-pointer flex items-center justify-between ${
-                value === opt.value
+              className={`px-4 py-3 text-xs font-semibold hover:bg-green-50 hover:text-green-700 transition cursor-pointer flex items-center justify-between ${value === opt.value
                   ? "bg-green-50/50 text-green-700 font-bold"
                   : "text-slate-600"
-              }`}
+                }`}
             >
               <span>{opt.label}</span>
               {value === opt.value && (
@@ -815,7 +813,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     if (savedTitle) {
       try {
         initialOptions = JSON.parse(savedTitle);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     if (notice?.title && !initialOptions.includes(notice.title)) {
@@ -834,7 +832,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     if (savedSub) {
       try {
         initialSubOptions = JSON.parse(savedSub);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     if (notice?.tableData) {
@@ -850,7 +848,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
             setSubTitle(parsed.tables[0].subTitle || "");
           }
         }
-      } catch (err) {}
+      } catch (err) { }
     }
 
     setSubTitleOptions(initialSubOptions);
@@ -898,7 +896,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     if (saved) {
       try {
         initialOptions = JSON.parse(saved);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     if (notice?.tableData) {
@@ -914,7 +912,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
             }
           });
         }
-      } catch (err) {}
+      } catch (err) { }
     }
 
     setWarningOptions(initialOptions);
@@ -992,7 +990,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     if (saved) {
       try {
         initialOptions = JSON.parse(saved);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     if (notice?.tableData) {
@@ -1008,7 +1006,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
             }
           });
         }
-      } catch (err) {}
+      } catch (err) { }
     }
 
     setLocationOptions(initialOptions);
@@ -1273,41 +1271,41 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     notice?.tableData
       ? []
       : [
-          {
-            id: "tbl-init",
-            type: "pwd_ltm",
-            officeName: "গণপূর্ত বিভাগ, পাবনা।",
-            noticeDateBlock: "",
-            lastDateBlock: "",
-            lotteryDateBlock: "",
-            payOrderTo: "Executive Engineer, Pabna PWD Division, Pabna",
-            moreInfo:
-              "Engr. Md. Shah Alom B.Sc. Engr.(Civil)\nMobile No: 01711-805086\nL M B Market 1st Floor, Pabna.\nWeb: www.egpbtc.com",
-            bottomWarning: "ব্যাংক স্টেটমেন্ট অথবা ক্রেডিট কমিটমেন্ট দিতে হবে।",
-            headers: [
-              "Tender ID",
-              "Description",
-              "Location",
-              "AppCost (Tk)",
-              "Solvency (Tk)",
-              "Security (Tk)",
-              "Doc Fees (Tk)",
-              "Last Date & Time",
+        {
+          id: "tbl-init",
+          type: "pwd_ltm",
+          officeName: "গণপূর্ত বিভাগ, পাবনা।",
+          noticeDateBlock: "",
+          lastDateBlock: "",
+          lotteryDateBlock: "",
+          payOrderTo: "Executive Engineer, Pabna PWD Division, Pabna",
+          moreInfo:
+            "Engr. Md. Shah Alom B.Sc. Engr.(Civil)\nMobile No: 01711-805086\nL M B Market 1st Floor, Pabna.\nWeb: www.egpbtc.com",
+          bottomWarning: "ব্যাংক স্টেটমেন্ট অথবা ক্রেডিট কমিটমেন্ট দিতে হবে।",
+          headers: [
+            "Tender ID",
+            "Description",
+            "Location",
+            "AppCost (Tk)",
+            "Solvency (Tk)",
+            "Security (Tk)",
+            "Doc Fees (Tk)",
+            "Last Date & Time",
+          ],
+          rows: [
+            [
+              "1251464",
+              "Necessary repair works...",
+              "Pabna sadar",
+              "2,72,184",
+              "2,00,000",
+              "7,000",
+              "500",
+              "",
             ],
-            rows: [
-              [
-                "1251464",
-                "Necessary repair works...",
-                "Pabna sadar",
-                "2,72,184",
-                "2,00,000",
-                "7,000",
-                "500",
-                "",
-              ],
-            ],
-          },
-        ],
+          ],
+        },
+      ],
   );
 
   // Real-time file upload preview state
@@ -2184,9 +2182,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       // lotteryDate: only parse/set when category supports it
       const lotteryDateStr =
         category === "LOTTERY_RESULT" ||
-        category === "LOTTERY_PENDING" ||
-        category === "OTM" ||
-        category === "LTM"
+          category === "LOTTERY_PENDING" ||
+          category === "OTM" ||
+          category === "LTM"
           ? (formData.get("lotteryDate") as string)
           : "";
       const lotteryDateObj = parseDateTimeDmyToDate(lotteryDateStr);
@@ -2317,7 +2315,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     setPublishDate(combinedDateTime);
     setShowScheduleModal(false);
 
-    const fakeEvent = { preventDefault: () => {} } as any;
+    const fakeEvent = { preventDefault: () => { } } as any;
     handleSubmit(fakeEvent, "active", combinedDateTime);
   };
 
@@ -2464,10 +2462,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                 {titleOptions.filter((opt) =>
                   opt.toLowerCase().includes(newOptionInput.toLowerCase()),
                 ).length === 0 && (
-                  <div className="px-4 py-3 text-xs text-slate-400 font-semibold italic text-center">
-                    No matching options. Type above and click Add!
-                  </div>
-                )}
+                    <div className="px-4 py-3 text-xs text-slate-400 font-semibold italic text-center">
+                      No matching options. Type above and click Add!
+                    </div>
+                  )}
               </div>
             </div>
           )}
@@ -2591,10 +2589,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                 {subTitleOptions.filter((opt) =>
                   opt.toLowerCase().includes(newSubTitleInput.toLowerCase()),
                 ).length === 0 && (
-                  <div className="px-4 py-3 text-xs text-slate-400 font-semibold italic text-center">
-                    No matching options. Type above and click Add!
-                  </div>
-                )}
+                    <div className="px-4 py-3 text-xs text-slate-400 font-semibold italic text-center">
+                      No matching options. Type above and click Add!
+                    </div>
+                  )}
               </div>
             </div>
           )}
@@ -2658,23 +2656,23 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           category === "LOTTERY_PENDING" ||
           category === "OTM" ||
           category === "LTM") && (
-          <div className="space-y-2 relative animate-scale-in">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-slate-400" /> Lottery Date
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                name="lotteryDate"
-                value={lotteryDate}
-                onChange={(e) => setLotteryDate(e.target.value)}
-                placeholder="Select date..."
-                className="flatpickr-date bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3.5 text-slate-800 outline-none text-sm font-semibold focus:border-[var(--primary-color)] focus:bg-white transition cursor-pointer w-full shadow-xs"
-              />
-              <Calendar className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="space-y-2 relative animate-scale-in">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-slate-400" /> Lottery Date
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="lotteryDate"
+                  value={lotteryDate}
+                  onChange={(e) => setLotteryDate(e.target.value)}
+                  placeholder="Select date..."
+                  className="flatpickr-date bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3.5 text-slate-800 outline-none text-sm font-semibold focus:border-[var(--primary-color)] focus:bg-white transition cursor-pointer w-full shadow-xs"
+                />
+                <Calendar className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
 
       {/* Combinable Sections Configuration Bar */}
@@ -2686,11 +2684,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Tables Checkbox Switch */}
           <label
-            className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer shadow-xs select-none ${
-              enableTables
+            className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer shadow-xs select-none ${enableTables
                 ? "bg-green-50/50 border-green-200 text-green-700 font-bold"
                 : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100/50"
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2.5">
               <input
@@ -2717,11 +2714,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
           {/* File Checkbox Switch */}
           <label
-            className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer shadow-xs select-none ${
-              enableFile
+            className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer shadow-xs select-none ${enableFile
                 ? "bg-green-50/50 border-green-200 text-green-700 font-bold"
                 : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100/50"
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2.5">
               <input
@@ -2745,11 +2741,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
           {/* Text Checkbox Switch */}
           <label
-            className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer shadow-xs select-none ${
-              enableText
+            className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer shadow-xs select-none ${enableText
                 ? "bg-green-50/50 border-green-200 text-green-700 font-bold"
                 : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100/50"
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2.5">
               <input
@@ -2973,14 +2968,13 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                   clr.hex,
                                 )
                               }
-                              className={`w-5 h-5 rounded-md border transition transform hover:scale-110 active:scale-95 cursor-pointer ${
-                                (table.headerBgColor ||
+                              className={`w-5 h-5 rounded-md border transition transform hover:scale-110 active:scale-95 cursor-pointer ${(table.headerBgColor ||
                                   (category === "OTM"
                                     ? "#059669"
                                     : "#0891b2")) === clr.hex
                                   ? "border-slate-800 ring-1 ring-slate-400"
                                   : "border-slate-200"
-                              }`}
+                                }`}
                               style={{ backgroundColor: clr.hex }}
                               title={`Set header bg to ${clr.name}`}
                             />
@@ -3061,21 +3055,21 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                         />
                                         {(table.type === "pwd_ltm"
                                           ? table.headers.length > 9 &&
-                                            cIdx === table.headers.length - 1
+                                          cIdx === table.headers.length - 1
                                           : table.headers.length > 1 &&
-                                            cIdx ===
-                                              table.headers.length - 1) && (
-                                          <button
-                                            type="button"
-                                            onClick={() =>
-                                              removeColumn(tIdx, cIdx)
-                                            }
-                                            className="text-white hover:bg-red-750 bg-red-600 p-0.5 rounded-lg transition shrink-0 border-0 flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
-                                            title="Delete Column"
-                                          >
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                          </button>
-                                        )}
+                                          cIdx ===
+                                          table.headers.length - 1) && (
+                                            <button
+                                              type="button"
+                                              onClick={() =>
+                                                removeColumn(tIdx, cIdx)
+                                              }
+                                              className="text-white hover:bg-red-750 bg-red-600 p-0.5 rounded-lg transition shrink-0 border-0 flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+                                              title="Delete Column"
+                                            >
+                                              <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
+                                          )}
                                       </div>
 
                                       {/* Column Cell Color Customizer */}
@@ -3103,12 +3097,11 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                                   clr.hex,
                                                 )
                                               }
-                                              className={`w-2 h-2 rounded-full border border-slate-400 transition transform hover:scale-120 active:scale-95 cursor-pointer ${
-                                                (table.columnColors?.[cIdx] ||
+                                              className={`w-2 h-2 rounded-full border border-slate-400 transition transform hover:scale-120 active:scale-95 cursor-pointer ${(table.columnColors?.[cIdx] ||
                                                   "#ffffff") === clr.hex
                                                   ? "ring-1 ring-slate-600"
                                                   : ""
-                                              }`}
+                                                }`}
                                               style={{
                                                 backgroundColor: clr.hex,
                                               }}
@@ -3123,16 +3116,15 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                               },
                             )}
                             <th
-                              className={`p-1 w-8 text-center text-[10px] ${
-                                getHeaderTextColor(
-                                  table.headerBgColor ||
-                                    (category === "OTM"
-                                      ? "#059669"
-                                      : "#0891b2"),
-                                ) === "text-white"
+                              className={`p-1 w-8 text-center text-[10px] ${getHeaderTextColor(
+                                table.headerBgColor ||
+                                (category === "OTM"
+                                  ? "#059669"
+                                  : "#0891b2"),
+                              ) === "text-white"
                                   ? "text-white"
                                   : "text-slate-700"
-                              }`}
+                                }`}
                               style={{
                                 backgroundColor:
                                   table.headerBgColor ||
@@ -3219,13 +3211,12 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                               )
                                             }
                                             readOnly={isLastDateCol}
-                                            className={`bg-transparent border-0 outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded px-1 py-0.5 font-semibold text-slate-800 text-[10px] ${
-                                              isLastDateCol
+                                            className={`bg-transparent border-0 outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded px-1 py-0.5 font-semibold text-slate-800 text-[10px] ${isLastDateCol
                                                 ? "font-bold text-green-700 bg-green-50/10 cursor-not-allowed"
                                                 : isDateField
                                                   ? "flatpickr-datetime-field cursor-pointer font-bold text-green-700 bg-green-50/10"
                                                   : ""
-                                            }`}
+                                              }`}
                                             placeholder={
                                               isLastDateCol
                                                 ? "Synced"
@@ -3324,11 +3315,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                 "Select Warning Alert Info..."}
                             </span>
                             <ChevronDown
-                              className={`w-3.5 h-3.5 text-slate-400 transition-transform ${
-                                activeWarningDropdown === tIdx
+                              className={`w-3.5 h-3.5 text-slate-400 transition-transform ${activeWarningDropdown === tIdx
                                   ? "rotate-180"
                                   : ""
-                              }`}
+                                }`}
                             />
                           </div>
                         </div>
@@ -3432,10 +3422,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                     newWarningOptionInput.toLowerCase(),
                                   ),
                               ).length === 0 && (
-                                <div className="px-4 py-3 text-xs text-slate-400 font-semibold italic text-center">
-                                  No matching options. Type above and click Add!
-                                </div>
-                              )}
+                                  <div className="px-4 py-3 text-xs text-slate-400 font-semibold italic text-center">
+                                    No matching options. Type above and click Add!
+                                  </div>
+                                )}
                             </div>
                           </div>
                         )}

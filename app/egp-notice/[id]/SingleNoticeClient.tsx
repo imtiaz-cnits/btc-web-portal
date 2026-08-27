@@ -95,13 +95,15 @@ const formatCellValue = (val: string, hdr: string) => {
   const str = String(val).trim();
   const lowerHdr = (hdr || "").toLowerCase();
 
-  const isEstimateCol =
+  const isFullNumberAmountCol =
     lowerHdr.includes("estimate") ||
     lowerHdr.includes("app cost") ||
     lowerHdr.includes("appcost") ||
-    lowerHdr.includes("app estimate");
+    lowerHdr.includes("app estimate") ||
+    lowerHdr.includes("tender security") ||
+    lowerHdr.includes("security");
 
-  if (isEstimateCol) {
+  if (isFullNumberAmountCol) {
     const fullNum = parseFullNumericAmount(str);
     if (fullNum !== null) {
       if (fullNum % 1 === 0) {
@@ -169,7 +171,43 @@ const formatHeaderTitle = (hdr: string) => {
 
   if (lower.includes("work location") || lower.includes("worklocation")) return "Location";
   if (lower.includes("type of method") || lower.includes("type of mathod") || lower.includes("typeofmethod")) return "Method";
-  if (lower.includes("selling") || lower.includes("last date")) return "Schedule & Selling Date";
+  
+  if (lower.includes("selling") || lower.includes("last date")) {
+    return (
+      <div className="flex flex-col items-center justify-center leading-tight">
+        <span>Schedule &</span>
+        <span>Selling Date</span>
+      </div>
+    );
+  }
+
+  if (lower.includes("app estimate") || lower.includes("estimate cost")) {
+    return (
+      <div className="flex flex-col items-center justify-center leading-tight">
+        <span>APP Estimate</span>
+        <span>Cost Tk.</span>
+      </div>
+    );
+  }
+
+  if (lower.includes("bank credit") || lower.includes("credit line")) {
+    return (
+      <div className="flex flex-col items-center justify-center leading-tight">
+        <span>Bank</span>
+        <span>Credit Line</span>
+      </div>
+    );
+  }
+
+  if (lower.includes("document price") || (lower.includes("document") && lower.includes("price"))) {
+    return (
+      <div className="flex flex-col items-center justify-center leading-tight">
+        <span>Document</span>
+        <span>Price. Tk</span>
+      </div>
+    );
+  }
+
   if (lower.includes("tender security") || lower.includes("security")) {
     return (
       <div className="flex flex-col items-center justify-center leading-tight">
@@ -523,12 +561,12 @@ export default function SingleNoticeClient({
                 background-color: transparent !important;
                 page-break-inside: avoid !important;
               }
-              @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Tiro+Bangla&display=swap');
+              @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Tiro+Bangla:ital@0;1&display=swap');
               
-              *, *[class]:not(.print-office-name), *[style]:not(.print-office-name), .font-bangla:not(.print-office-name), [style*="font-family"]:not(.print-office-name) {
-                font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+              *, *[class], *[style] {
+                font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
               }
-              .print-office-name {
+              .print-office-name, .warning-card-content, .warning-card-content * {
                 font-family: 'Tiro Bangla', serif !important;
               }
               .print-subtitle {
@@ -542,21 +580,29 @@ export default function SingleNoticeClient({
                 word-break: normal !important;
                 overflow-wrap: break-word !important;
                 box-sizing: border-box !important;
-                font-size: 13.8px !important;
+                font-size: 16px !important;
               }
               td {
                 color: #000000 !important;
-                font-size: 13.8px !important;
+                font-size: 16px !important;
                 font-weight: 600 !important;
               }
               th {
                 font-weight: bold !important;
-                font-size: 13.8px !important;
+                font-size: 16px !important;
                 text-transform: capitalize !important;
                 text-align: center !important;
                 vertical-align: middle !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+              }
+              .auto-column {
+                white-space: nowrap !important;
+                width: 1% !important;
+              }
+              .desc-column {
+                white-space: normal !important;
+                width: auto !important;
               }
               .pwd-scroll-wrapper {
                 border-radius: 0 !important;
@@ -572,7 +618,7 @@ export default function SingleNoticeClient({
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
               }
-              .footer-card-label {
+              .footer-card-label, .warning-card-label {
                 display: block !important;
                 width: fit-content !important;
                 border-right: 1px solid #9ca3af !important;
@@ -581,16 +627,16 @@ export default function SingleNoticeClient({
                 border-left: none !important;
                 border-bottom-right-radius: 8px !important;
                 padding: 5px 12px !important;
-                font-weight: 800 !important;
-                font-size: 13.8px !important;
+                font-weight: bold !important;
+                font-size: 16px !important;
                 text-transform: uppercase !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
               }
               .footer-card-content {
                 padding: 8px 12px !important;
-                font-size: 13.8px !important;
-                font-weight: 700 !important;
+                font-size: 16px !important;
+                font-weight: 600 !important;
                 line-height: 1.5 !important;
                 color: #000000 !important;
               }
@@ -605,20 +651,12 @@ export default function SingleNoticeClient({
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
               }
-              .warning-card-label {
-                display: block !important;
-                width: fit-content !important;
-                border-right: 1px solid #9ca3af !important;
-                border-bottom: 1px solid #9ca3af !important;
-                border-top: none !important;
-                border-left: none !important;
-                border-bottom-right-radius: 8px !important;
-                padding: 5px 12px !important;
-                font-weight: 800 !important;
-                font-size: 13.8px !important;
-                text-transform: uppercase !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
+              .warning-card-content, .warning-card-content * {
+                padding: 8px 12px !important;
+                font-size: 16px !important;
+                font-weight: 600 !important;
+                font-family: 'Tiro Bangla', serif !important;
+                line-height: 1.5 !important;
               }
               img {
                 width: 100% !important;
@@ -662,8 +700,8 @@ export default function SingleNoticeClient({
                 print-color-adjust: exact !important;
               }
               .total-amount-row td {
-                font-size: 13.8px !important;
-                font-weight: 800 !important;
+                font-size: 16px !important;
+                font-weight: 600 !important;
               }
               .print-container th, 
               .print-container td {
@@ -797,12 +835,14 @@ export default function SingleNoticeClient({
             width: 100% !important;
             max-width: 100% !important;
           }
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Tiro+Bangla&display=swap');
-          *, *[class]:not(.print-office-name), *[style]:not(.print-office-name), .font-bangla:not(.print-office-name), [style*="font-family"]:not(.print-office-name) {
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Tiro+Bangla:ital@0;1&display=swap');
+          *, *[class], *[style] {
             font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
           }
-          .print-office-name {
+          .print-office-name, .warning-card-content, .warning-card-content * {
             font-family: 'Tiro Bangla', serif !important;
+          }
+          .print-office-name {
             font-size: 38pt !important;
           }
           .date-block-th {
@@ -1087,8 +1127,8 @@ export default function SingleNoticeClient({
                             <th
                               key={idx}
                               className={`p-2 font-bold border border-gray-400 text-base capitalize text-center ${isDesc
-                                ? "desc-column w-[32%] min-w-[220px] whitespace-normal"
-                                : "auto-column"
+                                ? "desc-column w-[32%] min-w-[220px] print:w-auto whitespace-normal"
+                                : "auto-column print:w-[1%]"
                                 } ${isTender || isSl ? "whitespace-nowrap" : ""}`}
                               style={{
                                 backgroundColor:
@@ -1207,7 +1247,7 @@ export default function SingleNoticeClient({
                                 : isCurrencyAlignCol
                                   ? "text-right"
                                   : "text-left";
-                              
+
                               const isCreditCol =
                                 colHdr.includes("credit") ||
                                 colHdr.includes("solvency") ||
@@ -1221,9 +1261,9 @@ export default function SingleNoticeClient({
                               return (
                                 <td
                                   key={cIdx}
-                                  className={`p-3 border border-gray-400 text-black text-base font-semibold font-bangla ${cellAlignClass} ${isDesc
-                                    ? "desc-column w-[32%] min-w-[220px] whitespace-normal text-left"
-                                    : "auto-column"
+                                  className={`p-3 border border-gray-400 text-black text-base font-semibold ${cellAlignClass} ${isDesc
+                                    ? "desc-column w-[32%] min-w-[220px] print:w-auto whitespace-normal text-left"
+                                    : "auto-column print:w-[1%]"
                                     } ${isNoWrapCell ? "whitespace-nowrap" : ""
                                     }`}
                                   style={{
@@ -1252,12 +1292,12 @@ export default function SingleNoticeClient({
                                       const { datePart, timePart } =
                                         getSellingDateDisplay(formattedVal);
                                       return (
-                                        <div className="flex flex-col text-center">
-                                          <span className="whitespace-nowrap font-bold">
+                                        <div className="flex flex-col text-center leading-tight">
+                                          <span className="whitespace-nowrap font-semibold print:text-[16px]">
                                             {datePart}
                                           </span>
                                           {timePart ? (
-                                            <span className="text-[13px] print:!text-[13px] text-gray-700 font-bold mt-0.5 whitespace-nowrap">
+                                            <span className="whitespace-nowrap font-semibold mt-0.5 print:text-[16px]">
                                               {timePart}
                                             </span>
                                           ) : null}
@@ -1290,7 +1330,7 @@ export default function SingleNoticeClient({
                               return (
                                 <td
                                   key={idx}
-                                  className="p-3 border border-gray-400 text-right text-lg md:text-xl font-extrabold bg-[#facc15]"
+                                  className="p-3 border border-gray-400 text-right text-sm font-semibold text-black bg-[#facc15]"
                                   style={{
                                     backgroundColor: "#facc15",
                                     textAlign: "right",
@@ -1312,7 +1352,7 @@ export default function SingleNoticeClient({
                               return (
                                 <td
                                   key={idx}
-                                  className="p-3 border border-gray-400 text-base font-extrabold text-black bg-[#facc15] text-right"
+                                  className="p-3 border border-gray-400 text-sm font-semibold text-black bg-[#facc15] text-right"
                                   style={{
                                     backgroundColor: "#facc15",
                                     textAlign: "right",
@@ -1326,7 +1366,7 @@ export default function SingleNoticeClient({
                               return (
                                 <td
                                   key={idx}
-                                  className="p-3 border border-gray-400 text-sm font-extrabold text-black bg-[#facc15] text-right"
+                                  className="p-3 border border-gray-400 text-sm font-semibold text-black bg-[#facc15] text-right"
                                   style={{
                                     backgroundColor: "#facc15",
                                     textAlign: "right",
@@ -1363,7 +1403,7 @@ export default function SingleNoticeClient({
 
                 {/* Compact Government Footer Table Blocks */}
                 {(table.payOrderTo || true) && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 mb-2 print:!mb-2 print:mt-3 print:grid-cols-2 font-bangla text-black">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 mb-2 print:!mb-2 print:mt-3 print:grid-cols-2 text-black">
                     {table.payOrderTo && (
                       <div
                         className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
@@ -1375,7 +1415,7 @@ export default function SingleNoticeClient({
                         }}
                       >
                         <div
-                          className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
+                          className="footer-card-label text-[13.8px] font-bold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
                           style={{
                             backgroundColor:
                               table.headerBgColor || defaultHeaderBg,
@@ -1391,7 +1431,7 @@ export default function SingleNoticeClient({
                           <i className="fa-solid fa-building-columns print:hidden"></i>
                           BD Pay Order To :
                         </div>
-                        <div className="footer-card-content p-4 text-black font-semibold text-sm leading-relaxed whitespace-pre-line">
+                        <div className="footer-card-content p-4 text-black font-semibold text-[13.8px] leading-relaxed whitespace-pre-line">
                           {table.payOrderTo}
                         </div>
                       </div>
@@ -1406,7 +1446,7 @@ export default function SingleNoticeClient({
                       }}
                     >
                       <div
-                        className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
+                        className="footer-card-label text-[13.8px] font-bold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
                         style={{
                           backgroundColor:
                             table.headerBgColor || defaultHeaderBg,
@@ -1422,7 +1462,7 @@ export default function SingleNoticeClient({
                         <i className="fa-solid fa-circle-info print:hidden"></i>
                         Contact Info / e-Tender Solutions :
                       </div>
-                      <div className="footer-card-content p-4 text-black font-semibold text-sm leading-relaxed">
+                      <div className="footer-card-content p-4 text-black font-semibold text-[13.8px] leading-relaxed">
                         Engr. Md. Shah Alom B.Sc. Engr.(Civil)
                         <br />
                         Mobile No: 01711-805086, 01972-805086
@@ -1457,7 +1497,7 @@ export default function SingleNoticeClient({
                     }}
                   >
                     <div
-                      className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2"
+                      className="footer-card-label text-[13.8px] font-bold uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2"
                       style={{
                         backgroundColor: "#dc2626",
                         color: "#ffffff",
@@ -1471,8 +1511,8 @@ export default function SingleNoticeClient({
                       Information :
                     </div>
                     <div
-                      className="footer-card-content p-4 text-red-650 font-extrabold text-sm leading-relaxed font-bangla"
-                      style={{ color: "#dc2626" }}
+                      className="warning-card-content p-4 text-red-650 font-semibold text-[13.8px] leading-relaxed font-bangla"
+                      style={{ color: "#dc2626", fontFamily: "'Tiro Bangla', serif" }}
                     >
                       {table.bottomWarning}
                     </div>
@@ -1812,8 +1852,8 @@ export default function SingleNoticeClient({
                                   <th
                                     key={idx}
                                     className={`p-2 font-bold border border-gray-400 text-sm capitalize text-center ${isDesc
-                                      ? "desc-column w-[30%] min-w-[220px]"
-                                      : "auto-column whitespace-nowrap"
+                                      ? "desc-column w-[30%] min-w-[220px] print:w-auto whitespace-normal"
+                                      : "auto-column print:w-[1%]"
                                       }`}
                                     style={{
                                       backgroundColor:
@@ -1910,9 +1950,9 @@ export default function SingleNoticeClient({
                                       return (
                                         <td
                                           key={cIdx}
-                                          className={`p-2.5 border border-gray-400 text-black text-sm font-semibold font-bangla ${cellAlignClass} ${isDesc
-                                            ? "desc-column w-[30%] min-w-[220px] text-left"
-                                            : "auto-column whitespace-nowrap"
+                                          className={`p-2.5 border border-gray-400 text-black text-sm font-semibold ${cellAlignClass} ${isDesc
+                                            ? "desc-column w-[30%] min-w-[220px] print:w-auto whitespace-normal text-left"
+                                            : "auto-column print:w-[1%]"
                                             }`}
                                           style={{
                                             backgroundColor: cellBg,
@@ -1952,12 +1992,12 @@ export default function SingleNoticeClient({
                                               const { datePart, timePart } =
                                                 getSellingDateDisplay(formattedVal);
                                               return (
-                                                <div className="flex flex-col text-center">
-                                                  <span className="whitespace-nowrap font-bold">
+                                                <div className="flex flex-col text-center leading-tight">
+                                                  <span className="whitespace-nowrap font-semibold print:text-[16px]">
                                                     {datePart}
                                                   </span>
                                                   {timePart ? (
-                                                    <span className="text-[13px] print:!text-[13px] text-gray-700 font-bold mt-0.5 whitespace-nowrap">
+                                                    <span className="whitespace-nowrap font-semibold mt-0.5 print:text-[16px]">
                                                       {timePart}
                                                     </span>
                                                   ) : null}
@@ -1992,7 +2032,7 @@ export default function SingleNoticeClient({
                                       return (
                                         <td
                                           key={idx}
-                                          className="p-2.5 border border-gray-400 text-right text-base md:text-lg font-extrabold bg-[#facc15]"
+                                          className="p-2.5 border border-gray-400 text-right text-sm font-semibold text-black bg-[#facc15]"
                                           style={{
                                             backgroundColor: "#facc15",
                                             textAlign: "right",
@@ -2016,7 +2056,7 @@ export default function SingleNoticeClient({
                                       return (
                                         <td
                                           key={idx}
-                                          className="p-2.5 border border-gray-400 text-sm font-extrabold text-black bg-[#facc15] text-right"
+                                          className="p-2.5 border border-gray-400 text-sm font-semibold text-black bg-[#facc15] text-right"
                                           style={{
                                             backgroundColor: "#facc15",
                                             textAlign: "right",
@@ -2030,7 +2070,7 @@ export default function SingleNoticeClient({
                                       return (
                                         <td
                                           key={idx}
-                                          className="p-2.5 border border-gray-400 text-sm font-extrabold text-black bg-[#facc15] text-right"
+                                          className="p-2.5 border border-gray-400 text-sm font-semibold text-black bg-[#facc15] text-right"
                                           style={{
                                             backgroundColor: "#facc15",
                                             textAlign: "right",
@@ -2067,7 +2107,7 @@ export default function SingleNoticeClient({
 
                       {/* Compact Government Footer Table Blocks */}
                       {(table.payOrderTo || true) && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 mb-2 print:!mb-2 print:mt-3 print:grid-cols-2 font-bangla text-black">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 mb-2 print:!mb-2 print:mt-3 print:grid-cols-2 text-black">
                           {table.payOrderTo && (
                             <div
                               className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
@@ -2079,7 +2119,7 @@ export default function SingleNoticeClient({
                               }}
                             >
                               <div
-                                className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
+                                className="footer-card-label text-[13.8px] font-bold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
                                 style={{
                                   backgroundColor:
                                     table.headerBgColor || defaultHeaderBg,
@@ -2095,7 +2135,7 @@ export default function SingleNoticeClient({
                                 <i className="fa-solid fa-building-columns print:hidden"></i>
                                 BD Pay Order To :
                               </div>
-                              <div className="footer-card-content p-4 text-black font-semibold text-sm leading-relaxed whitespace-pre-line">
+                              <div className="footer-card-content p-4 text-black font-semibold text-[13.8px] leading-relaxed whitespace-pre-line">
                                 {table.payOrderTo}
                               </div>
                             </div>
@@ -2110,7 +2150,7 @@ export default function SingleNoticeClient({
                             }}
                           >
                             <div
-                              className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
+                              className="footer-card-label text-[13.8px] font-bold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
                               style={{
                                 backgroundColor:
                                   table.headerBgColor || defaultHeaderBg,
@@ -2126,7 +2166,7 @@ export default function SingleNoticeClient({
                               <i className="fa-solid fa-circle-info print:hidden"></i>
                               Contact Info / e-Tender Solutions :
                             </div>
-                            <div className="footer-card-content p-4 text-black font-semibold text-sm leading-relaxed">
+                            <div className="footer-card-content p-4 text-black font-semibold text-[13.8px] leading-relaxed">
                               Engr. Md. Shah Alom B.Sc. Engr.(Civil)
                               <br />
                               Mobile No: 01711-805086
@@ -2159,7 +2199,7 @@ export default function SingleNoticeClient({
                           }}
                         >
                           <div
-                            className="footer-card-label text-xs md:text-sm font-extrabold uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2"
+                            className="warning-card-label text-[13.8px] font-bold uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2"
                             style={{
                               backgroundColor: "#dc2626",
                               color: "#ffffff",
@@ -2173,8 +2213,8 @@ export default function SingleNoticeClient({
                             Information :
                           </div>
                           <div
-                            className="footer-card-content p-4 text-red-650 font-extrabold text-sm leading-relaxed font-bangla"
-                            style={{ color: "#dc2626" }}
+                            className="warning-card-content p-4 text-red-650 font-semibold text-[13.8px] leading-relaxed font-bangla"
+                            style={{ color: "#dc2626", fontFamily: "'Tiro Bangla', serif" }}
                           >
                             {table.bottomWarning}
                           </div>

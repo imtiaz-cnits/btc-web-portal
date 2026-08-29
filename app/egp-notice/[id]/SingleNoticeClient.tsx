@@ -600,6 +600,10 @@ export default function SingleNoticeClient({
                 white-space: nowrap !important;
                 width: 1% !important;
               }
+              .location-column {
+                white-space: normal !important;
+                width: 1% !important;
+              }
               .desc-column {
                 white-space: normal !important;
                 width: auto !important;
@@ -1252,28 +1256,32 @@ export default function SingleNoticeClient({
                                 colHdr.includes("credit") ||
                                 colHdr.includes("solvency") ||
                                 colHdr.includes("line");
+                              const isLocationCol = colHdr.includes("location");
                               const isNoWrapCell =
-                                isTender ||
-                                isSl ||
-                                isCreditCol ||
-                                /lac|cr/i.test(formattedVal);
+                                !isLocationCol &&
+                                (isTender ||
+                                  isSl ||
+                                  isCreditCol ||
+                                  /lac|cr/i.test(formattedVal));
 
                               return (
                                 <td
                                   key={cIdx}
                                   className={`p-3 border border-gray-400 text-black text-base font-semibold ${cellAlignClass} ${isDesc
                                     ? "desc-column w-[32%] min-w-[220px] print:w-auto whitespace-normal text-left"
-                                    : "auto-column print:w-[1%]"
+                                    : isLocationCol
+                                      ? "location-column print:w-[1%] whitespace-normal text-center"
+                                      : "auto-column print:w-[1%]"
                                     } ${isNoWrapCell ? "whitespace-nowrap" : ""
                                     }`}
                                   style={{
                                     backgroundColor: cellBg,
-                                    textAlign: isCenterAlignCol
+                                    textAlign: isCenterAlignCol || isLocationCol
                                       ? "center"
                                       : isCurrencyAlignCol
                                         ? "right"
                                         : "left",
-                                    whiteSpace: isNoWrapCell ? "nowrap" : undefined,
+                                    whiteSpace: isNoWrapCell ? "nowrap" : isLocationCol ? "normal" : undefined,
                                     WebkitPrintColorAdjust: "exact",
                                     printColorAdjust: "exact",
                                   }}
@@ -1940,28 +1948,31 @@ export default function SingleNoticeClient({
                                         colHdr.includes("amount") ||
                                         colHdr.includes("similar") ||
                                         colHdr.includes("tk");
-
+                                      
                                       const cellAlignClass = isCenterAlignCol
                                         ? "text-center"
                                         : isCurrencyAlignCol
                                           ? "text-right"
                                           : "text-left";
+                                      const isLocationCol = colHdr.includes("location");
 
                                       return (
                                         <td
                                           key={cIdx}
                                           className={`p-2.5 border border-gray-400 text-black text-sm font-semibold ${cellAlignClass} ${isDesc
                                             ? "desc-column w-[30%] min-w-[220px] print:w-auto whitespace-normal text-left"
-                                            : "auto-column print:w-[1%]"
+                                            : isLocationCol
+                                              ? "location-column print:w-[1%] whitespace-normal text-center"
+                                              : "auto-column print:w-[1%]"
                                             }`}
                                           style={{
                                             backgroundColor: cellBg,
-                                            textAlign: isCenterAlignCol
+                                            textAlign: isCenterAlignCol || isLocationCol
                                               ? "center"
                                               : isCurrencyAlignCol
                                                 ? "right"
                                                 : "left",
-                                            whiteSpace: !isDesc ? "nowrap" : undefined,
+                                            whiteSpace: !isDesc && !isLocationCol ? "nowrap" : undefined,
                                             WebkitPrintColorAdjust: "exact",
                                             printColorAdjust: "exact",
                                           }}
@@ -2001,6 +2012,25 @@ export default function SingleNoticeClient({
                                                       {timePart}
                                                     </span>
                                                   ) : null}
+                                                </div>
+                                              );
+                                            }
+                                            const isLocationCol = (headers[cIdx] || "")
+                                              .toLowerCase()
+                                              .includes("location");
+                                            if (
+                                              isLocationCol &&
+                                              formattedVal &&
+                                              formattedVal !== "N/A" &&
+                                              formattedVal.includes(",")
+                                            ) {
+                                              const commaIdx = formattedVal.indexOf(",");
+                                              const part1 = formattedVal.substring(0, commaIdx + 1).trim();
+                                              const part2 = formattedVal.substring(commaIdx + 1).trim();
+                                              return (
+                                                <div className="flex flex-col text-center leading-tight">
+                                                  <span className="whitespace-nowrap">{part1}</span>
+                                                  {part2 ? <span className="whitespace-nowrap">{part2}</span> : null}
                                                 </div>
                                               );
                                             }

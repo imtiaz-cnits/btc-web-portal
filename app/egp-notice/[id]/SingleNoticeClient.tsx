@@ -164,6 +164,30 @@ const getSellingDateDisplay = (formattedVal: string) => {
   return { datePart, timePart };
 };
 
+const getFormattedPrintDateTime = () => {
+  const now = new Date();
+  const formatOptions: Intl.DateTimeFormatOptions = {
+    timeZone: "Asia/Dhaka",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  };
+  const formatter = new Intl.DateTimeFormat("en-GB", formatOptions);
+  const parts = formatter.formatToParts(now);
+  const day = parts.find((p) => p.type === "day")?.value;
+  const month = parts.find((p) => p.type === "month")?.value;
+  const year = parts.find((p) => p.type === "year")?.value;
+  let hour = parts.find((p) => p.type === "hour")?.value || "";
+  const minute = parts.find((p) => p.type === "minute")?.value;
+  let dayPeriod = parts.find((p) => p.type === "dayPeriod")?.value || "";
+  dayPeriod = dayPeriod.toUpperCase();
+
+  return `${day}/${month}/${year}, ${hour}:${minute} ${dayPeriod}`;
+};
+
 const formatHeaderTitle = (hdr: string) => {
   if (!hdr) return "";
   const str = String(hdr).trim();
@@ -195,6 +219,26 @@ const formatHeaderTitle = (hdr: string) => {
       <div className="flex flex-col items-center justify-center leading-tight">
         <span>Bank</span>
         <span>Credit Line</span>
+      </div>
+    );
+  }
+
+  if (lower.includes("turn over") || lower.includes("turnover")) {
+    const yearMatch = str.match(/\b\d+\s*(?:Years?|year|yrs?)\b/i);
+    return (
+      <div className="flex flex-col items-center justify-center leading-tight">
+        <span>Turn Over</span>
+        <span>{yearMatch ? yearMatch[0] : "05 Years"}</span>
+      </div>
+    );
+  }
+
+  if (lower.includes("similar work") || lower.includes("similar")) {
+    const yearMatch = str.match(/\b\d+\s*(?:Years?|year|yrs?)\b/i);
+    return (
+      <div className="flex flex-col items-center justify-center leading-tight">
+        <span>Similar Work</span>
+        <span>{yearMatch ? yearMatch[0] : "05 Years"}</span>
       </div>
     );
   }
@@ -253,27 +297,287 @@ export default function SingleNoticeClient({
         import("html2canvas-pro" as any),
         import("jspdf"),
       ]);
-      const canvas = await (html2canvas as any)(printAreaRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-      });
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
-      const pdf = new (jsPDF as any)("l", "mm", "a4"); // landscape for wide tables
-      const imgWidth = 297; // A4 landscape width
-      const pageHeight = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-      pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+
+      const isLandscape = parsedTables.length > 0;
+      const pdfWidth = isLandscape ? 297 : 210;
+      const pdfHeight = isLandscape ? 210 : 297;
+      const targetContainerWidth = isLandscape ? 1120 : 794;
+      const maxPageContentHeight = isLandscape ? 740 : 1060;
+
+      const sourceBlocks = printAreaRef.current.querySelectorAll(".pwd-table-block");
+
+      if (sourceBlocks.length === 0) {
+        // Fallback for non-table standard notices
+        const canvas = await (html2canvas as any)(printAreaRef.current, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+        });
+        const imgData = canvas.toDataURL("image/jpeg", 0.98);
+        const pdf = new (jsPDF as any)(isLandscape ? "l" : "p", "mm", "a4");
+        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+        pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
+        heightLeft -= pdfHeight;
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
+          heightLeft -= pdfHeight;
+        }
+        pdf.save(`${notice.title.slice(0, 50)}-result.pdf`);
+        return;
       }
+
+      // Create a temporary hidden container to build and measure exact paginated pages
+      const tempWrapper = document.createElement("div");
+      tempWrapper.style.cssText = `
+        position: fixed;
+        left: -9999px;
+        top: 0;
+        width: ${targetContainerWidth}px;
+        z-index: -9999;
+        background: #ffffff;
+      `;
+
+      // Inject the exact print styles into the temp wrapper
+      const styleEl = document.createElement("style");
+      styleEl.innerHTML = `
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Tiro+Bangla:ital@0;1&display=swap');
+        * { box-sizing: border-box !important; }
+        .pdf-page-box *, .pdf-page-box *[class], .pdf-page-box *[style] {
+          font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        }
+        .pdf-page-box .print-office-name, .pdf-page-box .warning-card-content, .pdf-page-box .warning-card-content * {
+          font-family: 'Tiro Bangla', serif !important;
+        }
+        .pdf-page-box .print-office-name {
+          font-size: 32pt !important;
+          text-align: center !important;
+          font-weight: bold !important;
+          background-color: white !important;
+          color: black !important;
+          padding: 4px 4px !important;
+        }
+        .pdf-page-box .print-subtitle {
+          font-size: 22px !important;
+          text-align: center !important;
+          font-weight: bold !important;
+          background-color: white !important;
+          color: black !important;
+          padding: 2px 4px !important;
+        }
+        .pdf-page-box table {
+          width: 100% !important;
+          border-collapse: collapse !important;
+          margin: 0 !important;
+          background-color: transparent !important;
+        }
+        .pdf-page-box th, .pdf-page-box td {
+          border: 1px solid #374151 !important;
+          padding: 3px 4px !important;
+          word-wrap: break-word !important;
+          word-break: normal !important;
+          overflow-wrap: break-word !important;
+          box-sizing: border-box !important;
+          font-size: 16px !important;
+        }
+        .pdf-page-box td {
+          color: #000000 !important;
+          font-size: 16px !important;
+          font-weight: 600 !important;
+        }
+        .pdf-page-box .date-block-th {
+          padding: 0 !important;
+          border-top: 0 !important;
+          border-bottom: 0 !important;
+        }
+        .pdf-page-box .date-block-badge {
+          margin: 0 !important;
+          padding: 3px 10px !important;
+          display: inline-block !important;
+        }
+        .pdf-page-box .total-amount-row, .pdf-page-box .total-amount-row td {
+          background-color: #facc15 !important;
+          font-size: 16px !important;
+          font-weight: 600 !important;
+        }
+        .pdf-page-box .footer-card {
+          margin-top: 10px !important;
+          margin-bottom: 6px !important;
+          overflow: hidden !important;
+        }
+        .pdf-page-box .footer-card-label {
+          font-size: 16px !important;
+          font-weight: 700 !important;
+          padding: 6px 12px !important;
+        }
+        .pdf-page-box .footer-card-content {
+          font-size: 16px !important;
+          font-weight: 600 !important;
+          line-height: 1.5 !important;
+          padding: 8px 12px !important;
+        }
+        .pdf-page-box .warning-card {
+          border: 2px solid #dc2626 !important;
+          border-left: 4px solid #dc2626 !important;
+          border-right: 4px solid #dc2626 !important;
+          border-radius: 12px !important;
+          margin-top: 10px !important;
+          margin-bottom: 6px !important;
+          overflow: hidden !important;
+        }
+        .pdf-page-box .warning-card-content, .pdf-page-box .warning-card-content * {
+          padding: 8px 12px !important;
+          font-size: 16px !important;
+          font-weight: 600 !important;
+          font-family: 'Tiro Bangla', serif !important;
+          line-height: 1.5 !important;
+        }
+      `;
+      tempWrapper.appendChild(styleEl);
+      document.body.appendChild(tempWrapper);
+
+      const createPageElement = () => {
+        const pageDiv = document.createElement("div");
+        pageDiv.className = "pdf-page-box";
+        pageDiv.style.cssText = `
+          width: ${targetContainerWidth}px;
+          min-height: ${maxPageContentHeight + 40}px;
+          box-sizing: border-box;
+          padding: 12px 16px 12px 16px;
+          background: #ffffff;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          margin-bottom: 20px;
+        `;
+
+        const topBar = document.createElement("div");
+        topBar.className = "custom-print-header";
+        topBar.style.cssText = "display: flex; justify-content: space-between; align-items: center; width: 100%; padding-bottom: 4px; margin-bottom: 10px; font-family: 'Inter', sans-serif;";
+        topBar.innerHTML = `
+          <div style="width: 30%;"></div>
+          <div style="width: 40%; text-align: center; font-size: 12px; font-weight: bold; color: #000000;">Salom Egp consultant</div>
+          <div style="width: 30%; text-align: right; font-size: 12px; color: #000000; font-weight: bold;">Print: ${getFormattedPrintDateTime()}</div>
+        `;
+        pageDiv.appendChild(topBar);
+        return pageDiv;
+      };
+
+      const pages: HTMLElement[] = [];
+
+      sourceBlocks.forEach((block) => {
+        const originalTable = block.querySelector("table");
+        const originalThead = originalTable?.querySelector("thead");
+        const originalRows = Array.from(originalTable?.querySelectorAll("tbody tr") || []) as HTMLTableRowElement[];
+
+        const totalsRow = originalRows.find((r) => r.classList.contains("total-amount-row"));
+        const dataRows = originalRows.filter((r) => !r.classList.contains("total-amount-row"));
+
+        const footerElements = Array.from(block.querySelectorAll(".grid, .warning-card")) as HTMLElement[];
+
+        const createTableOnPage = (targetPage: HTMLElement) => {
+          const tableContainer = document.createElement("div");
+          tableContainer.className = "pwd-scroll-wrapper relative";
+          tableContainer.style.cssText = "width: 100%; overflow: visible; position: relative;";
+
+          const watermark = document.createElement("div");
+          watermark.className = "watermark-container";
+          watermark.style.cssText = "position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; opacity: 0.09; z-index: 20;";
+          watermark.innerHTML = `<img src="/assets/icon/watermark.png" style="width: 440px; height: auto; object-fit: contain;" />`;
+          tableContainer.appendChild(watermark);
+
+          const newTable = document.createElement("table");
+          newTable.className = "w-full border-collapse text-left font-semibold text-black relative z-10";
+
+          if (originalThead) {
+            newTable.appendChild(originalThead.cloneNode(true));
+          }
+
+          const newTbody = document.createElement("tbody");
+          newTbody.className = "divide-y divide-gray-400";
+          newTable.appendChild(newTbody);
+
+          tableContainer.appendChild(newTable);
+          targetPage.appendChild(tableContainer);
+
+          return { tableContainer, newTable, newTbody };
+        };
+
+        let currentPage = createPageElement();
+        tempWrapper.appendChild(currentPage);
+        pages.push(currentPage);
+
+        let { newTbody } = createTableOnPage(currentPage);
+
+        dataRows.forEach((row) => {
+          const clonedRow = row.cloneNode(true) as HTMLTableRowElement;
+          newTbody.appendChild(clonedRow);
+
+          if (currentPage.offsetHeight > maxPageContentHeight + 45) {
+            newTbody.removeChild(clonedRow);
+
+            currentPage = createPageElement();
+            tempWrapper.appendChild(currentPage);
+            pages.push(currentPage);
+
+            const nextTable = createTableOnPage(currentPage);
+            newTbody = nextTable.newTbody;
+            newTbody.appendChild(clonedRow);
+          }
+        });
+
+        if (totalsRow) {
+          const clonedTotals = totalsRow.cloneNode(true) as HTMLTableRowElement;
+          newTbody.appendChild(clonedTotals);
+          if (currentPage.offsetHeight > maxPageContentHeight + 45) {
+            newTbody.removeChild(clonedTotals);
+            currentPage = createPageElement();
+            tempWrapper.appendChild(currentPage);
+            pages.push(currentPage);
+
+            const nextTable = createTableOnPage(currentPage);
+            newTbody = nextTable.newTbody;
+            newTbody.appendChild(clonedTotals);
+          }
+        }
+
+        footerElements.forEach((footerEl) => {
+          const clonedFooter = footerEl.cloneNode(true) as HTMLElement;
+          currentPage.appendChild(clonedFooter);
+
+          if (currentPage.offsetHeight > maxPageContentHeight + 45) {
+            currentPage.removeChild(clonedFooter);
+            currentPage = createPageElement();
+            tempWrapper.appendChild(currentPage);
+            pages.push(currentPage);
+            currentPage.appendChild(clonedFooter);
+          }
+        });
+      });
+
+      const pdf = new (jsPDF as any)(isLandscape ? "l" : "p", "mm", "a4");
+
+      for (let i = 0; i < pages.length; i++) {
+        const pageEl = pages[i];
+        const canvas = await (html2canvas as any)(pageEl, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+        });
+        const imgData = canvas.toDataURL("image/jpeg", 0.98);
+        if (i > 0) {
+          pdf.addPage();
+        }
+        pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+      }
+
       pdf.save(`${notice.title.slice(0, 50)}-result.pdf`);
+
+      document.body.removeChild(tempWrapper);
     } catch (err) {
       console.error("PDF generation failed:", err);
       alert("PDF generation failed. Please try again.");
@@ -376,30 +680,6 @@ export default function SingleNoticeClient({
       };
       return;
     }
-
-    const getFormattedPrintDateTime = () => {
-      const now = new Date();
-      const formatOptions: Intl.DateTimeFormatOptions = {
-        timeZone: "Asia/Dhaka",
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      };
-      const formatter = new Intl.DateTimeFormat("en-GB", formatOptions);
-      const parts = formatter.formatToParts(now);
-      const day = parts.find((p) => p.type === "day")?.value;
-      const month = parts.find((p) => p.type === "month")?.value;
-      const year = parts.find((p) => p.type === "year")?.value;
-      let hour = parts.find((p) => p.type === "hour")?.value || "";
-      const minute = parts.find((p) => p.type === "minute")?.value;
-      let dayPeriod = parts.find((p) => p.type === "dayPeriod")?.value || "";
-      dayPeriod = dayPeriod.toUpperCase();
-
-      return `${day}/${month}/${year}, ${hour}:${minute} ${dayPeriod}`;
-    };
 
     // Restore original DOM replacement logic for standard web tables/text as requested by the user
     // This keeps the original styles, colors, margins, fonts, and print layouts exactly the same!

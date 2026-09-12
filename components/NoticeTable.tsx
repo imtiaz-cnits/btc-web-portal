@@ -2,6 +2,7 @@
 
 import React, { useRef } from "react";
 import Link from "next/link";
+import { sanitizeBijoyDeep, autoConvertBijoy } from "@/lib/bijoyToUnicode";
 
 interface Notice {
   id: string;
@@ -81,6 +82,10 @@ function TablePdfPreview({ tableData, title, category }: { tableData: string; ti
       tables = [{ headers: parsed.headers, rows: parsed.rows, columnColors: parsed.columnColors || [] }];
     } else if (parsed.isPwdTemplate) {
       tables = [{ ...parsed, headers: parsed.headers || [], rows: parsed.rows || [] }];
+    }
+
+    if (tables.length > 0) {
+      tables = sanitizeBijoyDeep(tables);
     }
 
     const getHeaderTextColor = (bgColor: string) => {

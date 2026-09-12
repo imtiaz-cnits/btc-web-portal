@@ -8,6 +8,7 @@ import {
   updateNotice,
   getNoticeCountsByTitle,
 } from "@/app/actions/notices";
+import { sanitizeBijoyDeep, autoConvertBijoy } from "@/lib/bijoyToUnicode";
 import {
   Plus,
   Trash2,
@@ -1921,11 +1922,12 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   };
 
   const handleHeaderChange = (tIdx: number, colIndex: number, val: string) => {
+    const cleanVal = autoConvertBijoy(val);
     setTablesList((prev) =>
       prev.map((t, idx) => {
         if (idx !== tIdx) return t;
         const updated = [...t.headers];
-        updated[colIndex] = val;
+        updated[colIndex] = cleanVal;
         return { ...t, headers: updated };
       }),
     );
@@ -1937,14 +1939,15 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     colIndex: number,
     val: string,
   ) => {
+    const convertedVal = autoConvertBijoy(val);
     setTablesList((prev) =>
       prev.map((t, idx) => {
         if (idx !== tIdx) return t;
 
-        let formattedVal = val;
+        let formattedVal = convertedVal;
         const hdr = t.headers[colIndex] || "";
         if (isCurrencyColumn(hdr)) {
-          formattedVal = formatInputCurrency(val);
+          formattedVal = formatInputCurrency(convertedVal);
         }
 
         const updated = [...t.rows];
@@ -2028,11 +2031,12 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     field: string,
     val: string,
   ) => {
+    const cleanVal = autoConvertBijoy(val);
     setTablesList((prev) =>
       prev.map((t, idx) => {
         if (idx !== tIdx) return t;
         const updatedRows = t.rows.map((row: any, i: number) =>
-          i === rIdx ? { ...row, [field]: val } : row,
+          i === rIdx ? { ...row, [field]: cleanVal } : row,
         );
         return { ...t, rows: updatedRows };
       }),
@@ -2040,10 +2044,11 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   };
 
   const handlePwdFieldChange = (tIdx: number, field: string, val: string) => {
+    const cleanVal = autoConvertBijoy(val);
     setTablesList((prev) =>
       prev.map((t, idx) => {
         if (idx !== tIdx) return t;
-        return { ...t, [field]: val };
+        return { ...t, [field]: cleanVal };
       }),
     );
   };
@@ -2221,10 +2226,13 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       }
 
       if (enableText) {
-        formData.append("content", content);
+        formData.append("content", autoConvertBijoy(content));
       } else {
         formData.append("content", "");
       }
+
+      const rawTitle = (formData.get("title") as string) || title;
+      formData.set("title", autoConvertBijoy(rawTitle));
 
       if (enableTables && tablesList.length > 0) {
         // Automatically recalculate and format the SL No column values sequentially before saving
@@ -2251,15 +2259,16 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           }
           return {
             ...table,
-            officeName: title,
-            subTitle: subTitle,
+            officeName: autoConvertBijoy(title),
+            subTitle: autoConvertBijoy(subTitle),
             rows: updatedRows,
           };
         });
 
+        const sanitizedTables = sanitizeBijoyDeep(updatedTablesList);
         const serializedData = JSON.stringify({
           version: "v2",
-          tables: updatedTablesList,
+          tables: sanitizedTables,
         });
         formData.append("tableData", serializedData);
       } else {

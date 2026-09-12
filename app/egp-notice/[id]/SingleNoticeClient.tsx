@@ -3,6 +3,7 @@
 import React, { useRef, useEffect } from "react";
 import Link from "next/link";
 import { Home, ArrowLeft, Printer, Download } from "lucide-react";
+import { sanitizeBijoyDeep, autoConvertBijoy } from "@/lib/bijoyToUnicode";
 
 const formatDisplayDate = (dateStr: any) => {
   if (dateStr === null || dateStr === undefined) return "";
@@ -347,7 +348,7 @@ export default function SingleNoticeClient({
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Tiro+Bangla:ital@0;1&display=swap');
         * { box-sizing: border-box !important; }
         .pdf-page-box *, .pdf-page-box *[class], .pdf-page-box *[style] {
-          font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+          font-family: 'Inter', 'Tiro Bangla', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
         }
         .pdf-page-box .print-office-name, .pdf-page-box .warning-card-content, .pdf-page-box .warning-card-content * {
           font-family: 'Tiro Bangla', serif !important;
@@ -624,6 +625,10 @@ export default function SingleNoticeClient({
     }
   }
 
+  if (parsedTables.length > 0) {
+    parsedTables = sanitizeBijoyDeep(parsedTables);
+  }
+
   useEffect(() => {
     if (parsedTables.length > 0) {
       document.documentElement.classList.add("hide-global-layout");
@@ -844,7 +849,7 @@ export default function SingleNoticeClient({
               @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Tiro+Bangla:ital@0;1&display=swap');
               
               *, *[class], *[style] {
-                font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+                font-family: 'Inter', 'Tiro Bangla', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
               }
               .print-office-name, .warning-card-content, .warning-card-content * {
                 font-family: 'Tiro Bangla', serif !important;
@@ -1121,7 +1126,7 @@ export default function SingleNoticeClient({
           }
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Tiro+Bangla:ital@0;1&display=swap');
           *, *[class], *[style] {
-            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+            font-family: 'Inter', 'Tiro Bangla', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
           }
           .print-office-name, .warning-card-content, .warning-card-content * {
             font-family: 'Tiro Bangla', serif !important;

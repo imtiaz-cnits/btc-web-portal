@@ -33,12 +33,58 @@
   --text-2: #454545;
   --primary-font: "Space Grotesk", sans-serif;
   --secondary-font: "Space Grotesk", "Tiro Bangla", "Albert Sans", sans-serif;
-  --bangla-font: "Tiro Bangla", serif;
+  --bangla-font: "Tiro Bangla", "SutonnyOMJ", serif;
+  --sutonny-font: "SutonnyMJ", "SutonnyOMJ", sans-serif;
+}
+
+/* Sutonny Font Faces (Installed directly in project for universal availability) */
+@font-face {
+  font-family: 'SutonnyMJ';
+  src: url('/fonts/SutonnyMJ.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SutonnyMJ';
+  src: url('/fonts/SutonnyMJ-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SutonnyMJ';
+  src: url('/fonts/SutonnyMJ-Italic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SutonnyMJ';
+  src: url('/fonts/SutonnyMJ-BoldItalic.ttf') format('truetype');
+  font-weight: bold;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SutonnyOMJ';
+  src: url('/fonts/SutonnyOMJ.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-sutonny, .font-sutonnymj {
+  font-family: 'SutonnyMJ', 'SutonnyOMJ', sans-serif !important;
 }
 
 /* Bulletproof Unicode Font Stack for all user input and data table elements */
 input, textarea, select, button, table, .font-bangla {
-  font-family: "Space Grotesk", "Tiro Bangla", sans-serif !important;
+  font-family: "Space Grotesk", "Tiro Bangla", "SutonnyOMJ", sans-serif !important;
 }
 
 /* Explicit Navigation Classes for fallback */

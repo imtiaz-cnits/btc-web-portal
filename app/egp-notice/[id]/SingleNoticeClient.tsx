@@ -345,10 +345,24 @@ export default function SingleNoticeClient({
       // Inject the exact print styles into the temp wrapper
       const styleEl = document.createElement("style");
       styleEl.innerHTML = `
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Tiro+Bangla:ital@0;1&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Tiro+Bangla:ital@0;1&family=Albert+Sans:wght@400;600;700&display=swap');
+        @font-face {
+          font-family: 'SutonnyOMJ';
+          src: url('/fonts/SutonnyOMJ.ttf') format('truetype');
+          font-weight: normal;
+          font-style: normal;
+          font-display: swap;
+        }
+        @font-face {
+          font-family: 'SutonnyMJ';
+          src: url('/fonts/SutonnyMJ.ttf') format('truetype');
+          font-weight: normal;
+          font-style: normal;
+          font-display: swap;
+        }
         * { box-sizing: border-box !important; }
         .pdf-page-box *, .pdf-page-box *[class], .pdf-page-box *[style] {
-          font-family: 'Inter', 'Tiro Bangla', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+          font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
         }
         .pdf-page-box .print-office-name, .pdf-page-box .warning-card-content, .pdf-page-box .warning-card-content * {
           font-family: 'Tiro Bangla', serif !important;
@@ -458,7 +472,7 @@ export default function SingleNoticeClient({
 
         const topBar = document.createElement("div");
         topBar.className = "custom-print-header";
-        topBar.style.cssText = "display: flex; justify-content: space-between; align-items: center; width: 100%; padding-bottom: 4px; margin-bottom: 10px; font-family: 'Inter', sans-serif;";
+        topBar.style.cssText = "display: flex; justify-content: space-between; align-items: center; width: 100%; padding-bottom: 4px; margin-bottom: 10px; font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif;";
         topBar.innerHTML = `
           <div style="width: 30%;"></div>
           <div style="width: 40%; text-align: center; font-size: 12px; font-weight: bold; color: #000000;">Salom Egp consultant</div>
@@ -559,6 +573,10 @@ export default function SingleNoticeClient({
           }
         });
       });
+
+      if (typeof document !== "undefined" && (document as any).fonts) {
+        await (document as any).fonts.ready;
+      }
 
       const pdf = new (jsPDF as any)(isLandscape ? "l" : "p", "mm", "a4");
 
@@ -699,7 +717,21 @@ export default function SingleNoticeClient({
           <head>
             <title>&nbsp;</title>
             <style>
-              @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla&display=swap');
+              @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Tiro+Bangla:ital@0;1&family=Albert+Sans:wght@400;600;700&display=swap');
+              @font-face {
+                font-family: 'SutonnyOMJ';
+                src: url('/fonts/SutonnyOMJ.ttf') format('truetype');
+                font-weight: normal;
+                font-style: normal;
+                font-display: swap;
+              }
+              @font-face {
+                font-family: 'SutonnyMJ';
+                src: url('/fonts/SutonnyMJ.ttf') format('truetype');
+                font-weight: normal;
+                font-style: normal;
+                font-display: swap;
+              }
               @page {
                 size: A4 ${isLandscape ? "landscape" : "portrait"};
                 margin: 6mm 6mm 6mm 6mm !important;
@@ -710,7 +742,7 @@ export default function SingleNoticeClient({
               body {
                 padding: 0 !important;
                 margin: 0 !important;
-                font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+                font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
                 background-color: white !important;
                 color: #000000 !important;
                 -webkit-print-color-adjust: exact !important;
@@ -760,7 +792,7 @@ export default function SingleNoticeClient({
                 font-size: 14pt !important;
                 text-align: center !important;
                 font-weight: bold !important;
-                font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+                font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
                 background-color: white !important;
                 color: black !important;
                 padding: 2px 4px !important;
@@ -785,7 +817,7 @@ export default function SingleNoticeClient({
                 border-bottom: 2px solid #1b4332 !important;
                 padding-bottom: 10pt !important;
                 margin-bottom: 15pt !important;
-                font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+                font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
               }
               .notice-title {
                 font-size: 18pt !important;
@@ -794,7 +826,7 @@ export default function SingleNoticeClient({
                 margin: 0 0 8pt 0 !important;
                 line-height: 1.4 !important;
                 text-align: left !important;
-                font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+                font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
               }
               .notice-details-bar {
                 display: flex !important;
@@ -846,10 +878,9 @@ export default function SingleNoticeClient({
                 background-color: transparent !important;
                 page-break-inside: avoid !important;
               }
-              @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Tiro+Bangla:ital@0;1&display=swap');
               
               *, *[class], *[style] {
-                font-family: 'Inter', 'Tiro Bangla', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+                font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
               }
               .print-office-name, .warning-card-content, .warning-card-content * {
                 font-family: 'Tiro Bangla', serif !important;
@@ -1000,7 +1031,7 @@ export default function SingleNoticeClient({
           </head>
           <body>
             <div class="print-container">
-              <div class="custom-print-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding-bottom: 4px; margin-bottom: 12px; font-family: sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+              <div class="custom-print-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding-bottom: 4px; margin-bottom: 12px; font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                 <div style="width: 30%;"></div>
                 <div style="width: 40%; text-align: center; font-size: 12px; font-weight: bold; color: #000000;">Salom Egp consultant</div>
                 <div style="width: 30%; text-align: right; font-size: 12px; color: #000000; font-weight: bold;">Print: ${getFormattedPrintDateTime()}</div>
@@ -1100,6 +1131,7 @@ export default function SingleNoticeClient({
         <style
           dangerouslySetInnerHTML={{
             __html: `
+          @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Tiro+Bangla:ital@0;1&family=Albert+Sans:wght@400;600;700&display=swap');
           .website-layout > *:not(.main),
           .top_notice_board,
           .topbar,
@@ -1124,9 +1156,8 @@ export default function SingleNoticeClient({
             width: 100% !important;
             max-width: 100% !important;
           }
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Tiro+Bangla:ital@0;1&display=swap');
           *, *[class], *[style] {
-            font-family: 'Inter', 'Tiro Bangla', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+            font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
           }
           .print-office-name, .warning-card-content, .warning-card-content * {
             font-family: 'Tiro Bangla', serif !important;
@@ -1825,9 +1856,9 @@ export default function SingleNoticeClient({
       <style
         dangerouslySetInnerHTML={{
           __html: `
-        @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Tiro+Bangla:ital@0;1&family=Albert+Sans:wght@400;600;700&display=swap');
         .single_notice_page *, .single_notice_page *[class]:not(.print-office-name), .single_notice_page *[style]:not(.print-office-name), .single_notice_page .font-bangla:not(.print-office-name), .single_notice_page [style*="font-family"]:not(.print-office-name) {
-          font-family: 'Calibri', Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+          font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
         }
         .single_notice_page .print-office-name {
           font-family: 'Tiro Bangla', serif !important;

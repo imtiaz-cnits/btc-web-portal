@@ -398,7 +398,7 @@ export default function SingleNoticeClient({
           background-color: transparent !important;
         }
         .pdf-page-box th, .pdf-page-box td {
-          border: 1px solid #374151 !important;
+          border: 1px solid #c8cdd4 !important;
           padding: 2.5px 4px !important;
           word-wrap: break-word !important;
           word-break: normal !important;
@@ -407,11 +407,15 @@ export default function SingleNoticeClient({
         }
         .pdf-page-box th {
           font-size: 14px !important;
+          font-weight: 500 !important;
+          filter: brightness(1.3) !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
         }
         .pdf-page-box td {
           color: #000000 !important;
           font-size: 13px !important;
-          font-weight: 600 !important;
+          font-weight: 400 !important;
         }
         .pdf-page-box .auto-column {
           white-space: nowrap !important;
@@ -948,7 +952,7 @@ export default function SingleNoticeClient({
                 font-weight: bold !important;
               }
               th, td {
-                border: 1px solid #374151 !important;
+                border: 1px solid #c8cdd4 !important;
                 padding: 2.5px 4px !important;
                 word-wrap: break-word !important;
                 word-break: normal !important;
@@ -957,17 +961,18 @@ export default function SingleNoticeClient({
               }
               th {
                 font-size: 14px !important;
-                font-weight: bold !important;
+                font-weight: 500 !important;
                 text-transform: capitalize !important;
                 text-align: center !important;
                 vertical-align: middle !important;
+                filter: brightness(1.3) !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
               }
               td {
                 color: #000000 !important;
                 font-size: 13px !important;
-                font-weight: 600 !important;
+                font-weight: 400 !important;
               }
               .selling-date-cell, .selling-date-cell * {
                 font-size: 11.5px !important;
@@ -1094,7 +1099,7 @@ export default function SingleNoticeClient({
               }
               .print-container th, 
               .print-container td {
-                border-color: #000000 !important;
+                border-color: #c8cdd4 !important;
               }
             </style>
           </head>
@@ -1610,7 +1615,11 @@ export default function SingleNoticeClient({
                               const colHdr = (headers[cIdx] || "")
                                 .toLowerCase()
                                 .trim();
+                              const isTenderCol = colHdr
+                                .replace(/\s/g, "")
+                                .includes("tenderid");
                               const isCenterAlignCol =
+                                isTenderCol ||
                                 colHdr === "sl.no" ||
                                 colHdr === "sl no" ||
                                 colHdr === "sl. no" ||
@@ -1710,7 +1719,7 @@ export default function SingleNoticeClient({
                       {/* Sum Totals Row if any sum matches */}
                       {(securityColIdx !== -1 || docFeesColIdx !== -1) && (
                         <tr
-                          className="bg-[#facc15] font-bold text-black divide-x divide-gray-400 border-t-2 border-gray-500 total-amount-row"
+                          className="bg-[#facc15] font-bold text-black divide-x divide-gray-400 total-amount-row"
                           style={{ backgroundColor: "#facc15" }}
                         >
                           {headers.map((hdr: string, idx: number) => {
@@ -1802,10 +1811,10 @@ export default function SingleNoticeClient({
                       <div
                         className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
                         style={{
-                          borderLeft: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
-                          borderRight: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
-                          borderTop: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
-                          borderBottom: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
+                          borderLeft: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
+                          borderRight: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
+                          borderTop: `1px solid ${table.headerBgColor || defaultHeaderBg}`,
+                          borderBottom: `1px solid ${table.headerBgColor || defaultHeaderBg}`,
                         }}
                       >
                         <div
@@ -1833,10 +1842,10 @@ export default function SingleNoticeClient({
                     <div
                       className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
                       style={{
-                        borderLeft: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
-                        borderRight: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
-                        borderTop: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
-                        borderBottom: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
+                        borderLeft: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
+                        borderRight: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
+                        borderTop: `1px solid ${table.headerBgColor || defaultHeaderBg}`,
+                        borderBottom: `1px solid ${table.headerBgColor || defaultHeaderBg}`,
                       }}
                     >
                       <div
@@ -1884,10 +1893,10 @@ export default function SingleNoticeClient({
                   <div
                     className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
                     style={{
-                      borderLeft: "4px solid #dc2626",
-                      borderRight: "4px solid #dc2626",
-                      borderTop: "2px solid #dc2626",
-                      borderBottom: "2px solid #dc2626",
+                      borderLeft: "2px solid #dc2626",
+                      borderRight: "2px solid #dc2626",
+                      borderTop: "1px solid #dc2626",
+                      borderBottom: "1px solid #dc2626",
                     }}
                   >
                     <div
@@ -2314,7 +2323,11 @@ export default function SingleNoticeClient({
                                       const colHdr = (headers[cIdx] || "")
                                         .toLowerCase()
                                         .trim();
+                                      const isTenderCol = colHdr
+                                        .replace(/\s/g, "")
+                                        .includes("tenderid");
                                       const isCenterAlignCol =
+                                        isTenderCol ||
                                         colHdr === "sl.no" ||
                                         colHdr === "sl no" ||
                                         colHdr === "sl. no" ||
@@ -2434,7 +2447,7 @@ export default function SingleNoticeClient({
                             {(securityColIdx !== -1 ||
                               docFeesColIdx !== -1) && (
                                 <tr
-                                  className="bg-[#facc15] font-bold text-black divide-x divide-gray-400 border-t-2 border-gray-500 total-amount-row"
+                                  className="bg-[#facc15] font-bold text-black divide-x divide-gray-400 total-amount-row"
                                   style={{ backgroundColor: "#facc15" }}
                                 >
                                   {headers.map((hdr: string, idx: number) => {
@@ -2528,10 +2541,10 @@ export default function SingleNoticeClient({
                             <div
                               className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
                               style={{
-                                borderLeft: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
-                                borderRight: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
-                                borderTop: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
-                                borderBottom: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
+                                borderLeft: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
+                                borderRight: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
+                                borderTop: `1px solid ${table.headerBgColor || defaultHeaderBg}`,
+                                borderBottom: `1px solid ${table.headerBgColor || defaultHeaderBg}`,
                               }}
                             >
                               <div
@@ -2559,10 +2572,10 @@ export default function SingleNoticeClient({
                           <div
                             className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
                             style={{
-                              borderLeft: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
-                              borderRight: `4px solid ${table.headerBgColor || defaultHeaderBg}`,
-                              borderTop: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
-                              borderBottom: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
+                              borderLeft: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
+                              borderRight: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
+                              borderTop: `1px solid ${table.headerBgColor || defaultHeaderBg}`,
+                              borderBottom: `1px solid ${table.headerBgColor || defaultHeaderBg}`,
                             }}
                           >
                             <div
@@ -2606,10 +2619,10 @@ export default function SingleNoticeClient({
                         <div
                           className="footer-card rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden mt-4"
                           style={{
-                            borderLeft: "4px solid #dc2626",
-                            borderRight: "4px solid #dc2626",
-                            borderTop: "2px solid #dc2626",
-                            borderBottom: "2px solid #dc2626",
+                            borderLeft: "2px solid #dc2626",
+                            borderRight: "2px solid #dc2626",
+                            borderTop: "1px solid #dc2626",
+                            borderBottom: "1px solid #dc2626",
                           }}
                         >
                           <div

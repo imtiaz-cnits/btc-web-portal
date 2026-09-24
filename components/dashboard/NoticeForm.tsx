@@ -239,8 +239,8 @@ function LocationAutocompleteInput({
               setHighlighted(-1);
             }}
             className={`px-3 py-1.5 cursor-pointer font-semibold transition-colors flex items-center justify-between group rounded ${i === highlighted
-                ? "bg-green-50 text-green-700 font-bold"
-                : "hover:bg-green-50 hover:text-green-700 text-slate-700"
+              ? "bg-green-50 text-green-700 font-bold"
+              : "hover:bg-green-50 hover:text-green-700 text-slate-700"
               }`}
           >
             <span className="truncate">{s}</span>
@@ -340,8 +340,8 @@ function CustomSelect({
                 onToggle();
               }}
               className={`px-4 py-3 text-xs font-semibold hover:bg-green-50 hover:text-green-700 transition cursor-pointer flex items-center justify-between ${value === opt.value
-                  ? "bg-green-50/50 text-green-700 font-bold"
-                  : "text-slate-600"
+                ? "bg-green-50/50 text-green-700 font-bold"
+                : "text-slate-600"
                 }`}
             >
               <span>{opt.label}</span>
@@ -2694,8 +2694,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           {/* Tables Checkbox Switch */}
           <label
             className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer shadow-xs select-none ${enableTables
-                ? "bg-green-50/50 border-green-200 text-green-700 font-bold"
-                : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100/50"
+              ? "bg-green-50/50 border-green-200 text-green-700 font-bold"
+              : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100/50"
               }`}
           >
             <div className="flex items-center gap-2.5">
@@ -2724,8 +2724,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           {/* File Checkbox Switch */}
           <label
             className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer shadow-xs select-none ${enableFile
-                ? "bg-green-50/50 border-green-200 text-green-700 font-bold"
-                : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100/50"
+              ? "bg-green-50/50 border-green-200 text-green-700 font-bold"
+              : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100/50"
               }`}
           >
             <div className="flex items-center gap-2.5">
@@ -2751,8 +2751,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           {/* Text Checkbox Switch */}
           <label
             className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer shadow-xs select-none ${enableText
-                ? "bg-green-50/50 border-green-200 text-green-700 font-bold"
-                : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100/50"
+              ? "bg-green-50/50 border-green-200 text-green-700 font-bold"
+              : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100/50"
               }`}
           >
             <div className="flex items-center gap-2.5">
@@ -2961,11 +2961,11 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                             BG:
                           </span>
                           {[
-                            { hex: "#0891b2", name: "Cyan" },
-                            { hex: "#16a34a", name: "Green" },
-                            { hex: "#0d9488", name: "Teal" },
-                            { hex: "#ea580c", name: "Orange" },
-                            { hex: "#475569", name: "Slate" },
+                            { hex: "#0890b2c0", name: "Cyan" },
+                            { hex: "#16a34ab7", name: "Green" },
+                            { hex: "#0d9489b2", name: "Teal" },
+                            { hex: "#ea5a0c8f", name: "Orange" },
+                            { hex: "#47556998", name: "Slate" },
                           ].map((clr) => (
                             <button
                               key={clr.hex}
@@ -2978,11 +2978,11 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                 )
                               }
                               className={`w-5 h-5 rounded-md border transition transform hover:scale-110 active:scale-95 cursor-pointer ${(table.headerBgColor ||
-                                  (category === "OTM"
-                                    ? "#059669"
-                                    : "#0891b2")) === clr.hex
-                                  ? "border-slate-800 ring-1 ring-slate-400"
-                                  : "border-slate-200"
+                                (category === "OTM"
+                                  ? "#059669"
+                                  : "#0891b2")) === clr.hex
+                                ? "border-slate-800 ring-1 ring-slate-400"
+                                : "border-slate-200"
                                 }`}
                               style={{ backgroundColor: clr.hex }}
                               title={`Set header bg to ${clr.name}`}
@@ -3107,9 +3107,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                                 )
                                               }
                                               className={`w-2 h-2 rounded-full border border-slate-400 transition transform hover:scale-120 active:scale-95 cursor-pointer ${(table.columnColors?.[cIdx] ||
-                                                  "#ffffff") === clr.hex
-                                                  ? "ring-1 ring-slate-600"
-                                                  : ""
+                                                "#ffffff") === clr.hex
+                                                ? "ring-1 ring-slate-600"
+                                                : ""
                                                 }`}
                                               style={{
                                                 backgroundColor: clr.hex,
@@ -3131,8 +3131,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                   ? "#059669"
                                   : "#0891b2"),
                               ) === "text-white"
-                                  ? "text-white"
-                                  : "text-slate-700"
+                                ? "text-white"
+                                : "text-slate-700"
                                 }`}
                               style={{
                                 backgroundColor:
@@ -3259,10 +3259,10 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                             }
                                             readOnly={isLastDateCol}
                                             className={`bg-transparent border-0 outline-none w-full focus:bg-white focus:ring-1 focus:ring-green-500 rounded px-1 py-0.5 font-semibold text-slate-800 text-[10px] ${isLastDateCol
-                                                ? "font-bold text-green-700 bg-green-50/10 cursor-not-allowed"
-                                                : isDateField
-                                                  ? "flatpickr-datetime-field cursor-pointer font-bold text-green-700 bg-green-50/10"
-                                                  : ""
+                                              ? "font-bold text-green-700 bg-green-50/10 cursor-not-allowed"
+                                              : isDateField
+                                                ? "flatpickr-datetime-field cursor-pointer font-bold text-green-700 bg-green-50/10"
+                                                : ""
                                               }`}
                                             placeholder={
                                               isLastDateCol
@@ -3363,8 +3363,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                             </span>
                             <ChevronDown
                               className={`w-3.5 h-3.5 text-slate-400 transition-transform ${activeWarningDropdown === tIdx
-                                  ? "rotate-180"
-                                  : ""
+                                ? "rotate-180"
+                                : ""
                                 }`}
                             />
                           </div>

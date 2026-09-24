@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect } from "react";
 import Link from "next/link";
-import { Home, ArrowLeft, Printer, Download } from "lucide-react";
+import { Home, ArrowLeft, Printer, Download, Landmark, Info, AlertCircle } from "lucide-react";
 import { sanitizeBijoyDeep, autoConvertBijoy } from "@/lib/bijoyToUnicode";
 
 const formatDisplayDate = (dateStr: any) => {
@@ -375,15 +375,15 @@ export default function SingleNoticeClient({
           line-height: 1 !important;
         }
         .pdf-page-box .print-office-name {
-          font-size: 20pt !important;
+          font-size: 18pt !important;
           text-align: center !important;
           font-weight: bold !important;
           background-color: white !important;
           color: black !important;
-          padding: 3px 4px !important;
+          padding: 2px 4px !important;
         }
         .pdf-page-box .print-subtitle {
-          font-size: 15px !important;
+          font-size: 14px !important;
           text-align: center !important;
           font-weight: bold !important;
           background-color: white !important;
@@ -398,18 +398,18 @@ export default function SingleNoticeClient({
         }
         .pdf-page-box th, .pdf-page-box td {
           border: 1px solid #374151 !important;
-          padding: 3px 4px !important;
+          padding: 2.5px 4px !important;
           word-wrap: break-word !important;
           word-break: normal !important;
           overflow-wrap: break-word !important;
           box-sizing: border-box !important;
         }
         .pdf-page-box th {
-          font-size: 16px !important;
+          font-size: 15px !important;
         }
         .pdf-page-box td {
           color: #000000 !important;
-          font-size: 15px !important;
+          font-size: 14px !important;
           font-weight: 600 !important;
         }
         .pdf-page-box .date-block-th {
@@ -419,45 +419,57 @@ export default function SingleNoticeClient({
         }
         .pdf-page-box .date-block-badge {
           margin: 0 !important;
-          padding: 3px 10px !important;
+          padding: 2px 8px !important;
+          font-size: 12px !important;
           display: inline-block !important;
+        }
+        .pdf-page-box .selling-date-cell, .selling-date-cell {
+          font-size: 12.5px !important;
+          line-height: 1.2 !important;
+        }
+        .pdf-page-box .footer-card-label svg, .pdf-page-box .warning-card-label svg {
+          width: 16px !important;
+          height: 16px !important;
+          display: inline-block !important;
+          vertical-align: middle !important;
+          flex-shrink: 0 !important;
         }
         .pdf-page-box .total-amount-row, .pdf-page-box .total-amount-row td {
           background-color: #facc15 !important;
-          font-size: 15px !important;
+          font-size: 14px !important;
           font-weight: 600 !important;
         }
         .pdf-page-box .footer-card {
-          margin-top: 10px !important;
-          margin-bottom: 6px !important;
+          margin-top: 6px !important;
+          margin-bottom: 4px !important;
           overflow: hidden !important;
         }
         .pdf-page-box .footer-card-label {
-          font-size: 16px !important;
+          font-size: 14px !important;
           font-weight: 700 !important;
-          padding: 6px 12px !important;
+          padding: 4px 10px !important;
         }
         .pdf-page-box .footer-card-content {
-          font-size: 16px !important;
+          font-size: 14px !important;
           font-weight: 600 !important;
-          line-height: 1.5 !important;
-          padding: 8px 12px !important;
+          line-height: 1.4 !important;
+          padding: 6px 10px !important;
         }
         .pdf-page-box .warning-card {
           border: 2px solid #dc2626 !important;
           border-left: 4px solid #dc2626 !important;
           border-right: 4px solid #dc2626 !important;
-          border-radius: 12px !important;
-          margin-top: 10px !important;
-          margin-bottom: 6px !important;
+          border-radius: 8px !important;
+          margin-top: 6px !important;
+          margin-bottom: 4px !important;
           overflow: hidden !important;
         }
         .pdf-page-box .warning-card-content, .pdf-page-box .warning-card-content * {
-          padding: 8px 12px !important;
-          font-size: 16px !important;
+          padding: 6px 10px !important;
+          font-size: 14px !important;
           font-weight: 600 !important;
           font-family: 'Tiro Bangla', serif !important;
-          line-height: 1.5 !important;
+          line-height: 1.4 !important;
         }
       `;
       tempWrapper.appendChild(styleEl);
@@ -800,16 +812,16 @@ export default function SingleNoticeClient({
                 white-space: normal !important;
               }
               .print-office-name {
-                font-size: 20pt !important;
+                font-size: 18pt !important;
                 text-align: center !important;
                 font-weight: bold !important;
                 font-family: 'Tiro Bangla', serif !important;
                 background-color: white !important;
                 color: black !important;
-                padding: 3px 4px !important;
+                padding: 2px 4px !important;
               }
               .print-subtitle {
-                font-size: 15px !important;
+                font-size: 14px !important;
                 text-align: center !important;
                 font-weight: bold !important;
                 font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
@@ -827,10 +839,21 @@ export default function SingleNoticeClient({
               }
               .date-block-badge {
                 margin: 0 !important;
-                padding: 3px 10px !important;
+                padding: 2px 8px !important;
+                font-size: 12px !important;
                 display: inline-block !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+              }
+              .schedule-date-header {
+                font-size: 11px !important;
+                line-height: 1.15 !important;
+                font-weight: 600 !important;
+                text-transform: capitalize !important;
+              }
+              .selling-date-cell {
+                font-size: 12.5px !important;
+                line-height: 1.2 !important;
               }
               /* Minimal Print Header Styles */
               .print-header {
@@ -906,19 +929,19 @@ export default function SingleNoticeClient({
                 font-family: 'Tiro Bangla', serif !important;
               }
               .print-subtitle {
-                font-size: 15px !important;
+                font-size: 14px !important;
                 font-weight: bold !important;
               }
               th, td {
                 border: 1px solid #374151 !important;
-                padding: 3px 4px !important;
+                padding: 2.5px 4px !important;
                 word-wrap: break-word !important;
                 word-break: normal !important;
                 overflow-wrap: break-word !important;
                 box-sizing: border-box !important;
               }
               th {
-                font-size: 16px !important;
+                font-size: 15px !important;
                 font-weight: bold !important;
                 text-transform: capitalize !important;
                 text-align: center !important;
@@ -928,8 +951,19 @@ export default function SingleNoticeClient({
               }
               td {
                 color: #000000 !important;
-                font-size: 15px !important;
+                font-size: 14px !important;
                 font-weight: 600 !important;
+              }
+              .selling-date-cell, .selling-date-cell * {
+                font-size: 12.5px !important;
+                line-height: 1.2 !important;
+              }
+              .footer-card-label svg, .warning-card-label svg {
+                width: 16px !important;
+                height: 16px !important;
+                display: inline-block !important;
+                vertical-align: middle !important;
+                flex-shrink: 0 !important;
               }
               .auto-column {
                 white-space: nowrap !important;
@@ -950,7 +984,8 @@ export default function SingleNoticeClient({
               .footer-card {
                 border-radius: 8px !important;
                 padding: 0 !important;
-                margin-bottom: 6px !important;
+                margin-top: 6px !important;
+                margin-bottom: 4px !important;
                 overflow: hidden !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
@@ -965,25 +1000,25 @@ export default function SingleNoticeClient({
                 border-top: none !important;
                 border-left: none !important;
                 border-bottom-right-radius: 8px !important;
-                padding: 5px 12px !important;
+                padding: 4px 10px !important;
                 font-weight: bold !important;
-                font-size: 16px !important;
+                font-size: 14px !important;
                 text-transform: uppercase !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
               }
               .footer-card-content {
-                padding: 8px 12px !important;
-                font-size: 16px !important;
+                padding: 6px 10px !important;
+                font-size: 14px !important;
                 font-weight: 600 !important;
-                line-height: 1.5 !important;
+                line-height: 1.4 !important;
                 color: #000000 !important;
               }
               .warning-card {
                 border-radius: 8px !important;
                 padding: 0 !important;
-                margin-top: 10pt !important;
-                margin-bottom: 6px !important;
+                margin-top: 6px !important;
+                margin-bottom: 4px !important;
                 overflow: hidden !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
@@ -991,11 +1026,11 @@ export default function SingleNoticeClient({
                 print-color-adjust: exact !important;
               }
               .warning-card-content, .warning-card-content * {
-                padding: 8px 12px !important;
-                font-size: 16px !important;
+                padding: 6px 10px !important;
+                font-size: 14px !important;
                 font-weight: 600 !important;
                 font-family: 'Tiro Bangla', serif !important;
-                line-height: 1.5 !important;
+                line-height: 1.4 !important;
               }
               img {
                 width: 100% !important;
@@ -1039,7 +1074,7 @@ export default function SingleNoticeClient({
                 print-color-adjust: exact !important;
               }
               .total-amount-row td {
-                font-size: 15px !important;
+                font-size: 14px !important;
                 font-weight: 600 !important;
               }
               .print-container th, 
@@ -1635,12 +1670,12 @@ export default function SingleNoticeClient({
                                       const { datePart, timePart } =
                                         getSellingDateDisplay(formattedVal);
                                       return (
-                                        <div className="flex flex-col text-center leading-tight">
-                                          <span className="whitespace-nowrap font-semibold print:text-[16px]">
+                                        <div className="selling-date-cell flex flex-col text-center leading-tight">
+                                          <span className="whitespace-nowrap font-semibold print:text-[12.5px] text-[12.5px]">
                                             {datePart}
                                           </span>
                                           {timePart ? (
-                                            <span className="whitespace-nowrap font-semibold mt-0.5 print:text-[16px]">
+                                            <span className="whitespace-nowrap font-semibold mt-0.5 print:text-[12.5px] text-[12.5px]">
                                               {timePart}
                                             </span>
                                           ) : null}
@@ -1771,7 +1806,7 @@ export default function SingleNoticeClient({
                             gap: "8px",
                           }}
                         >
-                          <i className="fa-solid fa-building-columns print:hidden"></i>
+                          <Landmark size={16} className="w-4 h-4 flex-shrink-0" />
                           BD Pay Order To :
                         </div>
                         <div className="footer-card-content p-4 text-black font-semibold text-[13.8px] leading-relaxed whitespace-pre-line">
@@ -1802,7 +1837,7 @@ export default function SingleNoticeClient({
                           gap: "8px",
                         }}
                       >
-                        <i className="fa-solid fa-circle-info print:hidden"></i>
+                        <Info size={16} className="w-4 h-4 flex-shrink-0" />
                         Contact Info / e-Tender Solutions :
                       </div>
                       <div className="footer-card-content p-4 text-black font-semibold text-[13.8px] leading-relaxed">
@@ -1850,7 +1885,7 @@ export default function SingleNoticeClient({
                         gap: "8px",
                       }}
                     >
-                      <i className="fa-solid fa-circle-exclamation text-white print:hidden"></i>
+                      <AlertCircle size={16} className="w-4 h-4 flex-shrink-0 text-white" />
                       Information :
                     </div>
                     <div
@@ -2338,12 +2373,12 @@ export default function SingleNoticeClient({
                                               const { datePart, timePart } =
                                                 getSellingDateDisplay(formattedVal);
                                               return (
-                                                <div className="flex flex-col text-center leading-tight">
-                                                  <span className="whitespace-nowrap font-semibold print:text-[16px]">
+                                                <div className="selling-date-cell flex flex-col text-center leading-tight">
+                                                  <span className="whitespace-nowrap font-semibold text-[12.5px] print:text-[12.5px]">
                                                     {datePart}
                                                   </span>
                                                   {timePart ? (
-                                                    <span className="whitespace-nowrap font-semibold mt-0.5 print:text-[16px]">
+                                                    <span className="whitespace-nowrap font-semibold mt-0.5 text-[12.5px] print:text-[12.5px]">
                                                       {timePart}
                                                     </span>
                                                   ) : null}
@@ -2497,7 +2532,7 @@ export default function SingleNoticeClient({
                                   gap: "8px",
                                 }}
                               >
-                                <i className="fa-solid fa-building-columns print:hidden"></i>
+                                <Landmark size={16} className="w-4 h-4 flex-shrink-0" />
                                 BD Pay Order To :
                               </div>
                               <div className="footer-card-content p-4 text-black font-semibold text-[13.8px] leading-relaxed whitespace-pre-line">
@@ -2528,15 +2563,13 @@ export default function SingleNoticeClient({
                                 gap: "8px",
                               }}
                             >
-                              <i className="fa-solid fa-circle-info print:hidden"></i>
+                              <Info size={16} className="w-4 h-4 flex-shrink-0" />
                               Contact Info / e-Tender Solutions :
                             </div>
                             <div className="footer-card-content p-4 text-black font-semibold text-[13.8px] leading-relaxed">
                               Engr. Md. Shah Alom B.Sc. Engr.(Civil)
                               <br />
-                              Mobile No: 01711-805086
-                              <br />
-                              L M B Market 1st Floor, Pabna.
+                              Mobile No: 01711-805086, 01972-805086<br />L M B Market 1st Floor, Pabna.<br />salomdhaka@gmail.com
                               <br />
                               Web:{" "}
                               <a
@@ -2574,7 +2607,7 @@ export default function SingleNoticeClient({
                               gap: "8px",
                             }}
                           >
-                            <i className="fa-solid fa-circle-exclamation text-white print:hidden"></i>
+                            <AlertCircle size={16} className="w-4 h-4 flex-shrink-0 text-white" />
                             Information :
                           </div>
                           <div

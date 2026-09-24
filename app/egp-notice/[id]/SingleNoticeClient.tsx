@@ -1696,11 +1696,11 @@ export default function SingleNoticeClient({
                                         getSellingDateDisplay(formattedVal);
                                       return (
                                         <div className="selling-date-cell flex flex-col text-center leading-tight">
-                                          <span className="whitespace-nowrap font-semibold print:text-[12.5px] text-[12.5px]">
+                                          <span className="whitespace-nowrap font-normal print:text-[12.5px] text-[12.5px]">
                                             {datePart}
                                           </span>
                                           {timePart ? (
-                                            <span className="whitespace-nowrap font-semibold mt-0.5 print:text-[12.5px] text-[12.5px]">
+                                            <span className="whitespace-nowrap font-normal mt-0.5 print:text-[12.5px] text-[12.5px]">
                                               {timePart}
                                             </span>
                                           ) : null}
@@ -2403,11 +2403,11 @@ export default function SingleNoticeClient({
                                                 getSellingDateDisplay(formattedVal);
                                               return (
                                                 <div className="selling-date-cell flex flex-col text-center leading-tight">
-                                                  <span className="whitespace-nowrap font-semibold text-[12.5px] print:text-[12.5px]">
+                                                  <span className="whitespace-nowrap font-normal text-[12.5px] print:text-[12.5px]">
                                                     {datePart}
                                                   </span>
                                                   {timePart ? (
-                                                    <span className="whitespace-nowrap font-semibold mt-0.5 text-[12.5px] print:text-[12.5px]">
+                                                    <span className="whitespace-nowrap font-normal mt-0.5 text-[12.5px] print:text-[12.5px]">
                                                       {timePart}
                                                     </span>
                                                   ) : null}

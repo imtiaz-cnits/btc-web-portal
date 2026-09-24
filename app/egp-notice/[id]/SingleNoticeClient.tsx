@@ -367,16 +367,23 @@ export default function SingleNoticeClient({
         .pdf-page-box .print-office-name, .pdf-page-box .warning-card-content, .pdf-page-box .warning-card-content * {
           font-family: 'Tiro Bangla', serif !important;
         }
+        .pdf-page-box .custom-print-header {
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+          margin-top: 0 !important;
+          margin-bottom: 4px !important;
+          line-height: 1 !important;
+        }
         .pdf-page-box .print-office-name {
-          font-size: 32pt !important;
+          font-size: 20pt !important;
           text-align: center !important;
           font-weight: bold !important;
           background-color: white !important;
           color: black !important;
-          padding: 4px 4px !important;
+          padding: 3px 4px !important;
         }
         .pdf-page-box .print-subtitle {
-          font-size: 22px !important;
+          font-size: 15px !important;
           text-align: center !important;
           font-weight: bold !important;
           background-color: white !important;
@@ -396,11 +403,13 @@ export default function SingleNoticeClient({
           word-break: normal !important;
           overflow-wrap: break-word !important;
           box-sizing: border-box !important;
+        }
+        .pdf-page-box th {
           font-size: 16px !important;
         }
         .pdf-page-box td {
           color: #000000 !important;
-          font-size: 16px !important;
+          font-size: 15px !important;
           font-weight: 600 !important;
         }
         .pdf-page-box .date-block-th {
@@ -415,7 +424,7 @@ export default function SingleNoticeClient({
         }
         .pdf-page-box .total-amount-row, .pdf-page-box .total-amount-row td {
           background-color: #facc15 !important;
-          font-size: 16px !important;
+          font-size: 15px !important;
           font-weight: 600 !important;
         }
         .pdf-page-box .footer-card {
@@ -461,7 +470,7 @@ export default function SingleNoticeClient({
           width: ${targetContainerWidth}px;
           min-height: ${maxPageContentHeight + 40}px;
           box-sizing: border-box;
-          padding: 12px 16px 12px 16px;
+          padding: 5px 16px 12px 16px;
           background: #ffffff;
           position: relative;
           display: flex;
@@ -472,11 +481,11 @@ export default function SingleNoticeClient({
 
         const topBar = document.createElement("div");
         topBar.className = "custom-print-header";
-        topBar.style.cssText = "display: flex; justify-content: space-between; align-items: center; width: 100%; padding-bottom: 4px; margin-bottom: 10px; font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif;";
+        topBar.style.cssText = "display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0; margin-top: 0; margin-bottom: 4px; line-height: 1; font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif;";
         topBar.innerHTML = `
           <div style="width: 30%;"></div>
-          <div style="width: 40%; text-align: center; font-size: 12px; font-weight: bold; color: #000000;">Salom Egp consultant</div>
-          <div style="width: 30%; text-align: right; font-size: 12px; color: #000000; font-weight: bold;">Print: ${getFormattedPrintDateTime()}</div>
+          <div style="width: 40%; text-align: center; font-size: 11px; font-weight: bold; color: #000000; line-height: 1;">Salom Egp consultant</div>
+          <div style="width: 30%; text-align: right; font-size: 11px; color: #000000; font-weight: bold; line-height: 1;">Print: ${getFormattedPrintDateTime()}</div>
         `;
         pageDiv.appendChild(topBar);
         return pageDiv;
@@ -734,7 +743,7 @@ export default function SingleNoticeClient({
               }
               @page {
                 size: A4 ${isLandscape ? "landscape" : "portrait"};
-                margin: 6mm 6mm 6mm 6mm !important;
+                margin: 5px 6mm 6mm 6mm !important;
               }
               *, *:before, *:after {
                 box-sizing: border-box !important;
@@ -748,6 +757,17 @@ export default function SingleNoticeClient({
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
                 line-height: 1.4;
+              }
+              .custom-print-header {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                width: 100% !important;
+                padding-top: 0 !important;
+                padding-bottom: 0 !important;
+                margin-top: 0 !important;
+                margin-bottom: 4px !important;
+                line-height: 1 !important;
               }
               .print-container {
                 width: 100% !important;
@@ -780,16 +800,16 @@ export default function SingleNoticeClient({
                 white-space: normal !important;
               }
               .print-office-name {
-                font-size: 32pt !important;
+                font-size: 20pt !important;
                 text-align: center !important;
                 font-weight: bold !important;
                 font-family: 'Tiro Bangla', serif !important;
                 background-color: white !important;
                 color: black !important;
-                padding: 4px 4px !important;
+                padding: 3px 4px !important;
               }
               .print-subtitle {
-                font-size: 14pt !important;
+                font-size: 15px !important;
                 text-align: center !important;
                 font-weight: bold !important;
                 font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
@@ -886,7 +906,7 @@ export default function SingleNoticeClient({
                 font-family: 'Tiro Bangla', serif !important;
               }
               .print-subtitle {
-                font-size: 22px !important;
+                font-size: 15px !important;
                 font-weight: bold !important;
               }
               th, td {
@@ -896,21 +916,20 @@ export default function SingleNoticeClient({
                 word-break: normal !important;
                 overflow-wrap: break-word !important;
                 box-sizing: border-box !important;
-                font-size: 16px !important;
-              }
-              td {
-                color: #000000 !important;
-                font-size: 16px !important;
-                font-weight: 600 !important;
               }
               th {
-                font-weight: bold !important;
                 font-size: 16px !important;
+                font-weight: bold !important;
                 text-transform: capitalize !important;
                 text-align: center !important;
                 vertical-align: middle !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+              }
+              td {
+                color: #000000 !important;
+                font-size: 15px !important;
+                font-weight: 600 !important;
               }
               .auto-column {
                 white-space: nowrap !important;
@@ -1020,7 +1039,7 @@ export default function SingleNoticeClient({
                 print-color-adjust: exact !important;
               }
               .total-amount-row td {
-                font-size: 16px !important;
+                font-size: 15px !important;
                 font-weight: 600 !important;
               }
               .print-container th, 
@@ -1031,10 +1050,10 @@ export default function SingleNoticeClient({
           </head>
           <body>
             <div class="print-container">
-              <div class="custom-print-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding-bottom: 4px; margin-bottom: 12px; font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+              <div class="custom-print-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding-top: 0px; padding-bottom: 0px; margin-top: 0px; margin-bottom: 4px; line-height: 1; font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                 <div style="width: 30%;"></div>
-                <div style="width: 40%; text-align: center; font-size: 12px; font-weight: bold; color: #000000;">Salom Egp consultant</div>
-                <div style="width: 30%; text-align: right; font-size: 12px; color: #000000; font-weight: bold;">Print: ${getFormattedPrintDateTime()}</div>
+                <div style="width: 40%; text-align: center; font-size: 11px; font-weight: bold; color: #000000; line-height: 1;">Salom Egp consultant</div>
+                <div style="width: 30%; text-align: right; font-size: 11px; color: #000000; font-weight: bold; line-height: 1;">Print: ${getFormattedPrintDateTime()}</div>
               </div>
               ${!isLandscape
           ? `
@@ -1163,7 +1182,7 @@ export default function SingleNoticeClient({
             font-family: 'Tiro Bangla', serif !important;
           }
           .print-office-name {
-            font-size: 38pt !important;
+            font-size: 26pt !important;
           }
           .date-block-th {
             padding: 0 !important;

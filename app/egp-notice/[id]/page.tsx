@@ -7,6 +7,64 @@ import { formatDateDhaka, isNoticeExpired } from "@/lib/date";
 
 export const revalidate = 0; // Retrieve real-time data on every request
 
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}) {
+  try {
+    const notice = await prisma.notice.findUnique({
+      where: { id: params.id },
+    });
+    if (!notice) return { title: "Notice Details | BTC Web Portal" };
+
+    let officeName = "";
+    let groupCount = 0;
+    if (notice.tableData) {
+      try {
+        const parsed = JSON.parse(notice.tableData);
+        let tables: any[] = [];
+        if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
+          tables = parsed.tables;
+        } else if (parsed.isPwdTemplate) {
+          tables = [parsed];
+        } else if (parsed.headers && parsed.rows) {
+          tables = [parsed];
+        }
+        if (tables.length > 0) {
+          officeName = tables[0].officeName || "";
+          groupCount = tables.reduce((acc: number, t: any) => acc + (t.rows?.length || 0), 0);
+        }
+      } catch (_) {}
+    }
+
+    const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+    const toBengaliDigits = (numStr: string | number) => numStr.toString().replace(/\d/g, (d) => bengaliDigits[parseInt(d)]);
+    const groupStr = groupCount > 0 ? `${toBengaliDigits(groupCount)} গ্রুপ | ` : "";
+    const metaTitle = `টেন্ডার নোটিশ | ${groupStr}${officeName || notice.title}${notice.lastDate ? ` শেষ তারিখ: ${formatDateDhaka(notice.lastDate)}` : ""}`;
+    const metaDesc = `${officeName || notice.title}${notice.lastDate ? ` - শেষ তারিখ: ${formatDateDhaka(notice.lastDate)}` : ""}`;
+
+    return {
+      title: metaTitle,
+      description: metaDesc,
+      openGraph: {
+        title: metaTitle,
+        description: metaDesc,
+        type: "article",
+        images: ["/images/logo.png"],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: metaTitle,
+        description: metaDesc,
+        images: ["/images/logo.png"],
+      },
+    };
+  } catch {
+    return { title: "Notice Details | BTC Web Portal" };
+  }
+}
+
 const categoryMap: Record<string, string> = {
   LTM: "LTM",
   OTM: "OTM",

@@ -29,7 +29,7 @@ export default function HomeNoticesSection({ notices }: HomeNoticesSectionProps)
   const latestNotices = filtered.slice(0, 10);
 
   return (
-    <section className="bg-shade-1/20 border-t border-b border-ac-2/50 py-12 lg:py-16">
+    <section className="bg-shade-1/20">
       <div className="custom-container">
 
         {/* Categories Tab selector */}
@@ -39,7 +39,7 @@ export default function HomeNoticesSection({ notices }: HomeNoticesSectionProps)
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-6 py-2.5 sm:px-8 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 uppercase tracking-wide cursor-pointer ${activeTab.toLowerCase() === tab.toLowerCase()
+                className={`px-6 py-2 h-8 sm:px-8 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 uppercase tracking-wide cursor-pointer ${activeTab.toLowerCase() === tab.toLowerCase()
                   ? "bg-primary text-white shadow-lg scale-105"
                   : "bg-transparent text-text-2 hover:bg-shade-1"
                   }`}

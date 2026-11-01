@@ -158,8 +158,8 @@ function TablePdfPreview({ tableData, title, category }: { tableData: string; ti
                             isWinnerRow
                               ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500"
                               : rIdx % 2 === 0
-                              ? "bg-white"
-                              : "bg-slate-50"
+                                ? "bg-white"
+                                : "bg-slate-50"
                           }
                         >
                           {!hasSl && (
@@ -178,9 +178,8 @@ function TablePdfPreview({ tableData, title, category }: { tableData: string; ti
                               <td
                                 key={cIdx}
                                 style={cellBg ? { backgroundColor: cellBg } : undefined}
-                                className={`px-3 py-2 border border-slate-200 text-slate-800 ${
-                                  isCurrency ? "text-right" : "text-left"
-                                } whitespace-nowrap`}
+                                className={`px-3 py-2 border border-slate-200 text-slate-800 ${isCurrency ? "text-right" : "text-left"
+                                  } whitespace-nowrap`}
                               >
                                 {isWinnerCell && isWinnerRow && (
                                   <span className="inline-block mr-1">🏆</span>
@@ -251,7 +250,10 @@ function TableDownloadButton({
         heightLeft -= pageHeight;
       }
 
-      pdf.save(`${notice.title.slice(0, 50)}-result.pdf`);
+      const cleanDate = (notice.date || notice.publishDate || "").replace(/[/\\:*?"<>|]/g, "-").trim();
+      const sanitizedTitle = (notice.title || "notice").slice(0, 50).replace(/[/\\:*?"<>|]/g, "-").trim();
+      const fileName = cleanDate ? `${sanitizedTitle}-${cleanDate}.pdf` : `${sanitizedTitle}.pdf`;
+      pdf.save(fileName);
     } catch (err) {
       console.error("PDF generation failed:", err);
       alert("PDF generation failed. Please try again.");
@@ -275,7 +277,8 @@ function TableDownloadButton({
         }}
       >
         <div ref={captureRef} className="bg-white text-black p-10 space-y-6">
-          <style dangerouslySetInnerHTML={{ __html: `
+          <style dangerouslySetInnerHTML={{
+            __html: `
             .pdf-cap, .pdf-cap * { color: #000000 !important; border-color: #cbd5e1 !important; }
             .pdf-cap table { background-color: #ffffff !important; width: 100% !important; }
             .pdf-cap th { color: #ffffff !important; }
@@ -323,38 +326,46 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices, category }) => {
   // Check if a notice can provide a download (either via fileUrl or via client-side PDF generation from tableData)
   const canDownload = (notice: Notice) => {
     if (notice.fileUrl) return true;
-    if (notice.category === "Lottery Result" && notice.tableData) return true;
-    return false;
+    if (notice.tableData) return true;
+    return Boolean(notice.id);
   };
 
   const desktopDownloadBtn = (notice: Notice) => {
     const cls = "bg-text-1 !text-secondary px-3.5 py-1.5 rounded-lg font-bold text-xs uppercase hover:bg-primary transition shadow-sm flex items-center gap-2 cursor-pointer";
     if (notice.fileUrl) {
       return (
-        <a href={notice.fileUrl} download className={cls}>
+        <a href={notice.fileUrl} download className={cls} title="Download File">
           <i className="fa-solid fa-download"></i>
         </a>
       );
     }
-    if (notice.category === "Lottery Result" && notice.tableData) {
+    if (notice.tableData) {
       return <TableDownloadButton notice={notice} className={cls} />;
     }
-    return null;
+    return (
+      <Link href={`/egp-notice/${notice.id}`} className={cls} title="Download PDF">
+        <i className="fa-solid fa-download"></i>
+      </Link>
+    );
   };
 
   const mobileDownloadBtn = (notice: Notice) => {
     const cls = "bg-text-1 !text-secondary hover:!text-black hover:bg-primary p-3 rounded-xl font-bold text-[11px] uppercase flex items-center justify-center aspect-square shadow-sm active:scale-95 transition-all cursor-pointer";
     if (notice.fileUrl) {
       return (
-        <a href={notice.fileUrl} download className={cls}>
+        <a href={notice.fileUrl} download className={cls} title="Download File">
           <i className="fa-solid fa-download"></i>
         </a>
       );
     }
-    if (notice.category === "Lottery Result" && notice.tableData) {
+    if (notice.tableData) {
       return <TableDownloadButton notice={notice} className={cls} />;
     }
-    return null;
+    return (
+      <Link href={`/egp-notice/${notice.id}`} className={cls} title="Download PDF">
+        <i className="fa-solid fa-download"></i>
+      </Link>
+    );
   };
 
   return (
@@ -364,26 +375,26 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices, category }) => {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-shade-1 border-b border-ac-2">
-              <th className="py-3 px-4 font-bold text-text-1 uppercase text-base w-16">
+              <th className="py-2 px-4 font-bold text-[16px] uppercase text-base w-16">
                 #
               </th>
-              <th className="py-3 px-4 font-bold text-text-1 uppercase text-base">
+              <th className="py-2 px-4 font-bold text-[16px] uppercase text-base">
                 Procuring Entity / Title
               </th>
               {showPublishDate && (
-                <th className="py-3 px-4 font-bold text-text-1 uppercase text-base w-40 text-center">
+                <th className="py-2 px-4 font-bold text-[16px] uppercase text-base w-40 text-center">
                   Publish Date
                 </th>
               )}
-              <th className="py-3 px-4 font-bold text-text-1 uppercase text-base w-40 text-center">
+              <th className="py-2 px-4 font-bold text-[16px] uppercase text-base w-40 text-center">
                 Last Date
               </th>
               {isLotteryResult && (
-                <th className="py-3 px-4 font-bold text-text-1 uppercase text-base w-40 text-center">
+                <th className="py-2 px-4 font-bold text-[16px] uppercase text-base w-40 text-center">
                   Lottery Date
                 </th>
               )}
-              <th className="py-3 px-4 font-bold text-text-1 uppercase text-base w-48 text-center">
+              <th className="py-2 px-4 font-bold text-[16px] uppercase text-base w-48 text-center">
                 Action
               </th>
             </tr>

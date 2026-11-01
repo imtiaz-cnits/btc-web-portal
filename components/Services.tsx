@@ -4,7 +4,7 @@ import React from "react";
 
 const Services: React.FC = () => {
   return (
-    <section id="services" className="offer pt-20">
+    <section id="services" className="offer py-20">
       <div className="custom-container mx-auto px-4">
         <div className="offer_wrapper relative bg-shade-1 lg:rounded-[80px] rounded-[40px] lg:py-[40px] py-[20px] lg:px-[20px] overflow-hidden">
           {/* Shape 1 SVG */}

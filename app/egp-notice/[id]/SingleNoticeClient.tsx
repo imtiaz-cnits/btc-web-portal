@@ -327,7 +327,10 @@ export default function SingleNoticeClient({
           pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
           heightLeft -= pdfHeight;
         }
-        pdf.save(`${notice.title.slice(0, 50)}-result.pdf`);
+        const cleanDate = (notice.lastDate || notice.date || "").replace(/[/\\:*?"<>|]/g, "-").trim();
+        const sanitizedTitle = (notice.title || "notice").slice(0, 50).replace(/[/\\:*?"<>|]/g, "-").trim();
+        const fileName = cleanDate ? `${sanitizedTitle}-${cleanDate}.pdf` : `${sanitizedTitle}.pdf`;
+        pdf.save(fileName);
         return;
       }
 
@@ -363,6 +366,7 @@ export default function SingleNoticeClient({
         * { box-sizing: border-box !important; }
         .pdf-page-box *, .pdf-page-box *[class], .pdf-page-box *[style] {
           font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
+          box-shadow: none !important;
         }
         .pdf-page-box .print-office-name, .pdf-page-box .warning-card-content, .pdf-page-box .warning-card-content * {
           font-family: 'Tiro Bangla', serif !important;
@@ -373,32 +377,52 @@ export default function SingleNoticeClient({
           margin-top: 0 !important;
           margin-bottom: 4px !important;
           line-height: 1 !important;
+          border: none !important;
+          border-bottom: none !important;
         }
         .pdf-page-box .print-office-name {
           font-size: 17pt !important;
           text-align: center !important;
           font-weight: bold !important;
-          background-color: white !important;
-          color: black !important;
+          background-color: #ffffff !important;
+          color: #000000 !important;
           padding: 2px 4px !important;
+          border: 1px solid #000000 !important;
+          border-left: 1px solid #000000 !important;
+          border-right: 1px solid #000000 !important;
+          border-top: 1px solid #000000 !important;
+          border-bottom: 1px solid #000000 !important;
+          box-shadow: none !important;
         }
         .pdf-page-box .print-subtitle {
           font-size: 13px !important;
           text-align: center !important;
           font-weight: bold !important;
-          background-color: white !important;
-          color: black !important;
+          background-color: #ffffff !important;
+          color: #000000 !important;
           padding: 2px 4px !important;
+          border: 1px solid #000000 !important;
+          border-left: 1px solid #000000 !important;
+          border-right: 1px solid #000000 !important;
+          border-top: none !important;
+          border-bottom: 1px solid #000000 !important;
+          box-shadow: none !important;
         }
         .pdf-page-box table {
           width: 100% !important;
           max-width: 100% !important;
           border-collapse: collapse !important;
+          border: 1px solid #000000 !important;
+          border-left: 1px solid #000000 !important;
+          border-right: 1px solid #000000 !important;
+          border-top: 1px solid #000000 !important;
+          border-bottom: 1px solid #000000 !important;
           margin: 0 !important;
           background-color: transparent !important;
         }
-        .pdf-page-box th, .pdf-page-box td {
-          border: 1px solid #c8cdd4 !important;
+        .pdf-page-box th, .pdf-page-box thead th, .pdf-page-box td, .pdf-page-box tbody td {
+          border: 1px solid #000000 !important;
+          border-color: #000000 !important;
           padding: 2.5px 4px !important;
           word-wrap: break-word !important;
           word-break: normal !important;
@@ -415,7 +439,7 @@ export default function SingleNoticeClient({
         .pdf-page-box td {
           color: #000000 !important;
           font-size: 13px !important;
-          font-weight: 400 !important;
+          font-weight: 500 !important;
         }
         .pdf-page-box .auto-column {
           white-space: nowrap !important;
@@ -423,7 +447,12 @@ export default function SingleNoticeClient({
         }
         .pdf-page-box .location-column {
           white-space: normal !important;
-          width: 1% !important;
+          width: 140px !important;
+          min-width: 125px !important;
+          max-width: 170px !important;
+          text-align: center !important;
+          line-height: 1.25 !important;
+          word-break: normal !important;
         }
         .pdf-page-box .desc-column {
           white-space: normal !important;
@@ -433,14 +462,16 @@ export default function SingleNoticeClient({
         }
         .pdf-page-box .date-block-th {
           padding: 0 !important;
-          border-top: 0 !important;
-          border-bottom: 0 !important;
+          border: 1px solid #000000 !important;
+          border-top: none !important;
+          border-bottom: none !important;
         }
         .pdf-page-box .date-block-badge {
           margin: 0 !important;
           padding: 2px 8px !important;
           font-size: 12px !important;
           display: inline-block !important;
+          border-left: 1px solid #000000 !important;
         }
         .pdf-page-box .selling-date-cell, .selling-date-cell {
           font-size: 11.5px !important;
@@ -512,9 +543,9 @@ export default function SingleNoticeClient({
 
         const topBar = document.createElement("div");
         topBar.className = "custom-print-header";
-        topBar.style.cssText = "display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0; margin-top: 0; margin-bottom: 4px; line-height: 1; font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif;";
+        topBar.style.cssText = "display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0; margin-top: 0; margin-bottom: 4px; line-height: 1; font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif; border: none !important; border-bottom: none !important;";
         topBar.innerHTML = `
-          <div style="width: 30%;"></div>
+          <div class="pdf-page-num" style="width: 30%; text-align: left; font-size: 11px; font-weight: bold; color: #000000; line-height: 1;">Page 1</div>
           <div style="width: 40%; text-align: center; font-size: 11px; font-weight: bold; color: #000000; line-height: 1;">Salom Egp consultant</div>
           <div style="width: 30%; text-align: right; font-size: 11px; color: #000000; font-weight: bold; line-height: 1;">Print: ${getFormattedPrintDateTime()}</div>
         `;
@@ -622,6 +653,15 @@ export default function SingleNoticeClient({
 
       for (let i = 0; i < pages.length; i++) {
         const pageEl = pages[i];
+        const pageNumEl = pageEl.querySelector(".pdf-page-num");
+        if (pageNumEl) {
+          pageNumEl.textContent = `Page ${i + 1}`;
+        }
+        pageEl.querySelectorAll("*").forEach((el: any) => {
+          if (el.style) {
+            el.style.boxShadow = "none";
+          }
+        });
         const canvas = await (html2canvas as any)(pageEl, {
           scale: 2,
           useCORS: true,
@@ -634,7 +674,10 @@ export default function SingleNoticeClient({
         pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
       }
 
-      pdf.save(`${notice.title.slice(0, 50)}-result.pdf`);
+      const cleanDate = (notice.lastDate || notice.date || "").replace(/[/\\:*?"<>|]/g, "-").trim();
+      const sanitizedTitle = (notice.title || "notice").slice(0, 50).replace(/[/\\:*?"<>|]/g, "-").trim();
+      const fileName = cleanDate ? `${sanitizedTitle}-${cleanDate}.pdf` : `${sanitizedTitle}.pdf`;
+      pdf.save(fileName);
 
       document.body.removeChild(tempWrapper);
     } catch (err) {
@@ -773,13 +816,16 @@ export default function SingleNoticeClient({
                 font-display: swap;
               }
               @page {
-                size: A4 ${isLandscape ? "landscape" : "portrait"};
-                margin: 5px 6mm 6mm 6mm !important;
+                size: ${isLandscape ? "A4 landscape" : "A4 portrait"};
+                margin: 5mm 6mm 6mm 6mm;
               }
               *, *:before, *:after {
                 box-sizing: border-box !important;
               }
-              body {
+              html, body {
+                width: 100% !important;
+                min-width: 100% !important;
+                max-width: 100% !important;
                 padding: 0 !important;
                 margin: 0 !important;
                 font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
@@ -799,11 +845,14 @@ export default function SingleNoticeClient({
                 margin-top: 0 !important;
                 margin-bottom: 4px !important;
                 line-height: 1 !important;
+                border: none !important;
+                border-bottom: none !important;
               }
               .print-container {
                 width: 100% !important;
+                min-width: 100% !important;
                 max-width: 100% !important;
-                margin: 0 !important;
+                margin: 0 auto !important;
                 padding: 0 !important;
                 box-sizing: border-box !important;
                 background-color: transparent !important;
@@ -815,19 +864,26 @@ export default function SingleNoticeClient({
                 margin-left: 0px !important;
                 margin-right: 0px !important;
                 width: 100% !important;
+                min-width: 100% !important;
                 max-width: 100% !important;
                 box-sizing: border-box !important;
               }
               /* Column widths for print */
               .auto-column {
-                width: auto !important;
-                min-width: unset !important;
-                max-width: unset !important;
+                white-space: nowrap !important;
+                width: 1% !important;
+              }
+              .location-column {
                 white-space: normal !important;
-                word-wrap: break-word !important;
+                width: 140px !important;
+                min-width: 125px !important;
+                max-width: 170px !important;
+                text-align: center !important;
+                line-height: 1.25 !important;
+                word-break: normal !important;
               }
               .desc-column {
-                width: 28% !important;
+                width: auto !important;
                 white-space: normal !important;
               }
               .print-office-name {
@@ -838,6 +894,11 @@ export default function SingleNoticeClient({
                 background-color: white !important;
                 color: black !important;
                 padding: 2px 4px !important;
+                border: 1px solid #000000 !important;
+                border-left: 1px solid #000000 !important;
+                border-right: 1px solid #000000 !important;
+                border-top: 1px solid #000000 !important;
+                box-shadow: inset 1px 1px 0 0 #000000, inset -1px 0 0 0 #000000, inset 0 -1px 0 0 #000000 !important;
               }
               .print-subtitle {
                 font-size: 13px !important;
@@ -847,20 +908,31 @@ export default function SingleNoticeClient({
                 background-color: white !important;
                 color: black !important;
                 padding: 2px 4px !important;
+                border: 1px solid #000000 !important;
+                border-left: 1px solid #000000 !important;
+                border-right: 1px solid #000000 !important;
+                border-top: none !important;
+                border-bottom: 1px solid #000000 !important;
+                box-shadow: inset 1px 0 0 0 #000000, inset -1px 0 0 0 #000000, inset 0 -1px 0 0 #000000 !important;
               }
               thead {
                 display: table-header-group !important;
               }
               .date-block-th {
                 padding: 0 !important;
-                border-top: 0 !important;
-                border-bottom: 0 !important;
+                border: 1px solid #000000 !important;
+                border-left: 1px solid #000000 !important;
+                border-right: 1px solid #000000 !important;
+                border-top: none !important;
+                border-bottom: none !important;
+                box-shadow: inset 1px 0 0 0 #000000, inset -1px 0 0 0 #000000 !important;
               }
               .date-block-badge {
                 margin: 0 !important;
                 padding: 2px 8px !important;
                 font-size: 12px !important;
                 display: inline-block !important;
+                border-left: 1px solid #000000 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
               }
@@ -876,9 +948,9 @@ export default function SingleNoticeClient({
               }
               /* Minimal Print Header Styles */
               .print-header {
-                border-bottom: 2px solid #1b4332 !important;
-                padding-bottom: 10pt !important;
-                margin-bottom: 15pt !important;
+                border-bottom: none !important;
+                padding-bottom: 6pt !important;
+                margin-bottom: 8pt !important;
                 font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
               }
               .notice-title {
@@ -926,8 +998,14 @@ export default function SingleNoticeClient({
               }
               table {
                 width: 100% !important;
+                min-width: 100% !important;
                 max-width: 100% !important;
                 border-collapse: collapse !important;
+                border: 1px solid #000000 !important;
+                border-left: 1px solid #000000 !important;
+                border-right: 1px solid #000000 !important;
+                border-top: 1px solid #000000 !important;
+                border-bottom: 1px solid #000000 !important;
                 margin-top: 0 !important;
                 margin-bottom: 0 !important;
                 page-break-inside: auto !important;
@@ -951,8 +1029,9 @@ export default function SingleNoticeClient({
                 font-size: 13px !important;
                 font-weight: bold !important;
               }
-              th, td {
-                border: 1px solid #c8cdd4 !important;
+              th, thead th, td, tbody td {
+                border: 1px solid #000000 !important;
+                border-color: #000000 !important;
                 padding: 2.5px 4px !important;
                 word-wrap: break-word !important;
                 word-break: normal !important;
@@ -972,7 +1051,7 @@ export default function SingleNoticeClient({
               td {
                 color: #000000 !important;
                 font-size: 13px !important;
-                font-weight: 400 !important;
+                font-weight: 500 !important;
               }
               .selling-date-cell, .selling-date-cell * {
                 font-size: 11.5px !important;
@@ -991,7 +1070,12 @@ export default function SingleNoticeClient({
               }
               .location-column {
                 white-space: normal !important;
-                width: 1% !important;
+                width: 140px !important;
+                min-width: 125px !important;
+                max-width: 170px !important;
+                text-align: center !important;
+                line-height: 1.25 !important;
+                word-break: normal !important;
               }
               .desc-column {
                 white-space: normal !important;
@@ -1099,14 +1183,15 @@ export default function SingleNoticeClient({
               }
               .print-container th, 
               .print-container td {
-                border-color: #c8cdd4 !important;
+                border-color: #000000 !important;
+                border: 1px solid #000000 !important;
               }
             </style>
           </head>
           <body>
             <div class="print-container">
-              <div class="custom-print-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding-top: 0px; padding-bottom: 0px; margin-top: 0px; margin-bottom: 4px; line-height: 1; font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
-                <div style="width: 30%;"></div>
+              <div class="custom-print-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding-top: 0px; padding-bottom: 0px; margin-top: 0px; margin-bottom: 4px; line-height: 1; font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; border: none !important; border-bottom: none !important;">
+                <div style="width: 30%; text-align: left; font-size: 11px; font-weight: bold; color: #000000; line-height: 1;">Page 1</div>
                 <div style="width: 40%; text-align: center; font-size: 11px; font-weight: bold; color: #000000; line-height: 1;">Salom Egp consultant</div>
                 <div style="width: 30%; text-align: right; font-size: 11px; color: #000000; font-weight: bold; line-height: 1;">Print: ${getFormattedPrintDateTime()}</div>
               </div>
@@ -1409,7 +1494,7 @@ export default function SingleNoticeClient({
                     />
                   </div>
 
-                  <table className="w-full border-collapse text-left font-semibold text-black relative z-10 print:w-full">
+                  <table className="w-full border-collapse border border-black text-left font-semibold text-black relative z-10 print:w-full print:border-black">
                     <thead className="text-black">
                       {table.officeName && (
                         <tr>
@@ -1417,10 +1502,15 @@ export default function SingleNoticeClient({
                             colSpan={totalCols}
                             className="p-2 md:p-3 font-extrabold text-3xl md:text-5xl text-center text-black bg-white print-office-name"
                             style={{
-                              border: "1px solid #374151",
+                              border: "1px solid #000000",
+                              borderLeft: "1px solid #000000",
+                              borderRight: "1px solid #000000",
+                              borderTop: "1px solid #000000",
                               fontFamily: "'Tiro Bangla', serif",
                               backgroundColor: "#ffffff",
                               color: "#000000",
+                              WebkitPrintColorAdjust: "exact",
+                              printColorAdjust: "exact",
                             }}
                           >
                             {table.officeName}
@@ -1433,10 +1523,15 @@ export default function SingleNoticeClient({
                             colSpan={totalCols}
                             className="p-2 font-bold text-[18px] md:text-[22px] print:!text-[22px] text-center text-black bg-white print-subtitle"
                             style={{
-                              border: "1px solid #374151",
+                              border: "1px solid #000000",
                               borderTop: 0,
+                              borderLeft: "1px solid #000000",
+                              borderRight: "1px solid #000000",
+                              borderBottom: "1px solid #000000",
                               backgroundColor: "#ffffff",
                               color: "#000000",
+                              WebkitPrintColorAdjust: "exact",
+                              printColorAdjust: "exact",
                             }}
                           >
                             {table.subTitle}
@@ -1449,11 +1544,15 @@ export default function SingleNoticeClient({
                             colSpan={totalCols}
                             className="p-0 bg-white date-block-th"
                             style={{
-                              border: "1px solid #374151",
+                              border: "1px solid #000000",
                               borderTop: 0,
                               borderBottom: 0,
+                              borderLeft: "1px solid #000000",
+                              borderRight: "1px solid #000000",
                               padding: "0 !important",
                               backgroundColor: "#ffffff",
+                              WebkitPrintColorAdjust: "exact",
+                              printColorAdjust: "exact",
                             }}
                           >
                             <div className="flex justify-end w-full m-0 p-0">
@@ -1466,7 +1565,7 @@ export default function SingleNoticeClient({
                                     table.headerBgColor || defaultHeaderBg
                                   ),
                                   padding: "3px 10px",
-                                  borderLeft: "1px solid #374151",
+                                  borderLeft: "1px solid #000000",
                                   WebkitPrintColorAdjust: "exact",
                                   printColorAdjust: "exact",
                                 }}
@@ -1517,12 +1616,16 @@ export default function SingleNoticeClient({
                               .toLowerCase()
                               .replace(/\s/g, "")
                               .includes("sl");
+                          const isLocation =
+                            (hdr || "").toLowerCase().includes("location");
                           return (
                             <th
                               key={idx}
                               className={`p-2 font-bold border border-gray-400 text-base capitalize text-center ${isDesc
                                 ? "desc-column w-[32%] min-w-[220px] print:w-auto whitespace-normal"
-                                : "auto-column print:w-[1%]"
+                                : isLocation
+                                  ? "location-column w-[140px] min-w-[125px] max-w-[170px] print:w-auto print:min-w-[125px] print:max-w-[170px] whitespace-normal text-center"
+                                  : "auto-column print:w-[1%]"
                                 } ${isTender || isSl ? "whitespace-nowrap" : ""}`}
                               style={{
                                 backgroundColor:
@@ -1665,7 +1768,7 @@ export default function SingleNoticeClient({
                                   className={`p-2.5 border border-gray-400 text-black text-[15px] font-semibold ${cellAlignClass} ${isDesc
                                     ? "desc-column w-[32%] min-w-[220px] print:w-auto whitespace-normal text-left"
                                     : isLocationCol
-                                      ? "location-column print:w-[1%] whitespace-normal text-center"
+                                      ? "location-column w-[140px] min-w-[125px] max-w-[170px] print:w-auto print:min-w-[125px] print:max-w-[170px] whitespace-normal text-center"
                                       : "auto-column print:w-[1%]"
                                     } ${isNoWrapCell ? "whitespace-nowrap" : ""
                                     }`}
@@ -2156,7 +2259,7 @@ export default function SingleNoticeClient({
                           />
                         </div>
 
-                        <table className="w-full border-collapse text-left font-semibold text-black relative z-10 print:w-full">
+                        <table className="w-full border-collapse border border-black text-left font-semibold text-black relative z-10 print:w-full print:border-black">
                           <thead className="text-black">
                             {table.officeName && (
                               <tr>
@@ -2164,10 +2267,15 @@ export default function SingleNoticeClient({
                                   colSpan={totalCols}
                                   className="p-2 md:p-3 font-extrabold text-3xl md:text-5xl text-center text-black bg-white print-office-name"
                                   style={{
-                                    border: "1px solid #374151",
+                                    border: "1px solid #000000",
+                                    borderLeft: "1px solid #000000",
+                                    borderRight: "1px solid #000000",
+                                    borderTop: "1px solid #000000",
                                     fontFamily: "'Tiro Bangla', serif",
                                     backgroundColor: "#ffffff",
                                     color: "#000000",
+                                    WebkitPrintColorAdjust: "exact",
+                                    printColorAdjust: "exact",
                                   }}
                                 >
                                   {table.officeName}
@@ -2180,10 +2288,15 @@ export default function SingleNoticeClient({
                                   colSpan={totalCols}
                                   className="p-2 font-bold text-[18px] md:text-[22px] print:!text-[22px] text-center text-black bg-white print-subtitle"
                                   style={{
-                                    border: "1px solid #374151",
+                                    border: "1px solid #000000",
                                     borderTop: 0,
+                                    borderLeft: "1px solid #000000",
+                                    borderRight: "1px solid #000000",
+                                    borderBottom: "1px solid #000000",
                                     backgroundColor: "#ffffff",
                                     color: "#000000",
+                                    WebkitPrintColorAdjust: "exact",
+                                    printColorAdjust: "exact",
                                   }}
                                 >
                                   {table.subTitle}
@@ -2196,11 +2309,15 @@ export default function SingleNoticeClient({
                                   colSpan={totalCols}
                                   className="p-0 bg-white date-block-th"
                                   style={{
-                                    border: "1px solid #374151",
+                                    border: "1px solid #000000",
                                     borderTop: 0,
                                     borderBottom: 0,
+                                    borderLeft: "1px solid #000000",
+                                    borderRight: "1px solid #000000",
                                     padding: "0 !important",
                                     backgroundColor: "#ffffff",
+                                    WebkitPrintColorAdjust: "exact",
+                                    printColorAdjust: "exact",
                                   }}
                                 >
                                   <div className="flex justify-end w-full m-0 p-0">
@@ -2213,7 +2330,7 @@ export default function SingleNoticeClient({
                                           table.headerBgColor || defaultHeaderBg
                                         ),
                                         padding: "3px 10px",
-                                        borderLeft: "1px solid #374151",
+                                        borderLeft: "1px solid #000000",
                                         WebkitPrintColorAdjust: "exact",
                                         printColorAdjust: "exact",
                                       }}
@@ -2251,12 +2368,17 @@ export default function SingleNoticeClient({
                                 const isDesc = (hdr || "")
                                   .toLowerCase()
                                   .includes("description");
+                                const isLocation = (hdr || "")
+                                  .toLowerCase()
+                                  .includes("location");
                                 return (
                                   <th
                                     key={idx}
                                     className={`p-2 font-bold border border-gray-400 text-sm capitalize text-center ${isDesc
                                       ? "desc-column w-[30%] min-w-[220px] print:w-auto whitespace-normal"
-                                      : "auto-column print:w-[1%]"
+                                      : isLocation
+                                        ? "location-column w-[140px] min-w-[125px] max-w-[170px] print:w-auto print:min-w-[125px] print:max-w-[170px] whitespace-normal text-center"
+                                        : "auto-column print:w-[1%]"
                                       }`}
                                     style={{
                                       backgroundColor:
@@ -2361,7 +2483,7 @@ export default function SingleNoticeClient({
                                           className={`p-2.5 border border-gray-400 text-black text-sm font-semibold ${cellAlignClass} ${isDesc
                                             ? "desc-column w-[30%] min-w-[220px] print:w-auto whitespace-normal text-left"
                                             : isLocationCol
-                                              ? "location-column print:w-[1%] whitespace-normal text-center"
+                                              ? "location-column w-[140px] min-w-[125px] max-w-[170px] print:w-auto print:min-w-[125px] print:max-w-[170px] whitespace-normal text-center"
                                               : "auto-column print:w-[1%]"
                                             }`}
                                           style={{

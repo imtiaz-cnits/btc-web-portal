@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { parseNoticeTableData } from "@/lib/tableEngine/normalizer";
 
 interface NoticeItem {
   id: string;
@@ -42,27 +43,11 @@ const parseTableMeta = (notice: NoticeItem) => {
 
   if (notice.tableData) {
     try {
-      const parsed = JSON.parse(notice.tableData);
-      let tables: any[] = [];
-      if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
-        tables = parsed.tables;
-      } else if (parsed.isPwdTemplate) {
-        tables = [
-          {
-            officeName: parsed.officeName || "",
-            rows: parsed.rows || [],
-            lastDateBlock: parsed.lastDateBlock || "",
-          },
-        ];
-      } else if (parsed.headers && parsed.rows) {
-        tables = [{ rows: parsed.rows || [] }];
-      }
-
-      if (tables.length > 0) {
-        officeName = tables[0].officeName || "";
-        groupCount =
-          tables.reduce((acc: number, t: any) => acc + (t.rows?.length || 0), 0) || 0;
-        if (tables[0].lastDateBlock) lastDate = tables[0].lastDateBlock;
+      const v3Data = parseNoticeTableData(notice.tableData);
+      if (v3Data.tables && v3Data.tables.length > 0) {
+        officeName = v3Data.tables[0].title || (v3Data.tables[0] as any).officeName || "";
+        groupCount = v3Data.tables.reduce((acc: number, t: any) => acc + (t.rows?.length || 0), 0) || 0;
+        if (v3Data.tables[0].lastDateBlock) lastDate = v3Data.tables[0].lastDateBlock;
       }
     } catch (_) {}
   }

@@ -9,6 +9,15 @@ import {
   getNoticeCountsByTitle,
 } from "@/app/actions/notices";
 import { sanitizeBijoyDeep, autoConvertBijoy } from "@/lib/bijoyToUnicode";
+import ExcelImportModal from "@/components/dashboard/ExcelImportModal";
+import { parseClipboardText, ParsedSheetData } from "@/lib/tableEngine/excelParser";
+import {
+  parseNoticeTableData,
+  serializeNoticeTableData,
+  tableSpecToRowsArray,
+  rowsArrayToTableSpec,
+} from "@/lib/tableEngine/normalizer";
+import { NoticeTableDataV3 } from "@/lib/tableEngine/types";
 import {
   Plus,
   Trash2,
@@ -28,6 +37,7 @@ import {
   Eye,
   Sliders,
   Clock,
+  FileSpreadsheet,
 } from "lucide-react";
 
 interface NoticeFormProps {
@@ -838,15 +848,17 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
     if (notice?.tableData) {
       try {
-        const parsed = JSON.parse(notice.tableData);
-        if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
-          parsed.tables.forEach((table: any) => {
-            if (table.subTitle && !initialSubOptions.includes(table.subTitle)) {
-              initialSubOptions = [...initialSubOptions, table.subTitle];
+        const v3Data = parseNoticeTableData(notice.tableData);
+        if (v3Data.tables && v3Data.tables.length > 0) {
+          v3Data.tables.forEach((table: any) => {
+            const sub = table.subtitle || table.subTitle;
+            if (sub && !initialSubOptions.includes(sub)) {
+              initialSubOptions = [...initialSubOptions, sub];
             }
           });
-          if (parsed.tables.length > 0) {
-            setSubTitle(parsed.tables[0].subTitle || "");
+          const firstSub = v3Data.tables[0].subtitle || (v3Data.tables[0] as any).subTitle;
+          if (firstSub) {
+            setSubTitle(firstSub);
           }
         }
       } catch (err) { }
@@ -902,14 +914,12 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
     if (notice?.tableData) {
       try {
-        const parsed = JSON.parse(notice.tableData);
-        if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
-          parsed.tables.forEach((table: any) => {
-            if (
-              table.bottomWarning &&
-              !initialOptions.includes(table.bottomWarning)
-            ) {
-              initialOptions = [...initialOptions, table.bottomWarning];
+        const v3Data = parseNoticeTableData(notice.tableData);
+        if (v3Data.tables && v3Data.tables.length > 0) {
+          v3Data.tables.forEach((table: any) => {
+            const warn = table.bottomWarning || v3Data.sharedFooter?.bottomWarning;
+            if (warn && !initialOptions.includes(warn)) {
+              initialOptions = [...initialOptions, warn];
             }
           });
         }
@@ -996,9 +1006,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
     if (notice?.tableData) {
       try {
-        const parsed = JSON.parse(notice.tableData);
-        if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
-          parsed.tables.forEach((table: any) => {
+        const v3Data = parseNoticeTableData(notice.tableData);
+        if (v3Data.tables && v3Data.tables.length > 0) {
+          v3Data.tables.forEach((table: any) => {
             if (
               table.workLocation &&
               !initialOptions.includes(table.workLocation)
@@ -1329,6 +1339,102 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
     };
   }, [selectedFileUrl]);
 
+  // Excel Import Modal State
+  const [isExcelModalOpen, setIsExcelModalOpen] = useState(false);
+  const [importTargetTableIdx, setImportTargetTableIdx] = useState<number>(0);
+  const [clipboardData, setClipboardData] = useState<ParsedSheetData | null>(null);
+
+  // Global Ctrl + V paste listener for tabular spreadsheet data
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      // If import modal is already open, do not intercept
+      if (isExcelModalOpen) return;
+
+      const activeEl = document.activeElement as HTMLElement | null;
+      if (activeEl) {
+        const tagName = activeEl.tagName.toLowerCase();
+        // If focused on a standard form input/textarea outside the table grid,
+        // accept normal ordinary text/Bengali Ctrl+V paste completely untouched!
+        if (tagName === "input" || tagName === "textarea") {
+          const isInsideTableGrid = !!activeEl.closest(".studio-table");
+          if (!isInsideTableGrid) {
+            return;
+          }
+        }
+      }
+
+      const text = e.clipboardData?.getData("text/plain");
+      if (!text) return;
+
+      // Detect spreadsheet clipboard data: must contain tabs (\t) with multi-row or multi-column data
+      const hasTab = text.includes("\t");
+      const hasNewline = text.includes("\n");
+      const isSpreadsheetData =
+        hasTab && (hasNewline || text.split("\t").length >= 2);
+
+      if (!isSpreadsheetData) {
+        // Normal text paste inside or outside table cells proceeds without opening the modal
+        return;
+      }
+
+      if (enableTables && tablesList.length > 0) {
+        e.preventDefault();
+        const parsed = parseClipboardText(text);
+        if (parsed.rawRows.length > 0) {
+          // Identify target table index if focused inside a specific table block
+          let targetIdx = 0;
+          if (activeEl) {
+            const tableContainer = activeEl.closest("[data-table-index]");
+            if (tableContainer) {
+              const idxAttr = tableContainer.getAttribute("data-table-index");
+              if (idxAttr) targetIdx = parseInt(idxAttr, 10) || 0;
+            }
+          }
+          setClipboardData(parsed);
+          setImportTargetTableIdx(targetIdx);
+          setIsExcelModalOpen(true);
+        }
+      }
+    };
+
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [enableTables, tablesList.length, isExcelModalOpen]);
+
+  const handleConfirmExcelImport = (
+    importedRows: string[][],
+    mode: "append" | "replace",
+  ) => {
+    setTablesList((prev) =>
+      prev.map((t, idx) => {
+        if (idx !== importTargetTableIdx) return t;
+        const newRows =
+          mode === "replace"
+            ? importedRows
+            : [...t.rows, ...importedRows];
+
+        // Recalculate SL.NO if column present
+        const slIdx = (t.headers || []).findIndex((hdr: string) => {
+          const norm = (hdr || "").toLowerCase().replace(/[.\s]/g, "");
+          return norm === "slno" || norm === "sl";
+        });
+        if (slIdx !== -1) {
+          newRows.forEach((r, rIdx) => {
+            r[slIdx] = (rIdx + 1).toString();
+          });
+        }
+
+        return {
+          ...t,
+          rows: newRows,
+        };
+      }),
+    );
+    setSuccessMessage(
+      `Successfully ${mode === "append" ? "appended" : "replaced"} ${importedRows.length} rows from Excel.`,
+    );
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -1456,9 +1562,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
       if (notice.tableData) {
         try {
-          const parsed = JSON.parse(notice.tableData);
-          if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
-            const formattedTables = parsed.tables.map((table: any) => {
+          const v3Data = parseNoticeTableData(notice.tableData);
+          if (v3Data.tables && v3Data.tables.length > 0) {
+            const formattedTables = v3Data.tables.map((table: any, tIdx: number) => {
               const noticeDateBlock = formatCellDateToDmy(
                 table.noticeDateBlock,
               );
@@ -1467,102 +1573,11 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                 table.lotteryDateBlock,
               );
 
-              const rows = (table.rows || []).map((row: any) => {
-                if (Array.isArray(row)) {
-                  return row.map((cell: string, cIdx: number) => {
-                    const headerName = (
-                      table.headers[cIdx] || ""
-                    ).toLowerCase();
-                    const isDateField =
-                      headerName.includes("date") ||
-                      headerName.includes("time") ||
-                      headerName.includes("তারিখ") ||
-                      headerName.includes("সময়");
-                    if (isDateField && cell) {
-                      return formatCellDateToDmy(cell);
-                    }
-                    return cell;
-                  });
-                }
-                return row;
-              });
+              const { headers, rows, columnColors } = tableSpecToRowsArray(table);
 
-              return {
-                ...table,
-                noticeDateBlock,
-                lastDateBlock,
-                lotteryDateBlock,
-                rows,
-              };
-            });
-            setTablesList(formattedTables);
-          } else {
-            // Backward compatibility for old single-table formats
-            if (parsed.isPwdTemplate) {
-              const legacyRows = parsed.rows || [];
-              const normalizedLegacyRows = legacyRows.map(
-                (row: any, rIdx: number) => {
-                  let cellVal = "";
-                  if (Array.isArray(row)) {
-                    cellVal = row[8] || "";
-                  } else if (row && typeof row === "object") {
-                    cellVal = row.lastDateTime || row.lastDate || "";
-                  }
-                  const formattedCellVal = formatCellDateToDmy(cellVal);
-
-                  if (Array.isArray(row)) {
-                    const newRow = [...row];
-                    newRow[8] = formattedCellVal;
-                    return newRow;
-                  }
-                  if (row && typeof row === "object") {
-                    return [
-                      (rIdx + 1).toString(),
-                      row.tenderId || "",
-                      row.description || "",
-                      row.location || "",
-                      row.appCost || "",
-                      row.solvency || "",
-                      row.security || "",
-                      row.docFees || "",
-                      formattedCellVal,
-                    ];
-                  }
-                  return [];
-                },
-              );
-
-              setTablesList([
-                {
-                  id: "old-pwd-" + Math.random().toString(),
-                  type: "pwd_ltm",
-                  officeName: parsed.officeName || "",
-                  noticeDateBlock: formatCellDateToDmy(parsed.noticeDateBlock),
-                  lastDateBlock: formatCellDateToDmy(parsed.lastDateBlock),
-                  lotteryDateBlock: formatCellDateToDmy(
-                    parsed.lotteryDateBlock,
-                  ),
-                  payOrderTo: parsed.payOrderTo || "",
-                  moreInfo:
-                    "Engr. Md. Shah Alom B.Sc. Engr.(Civil)\nMobile No: 01711-805086\nL M B Market 1st Floor, Pabna.\nWeb: www.egpbtc.com",
-                  bottomWarning: parsed.bottomWarning || "",
-                  headers: [
-                    "Tender ID",
-                    "Description",
-                    "Location",
-                    "AppCost (Tk)",
-                    "Solvency (Tk)",
-                    "Security (Tk)",
-                    "Doc Fees (Tk)",
-                    "Last Date & Time",
-                  ],
-                  rows: normalizedLegacyRows,
-                },
-              ]);
-            } else if (parsed.headers && parsed.rows) {
-              const formattedRows = parsed.rows.map((row: string[]) => {
+              const formattedRows = rows.map((row: string[]) => {
                 return row.map((cell: string, cIdx: number) => {
-                  const headerName = (parsed.headers[cIdx] || "").toLowerCase();
+                  const headerName = (headers[cIdx] || "").toLowerCase();
                   const isDateField =
                     headerName.includes("date") ||
                     headerName.includes("time") ||
@@ -1575,15 +1590,25 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                 });
               });
 
-              setTablesList([
-                {
-                  id: "old-std-" + Math.random().toString(),
-                  type: "standard",
-                  headers: parsed.headers,
-                  rows: formattedRows,
-                },
-              ]);
-            }
+              return {
+                id: table.id || `table-${tIdx + 1}`,
+                type: table.tableType || "LTM",
+                officeName: table.title || "",
+                subTitle: table.subtitle || "",
+                workLocation: table.workLocation || "",
+                noticeDateBlock,
+                lastDateBlock,
+                lotteryDateBlock,
+                payOrderTo: table.payOrderTo || v3Data.sharedFooter?.payOrderTo || "",
+                moreInfo: table.moreInfo || v3Data.sharedFooter?.moreInfo || "",
+                bottomWarning: table.bottomWarning || v3Data.sharedFooter?.bottomWarning || "",
+                headers,
+                rows: formattedRows,
+                columnColors,
+                headerBgColor: table.headerBgColor,
+              };
+            });
+            setTablesList(formattedTables);
           }
         } catch (err) {
           console.error("Failed to parse tableData", err);
@@ -2266,10 +2291,33 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
         });
 
         const sanitizedTables = sanitizeBijoyDeep(updatedTablesList);
-        const serializedData = JSON.stringify({
-          version: "v2",
-          tables: sanitizedTables,
-        });
+        const v3Tables = sanitizedTables.map((t: any, idx: number) =>
+          rowsArrayToTableSpec({
+            id: t.id || `tbl-${idx + 1}`,
+            order: idx,
+            tableTitle: autoConvertBijoy(t.officeName || title),
+            tableSubtitle: autoConvertBijoy(t.subTitle || subTitle),
+            officeName: autoConvertBijoy(t.officeName || title),
+            subTitle: autoConvertBijoy(t.subTitle || subTitle),
+            workLocation: t.workLocation,
+            noticeDateBlock: t.noticeDateBlock,
+            lastDateBlock: t.lastDateBlock,
+            lotteryDateBlock: t.lotteryDateBlock,
+            headers: t.headers || [],
+            rows: t.rows || [],
+            columnColors: t.columnColors,
+            headerBgColor: t.headerBgColor,
+            payOrderTo: t.payOrderTo,
+            moreInfo: t.moreInfo,
+            bottomWarning: t.bottomWarning,
+            category,
+          })
+        );
+        const v3Data: NoticeTableDataV3 = {
+          version: "v3",
+          tables: v3Tables,
+        };
+        const serializedData = serializeNoticeTableData(v3Data);
         formData.append("tableData", serializedData);
       } else {
         formData.append("tableData", "");
@@ -2944,6 +2992,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
               return (
                 <div
                   key={table.id || tIdx}
+                  data-table-index={tIdx}
                   className="space-y-6 relative min-w-0 w-full overflow-hidden transition duration-300"
                 >
                   {/* Columns & Rows Controls */}
@@ -3004,6 +3053,18 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                           className="bg-[var(--primary-color)] hover:bg-green-700 !text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-xs cursor-pointer border-0"
                         >
                           <Plus className="w-3.5 h-3.5 !text-white" /> Row
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImportTargetTableIdx(tIdx);
+                            setClipboardData(null);
+                            setIsExcelModalOpen(true);
+                          }}
+                          className="bg-emerald-600 hover:bg-emerald-700 !text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer border-0 active:scale-95"
+                          title="Import tender rows from Excel (.xlsx, .xls, .csv) or clipboard paste"
+                        >
+                          <FileSpreadsheet className="w-3.5 h-3.5 !text-white" /> Import Excel
                         </button>
 
                       </div>
@@ -3738,6 +3799,22 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
             </div>
           </div>
         </div>
+      )}
+      {/* Excel Import Modal */}
+      {isExcelModalOpen && tablesList[importTargetTableIdx] && (
+        <ExcelImportModal
+          isOpen={isExcelModalOpen}
+          onClose={() => {
+            setIsExcelModalOpen(false);
+            setClipboardData(null);
+          }}
+          destinationHeaders={tablesList[importTargetTableIdx].headers}
+          category={category}
+          defaultLocation={tablesList[importTargetTableIdx].workLocation}
+          defaultLastDate={lastDate}
+          initialClipboardData={clipboardData}
+          onConfirmImport={handleConfirmExcelImport}
+        />
       )}
     </form>
   );

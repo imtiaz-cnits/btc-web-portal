@@ -4,6 +4,7 @@ import React, { useRef, useEffect } from "react";
 import Link from "next/link";
 import { Home, ArrowLeft, Printer, Download, Landmark, Info, AlertCircle } from "lucide-react";
 import { sanitizeBijoyDeep, autoConvertBijoy } from "@/lib/bijoyToUnicode";
+import { parseNoticeTableData, tableSpecToRowsArray } from "@/lib/tableEngine/normalizer";
 
 const formatDisplayDate = (dateStr: any) => {
   if (dateStr === null || dateStr === undefined) return "";
@@ -688,38 +689,33 @@ export default function SingleNoticeClient({
     }
   };
 
-  // Parsing Multi-Tables (supports old single-table formats and new multi-table v2 formats)
+  // Parsing Multi-Tables (supports V3, V2, and legacy formats seamlessly)
   let parsedTables: any[] = [];
   if (notice.tableData) {
     try {
-      const parsed = JSON.parse(notice.tableData);
-      if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
-        parsedTables = parsed.tables;
-      } else {
-        // Fallback for old single table entries (standard or PWD LTM)
-        if (parsed.isPwdTemplate) {
-          parsedTables = [
-            {
-              type: "pwd_ltm",
-              officeName: parsed.officeName || "",
-              noticeDateBlock: parsed.noticeDateBlock || "",
-              lastDateBlock: parsed.lastDateBlock || "",
-              lotteryDateBlock: parsed.lotteryDateBlock || "",
-              payOrderTo: parsed.payOrderTo || "",
-              moreInfo: parsed.moreInfo || "",
-              bottomWarning: parsed.bottomWarning || "",
-              rows: parsed.rows || [],
-            },
-          ];
-        } else if (parsed.headers && parsed.rows) {
-          parsedTables = [
-            {
-              type: "standard",
-              headers: parsed.headers,
-              rows: parsed.rows,
-            },
-          ];
-        }
+      const v3Data = parseNoticeTableData(notice.tableData);
+      if (v3Data.tables && v3Data.tables.length > 0) {
+        parsedTables = v3Data.tables.map((table) => {
+          const { headers, rows, columnColors } = tableSpecToRowsArray(table);
+          return {
+            id: table.id,
+            type: table.tableType || "LTM",
+            officeName: table.title || "",
+            subTitle: table.subtitle || "",
+            workLocation: table.workLocation || "",
+            noticeDateBlock: table.noticeDateBlock || "",
+            lastDateBlock: table.lastDateBlock || "",
+            lotteryDateBlock: table.lotteryDateBlock || "",
+            payOrderTo: table.payOrderTo || v3Data.sharedFooter?.payOrderTo || "",
+            moreInfo: table.moreInfo || v3Data.sharedFooter?.moreInfo || "",
+            bottomWarning: table.bottomWarning || v3Data.sharedFooter?.bottomWarning || "",
+            headers,
+            rows,
+            headerBgColor: table.headerBgColor,
+            columnColors,
+            extra: table.extra,
+          };
+        });
       }
     } catch (e) {
       console.error("Error parsing notice tableData", e);

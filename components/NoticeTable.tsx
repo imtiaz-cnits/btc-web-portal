@@ -3,6 +3,7 @@
 import React, { useRef } from "react";
 import Link from "next/link";
 import { sanitizeBijoyDeep, autoConvertBijoy } from "@/lib/bijoyToUnicode";
+import { parseNoticeTableData, tableSpecToRowsArray } from "@/lib/tableEngine/normalizer";
 
 interface Notice {
   id: string;
@@ -73,15 +74,30 @@ const formatCellValue = (val: string, hdr: string) => {
 // Renders the table data into a printable-friendly HTML table
 function TablePdfPreview({ tableData, title, category }: { tableData: string; title: string; category?: string }) {
   try {
-    const parsed = JSON.parse(tableData);
+    const v3Data = parseNoticeTableData(tableData);
     let tables: any[] = [];
 
-    if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
-      tables = parsed.tables;
-    } else if (parsed.headers && parsed.rows) {
-      tables = [{ headers: parsed.headers, rows: parsed.rows, columnColors: parsed.columnColors || [] }];
-    } else if (parsed.isPwdTemplate) {
-      tables = [{ ...parsed, headers: parsed.headers || [], rows: parsed.rows || [] }];
+    if (v3Data.tables && v3Data.tables.length > 0) {
+      tables = v3Data.tables.map((table) => {
+        const { headers, rows, columnColors } = tableSpecToRowsArray(table);
+        return {
+          id: table.id,
+          type: table.tableType || "LTM",
+          officeName: table.title || "",
+          subTitle: table.subtitle || "",
+          workLocation: table.workLocation || "",
+          noticeDateBlock: table.noticeDateBlock || "",
+          lastDateBlock: table.lastDateBlock || "",
+          lotteryDateBlock: table.lotteryDateBlock || "",
+          payOrderTo: table.payOrderTo || v3Data.sharedFooter?.payOrderTo || "",
+          moreInfo: table.moreInfo || v3Data.sharedFooter?.moreInfo || "",
+          bottomWarning: table.bottomWarning || v3Data.sharedFooter?.bottomWarning || "",
+          headers,
+          rows,
+          headerBgColor: table.headerBgColor,
+          columnColors,
+        };
+      });
     }
 
     if (tables.length > 0) {

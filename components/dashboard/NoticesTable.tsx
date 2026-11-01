@@ -4,6 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { deleteNotice, saveNoticeWinners } from "@/app/actions/notices";
+import {
+  parseNoticeTableData,
+  serializeNoticeTableData,
+  tableSpecToRowsArray,
+  normalizeNoticeTableData,
+} from "@/lib/tableEngine/normalizer";
 import { isNoticeExpired } from "@/lib/date";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
@@ -98,13 +104,24 @@ const getHeaderTextColor = (bgColor: string) => {
 
 function TableDataPreview({ tableData }: { tableData: string }) {
   try {
-    const parsed = JSON.parse(tableData);
+    const parsed = JSON.parse(tableData || "{}");
+    const v3Data = parseNoticeTableData(tableData);
 
-    // v2 format: multiple tables
-    if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
+    if (v3Data.tables && v3Data.tables.length > 0) {
+      const tables = v3Data.tables.map((table: any) => {
+        const { headers, rows, columnColors } = tableSpecToRowsArray(table);
+        return {
+          officeName: table.title || "",
+          subTitle: table.subtitle || "",
+          headerBgColor: table.headerBgColor,
+          columnColors,
+          headers,
+          rows,
+        };
+      });
       return (
         <div className="space-y-6 custom-table-preview">
-          {parsed.tables.map((table: any, tIdx: number) => {
+          {tables.map((table: any, tIdx: number) => {
             const headerBg = table.headerBgColor;
             const isCustomHeader = !!headerBg;
             const headers = table.headers || [];
@@ -558,35 +575,29 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
 
   const initWinnersMode = (notice: Notice) => {
     try {
-      const parsed = JSON.parse(notice.tableData || "{}");
-      let tables = [];
-      if (parsed.version === "v2" && Array.isArray(parsed.tables)) {
-        tables = parsed.tables;
-      } else if (parsed.isPwdTemplate) {
-        tables = [
-          {
-            type: "pwd_ltm",
-            officeName: parsed.officeName || "",
-            noticeDateBlock: parsed.noticeDateBlock || "",
-            lastDateBlock: parsed.lastDateBlock || "",
-            lotteryDateBlock: parsed.lotteryDateBlock || "",
-            payOrderTo: parsed.payOrderTo || "",
-            moreInfo: parsed.moreInfo || "",
-            bottomWarning: parsed.bottomWarning || "",
-            headers: parsed.headers || ["SL No", "Tender ID", "Description", "Location", "AppCost (Tk)", "Solvency (Tk)", "Security (Tk)", "Doc Fees (Tk)", "Last Date & Time"],
-            rows: parsed.rows || [],
-            columnColors: parsed.columnColors || []
-          }
-        ];
-      } else if (parsed.headers && parsed.rows) {
-        tables = [
-          {
-            type: "standard",
-            headers: parsed.headers,
-            rows: parsed.rows,
-            columnColors: parsed.columnColors || []
-          }
-        ];
+      const v3Data = parseNoticeTableData(notice.tableData);
+      let tables: any[] = [];
+      if (v3Data.tables && v3Data.tables.length > 0) {
+        tables = v3Data.tables.map((table: any) => {
+          const { headers, rows, columnColors } = tableSpecToRowsArray(table);
+          return {
+            id: table.id,
+            type: table.tableType || "LTM",
+            officeName: table.title || "",
+            subTitle: table.subtitle || "",
+            workLocation: table.workLocation || "",
+            noticeDateBlock: table.noticeDateBlock || "",
+            lastDateBlock: table.lastDateBlock || "",
+            lotteryDateBlock: table.lotteryDateBlock || "",
+            payOrderTo: table.payOrderTo || v3Data.sharedFooter?.payOrderTo || "",
+            moreInfo: table.moreInfo || v3Data.sharedFooter?.moreInfo || "",
+            bottomWarning: table.bottomWarning || v3Data.sharedFooter?.bottomWarning || "",
+            headers,
+            rows,
+            headerBgColor: table.headerBgColor,
+            columnColors,
+          };
+        });
       }
 
       // Ensure "WINNER LIST NAME" column exists in each table
@@ -656,7 +667,8 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
         pdfBase64 = pdfDataUri.split(",")[1];
       }
 
-      const res = await saveNoticeWinners(quickViewNotice.id, JSON.stringify(tempTableData), pdfBase64);
+      const v3Payload = normalizeNoticeTableData(tempTableData);
+      const res = await saveNoticeWinners(quickViewNotice.id, serializeNoticeTableData(v3Payload), pdfBase64);
       if (res.success) {
         alert(res.message);
         setQuickViewNotice(null);

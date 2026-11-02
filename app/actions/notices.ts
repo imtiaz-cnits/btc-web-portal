@@ -207,28 +207,12 @@ export async function saveNoticeWinners(id: string, tableData: string, pdfBase64
   }
 
   try {
-    let filePath = undefined;
-    if (pdfBase64) {
-      try {
-        const buffer = Buffer.from(pdfBase64, "base64");
-        const uploadDir = path.join(process.cwd(), "public", "assets", "pdf");
-        await fs.mkdir(uploadDir, { recursive: true });
-        const fileName = `${id}-result.pdf`;
-        const fullPath = path.join(uploadDir, fileName);
-        await fs.writeFile(fullPath, buffer);
-        filePath = `/assets/pdf/${fileName}`;
-      } catch (fsError: any) {
-        console.error("Warning: Could not write PDF to read-only filesystem (EROFS):", fsError);
-        // Fail-safe: do not crash, database write will continue.
-      }
-    }
-
     await prisma.notice.update({
       where: { id },
       data: {
         category: "LOTTERY_RESULT",
         tableData: tableData,
-        ...(filePath ? { filePath } : {})
+        filePath: null,
       }
     });
 
@@ -295,5 +279,24 @@ export async function getNoticeCountsByTitle() {
   } catch (error) {
     console.error("Failed to get notice counts by title:", error);
     return { success: false, counts: {} };
+  }
+}
+
+
+export async function getSystemEmailRecipients() {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    return { success: true, users };
+  } catch (error: any) {
+    console.error("Failed to fetch system emails:", error);
+    return { success: false, users: [] };
   }
 }

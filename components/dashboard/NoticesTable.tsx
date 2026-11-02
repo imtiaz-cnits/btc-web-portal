@@ -15,6 +15,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
 import DeleteButton from "@/components/dashboard/DeleteButton";
 import WhatsAppShareButton from "@/components/dashboard/WhatsAppShareButton";
+import EmailShareButton from "@/components/dashboard/EmailShareButton";
 import {
   Calendar,
   FileSpreadsheet,
@@ -25,6 +26,7 @@ import {
   X,
   ExternalLink,
   CheckCircle2,
+  Trophy,
 } from "lucide-react";
 
 interface Notice {
@@ -54,20 +56,20 @@ interface NoticesTableProps {
 const isCurrencyColumn = (hdr: string) => {
   if (!hdr) return false;
   const lower = hdr.toLowerCase();
-  return lower.includes("cost") || 
-         lower.includes("tk") || 
-         lower.includes("taka") || 
-         lower.includes("security") || 
-         lower.includes("fees") || 
-         lower.includes("fee") || 
-         lower.includes("price") || 
-         lower.includes("amount") || 
-         lower.includes("turn over") || 
-         lower.includes("turnover") || 
-         lower.includes("similar work") || 
-         lower.includes("similar") || 
-         lower.includes("credit") || 
-         lower.includes("টাকা");
+  return lower.includes("cost") ||
+    lower.includes("tk") ||
+    lower.includes("taka") ||
+    lower.includes("security") ||
+    lower.includes("fees") ||
+    lower.includes("fee") ||
+    lower.includes("price") ||
+    lower.includes("amount") ||
+    lower.includes("turn over") ||
+    lower.includes("turnover") ||
+    lower.includes("similar work") ||
+    lower.includes("similar") ||
+    lower.includes("credit") ||
+    lower.includes("টাকা");
 };
 
 const formatCellValue = (val: string, hdr: string) => {
@@ -102,7 +104,7 @@ const getHeaderTextColor = (bgColor: string) => {
   return lightColors.includes(lower) ? "text-slate-800" : "text-white";
 };
 
-function TableDataPreview({ tableData }: { tableData: string }) {
+function TableDataPreview({ tableData, category }: { tableData: string; category?: string }) {
   try {
     const parsed = JSON.parse(tableData || "{}");
     const v3Data = parseNoticeTableData(tableData);
@@ -111,6 +113,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
       const tables = v3Data.tables.map((table: any) => {
         const { headers, rows, columnColors } = tableSpecToRowsArray(table);
         return {
+          type: table.tableType,
           officeName: table.title || "",
           subTitle: table.subtitle || "",
           headerBgColor: table.headerBgColor,
@@ -162,21 +165,33 @@ function TableDataPreview({ tableData }: { tableData: string }) {
               }
             };
 
+            const isWinnerNotice =
+              category === "LOTTERY_RESULT" ||
+              table.type === "LOTTERY_RESULT";
+            const winningRows =
+              winnerColIdx !== -1
+                ? (rows || []).filter(
+                  (r: string[]) => r[winnerColIdx] && r[winnerColIdx].trim() !== "",
+                )
+                : [];
+            const displayRows =
+              isWinnerNotice && winningRows.length > 0 ? winningRows : rows;
+
             const totalSecurity =
               securityColIdx !== -1
-                ? rows.reduce(
-                    (sum: number, r: string[]) =>
-                      sum + parseMoney(r[securityColIdx]),
-                    0,
-                  )
+                ? displayRows.reduce(
+                  (sum: number, r: string[]) =>
+                    sum + parseMoney(r[securityColIdx]),
+                  0,
+                )
                 : 0;
             const totalDocFees =
               docFeesColIdx !== -1
-                ? rows.reduce(
-                    (sum: number, r: string[]) =>
-                      sum + parseMoney(r[docFeesColIdx]),
-                    0,
-                  )
+                ? displayRows.reduce(
+                  (sum: number, r: string[]) =>
+                    sum + parseMoney(r[docFeesColIdx]),
+                  0,
+                )
                 : 0;
 
             return (
@@ -190,27 +205,25 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                 <div className="overflow-x-auto rounded-xl border border-slate-200">
                   <table className="w-full text-xs border-collapse">
                     <thead>
-                      <tr 
+                      <tr
                         style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
                         className={getHeaderTextColor(headerBg || "#1b4332")}
                       >
                         {!hasSl && (
                           <th
                             style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
-                            className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide border-slate-200 ${
-                              getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
-                            }`}
+                            className={`px-3 py-2 text-left font-bold whitespace-nowrap border text-[10px] uppercase tracking-wide border-slate-200 ${getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
+                              }`}
                           >
                             SL No
                           </th>
                         )}
                         {headers.map((h: string, i: number) => (
-                          <th 
-                            key={i} 
+                          <th
+                            key={i}
                             style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
-                            className={`px-3 py-2 text-left font-bold whitespace-normal border text-[10px] uppercase tracking-wide border-slate-200 ${
-                              getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
-                            }`}
+                            className={`px-3 py-2 text-left font-bold whitespace-normal border text-[10px] uppercase tracking-wide border-slate-200 ${getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
+                              }`}
                           >
                             {h}
                           </th>
@@ -218,16 +231,16 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {rows.map((row: string[], rIdx: number) => {
+                      {displayRows.map((row: string[], rIdx: number) => {
                         const isWinnerRow = winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
                         return (
-                          <tr 
-                            key={rIdx} 
+                          <tr
+                            key={rIdx}
                             className={
-                              isWinnerRow 
-                                ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500" 
-                                : rIdx % 2 === 0 
-                                  ? "bg-white" 
+                              isWinnerRow
+                                ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500"
+                                : rIdx % 2 === 0
+                                  ? "bg-white"
                                   : "bg-slate-50"
                             }
                           >
@@ -245,12 +258,11 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                               const isCurrency = isCurrencyColumn(headers[cIdx] || "");
                               const isWinnerCell = cIdx === winnerColIdx;
                               return (
-                                <td 
-                                  key={cIdx} 
+                                <td
+                                  key={cIdx}
                                   style={cellBg ? { backgroundColor: cellBg } : undefined}
-                                  className={`px-3 py-2 border border-slate-200 !text-slate-800 ${
-                                    isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-normal"
-                                  } ${isCurrency ? "text-right" : "text-left"}`}
+                                  className={`px-3 py-2 border border-slate-200 !text-slate-800 ${isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-normal"
+                                    } ${isCurrency ? "text-right" : "text-left"}`}
                                 >
                                   {isWinnerCell && isWinnerRow && <span className="inline-block mr-1">🏆</span>}
                                   {formatCellValue(cell, headers[cIdx] || "")}
@@ -286,7 +298,7 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                             const minTotalColIdx = Math.min(
                               securityColIdx !== -1
                                 ? securityColIdx
-                                  : docFeesColIdx,
+                                : docFeesColIdx,
                               headers.length,
                             );
                             if (idx < minTotalColIdx) {
@@ -351,27 +363,25 @@ function TableDataPreview({ tableData }: { tableData: string }) {
           <div className="overflow-x-auto rounded-xl border border-slate-200">
             <table className="w-full text-xs border-collapse">
               <thead>
-                <tr 
+                <tr
                   style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
                   className={getHeaderTextColor(headerBg || "#1b4332")}
                 >
                   {!hasSl && (
-                    <th 
+                    <th
                       style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
-                      className={`px-3 py-2 text-left font-bold whitespace-normal border text-[10px] uppercase tracking-wide border-slate-200 ${
-                        getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
-                      }`}
+                      className={`px-3 py-2 text-left font-bold whitespace-normal border text-[10px] uppercase tracking-wide border-slate-200 ${getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
+                        }`}
                     >
                       SL No
                     </th>
                   )}
                   {headers.map((h: string, i: number) => (
-                    <th 
-                      key={i} 
+                    <th
+                      key={i}
                       style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
-                      className={`px-3 py-2 text-left font-bold whitespace-normal border text-[10px] uppercase tracking-wide border-slate-200 ${
-                        getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
-                      }`}
+                      className={`px-3 py-2 text-left font-bold whitespace-normal border text-[10px] uppercase tracking-wide border-slate-200 ${getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
+                        }`}
                     >
                       {h}
                     </th>
@@ -382,13 +392,13 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                 {(rows || []).map((row: string[], rIdx: number) => {
                   const isWinnerRow = winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
                   return (
-                    <tr 
-                      key={rIdx} 
+                    <tr
+                      key={rIdx}
                       className={
-                        isWinnerRow 
-                          ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500" 
-                          : rIdx % 2 === 0 
-                            ? "bg-white" 
+                        isWinnerRow
+                          ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500"
+                          : rIdx % 2 === 0
+                            ? "bg-white"
                             : "bg-slate-50"
                       }
                     >
@@ -405,12 +415,11 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                         const isDesc = (headers?.[cIdx] || "").toLowerCase().includes("description");
                         const isWinnerCell = cIdx === winnerColIdx;
                         return (
-                          <td 
-                            key={cIdx} 
+                          <td
+                            key={cIdx}
                             style={cellBg ? { backgroundColor: cellBg } : undefined}
-                            className={`px-3 py-2 border border-slate-200 !text-slate-800 ${
-                              isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-normal"
-                            }`}
+                            className={`px-3 py-2 border border-slate-200 !text-slate-800 ${isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-normal"
+                              }`}
                           >
                             {isWinnerCell && isWinnerRow && <span className="inline-block mr-1">🏆</span>}
                             {cell}
@@ -443,27 +452,25 @@ function TableDataPreview({ tableData }: { tableData: string }) {
         <div className="overflow-x-auto rounded-xl border border-slate-200 custom-table-preview">
           <table className="w-full text-xs border-collapse">
             <thead>
-              <tr 
+              <tr
                 style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
                 className={getHeaderTextColor(headerBg || "#1b4332")}
               >
                 {!hasSl && (
-                  <th 
+                  <th
                     style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
-                    className={`px-3 py-2 text-left font-bold whitespace-normal border text-[10px] uppercase tracking-wide border-slate-200 ${
-                      getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
-                    }`}
+                    className={`px-3 py-2 text-left font-bold whitespace-normal border text-[10px] uppercase tracking-wide border-slate-200 ${getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
+                      }`}
                   >
                     SL No
                   </th>
                 )}
                 {headers.map((h: string, i: number) => (
-                  <th 
-                    key={i} 
+                  <th
+                    key={i}
                     style={headerBg ? { backgroundColor: headerBg } : { backgroundColor: "#1b4332" }}
-                    className={`px-3 py-2 text-left font-bold whitespace-normal border text-[10px] uppercase tracking-wide border-slate-200 ${
-                      getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
-                    }`}
+                    className={`px-3 py-2 text-left font-bold whitespace-normal border text-[10px] uppercase tracking-wide border-slate-200 ${getHeaderTextColor(headerBg || "#1b4332") === "text-white" ? "!text-white" : "!text-slate-800"
+                      }`}
                   >
                     {h}
                   </th>
@@ -474,13 +481,13 @@ function TableDataPreview({ tableData }: { tableData: string }) {
               {(rows || []).map((row: string[], rIdx: number) => {
                 const isWinnerRow = winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
                 return (
-                  <tr 
-                    key={rIdx} 
+                  <tr
+                    key={rIdx}
                     className={
-                      isWinnerRow 
-                        ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500" 
-                        : rIdx % 2 === 0 
-                          ? "bg-white" 
+                      isWinnerRow
+                        ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500"
+                        : rIdx % 2 === 0
+                          ? "bg-white"
                           : "bg-slate-50"
                     }
                   >
@@ -497,12 +504,11 @@ function TableDataPreview({ tableData }: { tableData: string }) {
                       const isDesc = (headers?.[cIdx] || "").toLowerCase().includes("description");
                       const isWinnerCell = cIdx === winnerColIdx;
                       return (
-                        <td 
-                          key={cIdx} 
+                        <td
+                          key={cIdx}
                           style={cellBg ? { backgroundColor: cellBg } : undefined}
-                          className={`px-3 py-2 border border-slate-200 !text-slate-800 ${
-                            isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-normal"
-                          }`}
+                          className={`px-3 py-2 border border-slate-200 !text-slate-800 ${isDesc ? "whitespace-normal min-w-[220px]" : "whitespace-normal"
+                            }`}
                         >
                           {isWinnerCell && isWinnerRow && <span className="inline-block mr-1">🏆</span>}
                           {cell}
@@ -545,7 +551,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
     if (!notice.lastDate) return "N/A";
     const d = new Date(notice.lastDate);
     if (isNaN(d.getTime())) return "N/A";
-    
+
     // Format date in Asia/Dhaka
     const dateStr = new Intl.DateTimeFormat("en-GB", {
       timeZone: "Asia/Dhaka",
@@ -609,11 +615,12 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
         const winnerColIdx = headers.findIndex((h: string) => h.toUpperCase().replace(/\./g, "").includes("WINNER"));
         if (winnerColIdx === -1) {
           headers.push("WINNER LIST NAME");
-          columnColors.push("#ffffcc");
+          columnColors.push("#fde047");
           rows.forEach((r: any) => r.push(""));
         }
         return {
           ...table,
+          type: "LOTTERY_RESULT",
           headers,
           rows,
           columnColors
@@ -645,7 +652,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
           backgroundColor: "#ffffff",
         });
         const imgData = canvas.toDataURL("image/jpeg", 0.95);
-        
+
         const pdf = new jsPDF("p", "mm", "a4");
         const imgWidth = 210; // A4 size width in mm
         const pageHeight = 295; // A4 size height in mm
@@ -742,7 +749,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
   const renderPreviewContent = (notice: Notice) => {
     // Table — render inline first (avoids PDF iframe cut-off/dark-theme issues)
     if (notice.tableData) {
-      return <TableDataPreview tableData={notice.tableData} />;
+      return <TableDataPreview tableData={notice.tableData} category={notice.category} />;
     }
 
     // File (image or PDF)
@@ -890,6 +897,28 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                 {/* Actions */}
                 <td className="px-6 py-4 text-right">
                   <div className="flex justify-end gap-2 items-center">
+                    {/* Email Share Button */}
+                    <EmailShareButton notice={notice} />
+
+                    {/* Winner Selection Button for Pending Notices */}
+                    {(filter === "pending" ||
+                      (notice.lastDate &&
+                        isNoticeExpired(notice.lastDate, nowDate) &&
+                        notice.category !== "LOTTERY_RESULT")) &&
+                      notice.type === "TABLE" && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setQuickViewNotice(notice);
+                            initWinnersMode(notice);
+                          }}
+                          className="bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-lg transition inline-flex items-center justify-center border-0 active:scale-95 shadow-sm cursor-pointer"
+                          title="Select Winner & Send to Result"
+                        >
+                          <Trophy className="w-4 h-4 text-white" />
+                        </button>
+                      )}
+
                     <WhatsAppShareButton notice={notice} />
 
                     {/* Quick View */}
@@ -940,7 +969,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
           }}
         >
           <div
-            className="bg-white rounded-3xl w-full max-w-4xl border border-slate-100 shadow-2xl flex flex-col max-h-[92vh] relative overflow-hidden animate-scale-in"
+            className="bg-white rounded-3xl w-full max-w-6xl border border-slate-100 shadow-2xl flex flex-col max-h-[92vh] relative overflow-hidden animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top gradient bar */}
@@ -984,15 +1013,15 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                   {quickViewNotice.lotteryDate && (
                     <span className="flex items-center gap-1 text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md font-extrabold uppercase text-[10px]">
                       <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                       Lottery: {(() => {
-                         const d = new Date(quickViewNotice.lotteryDate);
-                         return new Intl.DateTimeFormat("en-GB", {
-                           timeZone: "Asia/Dhaka",
-                           day: "2-digit",
-                           month: "2-digit",
-                           year: "numeric"
-                         }).format(d).replace(/\//g, "-");
-                       })()}
+                      Lottery: {(() => {
+                        const d = new Date(quickViewNotice.lotteryDate);
+                        return new Intl.DateTimeFormat("en-GB", {
+                          timeZone: "Asia/Dhaka",
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric"
+                        }).format(d).replace(/\//g, "-");
+                      })()}
                     </span>
                   )}
                 </div>
@@ -1017,7 +1046,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                   <p className="text-xs text-amber-600 font-bold bg-amber-50 border border-amber-100 p-3.5 rounded-xl leading-relaxed">
                     🏆 বিজয়ী নির্বাচন করুন: নিচে টেবিলের <strong>WINNER LIST NAME</strong> কলামের ইনপুট বক্সে বিজয়ী ঠিকাদারের নাম টাইপ করুন। একাধিক বিজয়ী সিলেক্ট করতে পারেন। সেভ করলে ক্যাটাগরি স্বয়ংক্রিয়ভাবে Lottery Result এ আপডেট হবে।
                   </p>
-                  
+
                   {tempTableData.tables.map((table: any, tIdx: number) => {
                     const headerBg = table.headerBgColor || "#ccffff";
                     const headers = table.headers || [];
@@ -1040,22 +1069,20 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                             <thead>
                               <tr style={{ backgroundColor: headerBg }} className={getHeaderTextColor(headerBg)}>
                                 {!hasSl && (
-                                  <th 
+                                  <th
                                     style={{ backgroundColor: headerBg }}
-                                    className={`px-3 py-2 text-left font-bold border border-slate-200 text-[10px] uppercase tracking-wide whitespace-normal ${
-                                      getHeaderTextColor(headerBg) === "text-white" ? "!text-white" : "!text-slate-800"
-                                    }`}
+                                    className={`px-3 py-2 text-left font-bold border border-slate-200 text-[10px] uppercase tracking-wide whitespace-normal ${getHeaderTextColor(headerBg) === "text-white" ? "!text-white" : "!text-slate-800"
+                                      }`}
                                   >
                                     SL No
                                   </th>
                                 )}
                                 {headers.map((h: string, i: number) => (
-                                  <th 
-                                    key={i} 
+                                  <th
+                                    key={i}
                                     style={{ backgroundColor: headerBg }}
-                                    className={`px-3 py-2 text-left font-bold border border-slate-200 text-[10px] uppercase tracking-wide whitespace-normal ${
-                                      getHeaderTextColor(headerBg) === "text-white" ? "!text-white" : "!text-slate-800"
-                                    }`}
+                                    className={`px-3 py-2 text-left font-bold border border-slate-200 text-[10px] uppercase tracking-wide whitespace-normal ${getHeaderTextColor(headerBg) === "text-white" ? "!text-white" : "!text-slate-800"
+                                      }`}
                                   >
                                     {h}
                                   </th>
@@ -1066,8 +1093,8 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                               {rows.map((row: string[], rIdx: number) => {
                                 const isWinnerRow = winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
                                 return (
-                                  <tr 
-                                    key={rIdx} 
+                                  <tr
+                                    key={rIdx}
                                     className={isWinnerRow ? "bg-[#fffbeb] font-bold border-l-4 border-l-amber-500" : rIdx % 2 === 0 ? "bg-white" : "bg-slate-50"}
                                   >
                                     {!hasSl && (
@@ -1078,8 +1105,8 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                                     {row.map((cell: string, cIdx: number) => {
                                       const isWinnerCell = cIdx === winnerColIdx;
                                       return (
-                                        <td 
-                                          key={cIdx} 
+                                        <td
+                                          key={cIdx}
                                           className="px-3 py-2 border border-slate-200 text-slate-800"
                                         >
                                           {isWinnerCell ? (
@@ -1140,6 +1167,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                       onClick={() => {
                         setIsSelectingWinners(false);
                         setTempTableData(null);
+                        setQuickViewNotice(null);
                       }}
                       className="bg-slate-500 hover:bg-slate-600 text-white font-bold px-5 py-2 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 cursor-pointer border-0"
                     >
@@ -1177,7 +1205,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                     >
                       Close
                     </button>
-                    
+
                     {quickViewNotice.type === "TABLE" && filter === "pending" && (
                       <button
                         type="button"
@@ -1217,7 +1245,8 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
           }}
         >
           {/* Force strict light mode rendering inside PDF capture element */}
-          <style dangerouslySetInnerHTML={{ __html: `
+          <style dangerouslySetInnerHTML={{
+            __html: `
             #pdf-render-capture,
             #pdf-render-capture *:not(th) {
               color: #000000 !important;
@@ -1287,7 +1316,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                     <thead>
                       <tr style={{ backgroundColor: headerBg }} className="border-b border-slate-300">
                         {!hasSl && (
-                          <th 
+                          <th
                             style={{ backgroundColor: headerBg, color: getHeaderTextColorHex(headerBg) }}
                             className="px-3 py-2 text-left font-bold border-r border-slate-300 text-[10px] uppercase tracking-wide"
                           >
@@ -1295,8 +1324,8 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                           </th>
                         )}
                         {headers.map((h: string, i: number) => (
-                          <th 
-                            key={i} 
+                          <th
+                            key={i}
                             style={{ backgroundColor: headerBg, color: getHeaderTextColorHex(headerBg) }}
                             className="px-3 py-2 text-left font-bold border-r border-slate-300 text-[10px] uppercase tracking-wide"
                           >
@@ -1306,15 +1335,18 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                       </tr>
                     </thead>
                     <tbody>
-                      {rows.map((row: string[], rIdx: number) => {
+                      {((quickViewNotice?.category === "LOTTERY_RESULT" || table.type === "LOTTERY_RESULT" || filter === "winners") && winnerColIdx !== -1 && (rows || []).some((r: any) => r[winnerColIdx] && r[winnerColIdx].trim() !== "")
+                        ? (rows || []).filter((r: any) => r[winnerColIdx] && r[winnerColIdx].trim() !== "")
+                        : rows
+                      ).map((row: string[], rIdx: number) => {
                         const isWinnerRow = winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
                         return (
-                          <tr 
-                            key={rIdx} 
+                          <tr
+                            key={rIdx}
                             className={isWinnerRow ? "bg-[#fffbeb] font-bold" : rIdx % 2 === 0 ? "bg-white" : "bg-slate-50"}
                           >
                             {!hasSl && (
-                              <td 
+                              <td
                                 className="px-3 py-2 border-r border-b border-slate-300 text-slate-800 text-[11px] font-bold"
                               >
                                 {rIdx + 1}
@@ -1323,8 +1355,8 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                             {row.map((cell: string, cIdx: number) => {
                               const isWinnerCell = cIdx === winnerColIdx;
                               return (
-                                <td 
-                                  key={cIdx} 
+                                <td
+                                  key={cIdx}
                                   className="px-3 py-2 border-r border-b border-slate-300 text-slate-800 text-[11px]"
                                 >
                                   {isWinnerCell && isWinnerRow && <span className="inline-block mr-1">🏆</span>}

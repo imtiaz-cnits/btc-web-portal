@@ -164,7 +164,10 @@ function TablePdfPreview({ tableData, title, category }: { tableData: string; ti
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.map((row: string[], rIdx: number) => {
+                    {(((category || "").toLowerCase().includes("result") || table.type === "LOTTERY_RESULT") && winnerColIdx !== -1 && (rows || []).some((r: any) => r[winnerColIdx] && r[winnerColIdx].trim() !== "")
+                      ? (rows || []).filter((r: any) => r[winnerColIdx] && r[winnerColIdx].trim() !== "")
+                      : rows
+                    ).map((row: string[], rIdx: number) => {
                       const isWinnerRow =
                         winnerColIdx !== -1 && row[winnerColIdx] && row[winnerColIdx].trim() !== "";
                       return (
@@ -348,15 +351,15 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices, category }) => {
 
   const desktopDownloadBtn = (notice: Notice) => {
     const cls = "bg-text-1 !text-secondary px-3.5 py-1.5 rounded-lg font-bold text-xs uppercase hover:bg-primary transition shadow-sm flex items-center gap-2 cursor-pointer";
+    if (notice.tableData) {
+      return <TableDownloadButton notice={notice} className={cls} />;
+    }
     if (notice.fileUrl) {
       return (
         <a href={notice.fileUrl} download className={cls} title="Download File">
           <i className="fa-solid fa-download"></i>
         </a>
       );
-    }
-    if (notice.tableData) {
-      return <TableDownloadButton notice={notice} className={cls} />;
     }
     return (
       <Link href={`/egp-notice/${notice.id}`} className={cls} title="Download PDF">
@@ -367,15 +370,15 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices, category }) => {
 
   const mobileDownloadBtn = (notice: Notice) => {
     const cls = "bg-text-1 !text-secondary hover:!text-black hover:bg-primary p-3 rounded-xl font-bold text-[11px] uppercase flex items-center justify-center aspect-square shadow-sm active:scale-95 transition-all cursor-pointer";
+    if (notice.tableData) {
+      return <TableDownloadButton notice={notice} className={cls} />;
+    }
     if (notice.fileUrl) {
       return (
         <a href={notice.fileUrl} download className={cls} title="Download File">
           <i className="fa-solid fa-download"></i>
         </a>
       );
-    }
-    if (notice.tableData) {
-      return <TableDownloadButton notice={notice} className={cls} />;
     }
     return (
       <Link href={`/egp-notice/${notice.id}`} className={cls} title="Download PDF">

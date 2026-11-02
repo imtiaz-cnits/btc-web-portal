@@ -1556,7 +1556,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
   // Load existing notice specifications if available in edit mode
   useEffect(() => {
     if (isEdit) {
-      setEnableFile(!!notice.filePath);
+      const isAutoResultPdf = notice.filePath && (notice.filePath.includes("-result.pdf") || notice.filePath.includes("-details.pdf"));
+      setEnableFile(!!notice.filePath && !isAutoResultPdf);
       setEnableText(!!notice.content);
       setEnableTables(!!notice.tableData);
 
@@ -2330,7 +2331,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       formData.append("type", primaryType);
 
       if (isEdit) {
-        formData.append("existingFilePath", notice.filePath || "");
+        const isAutoResultPdf = notice.filePath && (notice.filePath.includes("-result.pdf") || notice.filePath.includes("-details.pdf"));
+        formData.append("existingFilePath", isAutoResultPdf ? "" : (notice.filePath || ""));
         const res = await updateNotice(notice.id, formData);
         if (res.success) {
           setSuccessMessage(res.message);
@@ -2915,7 +2917,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           )}
 
           {/* Existing Document Review Row */}
-          {isEdit && notice.filePath && !selectedFile && (
+          {isEdit && notice.filePath && !notice.filePath.includes("-result.pdf") && !notice.filePath.includes("-details.pdf") && !selectedFile && (
             <div className="bg-slate-100 p-4 rounded-xl text-xs text-slate-500 font-semibold border border-slate-200 mt-4 flex items-center justify-between">
               <div className="flex items-center gap-1.5 min-w-0">
                 <span>📎 Existing Attached Document:</span>

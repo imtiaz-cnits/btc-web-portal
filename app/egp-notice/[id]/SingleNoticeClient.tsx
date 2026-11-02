@@ -287,7 +287,7 @@ interface SingleNoticeClientProps {
 export default function SingleNoticeClient({
   notice,
 }: SingleNoticeClientProps) {
-  const isPdf = notice.filePath?.toLowerCase().endsWith(".pdf") || false;
+  const isPdf = notice.type === "FILE" && (notice.filePath?.toLowerCase().endsWith(".pdf") || false);
   const printAreaRef = useRef<HTMLDivElement>(null);
   const [pdfDownloading, setPdfDownloading] = React.useState(false);
 
@@ -1441,10 +1441,23 @@ export default function SingleNoticeClient({
             const winnerColIdx = headers.findIndex((h: string) =>
               h.toUpperCase().replace(/\./g, "").includes("WINNER"),
             );
+            const isLotteryResult =
+              notice.category === "LOTTERY_RESULT" ||
+              table.type === "LOTTERY_RESULT";
+            const winningRows =
+              winnerColIdx !== -1
+                ? normalizedRows.filter(
+                  (r: string[]) => r[winnerColIdx] && r[winnerColIdx].trim() !== "",
+                )
+                : [];
+            const displayRows =
+              isLotteryResult && winningRows.length > 0
+                ? winningRows
+                : normalizedRows;
 
             const totalSecurity =
               securityColIdx !== -1
-                ? normalizedRows.reduce(
+                ? displayRows.reduce(
                   (sum: number, r: string[]) =>
                     sum + parseMoney(r[securityColIdx]),
                   0,
@@ -1452,7 +1465,7 @@ export default function SingleNoticeClient({
                 : 0;
             const totalDocFees =
               docFeesColIdx !== -1
-                ? normalizedRows.reduce(
+                ? displayRows.reduce(
                   (sum: number, r: string[]) =>
                     sum + parseMoney(r[docFeesColIdx]),
                   0,
@@ -1638,7 +1651,7 @@ export default function SingleNoticeClient({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-400">
-                      {normalizedRows.map((row: string[], rIdx: number) => {
+                      {displayRows.map((row: string[], rIdx: number) => {
                         const isWinnerRow =
                           winnerColIdx !== -1 &&
                           row[winnerColIdx] &&
@@ -2088,7 +2101,7 @@ export default function SingleNoticeClient({
             >
               <i className="fa-solid fa-print"></i> Print Notice
             </button>
-            {notice.filePath && (
+            {notice.filePath && !notice.filePath.includes("-result.pdf") && (
               <a
                 href={notice.filePath}
                 download
@@ -2204,9 +2217,26 @@ export default function SingleNoticeClient({
                     return lower.includes("fee") || lower.includes("price");
                   });
 
+                  const winnerColIdx = headers.findIndex((h: string) =>
+                    h.toUpperCase().replace(/\./g, "").includes("WINNER"),
+                  );
+                  const isLotteryResult =
+                    notice.category === "LOTTERY_RESULT" ||
+                    table.type === "LOTTERY_RESULT";
+                  const winningRows =
+                    winnerColIdx !== -1
+                      ? normalizedRows.filter(
+                        (r: string[]) => r[winnerColIdx] && r[winnerColIdx].trim() !== "",
+                      )
+                      : [];
+                  const displayRows =
+                    isLotteryResult && winningRows.length > 0
+                      ? winningRows
+                      : normalizedRows;
+
                   const totalSecurity =
                     securityColIdx !== -1
-                      ? normalizedRows.reduce(
+                      ? displayRows.reduce(
                         (sum: number, r: string[]) =>
                           sum + parseMoney(r[securityColIdx]),
                         0,
@@ -2214,15 +2244,12 @@ export default function SingleNoticeClient({
                       : 0;
                   const totalDocFees =
                     docFeesColIdx !== -1
-                      ? normalizedRows.reduce(
+                      ? displayRows.reduce(
                         (sum: number, r: string[]) =>
                           sum + parseMoney(r[docFeesColIdx]),
                         0,
                       )
                       : 0;
-                  const winnerColIdx = headers.findIndex((h: string) =>
-                    h.toUpperCase().replace(/\./g, "").includes("WINNER"),
-                  );
 
                   const totalCols = headers.length + (!hasSl ? 1 : 0);
 
@@ -2392,7 +2419,7 @@ export default function SingleNoticeClient({
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-400">
-                            {normalizedRows.map(
+                            {displayRows.map(
                               (row: string[], rIdx: number) => {
                                 const isWinnerRow =
                                   winnerColIdx !== -1 &&

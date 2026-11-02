@@ -1,103 +1,133 @@
 # BTC Web Portal — Excel Data Import User Guide
-## Tender Notice Table Data Ingestion Guide
+## Comprehensive Manual for Tender Notice Table Ingestion
 
-This guide explains how administrators can rapidly import tender data into notice tables using **Excel File Upload** or **Direct Clipboard Copy & Paste (Ctrl + V)**.
-
----
-
-### 1. Supported File Formats & System Limits
-
-| Format | Extensions | Maximum File Size | Maximum Rows Per Sheet |
-|---|---|---|---|
-| Microsoft Excel OpenXML | `.xlsx` | 10 MB | 1,000 rows |
-| Microsoft Excel 97-2004 | `.xls` | 10 MB | 1,000 rows |
-| Comma-Separated Values | `.csv` | 10 MB | 1,000 rows |
-| Clipboard Tabular Data | Plain text (`\t`) | Browser limit | 1,000 rows |
-
-*Note: Files exceeding 10 MB or worksheets containing more than 1,000 data rows are automatically blocked to maintain browser performance and prevent UI freezing.*
+This guide provides end-to-end instructions for administrators of the Bangladesh Tender Notice Management Portal (BTC Web Portal) on importing tender schedules from Microsoft Excel, Google Sheets, or CSV files into notice tables.
 
 ---
 
-### 2. Method 1: Uploading an Excel File (Primary)
+## 1. Quick Start & Official Template Downloads
 
-1. Open the **Admin Dashboard** and navigate to **Add Notice** or **Edit Notice**.
-2. Select your desired tender category:
+Pre-formatted Excel templates matching the exact column structures, headers, and data formats for all tender categories are available directly from the portal:
+
+### 1.1 Download Locations
+All templates are accessible in the application repository:
+- **Public Assets Directory:** `public/templates/` (Available for direct browser download)
+- **Documentation Directory:** `docs/templates/`
+
+### 1.2 Available Templates
+
+| Category | Blank Template (For Data Entry) | Sample Template (With Realistic Data) | Column Count |
+|---|---|---|:---:|
+| **OTM** (Open Tendering Method) | [`otm_template_blank.xlsx`](/templates/otm_template_blank.xlsx) | [`otm_template_sample.xlsx`](/templates/otm_template_sample.xlsx) | 11 |
+| **LTM** (Limited Tendering Method) | [`ltm_template_blank.xlsx`](/templates/ltm_template_blank.xlsx) | [`ltm_template_sample.xlsx`](/templates/ltm_template_sample.xlsx) | 9 |
+| **LOTTERY_PENDING** (Lottery Pending) | [`lottery_pending_template_blank.xlsx`](/templates/lottery_pending_template_blank.xlsx) | [`lottery_pending_template_sample.xlsx`](/templates/lottery_pending_template_sample.xlsx) | 9 |
+| **LOTTERY_RESULT** (Lottery Result) | [`lottery_result_template_blank.xlsx`](/templates/lottery_result_template_blank.xlsx) | [`lottery_result_template_sample.xlsx`](/templates/lottery_result_template_sample.xlsx) | 10 |
+
+---
+
+## 2. Supported File Formats & Technical Limits
+
+| Format | File Extension | Max Size | Max Rows Per Sheet | Character Encoding |
+|---|---|:---:|:---:|---|
+| Microsoft Excel OpenXML | `.xlsx` | **10 MB** | 1,000 | UTF-8 / Standard |
+| Microsoft Excel Legacy | `.xls` (97-2004) | **10 MB** | 1,000 | UTF-8 / Standard |
+| Comma-Separated Values | `.csv` | **10 MB** | 1,000 | UTF-8 / ANSI |
+| Direct Clipboard Paste | Plain Text / TSV | Browser Buffer | 1,000 | UTF-8 |
+
+> **Performance Guard:** Files exceeding 10 MB or sheets with more than 1,000 data rows are automatically blocked to ensure smooth rendering and avoid freezing administrative sessions.
+
+---
+
+## 3. Workflow 1: File Upload (Step-by-Step)
+
+### Step 1: Open the Notice Editor
+1. Log in to the BTC Web Portal Admin Dashboard (`/dashboard`).
+2. Click **Add Notice** to create a new tender, or click **Edit** on an existing notice.
+3. Select your desired tender category:
    - **OTM** (11 columns)
    - **LTM** (9 columns)
    - **LOTTERY_PENDING** (9 columns)
-   - **LOTTERY_RESULT** (10 columns, with Winner List Name)
-3. Ensure the **Tables Module** is enabled.
-4. In the table toolbar header (beside `+ Row`), click the green **"Import Excel"** button:
-   - An intuitive, two-step modal will appear.
-5. Drag and drop your `.xlsx`, `.xls`, or `.csv` file into the upload area, or click to browse.
+   - **LOTTERY_RESULT** (10 columns)
+4. Ensure the **Tables Module** toggle is switched **ON**.
+
+### Step 2: Open the Import Dialog
+1. In the table toolbar header (beside the `+ Row` button), click the green **"Import Excel"** button.
+2. The **Import Excel Data** modal dialog will appear.
+
+### Step 3: Choose or Drag-and-Drop Your File
+1. Drag and drop your `.xlsx`, `.xls`, or `.csv` file into the upload dropzone.
+2. Alternatively, click the browse button to select a file from your computer.
+3. The engine parses the file in memory without uploading any raw files to disk.
+
+### Step 4: Multi-Sheet Selection (If Applicable)
+If your workbook contains multiple worksheets (e.g. `Summary`, `Package_01`, `Package_02`):
+- A **"Select Worksheet"** dropdown will appear at the top.
+- The dropdown indicates the sheet name, detected column count, and total rows.
+- Select your target sheet; column mapping and live preview update instantaneously.
+
+### Step 5: Review & Adjust Column Mapping
+The intelligent mapping engine matches Excel headers against portal requirements:
+- **Auto-Mapped:** Columns matched by exact or fuzzy alias show a green `Mapped` badge.
+- **Required Columns:** Fields like `Tender Id` and `Brief Description of Works` display a red `Required` badge.
+- **Manual Mapping:**
+  - If a column wasn't automatically recognized, click its dropdown and choose your Excel header.
+  - To skip an unnecessary Excel column, select `(Ignore / Leave Blank)`.
+  - **Duplicate Protection:** Assigning an Excel column to a destination field automatically un-assigns it from any previous field.
+
+### Step 6: Verify with Live Preview
+Inspect the parsed rows in the Live Preview table:
+- **Tender IDs:** Checked for validity (empty IDs are flagged or skipped).
+- **Bangladeshi Currency:** Formats large numbers using standard Bangladeshi comma groupings (`41,26,000`).
+- **Word Notation:** Preserves amounts with `Lac` or `Cr` (e.g., `44 Lac`, `2.2 Cr`).
+- **Date Standard:** Normalizes dates into `DD-MM-YYYY 05:00 PM`.
+- **Bengali Text:** Preserves Unicode Bengali and converts legacy Bijoy encoding seamlessly.
+- **Lottery Winner:** In `LOTTERY_RESULT`, verifies that winning contractors appear in `WINNER LIST NAME`.
+
+### Step 7: Choose Ingestion Mode & Import
+At the bottom of the modal, select:
+- **Append to Table (Default):** Adds imported rows to the end of your existing rows.
+- **Replace Table Rows:** Replaces all existing rows with the newly imported dataset. A confirmation prompt prevents accidental overwrites.
+- Click **"Apply to Table"** to populate the notice editor.
 
 ---
 
-### 3. Selecting a Worksheet
+## 4. Workflow 2: Direct Clipboard Paste (Ctrl + V)
 
-If your Excel workbook contains multiple worksheets (e.g. `ReadMe`, `Civil_Works`, `Electrical`):
-- A **"Select Worksheet"** dropdown will appear at the top of Step 2.
-- The dropdown displays the sheet name, total rows, and total columns.
-- Switch sheets with one click. Column mapping and live preview instantly update.
+For rapid entry directly from Microsoft Excel, Google Sheets, or LibreOffice Calc:
 
----
+1. Open your spreadsheet software.
+2. Highlight your data rows (with or without headers) and press <kbd>Ctrl + C</kbd> (or <kbd>Cmd + C</kbd> on Mac).
+3. Switch back to the BTC Notice Form.
+4. Click anywhere inside the table area (or click the table toolbar).
+5. Press <kbd>Ctrl + V</kbd>.
+6. The **Excel Import Modal** will instantly open pre-loaded with your copied data.
+7. Verify mapping and preview, then click **Import & Append** or **Replace**.
 
-### 4. Reviewing and Adjusting Column Mapping
-
-The import engine automatically compares Excel column headers with the official BTC Web Portal category schema:
-- **Auto-Mapped Columns:** Marked with a green checkmark (`Mapped`).
-- **Required Columns:** Columns like `Tender Id` and `Brief Description of Works` are flagged with a red `Required` badge.
-- **Manual Adjustment:** 
-  - To change a mapped column, click its dropdown and select the matching Excel header.
-  - To leave a column blank or skip it, select `(Ignore / Leave Blank)`.
-  - Selecting an Excel column for a destination field automatically clears it from any other field to prevent duplicate data overwrites.
+> **Smart Form Protection:** Normal typing inside Notice Title, Description, Date pickers, and contact inputs is isolated. Pasting plain text inside input fields will never trigger the import dialog.
 
 ---
 
-### 5. Live Preview & Data Formatting
+## 5. Saving, Serialization & Public Display
 
-Before applying data to the notice, review the **Live Preview Table**:
-- **Automatic Bangladeshi Currency Formatting:** Numeric values (e.g., `4126000`) are automatically formatted with Bangladeshi/Indian commas (`41,26,000`). Text quantities like `44 Lac` or `2.2 Cr` are preserved as-is.
-- **Automatic Date Normalization:** Dates in `YYYY-MM-DD`, `DD/MM/YYYY`, or Excel serial formats are converted to standard `DD-MM-YYYY` with `05:00 PM` default submission time.
-- **Bengali Unicode Preservation:** Existing Bengali Unicode descriptions and locations are completely preserved without corruption.
-- **Method Assignment:** The `Type of Method` column is automatically filled according to the active category.
-- **Invalid Rows:** Any rows missing a required Tender ID are excluded, and summary counters indicate how many valid rows are ready to be imported.
+### 5.1 Automatic V3 Data Serialization
+- When you click **Save Notice**, the portal validates the table structure and automatically serializes the data into **V3 Strongly Typed Architecture** (`version: "v3"`).
+- Production notices created under V2 or legacy formats remain 100% compatible and are non-destructively loaded.
 
----
-
-### 6. Difference Between Append and Replace
-
-At the bottom of the import modal, choose your import operation:
-
-| Operation | Behavior | When to Use |
-|---|---|---|
-| **Append to Table (Default)** | Adds the imported rows after any existing rows in the table. Existing rows are preserved. | Adding new groups/packages to an existing notice. |
-| **Replace Table Rows** | Completely replaces existing data rows with the new imported rows. | Updating an entire tender schedule with a revised file. |
-
-*Safety Notice: Selecting "Replace" requires double-confirmation on a red warning prompt to prevent accidental data loss.*
+### 5.2 Public Rendering & Print View
+- The public notice page renders the imported table with exact category colors:
+  - **OTM & LTM:** Forest Emerald (`#059669`)
+  - **LOTTERY_PENDING:** Ocean Cyan (`#0891b2`)
+  - **LOTTERY_RESULT:** Sky Blue (`#0284c7`) with winner badge highlighting
+- Print layouts and PDF exports (`/notices/[id]/print`) retain proper page breaks, crisp Bengali fonts (`font-bangla`), and full responsive readability.
 
 ---
 
-### 7. Method 2: Direct Clipboard Copy & Paste (Ctrl + V)
+## 6. Summary Checklist for Administrators
 
-You can copy rows directly from Microsoft Excel or Google Sheets and paste them into the portal without saving or uploading a file:
-1. Open your Excel workbook or Google Sheet.
-2. Select the cells/rows (with or without headers) and press <kbd>Ctrl + C</kbd>.
-3. Return to the BTC Notice Form and click inside the table area.
-4. Press <kbd>Ctrl + V</kbd>.
-5. The **Excel Import Modal** will instantly open pre-populated with your clipboard data.
-6. Verify the mapping, preview the rows, and click **Import & Append** or **Replace**.
-
-*Normal Text Paste Safety: Normal Ctrl+V pasting into the Notice Title, Description textarea, date inputs, and contact fields is preserved untouched and will never trigger the import modal.*
-
----
-
-### 8. Common Errors & Solutions
-
-| Issue | Cause | Solution |
-|---|---|---|
-| **"File exceeds the 10 MB limit"** | File size is larger than 10 MB. | Split the workbook or remove high-resolution embedded images. |
-| **"Required field 'Tender Id' is missing"** | The Excel column containing tender IDs was unmapped or left blank. | In the column mapping table, select the column that holds your Tender ID numbers. |
-| **"No valid rows available to import"** | All rows in the worksheet were empty or lacked required fields. | Ensure your sheet has non-empty rows with valid Tender IDs. |
-| **Wrong worksheet loaded** | The workbook defaulted to the first tab (e.g. cover page). | Use the "Select Worksheet" dropdown in Step 2 to choose your data tab. |
-
+1. [ ] Download the official template matching your tender category.
+2. [ ] Fill in `Tender Id` (mandatory) and procurement details.
+3. [ ] If using Bengali, standard Unicode is recommended (Bijoy is also auto-converted).
+4. [ ] For `LOTTERY_RESULT`, place winning contractor names in `WINNER LIST NAME` and leave non-winners blank.
+5. [ ] In BTC Notice Form, click **Import Excel** or press **Ctrl + V**.
+6. [ ] Review the Live Preview and verify mapped columns.
+7. [ ] Click **Apply to Table** and click **Save Notice**.

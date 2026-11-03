@@ -10,6 +10,9 @@ import {
 } from "@/app/actions/notices";
 import { sanitizeBijoyDeep, autoConvertBijoy } from "@/lib/bijoyToUnicode";
 import ExcelImportModal from "@/components/dashboard/ExcelImportModal";
+import CategoryExcelImportModal from "@/components/dashboard/CategoryExcelImport/CategoryExcelImportModal";
+import { adaptCategoryImportToNoticeForm } from "@/lib/categoryExcelImport/adapter";
+import { CategoryNoticeImportData } from "@/lib/categoryExcelImport/types";
 import { parseClipboardText, ParsedSheetData } from "@/lib/tableEngine/excelParser";
 import {
   parseNoticeTableData,
@@ -1341,6 +1344,24 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
 
   // Excel Import Modal State
   const [isExcelModalOpen, setIsExcelModalOpen] = useState(false);
+  const [showCategoryExcelModal, setShowCategoryExcelModal] = useState(false);
+
+  const handleApplyCategoryExcel = (importData: CategoryNoticeImportData) => {
+    const formUpdate = adaptCategoryImportToNoticeForm(importData, tablesList);
+    setTitle(formUpdate.title);
+    setSubTitle(formUpdate.subTitle);
+    setCategory(formUpdate.category);
+    setYear(formUpdate.year);
+    if (formUpdate.publishDate) setPublishDate(formUpdate.publishDate);
+    setLastDate(formUpdate.lastDate || "");
+    if (formUpdate.lotteryDate) setLotteryDate(formUpdate.lotteryDate);
+    setEnableTables(true);
+    setTablesList(formUpdate.tablesList);
+    setSuccessMessage(
+      `Category Excel workbook (${formUpdate.category}) imported successfully! Notice details, ${formUpdate.tablesList[0]?.rows?.length || 0} tender rows, and footer are now loaded. Review and click Save Notice to persist.`
+    );
+    setTimeout(() => setSuccessMessage(""), 6000);
+  };
   const [importTargetTableIdx, setImportTargetTableIdx] = useState<number>(0);
   const [clipboardData, setClipboardData] = useState<ParsedSheetData | null>(null);
 
@@ -2397,6 +2418,35 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       onSubmit={handleSubmit}
       className="space-y-6 min-w-0 w-full overflow-hidden"
     >
+      {/* Category-Based Excel Notice Entry Entry Point */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50/50 border border-emerald-200/80 rounded-2xl shadow-xs">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+            <FileSpreadsheet className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-slate-800 flex items-center gap-2">
+              <span>Category-Based Excel Notice Entry</span>
+              <span className="bg-emerald-100 text-emerald-800 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full uppercase">
+                2-Sheet Workbook
+              </span>
+            </h4>
+            <p className="text-[11px] text-slate-500">
+              Download category template (OTM / LTM), fill Tender Data & Footer Details, and auto-populate the entire form.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowCategoryExcelModal(true)}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer border-0"
+          title="Open Category-Based Excel Entry Modal"
+        >
+          <FileSpreadsheet className="w-3.5 h-3.5 text-white" />
+          <span>Category Excel Import</span>
+        </button>
+      </div>
+
       {/* Notice Basic Settings Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 shrink-0">
         <div ref={dropdownRef} className="md:col-span-1 space-y-2 relative">
@@ -3067,6 +3117,14 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                           title="Import tender rows from Excel (.xlsx, .xls, .csv) or clipboard paste"
                         >
                           <FileSpreadsheet className="w-3.5 h-3.5 !text-white" /> Import Excel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowCategoryExcelModal(true)}
+                          className="bg-teal-600 hover:bg-teal-700 !text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer border-0 active:scale-95"
+                          title="Import entire notice from category-specific 3-sheet Excel template"
+                        >
+                          <FileSpreadsheet className="w-3.5 h-3.5 !text-white" /> Category Excel
                         </button>
 
                       </div>
@@ -3818,6 +3876,14 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           onConfirmImport={handleConfirmExcelImport}
         />
       )}
+
+      {/* Category-Based Excel Notice Entry Modal */}
+      <CategoryExcelImportModal
+        isOpen={showCategoryExcelModal}
+        onClose={() => setShowCategoryExcelModal(false)}
+        initialCategory={category}
+        onApply={handleApplyCategoryExcel}
+      />
     </form>
   );
 }

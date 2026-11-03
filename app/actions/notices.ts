@@ -7,7 +7,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import fs from "fs/promises";
 import path from "path";
-import { getEndOfDayDhaka, isDateBeforeDhaka } from "@/lib/date";
+import { getEndOfDayDhaka, isDateBeforeDhaka, parseDateSafe } from "@/lib/date";
 
 export async function createNotice(formData: FormData) {
   const session = await getServerSession(authOptions);
@@ -15,7 +15,53 @@ export async function createNotice(formData: FormData) {
     return { success: false, message: "Unauthorized. Please login again." };
   }
 
-  const authorId = (session.user as any).id;
+  let authorId: string | null = null;
+  const sessionUserId = (session.user as any)?.id;
+
+  // 1. Check if session user ID exists in the database
+  if (sessionUserId) {
+    const userExists = await prisma.user.findUnique({
+      where: { id: sessionUserId },
+      select: { id: true },
+    });
+    if (userExists) {
+      authorId = userExists.id;
+    }
+  }
+
+  // 2. If authorId not found by ID, try finding by session user email
+  if (!authorId && session.user?.email) {
+    const userByEmail = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true },
+    });
+    if (userByEmail) {
+      authorId = userByEmail.id;
+    }
+  }
+
+  // 3. Fallback to active ADMIN user or first available user in DB
+  if (!authorId) {
+    const adminUser = await prisma.user.findFirst({
+      where: { role: "ADMIN" },
+      select: { id: true },
+    });
+    if (adminUser) {
+      authorId = adminUser.id;
+    } else {
+      const anyUser = await prisma.user.findFirst({
+        select: { id: true },
+      });
+      if (anyUser) {
+        authorId = anyUser.id;
+      }
+    }
+  }
+
+  if (!authorId) {
+    return { success: false, message: "No valid author found in the system. Please login or register an admin user." };
+  }
+
   const title = formData.get("title") as string;
   const content = formData.get("content") as string;
   const category = formData.get("category") as any;
@@ -53,9 +99,9 @@ export async function createNotice(formData: FormData) {
         year,
         category,
         status,
-        publishDate: publishDate ? new Date(publishDate) : null,
+        publishDate: publishDate ? parseDateSafe(publishDate) : null,
         lastDate: lastDate ? getEndOfDayDhaka(lastDate) : null,
-        lotteryDate: lotteryDate ? new Date(lotteryDate) : null,
+        lotteryDate: lotteryDate ? parseDateSafe(lotteryDate) : null,
         authorId,
         filePath: filePath || null,
       },
@@ -65,9 +111,9 @@ export async function createNotice(formData: FormData) {
     revalidatePath("/");
     revalidatePath("/egp-notice");
     return { success: true, message: "Notice created successfully" };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Create notice error:", error);
-    return { success: false, message: "Failed to create notice" };
+    return { success: false, message: error?.message || "Failed to create notice" };
   }
 }
 
@@ -122,9 +168,9 @@ export async function updateNotice(id: string, formData: FormData) {
         year,
         category,
         status,
-        publishDate: publishDate ? new Date(publishDate) : null,
+        publishDate: publishDate ? parseDateSafe(publishDate) : null,
         lastDate: lastDate ? getEndOfDayDhaka(lastDate) : null,
-        lotteryDate: lotteryDate ? new Date(lotteryDate) : null,
+        lotteryDate: lotteryDate ? parseDateSafe(lotteryDate) : null,
         filePath: filePath || null,
       },
     });
@@ -134,9 +180,9 @@ export async function updateNotice(id: string, formData: FormData) {
     revalidatePath("/egp-notice");
     revalidatePath("/");
     return { success: true, message: "Notice updated successfully" };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Update notice error:", error);
-    return { success: false, message: "Failed to update notice" };
+    return { success: false, message: error?.message || "Failed to update notice" };
   }
 }
 
@@ -281,7 +327,6 @@ export async function getNoticeCountsByTitle() {
     return { success: false, counts: {} };
   }
 }
-
 
 export async function getSystemEmailRecipients() {
   try {

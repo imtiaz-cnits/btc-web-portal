@@ -138,7 +138,7 @@ async function runE2EAcceptance() {
   });
   const baselineCount = initialNotices.length;
   console.log(`Initial baseline database notice count: ${baselineCount}`);
-  assert(baselineCount >= 5, `Database contains valid baseline notices (found: ${baselineCount})`);
+  assert(baselineCount === 5, "Database contains exactly 5 baseline notices");
 
   // Fetch admin author ID
   const adminUser = await prisma.user.findFirst();

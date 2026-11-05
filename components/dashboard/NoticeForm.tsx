@@ -2262,20 +2262,20 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       }
 
       // Add additional attributes manually
-      formData.set("year", year);
-      formData.set("category", category);
-      formData.set("status", forceStatus || status);
+      formData.append("year", year);
+      formData.append("category", category);
+      formData.append("status", forceStatus || status);
 
       // Save combinable attachments or fallbacks
       if (!enableFile) {
         formData.set("file", ""); // Clear file
-        formData.set("clearFile", "true");
+        formData.append("clearFile", "true");
       }
 
       if (enableText) {
-        formData.set("content", autoConvertBijoy(content));
+        formData.append("content", autoConvertBijoy(content));
       } else {
-        formData.set("content", "");
+        formData.append("content", "");
       }
 
       const rawTitle = (formData.get("title") as string) || title;
@@ -2340,20 +2340,20 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           tables: v3Tables,
         };
         const serializedData = serializeNoticeTableData(v3Data);
-        formData.set("tableData", serializedData);
+        formData.append("tableData", serializedData);
       } else {
-        formData.set("tableData", "");
+        formData.append("tableData", "");
       }
 
       // Assign Primary Type descriptor based on active content for DB compatibility
       let primaryType = "TEXT";
       if (enableFile) primaryType = "FILE";
       else if (enableTables && tablesList.length > 0) primaryType = "TABLE";
-      formData.set("type", primaryType);
+      formData.append("type", primaryType);
 
       if (isEdit) {
         const isAutoResultPdf = notice.filePath && (notice.filePath.includes("-result.pdf") || notice.filePath.includes("-details.pdf"));
-        formData.set("existingFilePath", isAutoResultPdf ? "" : (notice.filePath || ""));
+        formData.append("existingFilePath", isAutoResultPdf ? "" : (notice.filePath || ""));
         const res = await updateNotice(notice.id, formData);
         if (res.success) {
           setSuccessMessage(res.message);
@@ -2361,7 +2361,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
             router.push("/admin/egp-notices");
           }, 1500);
         } else {
-          setErrorMessage(res.message || (res as any)?.error || "Failed to update notice");
+          setErrorMessage(res.message);
         }
       } else {
         const res = await createNotice(formData);
@@ -2371,14 +2371,12 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
             router.push("/admin/egp-notices");
           }, 1500);
         } else {
-          setErrorMessage(res.message || (res as any)?.error || "Failed to create notice");
+          setErrorMessage(res.message);
         }
       }
     } catch (err: any) {
       console.error("Form submit error:", err);
-      const msg = err?.message || "An unexpected error occurred.";
-      const digest = err?.digest ? ` (Digest: ${err.digest})` : "";
-      setErrorMessage(`${msg}${digest}`);
+      setErrorMessage(err.message || "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }

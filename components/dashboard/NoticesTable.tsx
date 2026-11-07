@@ -97,6 +97,32 @@ const formatCellValue = (val: string, hdr: string) => {
   return str;
 };
 
+const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+const toBengaliDigits = (numStr: string | number) =>
+  numStr.toString().replace(/\d/g, (d) => bengaliDigits[parseInt(d)]);
+
+const getNoticeGroupCount = (tableData?: string | null, category?: string): number => {
+  if (!tableData) return 0;
+  try {
+    const v3Data = parseNoticeTableData(tableData);
+    if (v3Data.tables && v3Data.tables.length > 0) {
+      return v3Data.tables.reduce((acc: number, t: any) => {
+        const { headers, rows } = tableSpecToRowsArray(t);
+        const winnerColIdx = (headers || []).findIndex((h: string) =>
+          h.toUpperCase().replace(/\./g, "").includes("WINNER")
+        );
+        const isWinnerNotice = (category || "").toLowerCase().includes("result") || t.tableType === "LOTTERY_RESULT";
+        const winningRows = winnerColIdx !== -1 ? (rows || []).filter((r: any) => r[winnerColIdx] && r[winnerColIdx].trim() !== "") : [];
+        const displayRows = isWinnerNotice && winningRows.length > 0 ? winningRows : (rows || []);
+        return acc + displayRows.length;
+      }, 0);
+    }
+  } catch {
+    // fallback
+  }
+  return 0;
+};
+
 const getHeaderTextColor = (bgColor: string) => {
   if (!bgColor) return "text-white";
   const lower = bgColor.toLowerCase().trim();
@@ -823,7 +849,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                 <td className="px-6 py-4">
                   <div className="space-y-1">
                     <span className="text-slate-800 font-bold line-clamp-1">{notice.title}</span>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold flex-wrap">
                       {notice.type === "FILE" && (
                         <span className="inline-flex items-center gap-1 text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold">
                           <FileDown className="w-3 h-3" /> File
@@ -839,6 +865,17 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                           <FileSpreadsheet className="w-3 h-3" /> Table
                         </span>
                       )}
+                      {(() => {
+                        const grpCount = getNoticeGroupCount(notice.tableData, notice.category);
+                        if (grpCount > 0) {
+                          return (
+                            <span className="inline-flex items-center gap-1 text-slate-700 bg-slate-100 border border-slate-200/80 px-2 py-0.5 rounded text-[11px] font-bold">
+                              {toBengaliDigits(grpCount)} গ্রুপ
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
                   </div>
                 </td>
@@ -994,6 +1031,17 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                       <FileSpreadsheet className="w-3 h-3" /> Table
                     </span>
                   )}
+                  {(() => {
+                    const grpCount = getNoticeGroupCount(quickViewNotice.tableData, quickViewNotice.category);
+                    if (grpCount > 0) {
+                      return (
+                        <span className="inline-flex items-center gap-1 text-slate-700 bg-slate-100 border border-slate-200/80 px-2 py-0.5 rounded-md text-[10px] font-bold">
+                          {toBengaliDigits(grpCount)} গ্রুপ
+                        </span>
+                      );
+                    }
+                    return null;
+                  })()}
                   <span className={`px-2 py-0.5 text-[10px] rounded-md font-extrabold uppercase ${getStatusBadge(quickViewNotice).cls}`}>
                     {getStatusBadge(quickViewNotice).label}
                   </span>

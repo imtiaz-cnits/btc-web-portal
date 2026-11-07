@@ -223,6 +223,32 @@ function TablePdfPreview({ tableData, title, category }: { tableData: string; ti
   }
 }
 
+const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+const toBengaliDigits = (numStr: string | number) =>
+  numStr.toString().replace(/\d/g, (d) => bengaliDigits[parseInt(d)]);
+
+const getNoticeGroupCount = (tableData?: string | null, category?: string): number => {
+  if (!tableData) return 0;
+  try {
+    const v3Data = parseNoticeTableData(tableData);
+    if (v3Data.tables && v3Data.tables.length > 0) {
+      return v3Data.tables.reduce((acc: number, t: any) => {
+        const { headers, rows } = tableSpecToRowsArray(t);
+        const winnerColIdx = (headers || []).findIndex((h: string) =>
+          h.toUpperCase().replace(/\./g, "").includes("WINNER")
+        );
+        const isWinnerNotice = (category || "").toLowerCase().includes("result") || t.tableType === "LOTTERY_RESULT";
+        const winningRows = winnerColIdx !== -1 ? (rows || []).filter((r: any) => r[winnerColIdx] && r[winnerColIdx].trim() !== "") : [];
+        const displayRows = isWinnerNotice && winningRows.length > 0 ? winningRows : (rows || []);
+        return acc + displayRows.length;
+      }, 0);
+    }
+  } catch {
+    // fallback
+  }
+  return 0;
+};
+
 // -----------------------------------------------
 // Download button for table-based lottery result notices
 // -----------------------------------------------
@@ -271,7 +297,9 @@ function TableDownloadButton({
 
       const cleanDate = (notice.date || notice.publishDate || "").replace(/[/\\:*?"<>|]/g, "-").trim();
       const sanitizedTitle = (notice.title || "notice").slice(0, 50).replace(/[/\\:*?"<>|]/g, "-").trim();
-      const fileName = cleanDate ? `${sanitizedTitle}-${cleanDate}.pdf` : `${sanitizedTitle}.pdf`;
+      const groupCount = getNoticeGroupCount(notice.tableData, notice.category);
+      const groupSuffix = groupCount > 0 ? ` (${toBengaliDigits(groupCount)} গ্রুপ)` : "";
+      const fileName = cleanDate ? `${sanitizedTitle}-${cleanDate}${groupSuffix}.pdf` : `${sanitizedTitle}${groupSuffix}.pdf`;
       pdf.save(fileName);
     } catch (err) {
       console.error("PDF generation failed:", err);
@@ -427,8 +455,19 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices, category }) => {
                 >
                   <td className="py-2.5 px-4 text-text-2 font-medium text-base">{index + 1}</td>
                   <td className="py-2.5 px-4">
-                    <h4 className="text-text-1 font-semibold leading-tight font-bangla text-base lg:text-lg">
-                      {notice.title}
+                    <h4 className="text-text-1 font-semibold leading-tight font-bangla text-base lg:text-lg flex items-center flex-wrap gap-1.5">
+                      <span>{notice.title}</span>
+                      {(() => {
+                        const grpCount = getNoticeGroupCount(notice.tableData, notice.category);
+                        if (grpCount > 0) {
+                          return (
+                            <span className="text-slate-700 font-bold text-sm lg:text-base font-sans">
+                              ({toBengaliDigits(grpCount)} গ্রুপ)
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()}
                     </h4>
                   </td>
                   {showPublishDate && (
@@ -514,8 +553,19 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices, category }) => {
                 </div>
               </div>
 
-              <h4 className="text-text-1 font-bold leading-snug font-bangla text-base mb-5">
-                {notice.title}
+              <h4 className="text-text-1 font-bold leading-snug font-bangla text-base mb-5 flex items-center flex-wrap gap-1.5">
+                <span>{notice.title}</span>
+                {(() => {
+                  const grpCount = getNoticeGroupCount(notice.tableData, notice.category);
+                  if (grpCount > 0) {
+                    return (
+                      <span className="text-slate-700 font-bold text-sm font-sans">
+                        ({toBengaliDigits(grpCount)} গ্রুপ)
+                      </span>
+                    );
+                  }
+                  return null;
+                })()}
               </h4>
 
               <div className="flex items-center gap-3">

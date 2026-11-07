@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect } from "react";
 import Link from "next/link";
-import { Home, ArrowLeft, Printer, Download, Landmark, Info, AlertCircle } from "lucide-react";
+import { Home, ArrowLeft, Printer, Download, Landmark, Info, AlertCircle, Loader2 } from "lucide-react";
 import { sanitizeBijoyDeep, autoConvertBijoy } from "@/lib/bijoyToUnicode";
 import { parseNoticeTableData, tableSpecToRowsArray } from "@/lib/tableEngine/normalizer";
 
@@ -47,6 +47,10 @@ const formatDisplayDate = (dateStr: any) => {
 
   return str;
 };
+
+const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+const toBengaliDigits = (numStr: string | number) =>
+  numStr.toString().replace(/\d/g, (d) => bengaliDigits[parseInt(d)]);
 
 const isCurrencyColumn = (hdr: string) => {
   if (!hdr) return false;
@@ -303,8 +307,22 @@ export default function SingleNoticeClient({
       const isLandscape = parsedTables.length > 0;
       const pdfWidth = isLandscape ? 297 : 210;
       const pdfHeight = isLandscape ? 210 : 297;
-      const targetContainerWidth = isLandscape ? 1120 : 794;
+      const targetContainerWidth = isLandscape ? 1122 : 794;
       const maxPageContentHeight = isLandscape ? 740 : 1060;
+
+      const cleanDate = (notice.lastDate || notice.date || "").replace(/[/\\:*?"<>|]/g, "-").trim();
+      const sanitizedTitle = (notice.title || "notice").slice(0, 50).replace(/[/\\:*?"<>|]/g, "-").trim();
+      const totalDisplayedRows = parsedTables.reduce((acc, t) => {
+        const winnerColIdx = (t.headers || []).findIndex((h: string) =>
+          h.toUpperCase().replace(/\./g, "").includes("WINNER")
+        );
+        const isWinnerNotice = notice.category === "LOTTERY_RESULT" || t.type === "LOTTERY_RESULT";
+        const winningRows = winnerColIdx !== -1 ? (t.rows || []).filter((r: any) => r[winnerColIdx] && r[winnerColIdx].trim() !== "") : [];
+        const displayRows = isWinnerNotice && winningRows.length > 0 ? winningRows : (t.rows || []);
+        return acc + displayRows.length;
+      }, 0);
+      const groupSuffix = totalDisplayedRows > 0 ? ` (${toBengaliDigits(totalDisplayedRows)} গ্রুপ)` : "";
+      const fileName = cleanDate ? `${sanitizedTitle}-${cleanDate}${groupSuffix}.pdf` : `${sanitizedTitle}${groupSuffix}.pdf`;
 
       const sourceBlocks = printAreaRef.current.querySelectorAll(".pwd-table-block");
 
@@ -328,9 +346,6 @@ export default function SingleNoticeClient({
           pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
           heightLeft -= pdfHeight;
         }
-        const cleanDate = (notice.lastDate || notice.date || "").replace(/[/\\:*?"<>|]/g, "-").trim();
-        const sanitizedTitle = (notice.title || "notice").slice(0, 50).replace(/[/\\:*?"<>|]/g, "-").trim();
-        const fileName = cleanDate ? `${sanitizedTitle}-${cleanDate}.pdf` : `${sanitizedTitle}.pdf`;
         pdf.save(fileName);
         return;
       }
@@ -365,9 +380,14 @@ export default function SingleNoticeClient({
           font-display: swap;
         }
         * { box-sizing: border-box !important; }
+        .pdf-page-box {
+          background-color: #ffffff !important;
+          background: #ffffff !important;
+        }
         .pdf-page-box *, .pdf-page-box *[class], .pdf-page-box *[style] {
           font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
           box-shadow: none !important;
+          outline: none !important;
         }
         .pdf-page-box .print-office-name, .pdf-page-box .warning-card-content, .pdf-page-box .warning-card-content * {
           font-family: 'Tiro Bangla', serif !important;
@@ -382,10 +402,11 @@ export default function SingleNoticeClient({
           border-bottom: none !important;
         }
         .pdf-page-box .print-office-name {
-          font-size: 17pt !important;
+          font-size: 16pt !important;
           text-align: center !important;
           font-weight: bold !important;
           background-color: #ffffff !important;
+          background: #ffffff !important;
           color: #000000 !important;
           padding: 2px 4px !important;
           border: 1px solid #000000 !important;
@@ -393,25 +414,37 @@ export default function SingleNoticeClient({
           border-right: 1px solid #000000 !important;
           border-top: 1px solid #000000 !important;
           border-bottom: 1px solid #000000 !important;
+          outline: none !important;
           box-shadow: none !important;
         }
         .pdf-page-box .print-subtitle {
-          font-size: 13px !important;
+          font-size: 12px !important;
           text-align: center !important;
           font-weight: bold !important;
           background-color: #ffffff !important;
+          background: #ffffff !important;
           color: #000000 !important;
           padding: 2px 4px !important;
           border: 1px solid #000000 !important;
           border-left: 1px solid #000000 !important;
           border-right: 1px solid #000000 !important;
-          border-top: none !important;
+          border-top: 1px solid #000000 !important;
           border-bottom: 1px solid #000000 !important;
+          outline: none !important;
           box-shadow: none !important;
+        }
+        .pdf-page-box .pwd-scroll-wrapper {
+          width: 100% !important;
+          min-width: 100% !important;
+          display: block !important;
+          overflow: visible !important;
+          background-color: #ffffff !important;
         }
         .pdf-page-box table {
           width: 100% !important;
+          min-width: 100% !important;
           max-width: 100% !important;
+          table-layout: auto !important;
           border-collapse: collapse !important;
           border: 1px solid #000000 !important;
           border-left: 1px solid #000000 !important;
@@ -419,28 +452,30 @@ export default function SingleNoticeClient({
           border-top: 1px solid #000000 !important;
           border-bottom: 1px solid #000000 !important;
           margin: 0 !important;
-          background-color: transparent !important;
+          background-color: #ffffff !important;
         }
         .pdf-page-box th, .pdf-page-box thead th, .pdf-page-box td, .pdf-page-box tbody td {
           border: 1px solid #000000 !important;
           border-color: #000000 !important;
-          padding: 2.5px 4px !important;
+          padding: 2px 3px !important;
           word-wrap: break-word !important;
           word-break: normal !important;
           overflow-wrap: break-word !important;
           box-sizing: border-box !important;
         }
         .pdf-page-box th {
-          font-size: 14px !important;
-          font-weight: 500 !important;
+          font-size: 11px !important;
+          font-weight: 700 !important;
+          line-height: 1.15 !important;
           filter: brightness(1.3) !important;
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
         }
         .pdf-page-box td {
           color: #000000 !important;
-          font-size: 13px !important;
+          font-size: 11px !important;
           font-weight: 500 !important;
+          line-height: 1.2 !important;
         }
         .pdf-page-box .auto-column {
           white-space: nowrap !important;
@@ -448,35 +483,43 @@ export default function SingleNoticeClient({
         }
         .pdf-page-box .location-column {
           white-space: normal !important;
-          width: 140px !important;
-          min-width: 125px !important;
-          max-width: 170px !important;
+          width: 95px !important;
+          min-width: 85px !important;
+          max-width: 110px !important;
           text-align: center !important;
-          line-height: 1.25 !important;
+          line-height: 1.15 !important;
           word-break: normal !important;
+          font-size: 10.5px !important;
         }
         .pdf-page-box .desc-column {
           white-space: normal !important;
           width: auto !important;
+          min-width: 150px !important;
           word-wrap: break-word !important;
           word-break: normal !important;
+          font-size: 11px !important;
+          line-height: 1.25 !important;
         }
         .pdf-page-box .date-block-th {
           padding: 0 !important;
           border: 1px solid #000000 !important;
-          border-top: none !important;
-          border-bottom: none !important;
+          border-top: 1px solid #000000 !important;
+          border-bottom: 1px solid #000000 !important;
+          outline: none !important;
+          box-shadow: none !important;
+          background-color: #ffffff !important;
         }
         .pdf-page-box .date-block-badge {
           margin: 0 !important;
-          padding: 2px 8px !important;
-          font-size: 12px !important;
+          padding: 1.5px 6px !important;
+          font-size: 11px !important;
           display: inline-block !important;
           border-left: 1px solid #000000 !important;
         }
         .pdf-page-box .selling-date-cell, .selling-date-cell {
-          font-size: 11.5px !important;
-          line-height: 1.2 !important;
+          font-size: 10.5px !important;
+          line-height: 1.15 !important;
+          white-space: nowrap !important;
         }
         .pdf-page-box .footer-card-label svg, .pdf-page-box .warning-card-label svg {
           width: 16px !important;
@@ -487,40 +530,84 @@ export default function SingleNoticeClient({
         }
         .pdf-page-box .total-amount-row, .pdf-page-box .total-amount-row td {
           background-color: #facc15 !important;
-          font-size: 13px !important;
-          font-weight: 600 !important;
-        }
-        .pdf-page-box .footer-card {
-          margin-top: 6px !important;
-          margin-bottom: 4px !important;
-          overflow: hidden !important;
-        }
-        .pdf-page-box .footer-card-label {
-          font-size: 13px !important;
+          font-size: 12px !important;
           font-weight: 700 !important;
-          padding: 4px 10px !important;
         }
-        .pdf-page-box .footer-card-content {
-          font-size: 13px !important;
-          font-weight: 600 !important;
-          line-height: 1.4 !important;
-          padding: 6px 10px !important;
+        .pdf-page-box .details-footer-block {
+          width: 100% !important;
+          min-width: 100% !important;
+          margin: 0 !important;
+          margin-top: -1px !important;
+          border: 1px solid #000000 !important;
+          border-top: 1px solid #000000 !important;
+          outline: none !important;
+          box-shadow: none !important;
+          box-sizing: border-box !important;
+          display: grid !important;
+          grid-template-columns: 1fr 1fr !important;
+          background-color: #ffffff !important;
+          background: #ffffff !important;
         }
-        .pdf-page-box .warning-card {
-          border: 2px solid #dc2626 !important;
-          border-left: 4px solid #dc2626 !important;
-          border-right: 4px solid #dc2626 !important;
-          border-radius: 8px !important;
-          margin-top: 6px !important;
-          margin-bottom: 4px !important;
-          overflow: hidden !important;
+        .pdf-page-box .details-footer-col {
+          padding: 3px 6px !important;
+          box-sizing: border-box !important;
         }
-        .pdf-page-box .warning-card-content, .pdf-page-box .warning-card-content * {
-          padding: 6px 10px !important;
-          font-size: 13px !important;
-          font-weight: 600 !important;
+        .pdf-page-box .details-footer-col:first-child {
+          border-right: 1px solid #000000 !important;
+        }
+        .pdf-page-box .details-footer-badge {
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: 4px !important;
+          font-size: 10.5px !important;
+          font-weight: 800 !important;
+          text-transform: uppercase !important;
+          padding: 1.5px 5px !important;
+          border-radius: 4px !important;
+          margin-bottom: 2px !important;
+        }
+        .pdf-page-box .details-footer-text, .pdf-page-box .details-footer-text * {
+          font-size: 12px !important;
+          font-weight: 700 !important;
+          line-height: 1.3 !important;
+          color: #000000 !important;
+        }
+        .pdf-page-box .warning-footer-block {
+          width: 100% !important;
+          min-width: 100% !important;
+          margin: 0 !important;
+          margin-top: -1px !important;
+          border: 1px solid #000000 !important;
+          border-top: 1px solid #000000 !important;
+          outline: none !important;
+          box-shadow: none !important;
+          box-sizing: border-box !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 6px !important;
+          padding: 3px 6px !important;
+          background-color: #ffffff !important;
+          background: #ffffff !important;
+        }
+        .pdf-page-box .warning-footer-badge {
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: 4px !important;
+          font-size: 10.5px !important;
+          font-weight: 800 !important;
+          text-transform: uppercase !important;
+          padding: 1.5px 5px !important;
+          border-radius: 4px !important;
+          background-color: #dc2626 !important;
+          color: #ffffff !important;
+          flex-shrink: 0 !important;
+        }
+        .pdf-page-box .warning-footer-text, .pdf-page-box .warning-footer-text * {
+          font-size: 12px !important;
+          font-weight: 700 !important;
+          line-height: 1.3 !important;
+          color: #dc2626 !important;
           font-family: 'Tiro Bangla', serif !important;
-          line-height: 1.4 !important;
         }
       `;
       tempWrapper.appendChild(styleEl);
@@ -533,12 +620,13 @@ export default function SingleNoticeClient({
           width: ${targetContainerWidth}px;
           min-height: ${maxPageContentHeight + 40}px;
           box-sizing: border-box;
-          padding: 5px 16px 12px 16px;
+          padding: 6px 14px 14px 14px;
           background: #ffffff;
           position: relative;
           display: flex;
           flex-direction: column;
           justify-content: flex-start;
+          align-items: stretch;
           margin-bottom: 20px;
         `;
 
@@ -547,7 +635,7 @@ export default function SingleNoticeClient({
         topBar.style.cssText = "display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0; margin-top: 0; margin-bottom: 4px; line-height: 1; font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif; border: none !important; border-bottom: none !important;";
         topBar.innerHTML = `
           <div class="pdf-page-num" style="width: 30%; text-align: left; font-size: 11px; font-weight: bold; color: #000000; line-height: 1;">Page 1</div>
-          <div style="width: 40%; text-align: center; font-size: 11px; font-weight: bold; color: #000000; line-height: 1;">Salom Egp consultant</div>
+          <div style="width: 40%; text-align: center; font-size: 11px; font-weight: bold; color: #000000; line-height: 1;">S. Alom EGP Tender & Consultant</div>
           <div style="width: 30%; text-align: right; font-size: 11px; color: #000000; font-weight: bold; line-height: 1;">Print: ${getFormattedPrintDateTime()}</div>
         `;
         pageDiv.appendChild(topBar);
@@ -564,12 +652,12 @@ export default function SingleNoticeClient({
         const totalsRow = originalRows.find((r) => r.classList.contains("total-amount-row"));
         const dataRows = originalRows.filter((r) => !r.classList.contains("total-amount-row"));
 
-        const footerElements = Array.from(block.querySelectorAll(".grid, .warning-card")) as HTMLElement[];
+        const footerElements = Array.from(block.querySelectorAll(".details-footer-block, .warning-footer-block")) as HTMLElement[];
 
         const createTableOnPage = (targetPage: HTMLElement) => {
           const tableContainer = document.createElement("div");
           tableContainer.className = "pwd-scroll-wrapper relative";
-          tableContainer.style.cssText = "width: 100%; overflow: visible; position: relative;";
+          tableContainer.style.cssText = "width: 100% !important; min-width: 100% !important; overflow: visible; position: relative;";
 
           const watermark = document.createElement("div");
           watermark.className = "watermark-container";
@@ -579,6 +667,7 @@ export default function SingleNoticeClient({
 
           const newTable = document.createElement("table");
           newTable.className = "w-full border-collapse text-left font-semibold text-black relative z-10";
+          newTable.style.cssText = "width: 100% !important; min-width: 100% !important; border-collapse: collapse !important; table-layout: auto !important;";
 
           if (originalThead) {
             newTable.appendChild(originalThead.cloneNode(true));
@@ -658,8 +747,59 @@ export default function SingleNoticeClient({
         if (pageNumEl) {
           pageNumEl.textContent = `Page ${i + 1}`;
         }
+
+        // Measure table width and synchronize scroll-wrapper, footers and page width
+        const tableEl = pageEl.querySelector("table");
+        if (tableEl) {
+          const tableWidth = Math.max(tableEl.offsetWidth, tableEl.scrollWidth);
+          const scrollWrapper = pageEl.querySelector(".pwd-scroll-wrapper") as HTMLElement;
+          const topBar = pageEl.querySelector(".custom-print-header") as HTMLElement;
+          const footerBlocks = pageEl.querySelectorAll(".details-footer-block, .warning-footer-block");
+
+          const neededPageWidth = tableWidth + 28; // 14px padding left + 14px padding right
+          if (neededPageWidth > targetContainerWidth) {
+            pageEl.style.width = `${neededPageWidth}px`;
+            if (scrollWrapper) {
+              scrollWrapper.style.width = `${tableWidth}px`;
+              scrollWrapper.style.minWidth = `${tableWidth}px`;
+              scrollWrapper.style.maxWidth = `${tableWidth}px`;
+            }
+            if (topBar) {
+              topBar.style.width = `${tableWidth}px`;
+              topBar.style.minWidth = `${tableWidth}px`;
+              topBar.style.maxWidth = `${tableWidth}px`;
+            }
+            footerBlocks.forEach((f: any) => {
+              f.style.width = `${tableWidth}px`;
+              f.style.minWidth = `${tableWidth}px`;
+              f.style.maxWidth = `${tableWidth}px`;
+            });
+          } else {
+            const innerWidth = targetContainerWidth - 28;
+            if (scrollWrapper) {
+              scrollWrapper.style.width = `${innerWidth}px`;
+              scrollWrapper.style.minWidth = `${innerWidth}px`;
+              scrollWrapper.style.maxWidth = `${innerWidth}px`;
+            }
+            tableEl.style.width = `${innerWidth}px`;
+            tableEl.style.minWidth = `${innerWidth}px`;
+            tableEl.style.maxWidth = `${innerWidth}px`;
+            if (topBar) {
+              topBar.style.width = `${innerWidth}px`;
+              topBar.style.minWidth = `${innerWidth}px`;
+              topBar.style.maxWidth = `${innerWidth}px`;
+            }
+            footerBlocks.forEach((f: any) => {
+              f.style.width = `${innerWidth}px`;
+              f.style.minWidth = `${innerWidth}px`;
+              f.style.maxWidth = `${innerWidth}px`;
+            });
+          }
+        }
+
         pageEl.querySelectorAll("*").forEach((el: any) => {
           if (el.style) {
+            el.style.outline = "none";
             el.style.boxShadow = "none";
           }
         });
@@ -672,12 +812,11 @@ export default function SingleNoticeClient({
         if (i > 0) {
           pdf.addPage();
         }
+        pdf.setFillColor(255, 255, 255);
+        pdf.rect(0, 0, pdfWidth, pdfHeight, "F");
         pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
       }
 
-      const cleanDate = (notice.lastDate || notice.date || "").replace(/[/\\:*?"<>|]/g, "-").trim();
-      const sanitizedTitle = (notice.title || "notice").slice(0, 50).replace(/[/\\:*?"<>|]/g, "-").trim();
-      const fileName = cleanDate ? `${sanitizedTitle}-${cleanDate}.pdf` : `${sanitizedTitle}.pdf`;
       pdf.save(fileName);
 
       document.body.removeChild(tempWrapper);
@@ -787,10 +926,11 @@ export default function SingleNoticeClient({
     // This keeps the original styles, colors, margins, fonts, and print layouts exactly the same!
     const isLandscape = parsedTables.length > 0;
     const printContents = printAreaRef.current?.innerHTML;
+
     if (printContents) {
       const originalContents = document.body.innerHTML;
       const originalTitle = document.title;
-      document.title = "Salom Egp consultant";
+      document.title = "S. Alom EGP Tender & Consultant";
       document.body.innerHTML = `
         <html>
           <head>
@@ -813,7 +953,28 @@ export default function SingleNoticeClient({
               }
               @page {
                 size: ${isLandscape ? "A4 landscape" : "A4 portrait"};
-                margin: 5mm 6mm 6mm 6mm;
+                margin: 9mm 6mm 6mm 6mm;
+                @top-left {
+                  content: "Page " counter(page);
+                  font-size: 11px;
+                  font-weight: bold;
+                  color: #000000;
+                  font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif;
+                }
+                @top-center {
+                  content: "S. Alom EGP Tender & Consultant";
+                  font-size: 11px;
+                  font-weight: bold;
+                  color: #000000;
+                  font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif;
+                }
+                @top-right {
+                  content: "Print: ${getFormattedPrintDateTime()}";
+                  font-size: 11px;
+                  font-weight: bold;
+                  color: #000000;
+                  font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif;
+                }
               }
               *, *:before, *:after {
                 box-sizing: border-box !important;
@@ -831,19 +992,6 @@ export default function SingleNoticeClient({
                 print-color-adjust: exact !important;
                 line-height: 1.4;
               }
-              .custom-print-header {
-                display: flex !important;
-                justify-content: space-between !important;
-                align-items: center !important;
-                width: 100% !important;
-                padding-top: 0 !important;
-                padding-bottom: 0 !important;
-                margin-top: 0 !important;
-                margin-bottom: 4px !important;
-                line-height: 1 !important;
-                border: none !important;
-                border-bottom: none !important;
-              }
               .print-container {
                 width: 100% !important;
                 min-width: 100% !important;
@@ -856,6 +1004,14 @@ export default function SingleNoticeClient({
               .print-container > div {
                 padding-left: 0px !important;
                 padding-right: 0px !important;
+                padding-top: 0px !important;
+                margin-left: 0px !important;
+                margin-right: 0px !important;
+                width: 100% !important;
+                min-width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+              }
                 padding-top: 0px !important;
                 margin-left: 0px !important;
                 margin-right: 0px !important;
@@ -885,31 +1041,30 @@ export default function SingleNoticeClient({
               .print-office-name {
                 font-size: 17pt !important;
                 text-align: center !important;
-                font-weight: bold !important;
+                font-weight: 700 !important;
                 font-family: 'Tiro Bangla', serif !important;
                 background-color: white !important;
                 color: black !important;
                 padding: 2px 4px !important;
                 border: 1px solid #000000 !important;
-                border-left: 1px solid #000000 !important;
-                border-right: 1px solid #000000 !important;
                 border-top: 1px solid #000000 !important;
-                box-shadow: inset 1px 1px 0 0 #000000, inset -1px 0 0 0 #000000, inset 0 -1px 0 0 #000000 !important;
+                outline: 1px solid #000000 !important;
+                outline-offset: -1px !important;
+                box-shadow: inset 0 1px 0 0 #000000, inset 0 -1px 0 0 #000000 !important;
               }
               .print-subtitle {
                 font-size: 13px !important;
                 text-align: center !important;
-                font-weight: bold !important;
+                font-weight: 600 !important;
                 font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
                 background-color: white !important;
                 color: black !important;
                 padding: 2px 4px !important;
                 border: 1px solid #000000 !important;
-                border-left: 1px solid #000000 !important;
-                border-right: 1px solid #000000 !important;
-                border-top: none !important;
-                border-bottom: 1px solid #000000 !important;
-                box-shadow: inset 1px 0 0 0 #000000, inset -1px 0 0 0 #000000, inset 0 -1px 0 0 #000000 !important;
+                border-top: 1px solid #000000 !important;
+                outline: 1px solid #000000 !important;
+                outline-offset: -1px !important;
+                box-shadow: inset 0 1px 0 0 #000000, inset 0 -1px 0 0 #000000 !important;
               }
               thead {
                 display: table-header-group !important;
@@ -917,11 +1072,11 @@ export default function SingleNoticeClient({
               .date-block-th {
                 padding: 0 !important;
                 border: 1px solid #000000 !important;
-                border-left: 1px solid #000000 !important;
-                border-right: 1px solid #000000 !important;
-                border-top: none !important;
-                border-bottom: none !important;
-                box-shadow: inset 1px 0 0 0 #000000, inset -1px 0 0 0 #000000 !important;
+                border-top: 1px solid #000000 !important;
+                border-bottom: 1px solid #000000 !important;
+                outline: 1px solid #000000 !important;
+                outline-offset: -1px !important;
+                box-shadow: inset 0 1px 0 0 #000000, inset 0 -1px 0 0 #000000 !important;
               }
               .date-block-badge {
                 margin: 0 !important;
@@ -1075,62 +1230,101 @@ export default function SingleNoticeClient({
               }
               .desc-column {
                 white-space: normal !important;
-                width: auto !important;
+                width: 100% !important;
+                min-width: 250px !important;
               }
               .pwd-scroll-wrapper {
                 border-radius: 0 !important;
                 overflow: visible !important;
+                width: 100% !important;
+                min-width: 100% !important;
               }
-              .footer-card {
-                border-radius: 8px !important;
-                padding: 0 !important;
-                margin-top: 6px !important;
-                margin-bottom: 4px !important;
-                overflow: hidden !important;
+              .details-footer-block {
+                width: 100% !important;
+                min-width: 100% !important;
+                margin: 0 !important;
+                margin-top: -1px !important;
+                border: 1px solid #000000 !important;
+                border-top: 1px solid #000000 !important;
+                outline: 1px solid #000000 !important;
+                outline-offset: -1px !important;
+                box-shadow: inset 0 1px 0 0 #000000, inset 0 -1px 0 0 #000000 !important;
+                box-sizing: border-box !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                background-color: #ffffff !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
               }
-              .footer-card-label, .warning-card-label {
-                display: block !important;
-                width: fit-content !important;
-                border-right: 1px solid #9ca3af !important;
-                border-bottom: 1px solid #9ca3af !important;
-                border-top: none !important;
-                border-left: none !important;
-                border-bottom-right-radius: 8px !important;
-                padding: 4px 10px !important;
-                font-weight: bold !important;
-                font-size: 13px !important;
+              .details-footer-col {
+                padding: 4px 8px !important;
+                box-sizing: border-box !important;
+                border-color: #000000 !important;
+              }
+              .details-footer-col:first-child {
+                border-right: 1px solid #000000 !important;
+              }
+              .details-footer-badge {
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 4px !important;
+                font-size: 11px !important;
+                font-weight: 800 !important;
                 text-transform: uppercase !important;
+                padding: 2px 6px !important;
+                border-radius: 4px !important;
+                margin-bottom: 3px !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
               }
-              .footer-card-content {
-                padding: 6px 10px !important;
+              .details-footer-text, .details-footer-text * {
                 font-size: 13px !important;
-                font-weight: 600 !important;
-                line-height: 1.4 !important;
+                font-weight: 700 !important;
+                line-height: 1.35 !important;
                 color: #000000 !important;
               }
-              .warning-card {
-                border-radius: 8px !important;
-                padding: 0 !important;
-                margin-top: 6px !important;
-                margin-bottom: 4px !important;
-                overflow: hidden !important;
+              .warning-footer-block {
+                width: 100% !important;
+                min-width: 100% !important;
+                margin: 0 !important;
+                margin-top: -1px !important;
+                border: 1px solid #000000 !important;
+                border-top: 1px solid #000000 !important;
+                outline: 1px solid #000000 !important;
+                outline-offset: -1px !important;
+                box-shadow: inset 0 1px 0 0 #000000 !important;
+                box-sizing: border-box !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+                padding: 4px 8px !important;
+                background-color: #ffffff !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
+              }
+              .warning-footer-badge {
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 4px !important;
+                font-size: 11px !important;
+                font-weight: 800 !important;
+                text-transform: uppercase !important;
+                padding: 2px 6px !important;
+                border-radius: 4px !important;
+                background-color: #dc2626 !important;
+                color: #ffffff !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+                flex-shrink: 0 !important;
               }
-              .warning-card-content, .warning-card-content * {
-                padding: 6px 10px !important;
+              .warning-footer-text, .warning-footer-text * {
                 font-size: 13px !important;
-                font-weight: 600 !important;
+                font-weight: 700 !important;
+                line-height: 1.35 !important;
+                color: #dc2626 !important;
                 font-family: 'Tiro Bangla', serif !important;
-                line-height: 1.4 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
               }
               img {
                 width: 100% !important;
@@ -1177,22 +1371,27 @@ export default function SingleNoticeClient({
                 font-size: 13px !important;
                 font-weight: 600 !important;
               }
+              .print-container table {
+                border-collapse: collapse !important;
+                border: 1px solid #000000 !important;
+              }
               .print-container th, 
               .print-container td {
                 border-color: #000000 !important;
                 border: 1px solid #000000 !important;
               }
+              .print-container th {
+                font-weight: 600 !important;
+              }
+              .print-container td {
+                font-weight: 500 !important;
+              }
             </style>
           </head>
           <body>
             <div class="print-container">
-              <div class="custom-print-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding-top: 0px; padding-bottom: 0px; margin-top: 0px; margin-bottom: 4px; line-height: 1; font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; border: none !important; border-bottom: none !important;">
-                <div style="width: 30%; text-align: left; font-size: 11px; font-weight: bold; color: #000000; line-height: 1;">Page 1</div>
-                <div style="width: 40%; text-align: center; font-size: 11px; font-weight: bold; color: #000000; line-height: 1;">Salom Egp consultant</div>
-                <div style="width: 30%; text-align: right; font-size: 11px; color: #000000; font-weight: bold; line-height: 1;">Print: ${getFormattedPrintDateTime()}</div>
-              </div>
               ${!isLandscape
-          ? `
+                ? `
                 <div class="print-header">
                   <h1 class="notice-title">${notice.title}</h1>
                   <div class="notice-details-bar">
@@ -1202,8 +1401,8 @@ export default function SingleNoticeClient({
                   </div>
                 </div>
               `
-          : ""
-        }
+                : ""
+              }
               ${printContents}
             </div>
           </body>
@@ -1364,7 +1563,7 @@ export default function SingleNoticeClient({
             >
               {pdfDownloading ? (
                 <>
-                  <i className="fa-solid fa-spinner fa-spin"></i> Generating...
+                  <Loader2 className="w-4 h-4 animate-spin text-white flex-shrink-0" /> Generating...
                 </>
               ) : (
                 <>
@@ -1515,6 +1714,7 @@ export default function SingleNoticeClient({
                               borderLeft: "1px solid #000000",
                               borderRight: "1px solid #000000",
                               borderTop: "1px solid #000000",
+                              borderBottom: "1px solid #000000",
                               fontFamily: "'Tiro Bangla', serif",
                               backgroundColor: "#ffffff",
                               color: "#000000",
@@ -1533,7 +1733,7 @@ export default function SingleNoticeClient({
                             className="p-2 font-bold text-[18px] md:text-[22px] print:!text-[22px] text-center text-black bg-white print-subtitle"
                             style={{
                               border: "1px solid #000000",
-                              borderTop: 0,
+                              borderTop: "1px solid #000000",
                               borderLeft: "1px solid #000000",
                               borderRight: "1px solid #000000",
                               borderBottom: "1px solid #000000",
@@ -1554,8 +1754,8 @@ export default function SingleNoticeClient({
                             className="p-0 bg-white date-block-th"
                             style={{
                               border: "1px solid #000000",
-                              borderTop: 0,
-                              borderBottom: 0,
+                              borderTop: "1px solid #000000",
+                              borderBottom: "1px solid #000000",
                               borderLeft: "1px solid #000000",
                               borderRight: "1px solid #000000",
                               padding: "0 !important",
@@ -1916,117 +2116,69 @@ export default function SingleNoticeClient({
                   </table>
                 </div>
 
-                {/* Compact Government Footer Table Blocks */}
+                {/* Modern Compact Attached Details Footer */}
                 {(table.payOrderTo || true) && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 mb-2 print:!mb-2 print:mt-3 print:grid-cols-2 text-black">
-                    {table.payOrderTo && (
-                      <div
-                        className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
-                        style={{
-                          borderLeft: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
-                          borderRight: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
-                          borderTop: `1px solid ${table.headerBgColor || defaultHeaderBg}`,
-                          borderBottom: `1px solid ${table.headerBgColor || defaultHeaderBg}`,
-                        }}
-                      >
-                        <div
-                          className="footer-card-label text-[13px] font-bold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
+                  <div className="details-footer-block w-full border border-black -mt-px bg-white grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 text-black">
+                    {/* Left Column: BD Pay Order To */}
+                    <div className="details-footer-col p-2 md:border-r border-black flex flex-col justify-start">
+                      <div className="mb-1">
+                        <span
+                          className="details-footer-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-extrabold uppercase tracking-wider"
                           style={{
-                            backgroundColor:
-                              table.headerBgColor || defaultHeaderBg,
-                            color: getHeaderTextColorHex(
-                              table.headerBgColor || defaultHeaderBg,
-                            ),
-                            display: "flex",
-                            width: "max-content",
-                            alignItems: "center",
-                            gap: "8px",
+                            backgroundColor: table.headerBgColor || defaultHeaderBg,
+                            color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
                           }}
                         >
-                          <Landmark size={16} className="w-4 h-4 flex-shrink-0" />
+                          <Landmark size={13} className="flex-shrink-0" />
                           BD Pay Order To :
-                        </div>
-                        <div className="footer-card-content p-4 text-black font-semibold text-[13px] leading-relaxed whitespace-pre-line">
-                          {table.payOrderTo}
-                        </div>
+                        </span>
                       </div>
-                    )}
-                    <div
-                      className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
-                      style={{
-                        borderLeft: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
-                        borderRight: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
-                        borderTop: `1px solid ${table.headerBgColor || defaultHeaderBg}`,
-                        borderBottom: `1px solid ${table.headerBgColor || defaultHeaderBg}`,
-                      }}
-                    >
-                      <div
-                        className="footer-card-label text-[13px] font-bold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
-                        style={{
-                          backgroundColor:
-                            table.headerBgColor || defaultHeaderBg,
-                          color: getHeaderTextColorHex(
-                            table.headerBgColor || defaultHeaderBg,
-                          ),
-                          display: "flex",
-                          width: "max-content",
-                          alignItems: "center",
-                          gap: "8px",
-                        }}
-                      >
-                        <Info size={16} className="w-4 h-4 flex-shrink-0" />
-                        Contact Info / e-Tender Solutions :
+                      <div className="details-footer-text text-[13px] font-bold text-black leading-snug whitespace-pre-line pl-0.5">
+                        {table.payOrderTo || "N/A"}
                       </div>
-                      <div className="footer-card-content p-4 text-black font-semibold text-[13px] leading-relaxed">
-                        Engr. Md. Shah Alom B.Sc. Engr.(Civil)
-                        <br />
-                        Mobile No: 01711-805086, 01972-805086
-                        <br />
-                        L M B Market 1st Floor, Pabna.
-                        <br />
-                        salomdhaka@gmail.com
-                        <br />
-                        Web:{" "}
-                        <a
-                          href="https://www.egpbtc.com"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
+                    </div>
+
+                    {/* Right Column: Contact Info */}
+                    <div className="details-footer-col p-2 flex flex-col justify-start">
+                      <div className="mb-1">
+                        <span
+                          className="details-footer-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-extrabold uppercase tracking-wider"
+                          style={{
+                            backgroundColor: table.headerBgColor || defaultHeaderBg,
+                            color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                          }}
                         >
-                          www.egpbtc.com
-                        </a>
+                          <Info size={13} className="flex-shrink-0" />
+                          Contact Info / e-Tender Solutions :
+                        </span>
+                      </div>
+                      <div className="details-footer-text text-[13px] font-bold text-black leading-snug pl-0.5">
+                        <div>Engr. Md. Shah Alom B.Sc. Engr.(Civil)</div>
+                        <div>Mobile No: 01711-805086, 01972-805086</div>
+                        <div>L M B Market 1st Floor, Pabna. | salomdhaka@gmail.com</div>
+                        <div>Web: www.egpbtc.com</div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* Red Warning alert below table */}
-                {table.bottomWarning && notice.category !== "OTM" && (
-                  <div
-                    className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
-                    style={{
-                      borderLeft: "2px solid #dc2626",
-                      borderRight: "2px solid #dc2626",
-                      borderTop: "1px solid #dc2626",
-                      borderBottom: "1px solid #dc2626",
-                    }}
-                  >
-                    <div
-                      className="footer-card-label text-[13px] font-bold uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2"
-                      style={{
-                        backgroundColor: "#dc2626",
-                        color: "#ffffff",
-                        display: "flex",
-                        width: "max-content",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <AlertCircle size={16} className="w-4 h-4 flex-shrink-0 text-white" />
-                      Information :
+                {/* Modern Compact Attached Warning Banner (1-line design directly attached below details box) */}
+                {table.bottomWarning && (
+                  <div className="warning-footer-block w-full border border-black -mt-px bg-white p-2 flex items-center gap-2.5 text-black">
+                    <div className="flex-shrink-0">
+                      <span
+                        className="warning-footer-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-extrabold uppercase tracking-wider text-white"
+                        style={{
+                          backgroundColor: "#dc2626",
+                          color: "#ffffff",
+                        }}
+                      >
+                        <AlertCircle size={13} className="flex-shrink-0 text-white" />
+                        INFORMATION :
+                      </span>
                     </div>
                     <div
-                      className="warning-card-content p-4 text-red-650 font-semibold text-[13px] leading-relaxed font-bangla"
+                      className="warning-footer-text text-[13px] font-bold text-red-600 leading-snug pl-0.5 font-bangla"
                       style={{ color: "#dc2626", fontFamily: "'Tiro Bangla', serif" }}
                     >
                       {table.bottomWarning}
@@ -2294,6 +2446,7 @@ export default function SingleNoticeClient({
                                     borderLeft: "1px solid #000000",
                                     borderRight: "1px solid #000000",
                                     borderTop: "1px solid #000000",
+                                    borderBottom: "1px solid #000000",
                                     fontFamily: "'Tiro Bangla', serif",
                                     backgroundColor: "#ffffff",
                                     color: "#000000",
@@ -2312,7 +2465,7 @@ export default function SingleNoticeClient({
                                   className="p-2 font-bold text-[18px] md:text-[22px] print:!text-[22px] text-center text-black bg-white print-subtitle"
                                   style={{
                                     border: "1px solid #000000",
-                                    borderTop: 0,
+                                    borderTop: "1px solid #000000",
                                     borderLeft: "1px solid #000000",
                                     borderRight: "1px solid #000000",
                                     borderBottom: "1px solid #000000",
@@ -2333,8 +2486,8 @@ export default function SingleNoticeClient({
                                   className="p-0 bg-white date-block-th"
                                   style={{
                                     border: "1px solid #000000",
-                                    borderTop: 0,
-                                    borderBottom: 0,
+                                    borderTop: "1px solid #000000",
+                                    borderBottom: "1px solid #000000",
                                     borderLeft: "1px solid #000000",
                                     borderRight: "1px solid #000000",
                                     padding: "0 !important",
@@ -2681,111 +2834,67 @@ export default function SingleNoticeClient({
 
                       {/* Compact Government Footer Table Blocks */}
                       {(table.payOrderTo || true) && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 mb-2 print:!mb-2 print:mt-3 print:grid-cols-2 text-black">
-                          {table.payOrderTo && (
-                            <div
-                              className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
-                              style={{
-                                borderLeft: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
-                                borderRight: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
-                                borderTop: `1px solid ${table.headerBgColor || defaultHeaderBg}`,
-                                borderBottom: `1px solid ${table.headerBgColor || defaultHeaderBg}`,
-                              }}
-                            >
-                              <div
-                                className="footer-card-label text-[13px] font-bold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
+                        <div className="w-full border border-black -mt-px bg-white grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 text-black details-footer-block">
+                          {/* Left Column: BD Pay Order To */}
+                          <div className="details-footer-col p-2 border-b md:border-b-0 md:border-r border-black print:border-b-0 print:border-r flex flex-col justify-start">
+                            <div className="mb-1">
+                              <span
+                                className="details-footer-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-extrabold uppercase tracking-wider"
                                 style={{
-                                  backgroundColor:
-                                    table.headerBgColor || defaultHeaderBg,
-                                  color: getHeaderTextColorHex(
-                                    table.headerBgColor || defaultHeaderBg,
-                                  ),
-                                  display: "flex",
-                                  width: "max-content",
-                                  alignItems: "center",
-                                  gap: "8px",
+                                  backgroundColor: table.headerBgColor || defaultHeaderBg,
+                                  color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
                                 }}
                               >
-                                <Landmark size={16} className="w-4 h-4 flex-shrink-0" />
+                                <Landmark size={13} className="flex-shrink-0" />
                                 BD Pay Order To :
-                              </div>
-                              <div className="footer-card-content p-4 text-black font-semibold text-[13px] leading-relaxed whitespace-pre-line">
-                                {table.payOrderTo}
-                              </div>
+                              </span>
                             </div>
-                          )}
-                          <div
-                            className="footer-card bg-gradient-to-br from-slate-50 to-white rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
-                            style={{
-                              borderLeft: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
-                              borderRight: `2px solid ${table.headerBgColor || defaultHeaderBg}`,
-                              borderTop: `1px solid ${table.headerBgColor || defaultHeaderBg}`,
-                              borderBottom: `1px solid ${table.headerBgColor || defaultHeaderBg}`,
-                            }}
-                          >
-                            <div
-                              className="footer-card-label text-[13px] font-bold uppercase tracking-wider border-r border-b border-slate-300 rounded-br-xl px-4 py-2"
-                              style={{
-                                backgroundColor:
-                                  table.headerBgColor || defaultHeaderBg,
-                                color: getHeaderTextColorHex(
-                                  table.headerBgColor || defaultHeaderBg,
-                                ),
-                                display: "flex",
-                                width: "max-content",
-                                alignItems: "center",
-                                gap: "8px",
-                              }}
-                            >
-                              <Info size={16} className="w-4 h-4 flex-shrink-0" />
-                              Contact Info / e-Tender Solutions :
+                            <div className="details-footer-text text-[13px] font-bold text-black leading-snug whitespace-pre-line pl-0.5">
+                              {table.payOrderTo || "N/A"}
                             </div>
-                            <div className="footer-card-content p-4 text-black font-semibold text-[13px] leading-relaxed">
-                              Engr. Md. Shah Alom B.Sc. Engr.(Civil)
-                              <br />
-                              Mobile No: 01711-805086, 01972-805086<br />L M B Market 1st Floor, Pabna.<br />salomdhaka@gmail.com
-                              <br />
-                              Web:{" "}
-                              <a
-                                href="https://www.egpbtc.com"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline"
+                          </div>
+
+                          {/* Right Column: Contact Info */}
+                          <div className="details-footer-col p-2 flex flex-col justify-start">
+                            <div className="mb-1">
+                              <span
+                                className="details-footer-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-extrabold uppercase tracking-wider"
+                                style={{
+                                  backgroundColor: table.headerBgColor || defaultHeaderBg,
+                                  color: getHeaderTextColorHex(table.headerBgColor || defaultHeaderBg),
+                                }}
                               >
-                                www.egpbtc.com
-                              </a>
+                                <Info size={13} className="flex-shrink-0" />
+                                Contact Info / e-Tender Solutions :
+                              </span>
+                            </div>
+                            <div className="details-footer-text text-[13px] font-bold text-black leading-snug pl-0.5">
+                              <div>Engr. Md. Shah Alom B.Sc. Engr.(Civil)</div>
+                              <div>Mobile No: 01711-805086, 01972-805086</div>
+                              <div>L M B Market 1st Floor, Pabna. | salomdhaka@gmail.com</div>
+                              <div>Web: www.egpbtc.com</div>
                             </div>
                           </div>
                         </div>
                       )}
 
-                      {/* Red Warning alert below table */}
-                      {table.bottomWarning && notice.category !== "OTM" && (
-                        <div
-                          className="footer-card rounded-xl p-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden mt-4"
-                          style={{
-                            borderLeft: "2px solid #dc2626",
-                            borderRight: "2px solid #dc2626",
-                            borderTop: "1px solid #dc2626",
-                            borderBottom: "1px solid #dc2626",
-                          }}
-                        >
-                          <div
-                            className="warning-card-label text-[13px] font-bold uppercase tracking-wider border-r border-b border-red-200 rounded-br-xl px-4 py-2"
-                            style={{
-                              backgroundColor: "#dc2626",
-                              color: "#ffffff",
-                              display: "flex",
-                              width: "max-content",
-                              alignItems: "center",
-                              gap: "8px",
-                            }}
-                          >
-                            <AlertCircle size={16} className="w-4 h-4 flex-shrink-0 text-white" />
-                            Information :
+                      {/* Modern Compact Attached Warning Banner (1-line design directly attached below details box) */}
+                      {table.bottomWarning && (
+                        <div className="warning-footer-block w-full border border-black -mt-px bg-white p-2 flex items-center gap-2.5 text-black">
+                          <div className="flex-shrink-0">
+                            <span
+                              className="warning-footer-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-extrabold uppercase tracking-wider text-white"
+                              style={{
+                                backgroundColor: "#dc2626",
+                                color: "#ffffff",
+                              }}
+                            >
+                              <AlertCircle size={13} className="flex-shrink-0 text-white" />
+                              INFORMATION :
+                            </span>
                           </div>
                           <div
-                            className="warning-card-content p-4 text-red-650 font-semibold text-[13px] leading-relaxed font-bangla"
+                            className="warning-footer-text text-[13px] font-bold text-red-600 leading-snug pl-0.5 font-bangla"
                             style={{ color: "#dc2626", fontFamily: "'Tiro Bangla', serif" }}
                           >
                             {table.bottomWarning}

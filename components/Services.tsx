@@ -123,10 +123,10 @@ const Services: React.FC = () => {
                     </svg>
                   </div>
                 </div>
-                <h3 className="title text-[18px] font-medium font-primary text-[var(text-1)] uppercase my-[10px]">
+                <h3 className="title text-[18px] font-medium font-primary text-[var(--text-1)] uppercase my-[10px]">
                   EGP Registration
                 </h3>
-                <p className="paragraph text-[16px] leading-[20px] font-normal text-[var(text-1)] font-secondary">
+                <p className="paragraph text-[16px] leading-[20px] font-normal text-[var(--text-1)] font-secondary">
                   Register today to streamline your projects, access exclusive
                   resources, and build with confidence.
                 </p>
@@ -180,10 +180,10 @@ const Services: React.FC = () => {
                     </svg>
                   </div>
                 </div>
-                <h3 className="title text-[18px] font-medium font-primary text-[var(text-1)] uppercase my-[10px]">
+                <h3 className="title text-[18px] font-medium font-primary text-[var(--text-1)] uppercase my-[10px]">
                   E-Tender Submission
                 </h3>
-                <p className="paragraph text-[16px] leading-[20px] font-normal text-[var(text-1)] font-secondary">
+                <p className="paragraph text-[16px] leading-[20px] font-normal text-[var(--text-1)] font-secondary">
                   Submit your e-tenders seamlessly and securely with our
                   streamlined platform.
                 </p>
@@ -237,10 +237,10 @@ const Services: React.FC = () => {
                     </svg>
                   </div>
                 </div>
-                <h3 className="title text-[18px] font-medium font-primary text-[var(text-1)] uppercase my-[10px]">
+                <h3 className="title text-[18px] font-medium font-primary text-[var(--text-1)] uppercase my-[10px]">
                   Building Construction
                 </h3>
-                <p className="paragraph text-[16px] leading-[20px] font-normal text-[var(text-1)] font-secondary">
+                <p className="paragraph text-[16px] leading-[20px] font-normal text-[var(--text-1)] font-secondary">
                   Transforming visions into reality with expert craftsmanship
                   and innovative solutions.
                 </p>
@@ -331,7 +331,7 @@ const Services: React.FC = () => {
                 </div>
                 <div className="details_wrap">
                   <div className="title_wrap flex h-[55px] items-center justify-between gap-[10px]">
-                    <h3 className="title text-[18px] font-medium font-primary text-[var(text-1)] uppercase m-0">
+                    <h3 className="title text-[18px] font-medium font-primary text-[var(--text-1)] uppercase m-0">
                       Soil Test
                     </h3>
                     <div className="button">
@@ -355,7 +355,7 @@ const Services: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  <p className="paragraph text-[16px] leading-[20px] !text-left font-normal m-0 font-secondary text-[var(text-1)]">
+                  <p className="paragraph text-[16px] leading-[20px] !text-left font-normal m-0 font-secondary text-[var(--text-1)]">
                     Offering precise soil testing services to ensure strong,
                     reliable, and lasting foundations for your construction
                     projects.
@@ -389,7 +389,7 @@ const Services: React.FC = () => {
                 </div>
                 <div className="details_wrap">
                   <div className="title_wrap flex h-[55px] items-center justify-between gap-[10px]">
-                    <h3 className="title text-[18px] font-medium font-primary text-[var(text-1)] uppercase m-0">
+                    <h3 className="title text-[18px] font-medium font-primary text-[var(--text-1)] uppercase m-0">
                       Rate Analysis
                     </h3>
                     <div className="button">
@@ -413,7 +413,7 @@ const Services: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  <p className="paragraph text-[16px] leading-[20px] !text-left font-normal m-0 font-secondary text-[var(text-1)]">
+                  <p className="paragraph text-[16px] leading-[20px] !text-left font-normal m-0 font-secondary text-[var(--text-1)]">
                     Delivering detailed and accurate rate analysis to optimize
                     costs and ensure transparency for your construction
                     projects.
@@ -447,7 +447,7 @@ const Services: React.FC = () => {
                 </div>
                 <div className="details_wrap">
                   <div className="title_wrap flex h-[55px] items-center justify-between gap-[10px]">
-                    <h3 className="title text-[18px] font-medium font-primary text-[var(text-1)] uppercase m-0">
+                    <h3 className="title text-[18px] font-medium font-primary text-[var(--text-1)] uppercase m-0">
                       Architectural Design
                     </h3>
                     <div className="button">
@@ -471,7 +471,7 @@ const Services: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  <p className="paragraph text-[16px] leading-[20px] !text-left font-normal m-0 font-secondary text-[var(text-1)]">
+                  <p className="paragraph text-[16px] leading-[20px] !text-left font-normal m-0 font-secondary text-[var(--text-1)]">
                     Creating innovative and functional architectural designs
                     tailored to bring your vision to life with style and
                     precision.
@@ -505,7 +505,7 @@ const Services: React.FC = () => {
                 </div>
                 <div className="details_wrap">
                   <div className="title_wrap flex h-[55px] items-center justify-between gap-[10px]">
-                    <h3 className="title text-[18px] font-medium font-primary text-[var(text-1)] uppercase m-0">
+                    <h3 className="title text-[18px] font-medium font-primary text-[var(--text-1)] uppercase m-0">
                       Interior Design
                     </h3>
                     <div className="button">
@@ -529,7 +529,7 @@ const Services: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  <p className="paragraph text-[16px] leading-[20px] !text-left font-normal m-0 font-secondary text-[var(text-1)]">
+                  <p className="paragraph text-[16px] leading-[20px] !text-left font-normal m-0 font-secondary text-[var(--text-1)]">
                     Transforming spaces with personalized interior design
                     solutions that blend functionality, aesthetics, and comfort
                     seamlessly.
@@ -563,7 +563,7 @@ const Services: React.FC = () => {
                 </div>
                 <div className="details_wrap">
                   <div className="title_wrap flex h-[55px] items-center justify-between gap-[10px]">
-                    <h3 className="title text-[18px] font-medium font-primary text-[var(text-1)] uppercase m-0">
+                    <h3 className="title text-[18px] font-medium font-primary text-[var(--text-1)] uppercase m-0">
                       Estimating & Costing
                     </h3>
                     <div className="button">
@@ -587,7 +587,7 @@ const Services: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  <p className="paragraph text-[16px] leading-[20px] !text-left font-normal m-0 font-secondary text-[var(text-1)]">
+                  <p className="paragraph text-[16px] leading-[20px] !text-left font-normal m-0 font-secondary text-[var(--text-1)]">
                     Providing precise estimating and costing services to plan
                     your construction budget effectively and ensure financial
                     clarity.
@@ -621,7 +621,7 @@ const Services: React.FC = () => {
                 </div>
                 <div className="details_wrap">
                   <div className="title_wrap flex h-[55px] items-center justify-between gap-[10px]">
-                    <h3 className="title text-[18px] font-medium font-primary text-[var(text-1)] uppercase m-0">
+                    <h3 className="title text-[18px] font-medium font-primary text-[var(--text-1)] uppercase m-0">
                       Land Survey
                     </h3>
                     <div className="button">
@@ -645,7 +645,7 @@ const Services: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  <p className="paragraph text-[16px] leading-[20px] !text-left font-normal m-0 font-secondary text-[var(text-1)]">
+                  <p className="paragraph text-[16px] leading-[20px] !text-left font-normal m-0 font-secondary text-[var(--text-1)]">
                     Offering accurate land survey services to provide essential
                     data for planning and executing your projects with
                     precision.

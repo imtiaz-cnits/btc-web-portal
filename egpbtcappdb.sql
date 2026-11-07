@@ -1,88 +1,154 @@
--- -------------------------------------------------------------
--- Database: egpbtcappdb (BTC Web Portal Database)
--- Generated for BTC Web Portal
--- -------------------------------------------------------------
+-- phpMyAdmin SQL Dump
+-- version 5.2.3
+-- https://www.phpmyadmin.net/
+--
+-- Host: localhost
+-- Generation Time: Nov 07, 2026 at 12:54 PM
+-- Server version: 8.0.45
+-- PHP Version: 8.3.36
 
-CREATE DATABASE IF NOT EXISTS `egpbtcappdb` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `egpbtcappdb`;
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
-SET FOREIGN_KEY_CHECKS = 0;
 
--- -------------------------------------------------------------
--- Table structure for `users`
--- -------------------------------------------------------------
-DROP TABLE IF EXISTS `users`;
-CREATE TABLE `users` (
-    `id` VARCHAR(191) NOT NULL,
-    `name` VARCHAR(191) NOT NULL,
-    `email` VARCHAR(191) NOT NULL,
-    `password` VARCHAR(191) NOT NULL,
-    `verifyOtp` VARCHAR(191) NOT NULL DEFAULT '',
-    `verifyOtpExpireAt` BIGINT NOT NULL DEFAULT 0,
-    `isAccountVerified` BOOLEAN NOT NULL DEFAULT false,
-    `resetOtp` VARCHAR(191) NOT NULL DEFAULT '',
-    `resetOtpExpireAt` BIGINT NOT NULL DEFAULT 0,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-    `role` ENUM('ADMIN', 'USER') NOT NULL DEFAULT 'USER',
-    `image` VARCHAR(191) NULL,
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 
-    UNIQUE INDEX `users_email_key`(`email`),
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+--
+-- Database: `egpbtcappdb`
+--
 
--- -------------------------------------------------------------
--- Table structure for `notices`
--- -------------------------------------------------------------
-DROP TABLE IF EXISTS `notices`;
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `notices`
+--
+
 CREATE TABLE `notices` (
-    `id` VARCHAR(191) NOT NULL,
-    `title` VARCHAR(191) NOT NULL,
-    `content` TEXT NULL,
-    `category` ENUM('LTM', 'OTM', 'LOTTERY_PENDING', 'LOTTERY_RESULT') NOT NULL DEFAULT 'LTM',
-    `authorId` VARCHAR(191) NOT NULL,
-    `filePath` VARCHAR(191) NULL,
-    `status` ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
-    `publishDate` DATETIME(3) NULL,
-    `lastDate` DATETIME(3) NULL,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-    `tableData` LONGTEXT NULL,
-    `type` ENUM('FILE', 'TEXT', 'TABLE') NOT NULL DEFAULT 'FILE',
-    `year` VARCHAR(191) NULL,
-    `lotteryDate` DATETIME(3) NULL,
-
-    INDEX `notices_createdAt_idx`(`createdAt` DESC),
-    INDEX `notices_authorId_fkey`(`authorId`),
-    PRIMARY KEY (`id`)
+  `id` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `category` enum('LTM','OTM','LOTTERY_PENDING','LOTTERY_RESULT') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'LTM',
+  `authorId` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `filePath` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('active','inactive') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
+  `publishDate` datetime(3) DEFAULT NULL,
+  `lastDate` datetime(3) DEFAULT NULL,
+  `createdAt` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updatedAt` datetime(3) NOT NULL,
+  `tableData` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `type` enum('FILE','TEXT','TABLE') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'FILE',
+  `year` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `lotteryDate` datetime(3) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -------------------------------------------------------------
--- Table structure for `winner_lists`
--- -------------------------------------------------------------
-DROP TABLE IF EXISTS `winner_lists`;
+--
+-- Dumping data for table `notices`
+--
+
+INSERT INTO `notices` (`id`, `title`, `content`, `category`, `authorId`, `filePath`, `status`, `publishDate`, `lastDate`, `createdAt`, `updatedAt`, `tableData`, `type`, `year`, `lotteryDate`) VALUES
+('cmt15oupa0001jn04wclifffy', 'জেলা পরিষদ, পাবনা', NULL, 'LTM', 'cmp9doolg0000vfcw6stbgzd6', NULL, 'active', '2026-08-20 05:56:00.000', '2026-09-01 17:59:59.999', '2026-08-20 06:45:21.645', '2026-09-07 12:43:16.607', '{\"version\":\"v2\",\"tables\":[{\"id\":\"tbl-init\",\"type\":\"pwd_ltm\",\"officeName\":\"জেলা পরিষদ, পাবনা\",\"noticeDateBlock\":\"20-08-2026 11:56 AM\",\"lastDateBlock\":\"01-09-2026\",\"lotteryDateBlock\":\"\",\"payOrderTo\":\"MD. JAKIR HOSSAIN, Assistant Engineer, Zila Parishad, Pabna\",\"moreInfo\":\"Engr. Md. Shah Alom B.Sc. Engr.(Civil)\\nMobile No: 01711-805086\\nL M B Market 1st Floor, Pabna.\\nWeb: www.egpbtc.com\",\"bottomWarning\":\"Only Zilla Parishad,Pabna Enlisted Tenderer (F/Y-2025-2026) can eligible for This Tender, Bank statement is not acceptable. In case of credit commitment attached to tender in format e-PW2B-5 must be paid\",\"headers\":[\"Tender Id\",\"Brief Description of Works\",\"Work Location\",\"Type of Method\",\"APP Estimate Cost Tk.\",\"Bank Credit Line\",\"Tender Security (BD)\",\"Document Price. Tk\",\"Schedule & BD Last Selling Date\"],\"rows\":[[\"1318237\",\"1)Estimate for Boundary wall at Ruppur Union Purbo Chhorpara Jame Mosque Under Bera Upazila, in District Pabna.2). Estimate for Construction work of Haturia Nakalia Union Best Pal More Batul Aman Jame Mosque Under Bera Upazila, in District Pabna.3). Estimate for Construction work of Zathsakini Union Horidebpur Hozrot Ali Jame Mosque Under Bera Upazila, in District Pabna.4) Estimate for Construction work of roof slab at Zathsakini Union Horidebpur Baitun Nur Jame Mosque Under Bera Upazila, in District Pabna.\",\"Bera Pabna\",\"LTM\",\"12,00,000.000\",\"3,00,000\",\"30,000\",\"1,000\",\"01-09-2026 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1318236\",\"1)Estimate for Roof & floor at Satbaria Union Satbaria Kheya Ghat near Mondir Under Sujanagar Upazila, District Pabna.2). Estimate for C.I. Sheet Roof, floor and wall at Hatkhali Union Hatkhali Sonaton Songo Durga Mondir Under Sujanagar Upazila, District Pabna.3). Estimate for Construction work of Toilet and Bharandha Grill at Manikhat Union Malifa Hafezia Madrasah & Mosque Under Sujanagar Upazila, District Pabna.\",\"Sadar Pabna\",\"LTM\",\"10,00,000.000\",\"3,00,000\",\"30,000\",\"500\",\"01-09-2026 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1318235\",\"1)Estimate for Construction work of 1st floor roof slab at Laxmikunda Union Koikunda Islamia Dakhil Madrasha Under Ishwardi Upazila, Pabna.2)Estimate for Construction work of Pakshi Union Mollik para Baitul Hamd Jame Mosque Under Ishwardi Upazila, Pabna.3) Estimate for Construction work of Al-Munsur Jame Mosque Under Pabna Sadar Upazila District Pabna.\",\"Sadar Pabna\",\"LTM\",\"10,00,000.000\",\"3,00,000\",\"30,000\",\"500\",\"01-09-2026 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1315236\",\"1)Estimate for Parking tiles at Salaipur Darus salam Graveyard Under Pabna Sadar Upazila, district pabna. 2)Estimate for Construction work of Ozukhana at Jalalpur Dokkhinpara Jannatul Baki Graveyard Under Pabna Sadar Upazila,Pabna. 3)Estimate for Boundary wall at Puraton Banggabaria Central Graveyard Under Pabna Sadar Upazila, district pabna.4) Improvement of HBB road at Dogashi Union Mohendropur RHD road side H/O Alauddin front- Diyarpara road Under Pabna sadar Upazila, District pabna. 5)Development work of Homiyopathik collage & haspatal Under pabna Sadar upazila District pabna. 6)Development work of Himayetpur union sanirdiyar Krisnodiyar Central jame Mosque Under pabna Sadar upazila District pabna\",\"Sadar Pabna\",\"LTM\",\"12,00,000.000\",\"5,00,000\",\"36,000\",\"1,000\",\"01-09-2026 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1315227\",\"1)Estimate for Boundary wall South and west side at Aminpur Ayenuddin High school Under bera Upazila, District pabna. 2)Construction of Ponds Ghatla at raninagar Union Vatikoya(Chorpara chowrasta near) Under Sujanagar Upazila District:Pabna.\",\"Sadar Pabna\",\"LTM\",\"13,00,000.000\",\"3,00,000\",\"39,000\",\"1,000\",\"01-09-2026 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1315212\",\"1)Estimate for Palisading work of Aminpur main road (Nolkhola road) Under Bera Upazila District pabna. 2)Estimate for Palisading work of Aminpur main road-Mirzapara Graveyard road north & south side Under Bera Upazila District pabna.\",\"Sadar Pabna\",\"LTM\",\"12,00,000.000\",\"4,00,000\",\"36,000\",\"1,000\",\"01-09-2026 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1315207\",\"1)Estimate for Construction work of 1st floor Column & Roof at Ayengong Bazar Jame Mosque Under Faridpur Upazila, District- pabna. Estimate for 2)Construction work of Public Toilet at Gopal nagar Sree Sree Kali Matha Mondir Under Faridpur Upazila, District- pabna.\",\"Sadar Pabna\",\"LTM\",\"13,00,000.000\",\"3,00,000\",\"39,000\",\"1,000\",\"01-09-2026 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1315202\",\"1)Development work of Stair Raling & Tiles at Pabna Sadar Graveyard Jame Mosque Under Pabna Sadar Upazila District Pabna. 2)Estimate for palisading work at Pabna Sadar Graveyard Under Pabna Sadar Upazila District Pabna\",\"Sadar Pabna\",\"LTM\",\"15,00,000.000\",\"3,00,000\",\"45,000\",\"1,000\",\"01-09-2026 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1315195\",\"1)Estimate for Tiles fitting at Dogashi Union Dipchor moddhopara Jannatul Naim jame Mosque Under Pabna Sadar Upazila District pabna. 2)Estimate for Boundary wall at Purbopara Tatipara Eidgha Graveyard Under Pabna Sadar Upazila, District pabna. 3)Estimate for Construction work of Bharara Union Chor bolorampur Giyasuddin Mondol hafizia Madrasha & Atimkhana Under Pabna Sadar Upazila, District Pabna.4) Estimate for palisading work at Chortarapur Union Purbo tatipara Zoyardar bari old jame Mosque Under Pabna Sadar Upazila District Pabna. 5)Estimate for Window Grill, and Ceiling fan at Bharara Union vaudanga khoyer Bagan Bazar jame Mosque Under Pabna Sadar Upazila in District Pabna.\",\"Sadar Pabna\",\"LTM\",\"10,00,000.000\",\"2,00,000\",\"30,000\",\"500\",\"01-09-2026 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1314778\",\"1)Estimate for Construction work of Choradanga sha shupi Kharkhani(R:) mazar near Jame Mosque Under Pabna Sadar Upazila.District-Pabna.2)Estimate for Window Grill, Thai, at Kuchiyamora Mishonpara Zannatul Mowya jame Mosque Under Pabna Sadar Upazila ,in District Pabna.3)Estimate for Boundary wall at Sardiyar Graveyard Under pabna Sadar Upazila District pabna.4)Supplying of AC supply at Gongarampur bazar Hizbullah jame Mosque Under Pabna Sadar upazila district pabna.5)Estimate for Boundary wall at Farathpur central Graveyard Under Pabna Sadar Upazila, district pabna.6)Estimate for Boundary wall at Sreekole Diyarpara Graveyard Under Pabna Sadar Upazila, district pabna.7)Improvement of HBB road at Gonggarampur Darus salam Graveyard road Under Pabna sadar Upazila, District pabna.\",\"Sadar Pabna\",\"LTM\",\"10,00,000.000\",\"3,00,000\",\"30,000\",\"500\",\"01-09-2026 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1314776\",\"1)Estimate for Boundary wall at Sreepur Khotib Abdul Zahid Mokul School & Collage Under Pabna Sadar Upazila, District pabna.2)Estimate for Boundary wall at Parchim Zamuya chorvharara Dhigolkandi Central Graveyard Under Pabna Sadar Upazila, district pabna.3)Estimate for Boundary wall at mohadobpur Dokkhinpara central Jame Mosque Under pabna Sadar Upazila District pabna4)Estimate for Boundary wall at Parchim Zamuya choryharara Dhigolkandi Central Graveyard Under Pabna Sadar Upazila, district pabna.5)Estimate for Boundary wall at Parchim Zamuya choryharara Dhigolkandi Graveyard near Eidgha math Under Pabna Sadar Upazila, district pabna.6)Estimate for Construction work of CC road at Bharara Union Aowrongobad Graveyard internal road Under Pabna Sadar Upazila, Pabna.\",\"Sadar Pabna\",\"LTM\",\"18,00,000.000\",\"5,00,000\",\"54,000\",\"1,000\",\"01-09-2026 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1314773\",\"1)Estimate for the Construction work of Toilet, Ablution area, Safety tank and Soakwell at Dilalpur Jame Mosque under Pabna Sadar Upazila, District Pabna. 2) Estimate for Construction work of Minner at Dilalpur Jame Mosque under Pabna Sadar Upazila, District Pabna. 3) Development work of Radhanagar Baitul Salam Jame Mosque under Pabna Sadar Upazila, District Pabna.\",\"Sadar Pabna\",\"LTM\",\"16,00,000.000\",\"2,00,000\",\"48,000\",\"1,000\",\"01-09-2026 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1314771\",\"à§§) Estimate for Construction work of Sree Sree Modon Mohon Zue Bigroho Deb Mondir under Pabna Sadar Upazila, District: Pabna. à§¨) Estimate for C.I. sheet roof at Bapist Prayer Uddan under Pabna Sadar Upazila, District: Pabna. à§©) Estimate for Construction work of CC Road at Pabna Central Mohoshosan under Pabna Sadar Upazila, District: Pabna. à§ª) Estimate for Construction work of Ozukhana roof and floor at Zannatul Mowya Jame Mosque under Pabna Sadar Upazila, District: Pabna. à§«) Development work of Aowrongozeb Road Kholifa Potti Jame Mosque under Pabna Sadar Upazila, District: Pabna.\",\"Sadar Pabna\",\"LTM\",\"18,00,000.000\",\"5,00,000\",\"54,000\",\"1,000\",\"01-09-2026 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1314762\",\"1)estimate for boundary wall at Nowda para Central graveyard under pabna Sadar upazila, district pabna 2)estimate for construction work of ozukhana footing,grade beam& column at jannatul mawya Jame mosque under pabna Sadar upazila, district pabna. 3)maintanance work of chorghospur uttor para(sopon mollah)Jame mosque under pabna Sadar upazila, district pabna. 4)estimate for construction work of cc work and tiles fitting at himayetpur union kismotprotabpur malithapara sona potti Jame mosque under pabna Sadar upazila, district pabna. 5)estimate for construction work of maligasa dhakil madrasa under pabna Sadar upazila, district pabna. 6)estimate for boundary wall at maligasa union notun banggabaria graveyard under pabna Sadar upazila, district pabna.\",\"Sadar Pabna\",\"LTM\",\"19,00,000.000\",\"5,00,000\",\"57,000\",\"1,000\",\"01-09-2026 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1313279\",\"Estimate for three storied building at bazidpur srama zibi kallyan samity under pabna sadar upazila.districk pabna.\",\"Sadar Pabna\",\"LTM\",\"57,00,000.000\",\"20,00,000\",\"1,71,000\",\"2,500\",\"01-09-2026 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"]],\"columnColors\":[\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\"],\"headerBgColor\":\"#0891b2\",\"subTitle\":\"Zila Parishad, Pabna. e-Tender Notice.(2026-2027) (LTM Method)\",\"workLocation\":\"Sadar Pabna\"}]}', 'TABLE', '2026', NULL),
+('cmtr8vx5u0001la04mrgcjurm', 'সড়ক ও জনপথ অধিদপ্তর (RHD)', NULL, 'OTM', 'cmp9doolg0000vfcw6stbgzd6', NULL, 'active', '2026-09-05 18:00:00.000', '2026-09-24 17:59:59.999', '2026-09-07 12:56:50.849', '2026-09-07 13:17:10.511', '{\"version\":\"v2\",\"tables\":[{\"id\":\"tbl-init\",\"type\":\"pwd_ltm\",\"officeName\":\"সড়ক ও জনপথ অধিদপ্তর (RHD)\",\"noticeDateBlock\":\"06-09-2026\",\"lastDateBlock\":\"24-09-2026 11:59 PM\",\"lotteryDateBlock\":\"\",\"payOrderTo\":\"Executive Engineer, Pabna Road Division, Pabna\",\"moreInfo\":\"Engr. Md. Shah Alom B.Sc. Engr.(Civil)\\nMobile No: 01711-805086\\nL M B Market 1st Floor, Pabna.\\nWeb: www.egpbtc.com\",\"bottomWarning\":\"The minimum amount of financial resources as liquid asset or working capital or credit line(s)or specific credit commitment or in any combination of them, of the Tenderers shall beTk 500.00 Lac.\",\"headers\":[\"Tender Id\",\"Brief Description of Works\",\"Work Location\",\"Type of Method\",\"APP Estimate Cost Tk.\",\"Bank Credit Line\",\"TURN OVER 05 Years\",\"Similar Work 05 Years\",\"Tender Security (BD)\",\"Document Price. Tk\",\"Schedule & BD Last Selling Date\"],\"rows\":[[\"1318856\",\"Periodic maintenance work under PMP (Road-Major) providing Necessary Repair & Double Bituminous Surface Treatment (DBST) at Ch. 16+000 km to 25+796 km of Pabna-Paksey Nadi Bandar (EPZ) Road (R-603) & Ch. 00+000 km to 22+000 km of Tebunia-Chatmohor-Handial-Hamkuria Road (R-604) under Pabna Road Division during the year-2026-2027.\",\"Road Division Pabna\",\"OTM\",\"11,98,66,019\",\"3,50,00,000\",\"66,00,00,000\",\"6,00,00,000\",\"24,00,000\",\"5,000\",\"24-09-2026 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1318855\",\"Periodic Maintenace Program (PMP) Providing Partial Strengthening & DBS-Wearing Course at Ch. 19+384 Km to 28+300 of Pabna-Sujanagar-Natakhola (Badherhat) Road (R-601) Under Road Division, Pabna During the Year 2026-2027\",\"Road Division Pabna\",\"OTM\",\"9,94,22,459\",\"3,00,00,000\",\"55,00,00,000\",\"5,00,00,000\",\"20,00,000\",\"4,000\",\"24-09-2026 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1318854\",\"Periodic Maintenance Work Under PMP-Major (Road) Providing Strengthening and DBS Wearing-course Work at Ch.35+100 to 39+920 of Tebunia-Chatmohor-Handial-Humkuria (R-604) Road under RHD, Road Division Pabna during the year-2026-2027.\",\"Road Division Pabna\",\"OTM\",\"8,04,99,895\",\"2,50,00,000\",\"45,00,00,000\",\"4,10,00,000\",\"17,00,000\",\"4,000\",\"24-09-2026 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1318857\",\"Periodic maintenance work under PMP (Road-Major) providing Necessary Repair & Double Bituminous Surface Treatment (DBST) at Ch. 00+000 km to 07+934 km of Chatmohor-Zonali-Baraigram Road (Z-6029) , Ch. 00+000 km to 04+360 km of Ramchandrapur Railgate-Bhangura (Jogatoal Bazar) Road (Z-6036) & Ch. 00+000 km to 04+000 km of Ishwardi-Kadamchilan (Pabna-Natore Highway) Road (Z-6022) under Pabna Road Division during the year-2026-2027.\",\"Road Division Pabna\",\"OTM\",\"6,47,17,572\",\"2,00,00,000\",\"36,00,00,000\",\"3,50,00,000\",\"13,00,000\",\"4,000\",\"24-09-2026 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"],[\"1318858\",\"Periodic maintenance work under PMP (Road-Major) providing Necessary Repair , Cutting by Milling Machine & Dense Bituminous Surfacing (DBS) Wearing Course at Ch. 99+000 km to 110+800 km of Dhaka (Mirpur)-Utholi-Paturia- Natakhola-Kashinathpur- Bogra-Rangpur-Beldanga- Banglabandh Road (N-5) under Pabna Road Division during the year-2026-2027.\",\"Road Division Pabna\",\"OTM\",\"15,96,71,490\",\"5,00,00,000\",\"87,50,00,000\",\"8,00,00,000\",\"32,00,000\",\"5,000\",\"24-09-2026 11:59 PM 11:59 PM 11:59 PM 05:00 PM\"]],\"columnColors\":[\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\"],\"headerBgColor\":\"#059669\",\"subTitle\":\"Roads and Highways Department, Pabna (RHD) (OTM Method)\",\"workLocation\":\"Road Division Pabna\"}]}', 'TABLE', '2026', NULL),
+('cmtvg4uih0001jz04vcg5ll80', 'বাংলাদেশ কৃষি উন্নয়ন কর্পোরেশন (বিএডিসি)', NULL, 'OTM', 'cmp9doolg0000vfcw6stbgzd6', NULL, 'active', '2026-09-08 18:00:00.000', '2026-09-21 17:59:59.999', '2026-09-10 11:30:49.336', '2026-09-10 11:53:06.902', '{\"version\":\"v2\",\"tables\":[{\"id\":\"tbl-init\",\"type\":\"pwd_ltm\",\"officeName\":\"বাংলাদেশ কৃষি উন্নয়ন কর্পোরেশন (বিএডিসি)\",\"noticeDateBlock\":\"09-09-2026\",\"lastDateBlock\":\"21-09-2026 11:59 PM\",\"lotteryDateBlock\":\"\",\"payOrderTo\":\"Mohammad Mahmudul Alam, Project Director (SSSFP), BADC Krishi Bhaban, Dhaka\",\"moreInfo\":\"Engr. Md. Shah Alom B.Sc. Engr.(Civil)\\nMobile No: 01711-805086\\nL M B Market 1st Floor, Pabna.\\nWeb: www.egpbtc.com\",\"bottomWarning\":\"The minimum amount of financial resources as liquid asset or working capital or credit line(s) or specific credit commitment or in any combination of them, of the Tenderers shall be Tk 180 lakh\",\"headers\":[\"Tender Id\",\"Brief Description of Works\",\"Work Location\",\"Type of Method\",\"APP Estimate Cost Tk.\",\"Bank Credit Line\",\"TURN OVER 05 Years\",\"Similar Work 05 Years\",\"Tender Security (BD)\",\"Document Price. Tk\",\"Schedule & BD Last Selling Date\"],\"rows\":[[\"1326177\",\"Construction of Internal R.C.C road-17\",\"Anywhere the Project Area\",\"OTM\",\"41,26,000\",\"44,00,000\",\"2,20,00,000\",\"25,00,000\",\"1,00,000\",\"1,500\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1326180\",\"Construction of Internal R.C.C road-18\",\"Anywhere the Project Area\",\"OTM\",\"17,37,000\",\"20,00,000\",\"1,25,00,000\",\"10,00,000\",\"45,000\",\"1,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1326631\",\"Construction of Internal R.C.C road-19\",\"Anywhere the Project Area\",\"OTM\",\"21,71,000\",\"20,00,000\",\"1,25,00,000\",\"12,00,000\",\"55,000\",\"1,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1326643\",\"Construction of Internal R.C.C road-20\",\"Anywhere the Project Area\",\"OTM\",\"26,05,000\",\"20,00,000\",\"1,25,00,000\",\"15,00,000\",\"65,000\",\"1,500\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1326665\",\"Construction of Internal R.C.C road-21\",\"Anywhere the Project Area\",\"OTM\",\"19,54,000\",\"20,00,000\",\"1,25,00,000\",\"12,00,000\",\"50,000\",\"1,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1328010\",\"Construction of Internal R.C.C road-22\",\"Anywhere the Project Area\",\"OTM\",\"15,30,000\",\"20,00,000\",\"1,25,00,000\",\"8,00,000\",\"40,000\",\"1,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1328167\",\"Construction of Internal R.C.C road-23\",\"Anywhere the Project Area\",\"OTM\",\"21,71,000\",\"20,00,000\",\"1,25,00,000\",\"12,00,000\",\"55,000\",\"1,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1328169\",\"Construction of Internal R.C.C road-24\",\"Anywhere the Project Area\",\"OTM\",\"43,42,000\",\"44,00,000\",\"2,20,00,000\",\"25,00,000\",\"1,00,000\",\"1,500\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1328174\",\"Construction of Internal R.C.C road-25\",\"Anywhere the Project Area\",\"OTM\",\"21,71,000\",\"20,00,000\",\"1,25,00,000\",\"12,00,000\",\"55,000\",\"1,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1328226\",\"Construction of Internal R.C.C road-26\",\"Anywhere the Project Area\",\"OTM\",\"21,71,000\",\"20,00,000\",\"1,25,00,000\",\"12,00,000\",\"55,000\",\"1,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1328289\",\"Construction of Internal R.C.C road-27\",\"Anywhere the Project Area\",\"OTM\",\"21,71,000\",\"20,00,000\",\"1,25,00,000\",\"12,00,000\",\"55,000\",\"1,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1328303\",\"Construction of Internal R.C.C road-28\",\"Anywhere the Project Area\",\"OTM\",\"15,30,000\",\"20,00,000\",\"1,25,00,000\",\"8,00,000\",\"40,000\",\"1,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1328309\",\"Construction of Internal R.C.C road-29\",\"Anywhere the Project Area\",\"OTM\",\"21,71,000\",\"20,00,000\",\"1,25,00,000\",\"12,00,000\",\"55,000\",\"1,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1328313\",\"Construction of Internal R.C.C road-30\",\"Anywhere the Project Area\",\"OTM\",\"21,71,000\",\"20,00,000\",\"1,25,00,000\",\"12,00,000\",\"55,000\",\"1,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1328315\",\"Construction of Internal R.C.C road-31\",\"Anywhere the Project Area\",\"OTM\",\"26,05,000\",\"20,00,000\",\"1,25,00,000\",\"15,00,000\",\"65,000\",\"1,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1328317\",\"Construction of Internal R.C.C road-32\",\"Anywhere the Project Area\",\"OTM\",\"15,30,000\",\"20,00,000\",\"1,25,00,000\",\"8,00,000\",\"40,000\",\"1,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1328319\",\"Construction of Internal R.C.C road-33\",\"Anywhere the Project Area\",\"OTM\",\"21,71,000\",\"20,00,000\",\"1,25,00,000\",\"12,00,000\",\"55,000\",\"1,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1328321\",\"Construction of Internal R.C.C road-34\",\"Anywhere the Project Area\",\"OTM\",\"21,71,000\",\"20,00,000\",\"1,25,00,000\",\"12,00,000\",\"55,000\",\"1,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1328322\",\"Construction of Internal R.C.C road-35\",\"Anywhere the Project Area\",\"OTM\",\"15,30,000\",\"20,00,000\",\"1,25,00,000\",\"8,00,000\",\"40,000\",\"1,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1328323\",\"Construction of Internal R.C.C road-36\",\"Anywhere the Project Area\",\"OTM\",\"21,71,000\",\"20,00,000\",\"1,25,00,000\",\"14,00,000\",\"55,000\",\"1,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1328324\",\"Construction of Internal R.C.C road-37\",\"Anywhere the Project Area\",\"OTM\",\"46,14,000\",\"44,00,000\",\"2,20,00,000\",\"25,00,000\",\"1,15,000\",\"1,500\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1325991\",\"Construction of Seed Storage (500 sqm) including Office Space (245 sqm)-25\",\"Anywhere the Project Area\",\"OTM\",\"3,80,00,000\",\"1,80,00,000\",\"9,50,00,000\",\"2,00,00,000\",\"9,50,000\",\"4,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1326000\",\"Construction of Seed Storage (200 sqm) including Office Space (100 sqm)-30\",\"Anywhere the Project Area\",\"OTM\",\"1,70,00,000\",\"65,00,000\",\"4,25,00,000\",\"90,00,000\",\"4,25,000\",\"2,500\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1326006\",\"Construction of Seed Storage (400 sqm) including Office Space (245 sqm)-03\",\"Anywhere the Project Area\",\"OTM\",\"3,18,45,000\",\"1,50,00,000\",\"8,50,00,000\",\"1,60,00,000\",\"8,00,000\",\"4,000\",\"21-09-2026 11:59 PM 05:00 PM\"],[\"1326010\",\"Construction of Seed Storage (400 sqm) including Office Space (245 sqm)-04\",\"Anywhere the Project Area\",\"OTM\",\"3,18,45,000\",\"1,50,00,000\",\"8,50,00,000\",\"1,60,00,000\",\"8,00,000\",\"4,000\",\"21-09-2026 11:59 PM 05:00 PM\"]],\"columnColors\":[\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\"],\"headerBgColor\":\"#16a34a\",\"subTitle\":\"Bangladesh Agricultural Development Corporation, (BADC) Dhaka (OTM Method)\",\"workLocation\":\"Anywhere the Project Area\"}]}', 'TABLE', '2026', NULL),
+('cmtxzugz90001lu2sfh6gs3hd', 'পানি উন্নয়ন বোর্ড, পাবনা। (BWDB)', NULL, 'OTM', 'cmp9e05070003vfcwt3kr90h0', NULL, 'active', '2026-09-12 06:16:00.000', '2026-09-14 17:59:59.999', '2026-09-12 06:18:09.699', '2026-09-12 06:18:09.699', '{\"version\":\"v2\",\"tables\":[{\"id\":\"tbl-init\",\"type\":\"pwd_ltm\",\"officeName\":\"পানি উন্নয়ন বোর্ড, পাবনা। (BWDB)\",\"noticeDateBlock\":\"12-09-2026 12:16 PM\",\"lastDateBlock\":\"14-09-2026\",\"lotteryDateBlock\":\"16-09-2026\",\"payOrderTo\":\"Executive Engineer, Pabna PWD Division, Pabna\",\"moreInfo\":\"Engr. Md. Shah Alom B.Sc. Engr.(Civil)\\nMobile No: 01711-805086\\nL M B Market 1st Floor, Pabna.\\nWeb: www.egpbtc.com\",\"bottomWarning\":\"ব্যাংক স্টেটমেন্ট অথবা ক্রেডিট কমিটমেন্ট দিতে হবে।\",\"headers\":[\"Tender Id\",\"Brief Description of Works\",\"Work Location\",\"Type of Method\",\"APP Estimate Cost Tk.\",\"Bank Credit Line\",\"TURN OVER 05 Years\",\"Similar Work 05 Years\",\"Tender Security (BD)\",\"Document Price. Tk\",\"Schedule & BD Last Selling Date\"],\"rows\":[[\"4354\",\"srwer ewrwerw werwer werwerwer werwerwer\",\"Pabna Sadar, Pabna\",\"OTM\",\"50,000\",\"5,45,555\",\"5,56,566\",\"6,65,665\",\"65,656\",\"5,65,656\",\"14-09-2026 05:00 PM\"]],\"columnColors\":[\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\"],\"headerBgColor\":\"#059669\",\"subTitle\":\"Bangladesh Agricultural Development Corporation, Pabna (BADC) (OTM Method)\",\"workLocation\":\"Pabna Sadar, Pabna\"}]}', 'TABLE', '2026', '2026-09-15 18:00:00.000'),
+('cmudox6cg0001k004oh17lvn6', 'স্থানীয় সরকার প্রকৌশল অধিদপ্তর, পাবনা। (LGED)', NULL, 'LTM', 'cmp9doolg0000vfcw6stbgzd6', NULL, 'active', '2026-09-23 05:46:00.000', '2026-10-05 17:59:59.999', '2026-09-23 05:56:39.135', '2026-09-24 07:25:14.357', '{\"version\":\"v2\",\"tables\":[{\"id\":\"tbl-init\",\"type\":\"pwd_ltm\",\"officeName\":\"স্থানীয় সরকার প্রকৌশল অধিদপ্তর, পাবনা। (LGED)\",\"noticeDateBlock\":\"23-09-2026 11:46 AM\",\"lastDateBlock\":\"05-10-2026 11:59 PM\",\"lotteryDateBlock\":\"\",\"payOrderTo\":\"Executive Engineer, Pabna PWD Division, Pabna\",\"moreInfo\":\"Engr. Md. Shah Alom B.Sc. Engr.(Civil)\\nMobile No: 01711-805086\\nL M B Market 1st Floor, Pabna.\\nWeb: www.egpbtc.com\",\"bottomWarning\":\"ব্যাংক স্টেটমেন্ট অথবা ক্রেডিট কমিটমেন্ট দিতে হবে।\",\"headers\":[\"Tender Id\",\"Brief Description of Works\",\"Work Location\",\"Type of Method\",\"APP Estimate Cost Tk.\",\"Bank Credit Line\",\"Tender Security (BD)\",\"Document Price. Tk\",\"Schedule & BD Last Selling Date\"],\"rows\":[[\"1329553\",\"Rehabilitation of Dogachi Up to Lachipara road. from Ch 00m - Ch 845m (Road ID: 176554247)[PABNA-S]\",\"Sadar Pabna\",\"LTM\",\"40,17,031.000\",\"32,00,000\",\"1,00,000\",\"1,500\",\"05-10-2026 11:59 PM 05:00 PM\"],[\"1329552\",\"Rehabilitation of kumilli Chunnu House (Sadar Part) - Goyeshpur UZR (Abdur Rahim house) via Mosque road. (River paralal road) from Ch 00m - Ch 500m (Road ID: 176554182) [PABNA-S]\",\"Sadar Pabna\",\"LTM\",\"18,85,261.000\",\"15,00,000\",\"50,000\",\"1,000\",\"05-10-2026 11:59 PM 05:00 PM\"],[\"1329554\",\"Rehabilitation of Kashipur hat - Charprotabpur via Hemayetpur UP Office road from Ch 00m - Ch 335m (Road ID: 176553001) [PABNA-S]\",\"Sadar Pabna\",\"LTM\",\"50,24,992.000\",\"40,00,000\",\"1,50,000\",\"2,500\",\"05-10-2026 11:59 PM 05:00 PM\"],[\"1333286\",\"Construction of Small Scale Hydraulic (Cattle crossing/Foot Bridge/Water Passing) Structure \",\"Sadar Pabna\",\"LTM\",\"50,24,992.000\",\"50,24,992.000\",\"50,24,992.000\",\"50,24,992.000\",\"05-10-2026 11:59 PM 05:00 PM\"],[\"1333286\",\"Construction of Small Scale Hydraulic (Cattle crossing/Foot Bridge/Water Passing) Structure \",\"Sadar Pabna\",\"LTM\",\"50,24,992.000\",\"50,24,992.000\",\"50,24,992.000\",\"50,24,992.000\",\"05-10-2026 11:59 PM 05:00 PM\"]],\"columnColors\":[\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\",\"#ffffff\"],\"headerBgColor\":\"#0891b2\",\"subTitle\":\"Local Government Engineering Department, Pabna (LGED) (LTM Method)\",\"workLocation\":\"Sadar Pabna\"}]}', 'TABLE', '2026', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `verifyOtp` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `verifyOtpExpireAt` bigint NOT NULL DEFAULT '0',
+  `isAccountVerified` tinyint(1) NOT NULL DEFAULT '0',
+  `resetOtp` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `resetOtpExpireAt` bigint NOT NULL DEFAULT '0',
+  `createdAt` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updatedAt` datetime(3) NOT NULL,
+  `role` enum('ADMIN','USER') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'USER',
+  `image` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `verifyOtp`, `verifyOtpExpireAt`, `isAccountVerified`, `resetOtp`, `resetOtpExpireAt`, `createdAt`, `updatedAt`, `role`, `image`) VALUES
+('cmp9doolg0000vfcw6stbgzd6', 'BTC ', 'admin@gmail.com', '$2b$10$F29c3QjaFhlYl4H83feKJuxVeLn.ljeKq5PQ8uRAVoB1HeCB5sUQi', '', 0, 0, '', 0, '2026-05-17 06:12:28.277', '2026-05-24 08:16:57.088', 'ADMIN', '/assets/img/df860a68-79c5-4355-a1a6-3b409192e055.jpeg'),
+('cmp9e05070003vfcwt3kr90h0', 'Khandaker Shanto', 'shanto.cnits@gmail.com', '$2b$10$HW0Q9X.86nZ2xgCV./F.ye6acaaZEBsoo.cp7rqIPI7sl7yI9kFZu', '', 0, 0, '', 0, '2026-05-17 06:21:25.207', '2026-05-24 08:06:29.096', 'USER', '/assets/img/0262fb03-90db-495b-a6c4-829b1ebfbe46.png');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `winner_lists`
+--
+
 CREATE TABLE `winner_lists` (
-    `id` VARCHAR(191) NOT NULL,
-    `title` VARCHAR(191) NOT NULL,
-    `content` TEXT NULL,
-    `authorId` VARCHAR(191) NOT NULL,
-    `filePath` VARCHAR(191) NULL,
-    `status` ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
-    `publishDate` DATETIME(3) NULL,
-    `lastDate` DATETIME(3) NULL,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-
-    INDEX `winner_lists_createdAt_idx`(`createdAt` DESC),
-    INDEX `winner_lists_authorId_fkey`(`authorId`),
-    PRIMARY KEY (`id`)
+  `id` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `authorId` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `filePath` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('active','inactive') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
+  `publishDate` datetime(3) DEFAULT NULL,
+  `lastDate` datetime(3) DEFAULT NULL,
+  `createdAt` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updatedAt` datetime(3) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -------------------------------------------------------------
--- Foreign Keys
--- -------------------------------------------------------------
-ALTER TABLE `notices` ADD CONSTRAINT `notices_authorId_fkey` FOREIGN KEY (`authorId`) REFERENCES `users`(`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
-ALTER TABLE `winner_lists` ADD CONSTRAINT `winner_lists_authorId_fkey` FOREIGN KEY (`authorId`) REFERENCES `users`(`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+--
+-- Indexes for dumped tables
+--
 
-SET FOREIGN_KEY_CHECKS = 1;
+--
+-- Indexes for table `notices`
+--
+ALTER TABLE `notices`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `notices_createdAt_idx` (`createdAt` DESC),
+  ADD KEY `notices_authorId_fkey` (`authorId`);
 
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `users_email_key` (`email`);
+
+--
+-- Indexes for table `winner_lists`
+--
+ALTER TABLE `winner_lists`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `winner_lists_createdAt_idx` (`createdAt` DESC),
+  ADD KEY `winner_lists_authorId_fkey` (`authorId`);
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `notices`
+--
+ALTER TABLE `notices`
+  ADD CONSTRAINT `notices_authorId_fkey` FOREIGN KEY (`authorId`) REFERENCES `users` (`id`) ON UPDATE CASCADE;
+
+--
+-- Constraints for table `winner_lists`
+--
+ALTER TABLE `winner_lists`
+  ADD CONSTRAINT `winner_lists_authorId_fkey` FOREIGN KEY (`authorId`) REFERENCES `users` (`id`) ON UPDATE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

@@ -290,7 +290,7 @@ html.hide-global-layout header,
 html.hide-global-layout nav,
 html.hide-global-layout .newsletter_section,
 html.hide-global-layout .newsletter,
-html.hide-global-layout .bg-[#ff253a],
+html.hide-global-layout .bg-\[\#ff253a\],
 html.hide-global-layout .marquee,
 html.hide-global-layout .text_marquee {
   display: none !important;
@@ -390,7 +390,6 @@ html.hide-global-layout .main {
 .admin-layout.dark .bg-green-50,
 .admin-layout.dark .bg-green-50\/50,
 .admin-layout.dark .bg-green-50\/20,
-.admin-layout.dark .hover:bg-green-50:hover,
 .admin-layout.dark .hover\:bg-green-50:hover {
   background-color: rgba(90, 164, 105, 0.15) !important;
   color: #6dbb7d !important;

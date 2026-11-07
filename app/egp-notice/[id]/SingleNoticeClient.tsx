@@ -1296,7 +1296,7 @@ export default function SingleNoticeClient({
           nav,
           .newsletter_section,
           .newsletter,
-          .bg-[#ff253a],
+          .bg-\[\#ff253a\],
           .marquee,
           .text_marquee {
             display: none !important;

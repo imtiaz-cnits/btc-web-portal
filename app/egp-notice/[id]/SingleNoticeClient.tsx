@@ -2,9 +2,11 @@
 
 import React, { useRef, useEffect } from "react";
 import Link from "next/link";
-import { Home, ArrowLeft, Printer, Download, Landmark, Info, AlertCircle, Loader2 } from "lucide-react";
+import { Home, ArrowLeft, Printer, Download, Landmark, Info, AlertCircle, Loader2, Phone, MapPin, Globe, CalendarPlus, Calendar, CalendarCheck, Paperclip, FileText } from "lucide-react";
 import { sanitizeBijoyDeep, autoConvertBijoy } from "@/lib/bijoyToUnicode";
 import { parseNoticeTableData, tableSpecToRowsArray } from "@/lib/tableEngine/normalizer";
+import { resolveNoticeFileUrl, buildNoticeDownloadFilename } from "@/lib/fileUrl";
+import PdfFullViewer from "@/components/PdfFullViewer";
 
 const formatDisplayDate = (dateStr: any) => {
   if (dateStr === null || dateStr === undefined) return "";
@@ -170,6 +172,15 @@ const getSellingDateDisplay = (formattedVal: string) => {
   return { datePart, timePart };
 };
 
+const getLocationWords = (val: string): string[] => {
+  if (!val || val === "N/A") return val ? [val] : [];
+  return String(val)
+    .replace(/,\s*/g, ", ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+};
+
 const getFormattedPrintDateTime = () => {
   const now = new Date();
   const formatOptions: Intl.DateTimeFormatOptions = {
@@ -201,7 +212,7 @@ const formatHeaderTitle = (hdr: string) => {
 
   if (lower.includes("work location") || lower.includes("worklocation")) return "Location";
   if (lower.includes("type of method") || lower.includes("type of mathod") || lower.includes("typeofmethod")) return "Method";
-  
+
   if (lower.includes("selling") || lower.includes("last date")) {
     return (
       <div className="flex flex-col items-center justify-center leading-tight">
@@ -278,6 +289,7 @@ interface NoticeItem {
   lastDate?: string;
   lotteryDate?: string;
   date: string;
+  year?: string;
   type: "FILE" | "TEXT" | "TABLE";
   content?: string | null;
   tableData?: string | null;
@@ -291,7 +303,23 @@ interface SingleNoticeClientProps {
 export default function SingleNoticeClient({
   notice,
 }: SingleNoticeClientProps) {
-  const isPdf = notice.type === "FILE" && (notice.filePath?.toLowerCase().endsWith(".pdf") || false);
+  const resolvedFileUrl = resolveNoticeFileUrl(notice.filePath);
+  const attachedDownloadFilename = buildNoticeDownloadFilename({
+    title: notice.title,
+    year: notice.year,
+    date: notice.date,
+    publishDate: notice.publishDate,
+    lastDate: notice.lastDate,
+    filePath: notice.filePath,
+  });
+  const attachedDownloadUrl = resolveNoticeFileUrl(
+    notice.filePath,
+    attachedDownloadFilename,
+  );
+  const isPdf = Boolean(
+    resolvedFileUrl &&
+      resolvedFileUrl.split("?")[0].toLowerCase().endsWith(".pdf"),
+  );
   const printAreaRef = useRef<HTMLDivElement>(null);
   const [pdfDownloading, setPdfDownloading] = React.useState(false);
 
@@ -379,7 +407,11 @@ export default function SingleNoticeClient({
           font-style: normal;
           font-display: swap;
         }
-        * { box-sizing: border-box !important; }
+        *, *:before, *:after {
+          box-sizing: border-box !important;
+          outline: none !important;
+          box-shadow: none !important;
+        }
         .pdf-page-box {
           background-color: #ffffff !important;
           background: #ffffff !important;
@@ -401,6 +433,61 @@ export default function SingleNoticeClient({
           border: none !important;
           border-bottom: none !important;
         }
+        .pdf-page-box .pwd-scroll-wrapper {
+          width: 100% !important;
+          min-width: 100% !important;
+          display: block !important;
+          overflow: visible !important;
+          background-color: #ffffff !important;
+          border: none !important;
+        }
+        .pdf-page-box table {
+          width: 100% !important;
+          min-width: 100% !important;
+          max-width: 100% !important;
+          table-layout: auto !important;
+          border-collapse: separate !important;
+          border-spacing: 0 !important;
+          border: none !important;
+          margin: 0 !important;
+          background-color: #ffffff !important;
+          box-sizing: border-box !important;
+        }
+        .pdf-page-box thead,
+        .pdf-page-box tbody,
+        .pdf-page-box tr {
+          border: none !important;
+        }
+        .pdf-page-box th,
+        .pdf-page-box thead th,
+        .pdf-page-box td,
+        .pdf-page-box tbody td,
+        .pdf-page-box .print-office-name,
+        .pdf-page-box .print-subtitle,
+        .pdf-page-box .date-block-th {
+          border-top: none !important;
+          border-left: none !important;
+          border-right: 1px solid #000000 !important;
+          border-bottom: 1px solid #000000 !important;
+          border-color: #000000 !important;
+          padding: 2px 3px !important;
+          word-wrap: break-word !important;
+          word-break: normal !important;
+          overflow-wrap: break-word !important;
+          box-sizing: border-box !important;
+          outline: none !important;
+          box-shadow: none !important;
+        }
+        .pdf-page-box thead tr:first-child > th,
+        .pdf-page-box thead tr:first-child > td,
+        .pdf-page-box table > tbody:first-child > tr:first-child > th,
+        .pdf-page-box table > tbody:first-child > tr:first-child > td {
+          border-top: 1px solid #000000 !important;
+        }
+        .pdf-page-box tr > th:first-child,
+        .pdf-page-box tr > td:first-child {
+          border-left: 1px solid #000000 !important;
+        }
         .pdf-page-box .print-office-name {
           font-size: 16pt !important;
           text-align: center !important;
@@ -409,64 +496,29 @@ export default function SingleNoticeClient({
           background: #ffffff !important;
           color: #000000 !important;
           padding: 2px 4px !important;
-          border: 1px solid #000000 !important;
-          border-left: 1px solid #000000 !important;
-          border-right: 1px solid #000000 !important;
-          border-top: 1px solid #000000 !important;
-          border-bottom: 1px solid #000000 !important;
-          outline: none !important;
-          box-shadow: none !important;
+          filter: none !important;
         }
         .pdf-page-box .print-subtitle {
-          font-size: 12px !important;
+          font-size: 12.5px !important;
           text-align: center !important;
           font-weight: bold !important;
           background-color: #ffffff !important;
           background: #ffffff !important;
           color: #000000 !important;
           padding: 2px 4px !important;
-          border: 1px solid #000000 !important;
-          border-left: 1px solid #000000 !important;
-          border-right: 1px solid #000000 !important;
-          border-top: 1px solid #000000 !important;
-          border-bottom: 1px solid #000000 !important;
-          outline: none !important;
-          box-shadow: none !important;
+          filter: none !important;
         }
-        .pdf-page-box .pwd-scroll-wrapper {
-          width: 100% !important;
-          min-width: 100% !important;
-          display: block !important;
-          overflow: visible !important;
-          background-color: #ffffff !important;
+        .pdf-page-box th,
+        .pdf-page-box th *,
+        .pdf-page-box thead th,
+        .pdf-page-box thead th * {
+          color: #000000 !important;
         }
-        .pdf-page-box table {
-          width: 100% !important;
-          min-width: 100% !important;
-          max-width: 100% !important;
-          table-layout: auto !important;
-          border-collapse: collapse !important;
-          border: 1px solid #000000 !important;
-          border-left: 1px solid #000000 !important;
-          border-right: 1px solid #000000 !important;
-          border-top: 1px solid #000000 !important;
-          border-bottom: 1px solid #000000 !important;
-          margin: 0 !important;
-          background-color: #ffffff !important;
-        }
-        .pdf-page-box th, .pdf-page-box thead th, .pdf-page-box td, .pdf-page-box tbody td {
-          border: 1px solid #000000 !important;
-          border-color: #000000 !important;
-          padding: 2px 3px !important;
-          word-wrap: break-word !important;
-          word-break: normal !important;
-          overflow-wrap: break-word !important;
-          box-sizing: border-box !important;
-        }
-        .pdf-page-box th {
+        .pdf-page-box th:not(.print-office-name):not(.print-subtitle):not(.date-block-th) {
           font-size: 11px !important;
           font-weight: 700 !important;
           line-height: 1.15 !important;
+          color: #000000 !important;
           filter: brightness(1.3) !important;
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
@@ -482,14 +534,27 @@ export default function SingleNoticeClient({
           width: 1% !important;
         }
         .pdf-page-box .location-column {
-          white-space: normal !important;
-          width: 95px !important;
-          min-width: 85px !important;
-          max-width: 110px !important;
+          white-space: nowrap !important;
+          width: 1% !important;
+          min-width: 0 !important;
+          max-width: none !important;
           text-align: center !important;
           line-height: 1.15 !important;
-          word-break: normal !important;
           font-size: 10.5px !important;
+        }
+        .pdf-page-box .location-cell {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
+          text-align: center !important;
+          line-height: 1.15 !important;
+        }
+        .pdf-page-box .location-word {
+          display: block !important;
+          white-space: nowrap !important;
+          font-size: 10.5px !important;
+          line-height: 1.15 !important;
         }
         .pdf-page-box .desc-column {
           white-space: normal !important;
@@ -500,21 +565,31 @@ export default function SingleNoticeClient({
           font-size: 11px !important;
           line-height: 1.25 !important;
         }
+        .pdf-page-box td.desc-column {
+          font-size: 12px !important;
+          line-height: 1.25 !important;
+        }
         .pdf-page-box .date-block-th {
           padding: 0 !important;
-          border: 1px solid #000000 !important;
-          border-top: 1px solid #000000 !important;
-          border-bottom: 1px solid #000000 !important;
-          outline: none !important;
-          box-shadow: none !important;
           background-color: #ffffff !important;
+          filter: none !important;
+        }
+        .pdf-page-box .date-block-badge,
+        .pdf-page-box .date-block-badge * {
+          color: #000000 !important;
         }
         .pdf-page-box .date-block-badge {
           margin: 0 !important;
           padding: 1.5px 6px !important;
           font-size: 11px !important;
+          font-weight: 700 !important;
+          color: #000000 !important;
           display: inline-block !important;
           border-left: 1px solid #000000 !important;
+          border-top: none !important;
+          border-right: none !important;
+          border-bottom: none !important;
+          filter: brightness(1.3) !important;
         }
         .pdf-page-box .selling-date-cell, .selling-date-cell {
           font-size: 10.5px !important;
@@ -532,14 +607,17 @@ export default function SingleNoticeClient({
           background-color: #facc15 !important;
           font-size: 12px !important;
           font-weight: 700 !important;
+          color: #000000 !important;
         }
         .pdf-page-box .details-footer-block {
           width: 100% !important;
           min-width: 100% !important;
           margin: 0 !important;
-          margin-top: -1px !important;
-          border: 1px solid #000000 !important;
-          border-top: 1px solid #000000 !important;
+          margin-top: 0 !important;
+          border-top: none !important;
+          border-left: 1px solid #000000 !important;
+          border-right: 1px solid #000000 !important;
+          border-bottom: 1px solid #000000 !important;
           outline: none !important;
           box-shadow: none !important;
           box-sizing: border-box !important;
@@ -551,9 +629,16 @@ export default function SingleNoticeClient({
         .pdf-page-box .details-footer-col {
           padding: 3px 6px !important;
           box-sizing: border-box !important;
+          border: none !important;
         }
         .pdf-page-box .details-footer-col:first-child {
           border-right: 1px solid #000000 !important;
+        }
+        .pdf-page-box .details-footer-badge,
+        .pdf-page-box .details-footer-badge *,
+        .pdf-page-box .details-footer-badge svg {
+          color: #000000 !important;
+          stroke: #000000 !important;
         }
         .pdf-page-box .details-footer-badge {
           display: inline-flex !important;
@@ -565,6 +650,8 @@ export default function SingleNoticeClient({
           padding: 1.5px 5px !important;
           border-radius: 4px !important;
           margin-bottom: 2px !important;
+          color: #000000 !important;
+          filter: brightness(1.3) !important;
         }
         .pdf-page-box .details-footer-text, .pdf-page-box .details-footer-text * {
           font-size: 12px !important;
@@ -572,13 +659,32 @@ export default function SingleNoticeClient({
           line-height: 1.3 !important;
           color: #000000 !important;
         }
+        .pdf-page-box .contact-info-line {
+          display: flex !important;
+          align-items: center !important;
+          gap: 4px !important;
+        }
+        .pdf-page-box .contact-info-icon,
+        .pdf-page-box .details-footer-text svg.contact-info-icon {
+          width: 11px !important;
+          height: 11px !important;
+          min-width: 11px !important;
+          min-height: 11px !important;
+          display: inline-block !important;
+          vertical-align: middle !important;
+          flex-shrink: 0 !important;
+          color: #000000 !important;
+          stroke: #000000 !important;
+        }
         .pdf-page-box .warning-footer-block {
           width: 100% !important;
           min-width: 100% !important;
           margin: 0 !important;
-          margin-top: -1px !important;
-          border: 1px solid #000000 !important;
-          border-top: 1px solid #000000 !important;
+          margin-top: 0 !important;
+          border-top: none !important;
+          border-left: 1px solid #000000 !important;
+          border-right: 1px solid #000000 !important;
+          border-bottom: 1px solid #000000 !important;
           outline: none !important;
           box-shadow: none !important;
           box-sizing: border-box !important;
@@ -618,7 +724,7 @@ export default function SingleNoticeClient({
         pageDiv.className = "pdf-page-box";
         pageDiv.style.cssText = `
           width: ${targetContainerWidth}px;
-          min-height: ${maxPageContentHeight + 40}px;
+          min-height: auto;
           box-sizing: border-box;
           padding: 6px 14px 14px 14px;
           background: #ffffff;
@@ -647,7 +753,12 @@ export default function SingleNoticeClient({
       sourceBlocks.forEach((block) => {
         const originalTable = block.querySelector("table");
         const originalThead = originalTable?.querySelector("thead");
-        const originalRows = Array.from(originalTable?.querySelectorAll("tbody tr") || []) as HTMLTableRowElement[];
+        const originalTbody = originalTable?.querySelector("tbody");
+        const originalRows = Array.from(originalTbody?.children || []).filter(
+          (el) =>
+            el.tagName === "TR" &&
+            !el.querySelector(".print-office-name, .print-subtitle, .date-block-th, th")
+        ) as HTMLTableRowElement[];
 
         const totalsRow = originalRows.find((r) => r.classList.contains("total-amount-row"));
         const dataRows = originalRows.filter((r) => !r.classList.contains("total-amount-row"));
@@ -655,6 +766,12 @@ export default function SingleNoticeClient({
         const footerElements = Array.from(block.querySelectorAll(".details-footer-block, .warning-footer-block")) as HTMLElement[];
 
         const createTableOnPage = (targetPage: HTMLElement) => {
+          Array.from(targetPage.querySelectorAll(".pwd-scroll-wrapper")).forEach((existingWrapper) => {
+            if (existingWrapper.querySelectorAll("tbody tr").length === 0) {
+              existingWrapper.remove();
+            }
+          });
+
           const tableContainer = document.createElement("div");
           tableContainer.className = "pwd-scroll-wrapper relative";
           tableContainer.style.cssText = "width: 100% !important; min-width: 100% !important; overflow: visible; position: relative;";
@@ -666,15 +783,27 @@ export default function SingleNoticeClient({
           tableContainer.appendChild(watermark);
 
           const newTable = document.createElement("table");
-          newTable.className = "w-full border-collapse text-left font-semibold text-black relative z-10";
-          newTable.style.cssText = "width: 100% !important; min-width: 100% !important; border-collapse: collapse !important; table-layout: auto !important;";
+          newTable.className = "w-full text-left font-semibold text-black relative z-10";
+          newTable.style.cssText = "width: 100% !important; min-width: 100% !important; border-collapse: separate !important; border-spacing: 0 !important; border: none !important; table-layout: auto !important;";
 
           if (originalThead) {
-            newTable.appendChild(originalThead.cloneNode(true));
+            const clonedThead = originalThead.cloneNode(true) as HTMLElement;
+            const seenRowTypes = new Set<string>();
+            Array.from(clonedThead.querySelectorAll("tr")).forEach((tr) => {
+              let rowType = "col-headers";
+              if (tr.querySelector(".print-office-name")) rowType = "office-name";
+              else if (tr.querySelector(".print-subtitle")) rowType = "sub-title";
+              else if (tr.querySelector(".date-block-th")) rowType = "date-block";
+              if (seenRowTypes.has(rowType)) {
+                tr.remove();
+              } else {
+                seenRowTypes.add(rowType);
+              }
+            });
+            newTable.appendChild(clonedThead);
           }
 
           const newTbody = document.createElement("tbody");
-          newTbody.className = "divide-y divide-gray-400";
           newTable.appendChild(newTbody);
 
           tableContainer.appendChild(newTable);
@@ -693,7 +822,7 @@ export default function SingleNoticeClient({
           const clonedRow = row.cloneNode(true) as HTMLTableRowElement;
           newTbody.appendChild(clonedRow);
 
-          if (currentPage.offsetHeight > maxPageContentHeight + 45) {
+          if (newTbody.children.length > 1 && currentPage.offsetHeight > maxPageContentHeight + 45) {
             newTbody.removeChild(clonedRow);
 
             currentPage = createPageElement();
@@ -709,7 +838,7 @@ export default function SingleNoticeClient({
         if (totalsRow) {
           const clonedTotals = totalsRow.cloneNode(true) as HTMLTableRowElement;
           newTbody.appendChild(clonedTotals);
-          if (currentPage.offsetHeight > maxPageContentHeight + 45) {
+          if (newTbody.children.length > 1 && currentPage.offsetHeight > maxPageContentHeight + 45) {
             newTbody.removeChild(clonedTotals);
             currentPage = createPageElement();
             tempWrapper.appendChild(currentPage);
@@ -730,6 +859,7 @@ export default function SingleNoticeClient({
             currentPage = createPageElement();
             tempWrapper.appendChild(currentPage);
             pages.push(currentPage);
+            clonedFooter.style.setProperty("border-top", "1px solid #000000", "important");
             currentPage.appendChild(clonedFooter);
           }
         });
@@ -743,6 +873,7 @@ export default function SingleNoticeClient({
 
       for (let i = 0; i < pages.length; i++) {
         const pageEl = pages[i];
+        pageEl.style.minHeight = `${maxPageContentHeight + 40}px`;
         const pageNumEl = pageEl.querySelector(".pdf-page-num");
         if (pageNumEl) {
           pageNumEl.textContent = `Page ${i + 1}`;
@@ -803,6 +934,21 @@ export default function SingleNoticeClient({
             el.style.boxShadow = "none";
           }
         });
+        pageEl
+          .querySelectorAll(
+            "thead th, thead th *, .date-block-badge, .date-block-badge *, .details-footer-badge, .details-footer-badge *"
+          )
+          .forEach((el: any) => {
+            if (el.style) {
+              el.style.setProperty("color", "#000000", "important");
+            }
+            if (el.tagName && (el.tagName.toLowerCase() === "svg" || el.closest?.("svg"))) {
+              el.setAttribute("stroke", "#000000");
+              if (el.style) {
+                el.style.setProperty("stroke", "#000000", "important");
+              }
+            }
+          });
         const canvas = await (html2canvas as any)(pageEl, {
           scale: 2,
           useCORS: true,
@@ -875,13 +1021,13 @@ export default function SingleNoticeClient({
   }, [parsedTables]);
 
   const handlePrint = () => {
-    if (isPdf && notice.filePath) {
+    if (isPdf && resolvedFileUrl) {
       // PDF print handling using a hidden iframe with Chrome query parameters
       // Bypasses browser PDF viewer layout bugs, scrollbars, sidebars, and multi-page print cuts!
       const pdfUrl =
-        notice.filePath.startsWith("/") || notice.filePath.startsWith("http")
-          ? notice.filePath
-          : "/" + notice.filePath;
+        resolvedFileUrl.startsWith("/") || resolvedFileUrl.startsWith("http")
+          ? resolvedFileUrl
+          : "/" + resolvedFileUrl;
 
       // Add query parameters to hide toolbars/navpanes and center-fit the document
       const cleanPdfUrl = pdfUrl + "#toolbar=0&navpanes=0&scrollbar=0&view=Fit";
@@ -925,7 +1071,77 @@ export default function SingleNoticeClient({
     // Restore original DOM replacement logic for standard web tables/text as requested by the user
     // This keeps the original styles, colors, margins, fonts, and print layouts exactly the same!
     const isLandscape = parsedTables.length > 0;
-    const printContents = printAreaRef.current?.innerHTML;
+    const brightenColorForPrint = (colorStr: string, factor = 1.3): string => {
+      if (!colorStr) return colorStr;
+      const clean = colorStr.trim();
+      const rgbMatch = clean.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+      if (rgbMatch) {
+        const r = Math.min(255, Math.round(parseInt(rgbMatch[1], 10) * factor));
+        const g = Math.min(255, Math.round(parseInt(rgbMatch[2], 10) * factor));
+        const b = Math.min(255, Math.round(parseInt(rgbMatch[3], 10) * factor));
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+      const hexMatch = clean.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+      if (hexMatch) {
+        let hex = hexMatch[1];
+        if (hex.length === 3) {
+          hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+        }
+        const r = Math.min(255, Math.round(parseInt(hex.slice(0, 2), 16) * factor));
+        const g = Math.min(255, Math.round(parseInt(hex.slice(2, 4), 16) * factor));
+        const b = Math.min(255, Math.round(parseInt(hex.slice(4, 6), 16) * factor));
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+      return colorStr;
+    };
+
+    let printContents = "";
+    if (printAreaRef.current) {
+      const clonedPrintArea = printAreaRef.current.cloneNode(true) as HTMLElement;
+      clonedPrintArea
+        .querySelectorAll(
+          "th:not(.print-office-name):not(.print-subtitle):not(.date-block-th), .date-block-badge, .details-footer-badge"
+        )
+        .forEach((el: any) => {
+          if (el.style && el.style.backgroundColor) {
+            el.style.backgroundColor = brightenColorForPrint(el.style.backgroundColor, 1.3);
+          }
+        });
+      const firstHeaderTr = clonedPrintArea.querySelector(
+        "thead tr:not(:has(.print-office-name)):not(:has(.print-subtitle)):not(:has(.date-block-th))"
+      ) as HTMLElement | null;
+      if (firstHeaderTr && firstHeaderTr.style && firstHeaderTr.style.backgroundColor) {
+        firstHeaderTr.style.backgroundColor = brightenColorForPrint(firstHeaderTr.style.backgroundColor, 1.3);
+      }
+      clonedPrintArea.querySelectorAll(".pwd-table-block").forEach((block) => {
+        const tableEl = block.querySelector("table");
+        const tbodyEl = tableEl?.querySelector("tbody");
+        if (!tableEl || !tbodyEl) return;
+        const maxCols = Array.from(tableEl.querySelectorAll("tr")).reduce((max, tr) => {
+          const cols = Array.from(tr.children).reduce(
+            (sum, cell) => sum + (parseInt(cell.getAttribute("colspan") || "1", 10) || 1),
+            0
+          );
+          return Math.max(max, cols);
+        }, 1);
+        const footerBlocks = Array.from(
+          block.querySelectorAll(".details-footer-block, .warning-footer-block")
+        );
+        footerBlocks.forEach((footerEl) => {
+          const tr = document.createElement("tr");
+          tr.className = "print-footer-tr";
+          const td = document.createElement("td");
+          td.colSpan = maxCols;
+          td.className = "print-footer-td";
+          td.style.cssText = "padding: 0 !important; border: 1px solid #000000 !important; background-color: #ffffff !important;";
+          footerEl.remove();
+          td.appendChild(footerEl);
+          tr.appendChild(td);
+          tbodyEl.appendChild(tr);
+        });
+      });
+      printContents = clonedPrintArea.innerHTML;
+    }
 
     if (printContents) {
       const originalContents = document.body.innerHTML;
@@ -978,6 +1194,8 @@ export default function SingleNoticeClient({
               }
               *, *:before, *:after {
                 box-sizing: border-box !important;
+                outline: none !important;
+                box-shadow: none !important;
               }
               html, body {
                 width: 100% !important;
@@ -997,7 +1215,7 @@ export default function SingleNoticeClient({
                 min-width: 100% !important;
                 max-width: 100% !important;
                 margin: 0 auto !important;
-                padding: 0 !important;
+                padding: 1px 2px !important;
                 box-sizing: border-box !important;
                 background-color: transparent !important;
               }
@@ -1012,90 +1230,14 @@ export default function SingleNoticeClient({
                 max-width: 100% !important;
                 box-sizing: border-box !important;
               }
-                padding-top: 0px !important;
-                margin-left: 0px !important;
-                margin-right: 0px !important;
-                width: 100% !important;
-                min-width: 100% !important;
-                max-width: 100% !important;
-                box-sizing: border-box !important;
-              }
-              /* Column widths for print */
-              .auto-column {
-                white-space: nowrap !important;
-                width: 1% !important;
-              }
-              .location-column {
-                white-space: normal !important;
-                width: 140px !important;
-                min-width: 125px !important;
-                max-width: 170px !important;
-                text-align: center !important;
-                line-height: 1.25 !important;
-                word-break: normal !important;
-              }
-              .desc-column {
-                width: auto !important;
-                white-space: normal !important;
-              }
-              .print-office-name {
-                font-size: 17pt !important;
-                text-align: center !important;
-                font-weight: 700 !important;
-                font-family: 'Tiro Bangla', serif !important;
-                background-color: white !important;
-                color: black !important;
-                padding: 2px 4px !important;
-                border: 1px solid #000000 !important;
-                border-top: 1px solid #000000 !important;
-                outline: 1px solid #000000 !important;
-                outline-offset: -1px !important;
-                box-shadow: inset 0 1px 0 0 #000000, inset 0 -1px 0 0 #000000 !important;
-              }
-              .print-subtitle {
-                font-size: 13px !important;
-                text-align: center !important;
-                font-weight: 600 !important;
+              *, *[class], *[style] {
                 font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
-                background-color: white !important;
-                color: black !important;
-                padding: 2px 4px !important;
-                border: 1px solid #000000 !important;
-                border-top: 1px solid #000000 !important;
-                outline: 1px solid #000000 !important;
-                outline-offset: -1px !important;
-                box-shadow: inset 0 1px 0 0 #000000, inset 0 -1px 0 0 #000000 !important;
+                outline: none !important;
+                box-shadow: none !important;
+                filter: none !important;
               }
-              thead {
-                display: table-header-group !important;
-              }
-              .date-block-th {
-                padding: 0 !important;
-                border: 1px solid #000000 !important;
-                border-top: 1px solid #000000 !important;
-                border-bottom: 1px solid #000000 !important;
-                outline: 1px solid #000000 !important;
-                outline-offset: -1px !important;
-                box-shadow: inset 0 1px 0 0 #000000, inset 0 -1px 0 0 #000000 !important;
-              }
-              .date-block-badge {
-                margin: 0 !important;
-                padding: 2px 8px !important;
-                font-size: 12px !important;
-                display: inline-block !important;
-                border-left: 1px solid #000000 !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-              }
-              .schedule-date-header {
-                font-size: 11px !important;
-                line-height: 1.15 !important;
-                font-weight: 600 !important;
-                text-transform: capitalize !important;
-              }
-              .selling-date-cell {
-                font-size: 12.5px !important;
-                line-height: 1.2 !important;
+              .print-office-name, .warning-card-content, .warning-card-content * {
+                font-family: 'Tiro Bangla', serif !important;
               }
               /* Minimal Print Header Styles */
               .print-header {
@@ -1137,26 +1279,25 @@ export default function SingleNoticeClient({
               }
               .pwd-scroll-wrapper {
                 border: none !important;
+                border-radius: 0 !important;
                 box-shadow: none !important;
                 padding: 0 !important;
                 margin: 0 !important;
                 width: 100% !important;
+                min-width: 100% !important;
                 max-width: 100% !important;
                 overflow: visible !important;
                 display: block !important;
                 position: relative !important;
                 box-sizing: border-box !important;
               }
-              table {
+              table, .print-container table {
                 width: 100% !important;
                 min-width: 100% !important;
                 max-width: 100% !important;
                 border-collapse: collapse !important;
+                border-spacing: 0 !important;
                 border: 1px solid #000000 !important;
-                border-left: 1px solid #000000 !important;
-                border-right: 1px solid #000000 !important;
-                border-top: 1px solid #000000 !important;
-                border-bottom: 1px solid #000000 !important;
                 margin-top: 0 !important;
                 margin-bottom: 0 !important;
                 page-break-inside: auto !important;
@@ -1165,48 +1306,98 @@ export default function SingleNoticeClient({
                 background-color: transparent !important;
                 box-sizing: border-box !important;
               }
-              tr {
+              thead {
+                display: table-header-group !important;
+                border: none !important;
+              }
+              tbody, tr {
+                border: none !important;
                 background-color: transparent !important;
                 page-break-inside: avoid !important;
               }
-              
-              *, *[class], *[style] {
-                font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
-              }
-              .print-office-name, .warning-card-content, .warning-card-content * {
-                font-family: 'Tiro Bangla', serif !important;
-              }
-              .print-subtitle {
-                font-size: 13px !important;
-                font-weight: bold !important;
-              }
-              th, thead th, td, tbody td {
+              th, thead th, td, tbody td,
+              .print-container th, .print-container td,
+              .print-office-name, .print-subtitle, .date-block-th {
                 border: 1px solid #000000 !important;
                 border-color: #000000 !important;
-                padding: 2.5px 4px !important;
+                padding: 2px 3px !important;
                 word-wrap: break-word !important;
                 word-break: normal !important;
                 overflow-wrap: break-word !important;
                 box-sizing: border-box !important;
+                outline: none !important;
+                box-shadow: none !important;
               }
-              th {
-                font-size: 14px !important;
-                font-weight: 500 !important;
+              .print-office-name, .print-container th.print-office-name {
+                font-size: 16pt !important;
+                text-align: center !important;
+                font-weight: 700 !important;
+                font-family: 'Tiro Bangla', serif !important;
+                background-color: white !important;
+                color: #000000 !important;
+                padding: 2px 4px !important;
+              }
+              .print-subtitle, .print-container th.print-subtitle {
+                font-size: 12.5px !important;
+                text-align: center !important;
+                font-weight: 700 !important;
+                font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
+                background-color: white !important;
+                color: #000000 !important;
+                padding: 2px 4px !important;
+              }
+              th, th *, thead th, thead th *, .print-container th, .print-container th * {
+                color: #000000 !important;
+              }
+              th:not(.print-office-name):not(.print-subtitle):not(.date-block-th),
+              .print-container th:not(.print-office-name):not(.print-subtitle):not(.date-block-th) {
+                font-size: 11px !important;
+                font-weight: 700 !important;
+                line-height: 1.15 !important;
                 text-transform: capitalize !important;
                 text-align: center !important;
                 vertical-align: middle !important;
-                filter: brightness(1.3) !important;
+                color: #000000 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
               }
-              td {
+              td, .print-container td {
                 color: #000000 !important;
-                font-size: 13px !important;
+                font-size: 11px !important;
                 font-weight: 500 !important;
+                line-height: 1.2 !important;
+              }
+              .date-block-th, .print-container th.date-block-th, thead th.date-block-th {
+                padding: 0 !important;
+                background-color: #ffffff !important;
+              }
+              .date-block-badge, .date-block-badge * {
+                color: #000000 !important;
+              }
+              .date-block-badge {
+                margin: 0 !important;
+                padding: 1.5px 6px !important;
+                font-size: 11px !important;
+                font-weight: 700 !important;
+                color: #000000 !important;
+                display: inline-block !important;
+                border-left: 1px solid #000000 !important;
+                border-top: none !important;
+                border-right: none !important;
+                border-bottom: none !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              .schedule-date-header {
+                font-size: 11px !important;
+                line-height: 1.15 !important;
+                font-weight: 700 !important;
+                text-transform: capitalize !important;
               }
               .selling-date-cell, .selling-date-cell * {
-                font-size: 11.5px !important;
-                line-height: 1.2 !important;
+                font-size: 10.5px !important;
+                line-height: 1.15 !important;
+                white-space: nowrap !important;
               }
               .footer-card-label svg, .warning-card-label svg {
                 width: 16px !important;
@@ -1220,35 +1411,56 @@ export default function SingleNoticeClient({
                 width: 1% !important;
               }
               .location-column {
-                white-space: normal !important;
-                width: 140px !important;
-                min-width: 125px !important;
-                max-width: 170px !important;
+                white-space: nowrap !important;
+                width: 1% !important;
+                min-width: 0 !important;
+                max-width: none !important;
                 text-align: center !important;
-                line-height: 1.25 !important;
-                word-break: normal !important;
+                line-height: 1.15 !important;
+                font-size: 10.5px !important;
+              }
+              .location-cell {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+                line-height: 1.15 !important;
+              }
+              .location-word {
+                display: block !important;
+                white-space: nowrap !important;
+                font-size: 10.5px !important;
+                line-height: 1.15 !important;
               }
               .desc-column {
                 white-space: normal !important;
-                width: 100% !important;
-                min-width: 250px !important;
+                width: auto !important;
+                min-width: 150px !important;
+                word-wrap: break-word !important;
+                word-break: normal !important;
+                font-size: 11px !important;
+                line-height: 1.25 !important;
               }
-              .pwd-scroll-wrapper {
-                border-radius: 0 !important;
-                overflow: visible !important;
-                width: 100% !important;
-                min-width: 100% !important;
+              td.desc-column, .print-container td.desc-column {
+                font-size: 12px !important;
+                line-height: 1.25 !important;
+              }
+              .print-footer-td,
+              tbody td.print-footer-td,
+              .print-container td.print-footer-td,
+              .print-container tbody td.print-footer-td {
+                padding: 0 !important;
+                border: 1px solid #000000 !important;
+                background-color: #ffffff !important;
               }
               .details-footer-block {
                 width: 100% !important;
                 min-width: 100% !important;
                 margin: 0 !important;
-                margin-top: -1px !important;
-                border: 1px solid #000000 !important;
-                border-top: 1px solid #000000 !important;
-                outline: 1px solid #000000 !important;
-                outline-offset: -1px !important;
-                box-shadow: inset 0 1px 0 0 #000000, inset 0 -1px 0 0 #000000 !important;
+                border: none !important;
+                outline: none !important;
+                box-shadow: none !important;
                 box-sizing: border-box !important;
                 display: grid !important;
                 grid-template-columns: 1fr 1fr !important;
@@ -1257,47 +1469,68 @@ export default function SingleNoticeClient({
                 break-inside: avoid !important;
               }
               .details-footer-col {
-                padding: 4px 8px !important;
+                padding: 3px 6px !important;
                 box-sizing: border-box !important;
-                border-color: #000000 !important;
+                border: none !important;
               }
               .details-footer-col:first-child {
                 border-right: 1px solid #000000 !important;
+              }
+              .details-footer-badge,
+              .details-footer-badge *,
+              .details-footer-badge svg {
+                color: #000000 !important;
+                stroke: #000000 !important;
               }
               .details-footer-badge {
                 display: inline-flex !important;
                 align-items: center !important;
                 gap: 4px !important;
-                font-size: 11px !important;
+                font-size: 10.5px !important;
                 font-weight: 800 !important;
                 text-transform: uppercase !important;
-                padding: 2px 6px !important;
+                padding: 1.5px 5px !important;
                 border-radius: 4px !important;
-                margin-bottom: 3px !important;
+                margin-bottom: 2px !important;
+                color: #000000 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
               }
               .details-footer-text, .details-footer-text * {
-                font-size: 13px !important;
+                font-size: 12px !important;
                 font-weight: 700 !important;
-                line-height: 1.35 !important;
+                line-height: 1.3 !important;
                 color: #000000 !important;
+              }
+              .contact-info-line {
+                display: flex !important;
+                align-items: center !important;
+                gap: 4px !important;
+              }
+              .contact-info-icon,
+              .details-footer-text svg.contact-info-icon {
+                width: 11px !important;
+                height: 11px !important;
+                min-width: 11px !important;
+                min-height: 11px !important;
+                display: inline-block !important;
+                vertical-align: middle !important;
+                flex-shrink: 0 !important;
+                color: #000000 !important;
+                stroke: #000000 !important;
               }
               .warning-footer-block {
                 width: 100% !important;
                 min-width: 100% !important;
                 margin: 0 !important;
-                margin-top: -1px !important;
-                border: 1px solid #000000 !important;
-                border-top: 1px solid #000000 !important;
-                outline: 1px solid #000000 !important;
-                outline-offset: -1px !important;
-                box-shadow: inset 0 1px 0 0 #000000 !important;
+                border: none !important;
+                outline: none !important;
+                box-shadow: none !important;
                 box-sizing: border-box !important;
                 display: flex !important;
                 align-items: center !important;
-                gap: 8px !important;
-                padding: 4px 8px !important;
+                gap: 6px !important;
+                padding: 3px 6px !important;
                 background-color: #ffffff !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
@@ -1306,10 +1539,10 @@ export default function SingleNoticeClient({
                 display: inline-flex !important;
                 align-items: center !important;
                 gap: 4px !important;
-                font-size: 11px !important;
+                font-size: 10.5px !important;
                 font-weight: 800 !important;
                 text-transform: uppercase !important;
-                padding: 2px 6px !important;
+                padding: 1.5px 5px !important;
                 border-radius: 4px !important;
                 background-color: #dc2626 !important;
                 color: #ffffff !important;
@@ -1318,9 +1551,9 @@ export default function SingleNoticeClient({
                 flex-shrink: 0 !important;
               }
               .warning-footer-text, .warning-footer-text * {
-                font-size: 13px !important;
+                font-size: 12px !important;
                 font-weight: 700 !important;
-                line-height: 1.35 !important;
+                line-height: 1.3 !important;
                 color: #dc2626 !important;
                 font-family: 'Tiro Bangla', serif !important;
                 -webkit-print-color-adjust: exact !important;
@@ -1368,30 +1601,16 @@ export default function SingleNoticeClient({
                 print-color-adjust: exact !important;
               }
               .total-amount-row td {
-                font-size: 13px !important;
-                font-weight: 600 !important;
-              }
-              .print-container table {
-                border-collapse: collapse !important;
-                border: 1px solid #000000 !important;
-              }
-              .print-container th, 
-              .print-container td {
-                border-color: #000000 !important;
-                border: 1px solid #000000 !important;
-              }
-              .print-container th {
-                font-weight: 600 !important;
-              }
-              .print-container td {
-                font-weight: 500 !important;
+                font-size: 12px !important;
+                font-weight: 700 !important;
+                color: #000000 !important;
               }
             </style>
           </head>
           <body>
             <div class="print-container">
               ${!isLandscape
-                ? `
+          ? `
                 <div class="print-header">
                   <h1 class="notice-title">${notice.title}</h1>
                   <div class="notice-details-bar">
@@ -1401,8 +1620,8 @@ export default function SingleNoticeClient({
                   </div>
                 </div>
               `
-                : ""
-              }
+          : ""
+        }
               ${printContents}
             </div>
           </body>
@@ -1522,6 +1741,55 @@ export default function SingleNoticeClient({
           .date-block-th {
             padding: 0 !important;
           }
+          .pwd-table-block table {
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+            border: none !important;
+          }
+          .pwd-table-block thead,
+          .pwd-table-block tbody,
+          .pwd-table-block tr {
+            border: none !important;
+          }
+          .pwd-table-block th,
+          .pwd-table-block td {
+            border-top: none !important;
+            border-left: none !important;
+            border-right: 1px solid #000000 !important;
+            border-bottom: 1px solid #000000 !important;
+          }
+          .pwd-table-block thead tr:first-child > th,
+          .pwd-table-block thead tr:first-child > td,
+          .pwd-table-block table > tbody:first-child > tr:first-child > th,
+          .pwd-table-block table > tbody:first-child > tr:first-child > td {
+            border-top: 1px solid #000000 !important;
+          }
+          .pwd-table-block tr > th:first-child,
+          .pwd-table-block tr > td:first-child {
+            border-left: 1px solid #000000 !important;
+          }
+          .pwd-table-block .details-footer-block {
+            margin: 0 !important;
+            margin-top: 0 !important;
+            border-top: none !important;
+            border-left: 1px solid #000000 !important;
+            border-right: 1px solid #000000 !important;
+            border-bottom: 1px solid #000000 !important;
+          }
+          .pwd-table-block .details-footer-col {
+            border: none !important;
+          }
+          .pwd-table-block .details-footer-col:first-child {
+            border-right: 1px solid #000000 !important;
+          }
+          .pwd-table-block .warning-footer-block {
+            margin: 0 !important;
+            margin-top: 0 !important;
+            border-top: none !important;
+            border-left: 1px solid #000000 !important;
+            border-right: 1px solid #000000 !important;
+            border-bottom: 1px solid #000000 !important;
+          }
         `,
           }}
         />
@@ -1546,32 +1814,34 @@ export default function SingleNoticeClient({
           >
             <Printer className="w-4 h-4" /> Print
           </button>
-          {notice.filePath ? (
-            <a
-              href={notice.filePath}
-              download
-              className="bg-[#2980b9] hover:bg-[#3498db] !text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-2 shadow-sm transition-all cursor-pointer"
-            >
-              <Download className="w-4 h-4" /> Download PDF
-            </a>
-          ) : notice.tableData ? (
-            <button
-              type="button"
-              onClick={handleDownloadPdf}
-              disabled={pdfDownloading}
-              className="bg-[#2980b9] hover:bg-[#3498db] !text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-60"
-            >
-              {pdfDownloading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin text-white flex-shrink-0" /> Generating...
-                </>
-              ) : (
-                <>
+            {
+              resolvedFileUrl && !resolvedFileUrl.includes("-result.pdf") && !notice.tableData ? (
+                <a
+                  href={attachedDownloadUrl}
+                  download={attachedDownloadFilename}
+                  className="bg-[#2980b9] hover:bg-[#3498db] !text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                >
                   <Download className="w-4 h-4" /> Download PDF
-                </>
-              )}
-            </button>
-          ) : null}
+                </a>
+              ) : notice.tableData ? (
+                <button
+                  type="button"
+                  onClick={handleDownloadPdf}
+                  disabled={pdfDownloading}
+                  className="bg-[#2980b9] hover:bg-[#3498db] !text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-60"
+                >
+                  {pdfDownloading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-white flex-shrink-0" /> Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4" /> Download PDF
+                    </>
+                  )}
+                </button>
+              ) : null
+            }
         </div>
 
         {/* Fullscreen Table Content Wrapper */}
@@ -1833,8 +2103,8 @@ export default function SingleNoticeClient({
                               className={`p-2 font-bold border border-gray-400 text-base capitalize text-center ${isDesc
                                 ? "desc-column w-[32%] min-w-[220px] print:w-auto whitespace-normal"
                                 : isLocation
-                                  ? "location-column w-[140px] min-w-[125px] max-w-[170px] print:w-auto print:min-w-[125px] print:max-w-[170px] whitespace-normal text-center"
-                                  : "auto-column print:w-[1%]"
+                                    ? "location-column w-[1%] print:w-[1%] whitespace-nowrap text-center"
+                                    : "auto-column print:w-[1%]"
                                 } ${isTender || isSl ? "whitespace-nowrap" : ""}`}
                               style={{
                                 backgroundColor:
@@ -1977,8 +2247,8 @@ export default function SingleNoticeClient({
                                   className={`p-2.5 border border-gray-400 text-black text-[15px] font-semibold ${cellAlignClass} ${isDesc
                                     ? "desc-column w-[32%] min-w-[220px] print:w-auto whitespace-normal text-left"
                                     : isLocationCol
-                                      ? "location-column w-[140px] min-w-[125px] max-w-[170px] print:w-auto print:min-w-[125px] print:max-w-[170px] whitespace-normal text-center"
-                                      : "auto-column print:w-[1%]"
+                                        ? "location-column w-[1%] print:w-[1%] whitespace-nowrap text-center"
+                                        : "auto-column print:w-[1%]"
                                     } ${isNoWrapCell ? "whitespace-nowrap" : ""
                                     }`}
                                   style={{
@@ -1988,7 +2258,7 @@ export default function SingleNoticeClient({
                                       : isCurrencyAlignCol
                                         ? "right"
                                         : "left",
-                                    whiteSpace: isDesc ? "normal" : isLocationCol ? "normal" : isNoWrapCell ? "nowrap" : undefined,
+                                    whiteSpace: isDesc ? "normal" : isLocationCol ? "nowrap" : isNoWrapCell ? "nowrap" : undefined,
                                     WebkitPrintColorAdjust: "exact",
                                     printColorAdjust: "exact",
                                   }}
@@ -2016,6 +2286,22 @@ export default function SingleNoticeClient({
                                               {timePart}
                                             </span>
                                           ) : null}
+                                        </div>
+                                      );
+                                    }
+                                    if (
+                                      isLocationCol &&
+                                      formattedVal &&
+                                      formattedVal !== "N/A"
+                                    ) {
+                                      const locationWords = getLocationWords(formattedVal);
+                                      return (
+                                        <div className="location-cell flex flex-col items-center justify-center text-center leading-tight">
+                                          {locationWords.map((word, wIdx) => (
+                                            <span key={wIdx} className="location-word whitespace-nowrap">
+                                              {word}
+                                            </span>
+                                          ))}
                                         </div>
                                       );
                                     }
@@ -2118,9 +2404,9 @@ export default function SingleNoticeClient({
 
                 {/* Modern Compact Attached Details Footer */}
                 {(table.payOrderTo || true) && (
-                  <div className="details-footer-block w-full border border-black -mt-px bg-white grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 text-black">
+                  <div className="details-footer-block w-full bg-white grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 text-black">
                     {/* Left Column: BD Pay Order To */}
-                    <div className="details-footer-col p-2 md:border-r border-black flex flex-col justify-start">
+                    <div className="details-footer-col p-2 flex flex-col justify-start">
                       <div className="mb-1">
                         <span
                           className="details-footer-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-extrabold uppercase tracking-wider"
@@ -2154,9 +2440,18 @@ export default function SingleNoticeClient({
                       </div>
                       <div className="details-footer-text text-[13px] font-bold text-black leading-snug pl-0.5">
                         <div>Engr. Md. Shah Alom B.Sc. Engr.(Civil)</div>
-                        <div>Mobile No: 01711-805086, 01972-805086</div>
-                        <div>L M B Market 1st Floor, Pabna. | salomdhaka@gmail.com</div>
-                        <div>Web: www.egpbtc.com</div>
+                        <div className="contact-info-line flex items-center gap-1">
+                          <Phone size={11} strokeWidth={2.5} className="contact-info-icon flex-shrink-0 text-black" />
+                          <span>Mobile No: 01711-805086, 01972-805086</span>
+                        </div>
+                        <div className="contact-info-line flex items-center gap-1">
+                          <MapPin size={11} strokeWidth={2.5} className="contact-info-icon flex-shrink-0 text-black" />
+                          <span>L M B Market 1st Floor, Pabna. | salomdhaka@gmail.com</span>
+                        </div>
+                        <div className="contact-info-line flex items-center gap-1">
+                          <Globe size={11} strokeWidth={2.5} className="contact-info-icon flex-shrink-0 text-black" />
+                          <span>Web: www.egpbtc.com</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2164,7 +2459,7 @@ export default function SingleNoticeClient({
 
                 {/* Modern Compact Attached Warning Banner (1-line design directly attached below details box) */}
                 {table.bottomWarning && (
-                  <div className="warning-footer-block w-full border border-black -mt-px bg-white p-2 flex items-center gap-2.5 text-black">
+                  <div className="warning-footer-block w-full bg-white p-2 flex items-center gap-2.5 text-black">
                     <div className="flex-shrink-0">
                       <span
                         className="warning-footer-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-extrabold uppercase tracking-wider text-white"
@@ -2200,11 +2495,60 @@ export default function SingleNoticeClient({
         dangerouslySetInnerHTML={{
           __html: `
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Tiro+Bangla:ital@0;1&family=Albert+Sans:wght@400;600;700&display=swap');
-        .single_notice_page *, .single_notice_page *[class]:not(.print-office-name), .single_notice_page *[style]:not(.print-office-name), .single_notice_page .font-bangla:not(.print-office-name), .single_notice_page [style*="font-family"]:not(.print-office-name) {
+        .single_notice_page *:not(.fa-solid):not(.fa-regular):not(.fa-brands):not([class*="fa-"]), .single_notice_page *[class]:not(.print-office-name):not(.fa-solid):not(.fa-regular):not(.fa-brands):not([class*="fa-"]), .single_notice_page *[style]:not(.print-office-name):not(.fa-solid):not(.fa-regular):not(.fa-brands):not([class*="fa-"]), .single_notice_page .font-bangla:not(.print-office-name), .single_notice_page [style*="font-family"]:not(.print-office-name) {
           font-family: 'Space Grotesk', 'Tiro Bangla', 'SutonnyOMJ', 'Albert Sans', Arial, sans-serif !important;
         }
         .single_notice_page .print-office-name {
           font-family: 'Tiro Bangla', serif !important;
+        }
+        .single_notice_page .pwd-table-block table {
+          border-collapse: separate !important;
+          border-spacing: 0 !important;
+          border: none !important;
+        }
+        .single_notice_page .pwd-table-block thead,
+        .single_notice_page .pwd-table-block tbody,
+        .single_notice_page .pwd-table-block tr {
+          border: none !important;
+        }
+        .single_notice_page .pwd-table-block th,
+        .single_notice_page .pwd-table-block td {
+          border-top: none !important;
+          border-left: none !important;
+          border-right: 1px solid #000000 !important;
+          border-bottom: 1px solid #000000 !important;
+        }
+        .single_notice_page .pwd-table-block thead tr:first-child > th,
+        .single_notice_page .pwd-table-block thead tr:first-child > td,
+        .single_notice_page .pwd-table-block table > tbody:first-child > tr:first-child > th,
+        .single_notice_page .pwd-table-block table > tbody:first-child > tr:first-child > td {
+          border-top: 1px solid #000000 !important;
+        }
+        .single_notice_page .pwd-table-block tr > th:first-child,
+        .single_notice_page .pwd-table-block tr > td:first-child {
+          border-left: 1px solid #000000 !important;
+        }
+        .single_notice_page .pwd-table-block .details-footer-block {
+          margin: 0 !important;
+          margin-top: 0 !important;
+          border-top: none !important;
+          border-left: 1px solid #000000 !important;
+          border-right: 1px solid #000000 !important;
+          border-bottom: 1px solid #000000 !important;
+        }
+        .single_notice_page .pwd-table-block .details-footer-col {
+          border: none !important;
+        }
+        .single_notice_page .pwd-table-block .details-footer-col:first-child {
+          border-right: 1px solid #000000 !important;
+        }
+        .single_notice_page .pwd-table-block .warning-footer-block {
+          margin: 0 !important;
+          margin-top: 0 !important;
+          border-top: none !important;
+          border-left: 1px solid #000000 !important;
+          border-right: 1px solid #000000 !important;
+          border-bottom: 1px solid #000000 !important;
         }
       `,
         }}
@@ -2217,7 +2561,7 @@ export default function SingleNoticeClient({
               href="/egp-notice"
               className="inline-flex items-center bg-primary hover:!text-secondary !text-secondary px-4 py-2 mb-5 rounded-xl font-bold text-sm uppercase hover:bg-text-1 transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer"
             >
-              <i className="fa-solid fa-arrow-left"></i> Back to All Notices
+              <ArrowLeft className="w-4 h-4 shrink-0" /> Back to All Notices
             </Link>
             <h1 className="text-2xl md:text-3xl font-bold text-text-1 font-bangla leading-tight">
               {notice.title}
@@ -2227,18 +2571,18 @@ export default function SingleNoticeClient({
                 {notice.category}
               </span>
               <span className="text-text-2 flex items-center gap-1.5">
-                <i className="fa-solid fa-calendar-plus text-primary"></i>
+                <CalendarPlus className="w-4 h-4 text-primary shrink-0" />
                 Publish Date: {notice.publishDate}
               </span>
               {notice.lastDate && (
                 <span className="text-text-2 flex items-center gap-1.5">
-                  <i className="fa-solid fa-calendar-day text-primary"></i>
+                  <Calendar className="w-4 h-4 text-primary shrink-0" />
                   Last Date: {notice.lastDate}
                 </span>
               )}
               {notice.lotteryDate && (
                 <span className="text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full text-xs flex items-center gap-1.5">
-                  <i className="fa-solid fa-calendar-check text-emerald-600"></i>
+                  <CalendarCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                   Lottery Date: {notice.lotteryDate}
                 </span>
               )}
@@ -2251,15 +2595,15 @@ export default function SingleNoticeClient({
               onClick={handlePrint}
               className="flex-1 lg:flex-initial bg-text-1 text-white px-6 py-3.5 rounded-xl font-bold text-sm uppercase hover:bg-primary transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer"
             >
-              <i className="fa-solid fa-print"></i> Print Notice
+              <Printer className="w-4 h-4 shrink-0" /> Print Notice
             </button>
-            {notice.filePath && !notice.filePath.includes("-result.pdf") && (
+            {resolvedFileUrl && !resolvedFileUrl.includes("-result.pdf") && (
               <a
-                href={notice.filePath}
-                download
+                href={attachedDownloadUrl}
+                download={attachedDownloadFilename}
                 className="flex-1 lg:flex-initial bg-primary hover:!text-secondary !text-secondary px-6 py-3.5 rounded-xl font-bold text-sm uppercase hover:bg-text-1 transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer"
               >
-                <i className="fa-solid fa-download"></i> Download File
+                <Download className="w-4 h-4 shrink-0" /> Download File
               </a>
             )}
           </div>
@@ -2272,23 +2616,18 @@ export default function SingleNoticeClient({
             className="print-wrapper-box w-full space-y-10"
           >
             {/* 1. ATTACHMENT VIEW (Renders if present) */}
-            {notice.filePath && (
+            {resolvedFileUrl && (
               <div className="w-full relative bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 p-2">
                 <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider mb-3 px-2 flex items-center gap-1.5 text-text-1 print:hidden">
-                  <i className="fa-solid fa-paperclip text-primary"></i>{" "}
+                  <Paperclip className="w-4 h-4 text-primary shrink-0" />{" "}
                   Attached Document Reference
                 </h4>
                 {isPdf ? (
-                  <iframe
-                    id="notice-frame"
-                    src={`${notice.filePath}#toolbar=0&navpanes=0&view=FitH`}
-                    className="w-full h-[80vh] border border-slate-200 rounded-xl block"
-                    title="Notice PDF Document"
-                  ></iframe>
+                  <PdfFullViewer fileUrl={resolvedFileUrl} title={notice.title} />
                 ) : (
                   <div className="relative overflow-hidden rounded-xl">
                     <img
-                      src={notice.filePath}
+                      src={resolvedFileUrl}
                       alt={notice.title}
                       className="w-full h-auto block mx-auto rounded-xl shadow-xs"
                     />
@@ -2307,7 +2646,7 @@ export default function SingleNoticeClient({
             {notice.content && (
               <div className="bg-slate-50/50 p-6 md:p-8 rounded-2xl border border-slate-100">
                 <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider mb-4 flex items-center gap-1.5 text-text-1 border-b pb-3 print:hidden">
-                  <i className="fa-solid fa-file-lines text-primary"></i> Notice
+                  <FileText className="w-4 h-4 text-primary shrink-0" /> Notice
                   Specifications & Guidelines
                 </h4>
                 <div className="prose max-w-none text-text-1 font-bangla text-base md:text-lg leading-relaxed whitespace-pre-wrap">
@@ -2553,8 +2892,8 @@ export default function SingleNoticeClient({
                                     className={`p-2 font-bold border border-gray-400 text-sm capitalize text-center ${isDesc
                                       ? "desc-column w-[30%] min-w-[220px] print:w-auto whitespace-normal"
                                       : isLocation
-                                        ? "location-column w-[140px] min-w-[125px] max-w-[170px] print:w-auto print:min-w-[125px] print:max-w-[170px] whitespace-normal text-center"
-                                        : "auto-column print:w-[1%]"
+                                          ? "location-column w-[1%] print:w-[1%] whitespace-nowrap text-center"
+                                          : "auto-column print:w-[1%]"
                                       }`}
                                     style={{
                                       backgroundColor:
@@ -2645,7 +2984,7 @@ export default function SingleNoticeClient({
                                         colHdr.includes("amount") ||
                                         colHdr.includes("similar") ||
                                         colHdr.includes("tk");
-                                      
+
                                       const cellAlignClass = isCenterAlignCol
                                         ? "text-center"
                                         : isCurrencyAlignCol
@@ -2659,8 +2998,8 @@ export default function SingleNoticeClient({
                                           className={`p-2.5 border border-gray-400 text-black text-sm font-semibold ${cellAlignClass} ${isDesc
                                             ? "desc-column w-[30%] min-w-[220px] print:w-auto whitespace-normal text-left"
                                             : isLocationCol
-                                              ? "location-column w-[140px] min-w-[125px] max-w-[170px] print:w-auto print:min-w-[125px] print:max-w-[170px] whitespace-normal text-center"
-                                              : "auto-column print:w-[1%]"
+                                                ? "location-column w-[1%] print:w-[1%] whitespace-nowrap text-center"
+                                                : "auto-column print:w-[1%]"
                                             }`}
                                           style={{
                                             backgroundColor: cellBg,
@@ -2669,7 +3008,7 @@ export default function SingleNoticeClient({
                                               : isCurrencyAlignCol
                                                 ? "right"
                                                 : "left",
-                                            whiteSpace: !isDesc && !isLocationCol ? "nowrap" : undefined,
+                                            whiteSpace: !isDesc ? "nowrap" : undefined,
                                             WebkitPrintColorAdjust: "exact",
                                             printColorAdjust: "exact",
                                           }}
@@ -2718,18 +3057,18 @@ export default function SingleNoticeClient({
                                             if (
                                               isLocationCol &&
                                               formattedVal &&
-                                              formattedVal !== "N/A" &&
-                                              formattedVal.includes(",")
+                                              formattedVal !== "N/A"
                                             ) {
-                                              const commaIdx = formattedVal.indexOf(",");
-                                              const part1 = formattedVal.substring(0, commaIdx + 1).trim();
-                                              const part2 = formattedVal.substring(commaIdx + 1).trim();
-                                              return (
-                                                <div className="flex flex-col text-center leading-tight">
-                                                  <span className="whitespace-nowrap">{part1}</span>
-                                                  {part2 ? <span className="whitespace-nowrap">{part2}</span> : null}
-                                                </div>
-                                              );
+                                          const locationWords = getLocationWords(formattedVal);
+                                          return (
+                                            <div className="location-cell flex flex-col items-center justify-center text-center leading-tight">
+                                              {locationWords.map((word, wIdx) => (
+                                                <span key={wIdx} className="location-word whitespace-nowrap">
+                                                  {word}
+                                                </span>
+                                              ))}
+                                            </div>
+                                            );
                                             }
                                             return formattedVal;
                                           })()}
@@ -2834,9 +3173,9 @@ export default function SingleNoticeClient({
 
                       {/* Compact Government Footer Table Blocks */}
                       {(table.payOrderTo || true) && (
-                        <div className="w-full border border-black -mt-px bg-white grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 text-black details-footer-block">
+                        <div className="w-full bg-white grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 text-black details-footer-block">
                           {/* Left Column: BD Pay Order To */}
-                          <div className="details-footer-col p-2 border-b md:border-b-0 md:border-r border-black print:border-b-0 print:border-r flex flex-col justify-start">
+                          <div className="details-footer-col p-2 flex flex-col justify-start">
                             <div className="mb-1">
                               <span
                                 className="details-footer-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-extrabold uppercase tracking-wider"
@@ -2870,9 +3209,18 @@ export default function SingleNoticeClient({
                             </div>
                             <div className="details-footer-text text-[13px] font-bold text-black leading-snug pl-0.5">
                               <div>Engr. Md. Shah Alom B.Sc. Engr.(Civil)</div>
-                              <div>Mobile No: 01711-805086, 01972-805086</div>
-                              <div>L M B Market 1st Floor, Pabna. | salomdhaka@gmail.com</div>
-                              <div>Web: www.egpbtc.com</div>
+                              <div className="contact-info-line flex items-center gap-1">
+                                <Phone size={11} strokeWidth={2.5} className="contact-info-icon flex-shrink-0 text-black" />
+                                <span>Mobile No: 01711-805086, 01972-805086</span>
+                              </div>
+                              <div className="contact-info-line flex items-center gap-1">
+                                <MapPin size={11} strokeWidth={2.5} className="contact-info-icon flex-shrink-0 text-black" />
+                                <span>L M B Market 1st Floor, Pabna. | salomdhaka@gmail.com</span>
+                              </div>
+                              <div className="contact-info-line flex items-center gap-1">
+                                <Globe size={11} strokeWidth={2.5} className="contact-info-icon flex-shrink-0 text-black" />
+                                <span>Web: www.egpbtc.com</span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -2880,7 +3228,7 @@ export default function SingleNoticeClient({
 
                       {/* Modern Compact Attached Warning Banner (1-line design directly attached below details box) */}
                       {table.bottomWarning && (
-                        <div className="warning-footer-block w-full border border-black -mt-px bg-white p-2 flex items-center gap-2.5 text-black">
+                        <div className="warning-footer-block w-full bg-white p-2 flex items-center gap-2.5 text-black">
                           <div className="flex-shrink-0">
                             <span
                               className="warning-footer-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-extrabold uppercase tracking-wider text-white"

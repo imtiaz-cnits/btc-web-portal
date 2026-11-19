@@ -9,6 +9,7 @@ import {
   getNoticeCountsByTitle,
 } from "@/app/actions/notices";
 import { sanitizeBijoyDeep, autoConvertBijoy } from "@/lib/bijoyToUnicode";
+import { resolveNoticeFileUrl } from "@/lib/fileUrl";
 import ExcelImportModal from "@/components/dashboard/ExcelImportModal";
 import CategoryExcelImportModal from "@/components/dashboard/CategoryExcelImport/CategoryExcelImportModal";
 import { adaptCategoryImportToNoticeForm } from "@/lib/categoryExcelImport/adapter";
@@ -2270,6 +2271,8 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
       if (!enableFile) {
         formData.set("file", ""); // Clear file
         formData.append("clearFile", "true");
+      } else if (selectedFile) {
+        formData.set("file", selectedFile);
       }
 
       if (enableText) {
@@ -2978,8 +2981,9 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
               <button
                 type="button"
                 onClick={() => {
-                  const isPdf = notice.filePath.toLowerCase().endsWith(".pdf");
-                  setModalPreviewUrl(notice.filePath);
+                  const resolved = resolveNoticeFileUrl(notice.filePath);
+                  const isPdf = resolved.split("?")[0].toLowerCase().endsWith(".pdf");
+                  setModalPreviewUrl(resolved);
                   setModalPreviewType(isPdf ? "pdf" : "image");
                   setShowPreviewModal(true);
                 }}

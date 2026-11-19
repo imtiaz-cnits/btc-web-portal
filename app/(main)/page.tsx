@@ -7,6 +7,7 @@ import ClientSlider from "@/components/ClientSlider";
 import HomeNoticesSection from "@/components/HomeNoticesSection";
 import prisma from "@/lib/prisma";
 import { formatDateDhaka, isNoticeExpired } from "@/lib/date";
+import { resolveNoticeFileUrl } from "@/lib/fileUrl";
 
 export const revalidate = 0; // Live data on every load
 
@@ -61,7 +62,8 @@ export default async function HomePage() {
       publishDate: formattedPublishDate,
       date: formattedLastDate,
       lotteryDate: formattedLotteryDate,
-      fileUrl: notice.filePath || "",
+      year: notice.year || "",
+      fileUrl: resolveNoticeFileUrl(notice.filePath),
       category: categoryMap[finalCategory] || "LTM",
     };
   });

@@ -11,6 +11,7 @@ import {
   normalizeNoticeTableData,
 } from "@/lib/tableEngine/normalizer";
 import { isNoticeExpired } from "@/lib/date";
+import { resolveNoticeFileUrl } from "@/lib/fileUrl";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
 import DeleteButton from "@/components/dashboard/DeleteButton";
@@ -780,11 +781,12 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
 
     // File (image or PDF)
     if (notice.filePath) {
-      const ext = notice.filePath.split(".").pop()?.toLowerCase();
+      const resolvedUrl = resolveNoticeFileUrl(notice.filePath);
+      const ext = notice.filePath.split("?")[0].split(".").pop()?.toLowerCase();
       if (["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext || "")) {
         return (
           <img
-            src={notice.filePath}
+            src={resolvedUrl}
             alt={notice.title}
             className="max-w-full max-h-[55vh] object-contain mx-auto rounded-xl shadow-sm"
           />
@@ -792,7 +794,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
       }
       return (
         <iframe
-          src={`${notice.filePath}#toolbar=0`}
+          src={`${resolvedUrl}#toolbar=0`}
           className="w-full h-[55vh] border-0 rounded-xl bg-slate-50"
           title="Notice Preview"
         />

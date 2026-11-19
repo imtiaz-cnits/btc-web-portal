@@ -12,6 +12,7 @@ interface NoticeItem {
   date: string;
   publishDate?: string;
   lotteryDate?: string;
+  year?: string;
   fileUrl: string;
   category: string;
   tableData?: string | null;
@@ -22,11 +23,11 @@ interface EgpNoticeClientProps {
 }
 
 export default function EgpNoticeClient({ initialNotices }: EgpNoticeClientProps) {
-  const [activeTab, setActiveTab] = useState("OTM");
+  const [activeTab, setActiveTab] = useState("LTM");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
 
-  const tabs = ["OTM", "LTM", "Lottery Pending", "Lottery Result"];
+  const tabs = ["LTM", "OTM", "Lottery Pending", "Lottery Result"];
 
   const filteredNotices = initialNotices.filter(
     (n) => n.category.toLowerCase() === activeTab.toLowerCase()

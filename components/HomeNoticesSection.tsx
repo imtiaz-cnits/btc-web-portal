@@ -8,6 +8,9 @@ interface Notice {
   id: string;
   title: string;
   date: string;
+  publishDate?: string;
+  lotteryDate?: string;
+  year?: string;
   fileUrl: string;
   category: string;
 }
@@ -17,8 +20,8 @@ interface HomeNoticesSectionProps {
 }
 
 export default function HomeNoticesSection({ notices }: HomeNoticesSectionProps) {
-  const [activeTab, setActiveTab] = useState("OTM");
-  const tabs = ["OTM", "LTM", "Lottery Pending", "Lottery Result"];
+  const [activeTab, setActiveTab] = useState("LTM");
+  const tabs = ["LTM", "OTM", "Lottery Pending", "Lottery Result"];
 
   // Filter notices by category
   const filtered = notices.filter(

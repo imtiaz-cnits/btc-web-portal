@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { uploadFile } from "@/lib/upload";
+import { uploadFile, getProjectRoot } from "@/lib/upload";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import fs from "fs/promises";
@@ -281,12 +281,12 @@ export async function uploadNoticePdf(id: string, pdfBase64: string) {
 
   try {
     const buffer = Buffer.from(pdfBase64, "base64");
-    const uploadDir = path.join(process.cwd(), "public", "assets", "pdf");
+    const uploadDir = path.join(getProjectRoot(), "public", "assets", "pdf");
     await fs.mkdir(uploadDir, { recursive: true });
     const fileName = `${id}-details.pdf`;
     const fullPath = path.join(uploadDir, fileName);
     await fs.writeFile(fullPath, buffer);
-    const filePath = `/assets/pdf/${fileName}`;
+    const filePath = `/api/files/assets/pdf/${fileName}`;
     
     await prisma.notice.update({
       where: { id },

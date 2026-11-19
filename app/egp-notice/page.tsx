@@ -3,7 +3,9 @@ import EgpNoticeClient from "./EgpNoticeClient";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { formatDateDhaka, isNoticeExpired } from "@/lib/date";
+import { resolveNoticeFileUrl } from "@/lib/fileUrl";
 
+export const dynamic = "force-dynamic";
 export const revalidate = 0; // Disable caching to fetch real-time notices
 
 const categoryMap: Record<string, string> = {
@@ -59,7 +61,8 @@ export default async function PublicEgpNoticePage() {
       publishDate: formattedPublishDate,
       date: formattedLastDate,
       lotteryDate: formattedLotteryDate,
-      fileUrl: notice.filePath || "",
+      year: notice.year || "",
+      fileUrl: resolveNoticeFileUrl(notice.filePath),
       category: categoryMap[finalCategory] || "LTM",
       tableData: notice.tableData || null,
     };

@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { formatDateDhaka, isNoticeExpired } from "@/lib/date";
+import { resolveNoticeFileUrl } from "@/lib/fileUrl";
 
+export const dynamic = "force-dynamic";
 export const revalidate = 0; // Retrieve real-time data on every request
 
 export async function generateMetadata({
@@ -120,7 +122,8 @@ export default async function PublicSingleNoticePage({
     type: notice.type,
     content: notice.content,
     tableData: notice.tableData,
-    filePath: notice.filePath,
+    filePath: resolveNoticeFileUrl(notice.filePath) || null,
+    year: notice.year || "",
   };
 
   // Check if there is ACTUALLY a valid parsed table in notice.tableData

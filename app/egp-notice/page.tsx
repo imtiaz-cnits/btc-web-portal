@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import EgpNoticeClient from "./EgpNoticeClient";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { formatDateDhaka, isNoticeExpired } from "@/lib/date";
+import { formatDateDhaka, isNoticeExpired, sortNoticesByDates } from "@/lib/date";
 import { resolveNoticeFileUrl } from "@/lib/fileUrl";
 
 export const dynamic = "force-dynamic";
@@ -33,8 +33,15 @@ export default async function PublicEgpNoticePage() {
     console.error("Failed to fetch notices in PublicEgpNoticePage:", error);
   }
 
+  const sortedNotices = sortNoticesByDates(notices, (notice) => {
+    const isExpired = isNoticeExpired(notice.lastDate);
+    return isExpired && notice.category !== "LOTTERY_RESULT"
+      ? "LOTTERY_PENDING"
+      : notice.category;
+  });
+
   // Map database notice properties to the fields expected by NoticeTable
-  const mappedNotices = notices.map((notice, idx) => {
+  const mappedNotices = sortedNotices.map((notice, idx) => {
     let formattedPublishDate = "N/A";
     if (notice.publishDate) {
       formattedPublishDate = formatDateDhaka(notice.publishDate);

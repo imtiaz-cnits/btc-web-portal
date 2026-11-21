@@ -10,6 +10,7 @@ import {
   tableSpecToRowsArray,
   normalizeNoticeTableData,
 } from "@/lib/tableEngine/normalizer";
+import { sortRowsByTenderIdAsc } from "@/lib/tableEngine/sortRows";
 import { isNoticeExpired } from "@/lib/date";
 import { resolveNoticeFileUrl } from "@/lib/fileUrl";
 import jsPDF from "jspdf";
@@ -201,8 +202,10 @@ function TableDataPreview({ tableData, category }: { tableData: string; category
                   (r: string[]) => r[winnerColIdx] && r[winnerColIdx].trim() !== "",
                 )
                 : [];
-            const displayRows =
-              isWinnerNotice && winningRows.length > 0 ? winningRows : rows;
+            const displayRows = sortRowsByTenderIdAsc(
+              isWinnerNotice && winningRows.length > 0 ? winningRows : rows,
+              headers,
+            );
 
             const totalSecurity =
               securityColIdx !== -1

@@ -97,3 +97,75 @@ export function isNoticeExpired(lastDate: Date | string | null | undefined, now?
 
   return todayStr > lastDateStr;
 }
+
+function getDhakaDayKey(dateInput: Date | string | null | undefined): string {
+  if (!dateInput) return "";
+  const d = parseDateSafe(dateInput);
+  if (!d || isNaN(d.getTime())) return "";
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Dhaka",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
+function getTimeSafe(dateInput: Date | string | null | undefined): number {
+  if (!dateInput) return 0;
+  const d = parseDateSafe(dateInput);
+  return d && !isNaN(d.getTime()) ? d.getTime() : 0;
+}
+
+export function sortNoticesByDates<
+  T extends {
+    publishDate?: Date | string | null;
+    lastDate?: Date | string | null;
+    lotteryDate?: Date | string | null;
+    createdAt?: Date | string | null;
+    category?: string | null;
+  },
+>(notices: T[], getCategory?: (item: T) => string): T[] {
+  return [...notices].sort((a, b) => {
+    const catA = (getCategory ? getCategory(a) : a.category || "").toUpperCase();
+    const catB = (getCategory ? getCategory(b) : b.category || "").toUpperCase();
+
+    const pubDayA = getDhakaDayKey(a.publishDate || a.createdAt);
+    const pubDayB = getDhakaDayKey(b.publishDate || b.createdAt);
+    const lastDayA = getDhakaDayKey(a.lastDate);
+    const lastDayB = getDhakaDayKey(b.lastDate);
+    const lotDayA = getDhakaDayKey(a.lotteryDate);
+    const lotDayB = getDhakaDayKey(b.lotteryDate);
+
+    // Lottery Result: newest lotteryDate first, then newest lastDate, then newest publishDate
+    if (catA === "LOTTERY_RESULT" && catB === "LOTTERY_RESULT") {
+      if (lotDayA !== lotDayB) return lotDayB.localeCompare(lotDayA);
+      if (lastDayA !== lastDayB) return lastDayB.localeCompare(lastDayA);
+      if (pubDayA !== pubDayB) return pubDayB.localeCompare(pubDayA);
+      return getTimeSafe(b.createdAt) - getTimeSafe(a.createdAt);
+    }
+
+    // Lottery Pending: most recently expired lastDate first, then newest publishDate
+    if (catA === "LOTTERY_PENDING" && catB === "LOTTERY_PENDING") {
+      if (lastDayA !== lastDayB) return lastDayB.localeCompare(lastDayA);
+      if (pubDayA !== pubDayB) return pubDayB.localeCompare(pubDayA);
+      return getTimeSafe(b.createdAt) - getTimeSafe(a.createdAt);
+    }
+
+    // Live LTM / Live OTM: current / newest publishDate on top, older below;
+    // for same publishDate, earlier lastDate comes first (e.g. 12/11/2026 before 13/11/2026)
+    if (pubDayA !== pubDayB) {
+      return pubDayB.localeCompare(pubDayA);
+    }
+    if (lastDayA !== lastDayB) {
+      if (!lastDayA) return 1;
+      if (!lastDayB) return -1;
+      return lastDayA.localeCompare(lastDayB);
+    }
+
+    const pubTimeA = getTimeSafe(a.publishDate || a.createdAt);
+    const pubTimeB = getTimeSafe(b.publishDate || b.createdAt);
+    if (pubTimeB !== pubTimeA) return pubTimeB - pubTimeA;
+
+    return getTimeSafe(b.createdAt) - getTimeSafe(a.createdAt);
+  });
+}

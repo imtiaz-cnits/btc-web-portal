@@ -21,7 +21,12 @@ interface HomeNoticesSectionProps {
 
 export default function HomeNoticesSection({ notices }: HomeNoticesSectionProps) {
   const [activeTab, setActiveTab] = useState("LTM");
-  const tabs = ["LTM", "OTM", "Lottery Pending", "Lottery Result"];
+  const tabs = [
+    { value: "LTM", label: "Live LTM" },
+    { value: "OTM", label: "Live OTM" },
+    { value: "Lottery Pending", label: "Lottery Pending" },
+    { value: "Lottery Result", label: "Lottery Result" },
+  ];
 
   // Filter notices by category
   const filtered = notices.filter(
@@ -40,14 +45,14 @@ export default function HomeNoticesSection({ notices }: HomeNoticesSectionProps)
           <div className="inline-flex flex-wrap justify-center gap-3 bg-white p-3 rounded-2xl border border-ac-2 shadow-sm">
             {tabs.map((tab) => (
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-6 py-2 h-8 sm:px-8 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 uppercase tracking-wide cursor-pointer ${activeTab.toLowerCase() === tab.toLowerCase()
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                className={`px-6 py-2 h-8 sm:px-8 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 uppercase tracking-wide cursor-pointer ${activeTab.toLowerCase() === tab.value.toLowerCase()
                   ? "bg-primary text-white shadow-lg scale-105"
                   : "bg-transparent text-text-2 hover:bg-shade-1"
                   }`}
               >
-                {tab}
+                {tab.label}
               </button>
             ))}
           </div>

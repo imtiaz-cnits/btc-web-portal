@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getNotices } from "@/app/actions/notices";
 import NoticeLimitDropdown from "@/components/dashboard/NoticeLimitDropdown";
-import { isNoticeExpired } from "@/lib/date";
+import { isNoticeExpired, sortNoticesByDates } from "@/lib/date";
 import NoticesTable from "@/components/dashboard/NoticesTable";
 import {
   Plus,
@@ -83,14 +83,10 @@ export default async function AdminNoticesPage({
     );
   }
 
-  // Sort notices by publishDate descending (fallback to createdAt descending) to ensure recent notices are always on top
-  notices.sort((a, b) => {
-    const dateA = a.publishDate ? new Date(a.publishDate).getTime() : new Date(a.createdAt).getTime();
-    const dateB = b.publishDate ? new Date(b.publishDate).getTime() : new Date(b.createdAt).getTime();
-    if (dateB !== dateA) {
-      return dateB - dateA;
-    }
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  // Sort notices by publishDate descending and lastDate ascending to keep current dates on top
+  notices = sortNoticesByDates(notices, (n) => {
+    const expired = n.lastDate && isNoticeExpired(n.lastDate, now);
+    return expired && n.category !== "LOTTERY_RESULT" ? "LOTTERY_PENDING" : n.category;
   });
 
   // Pagination calculation

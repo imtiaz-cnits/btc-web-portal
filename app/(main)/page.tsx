@@ -6,7 +6,7 @@ import ProjectsSection from "@/components/ProjectsSection";
 import ClientSlider from "@/components/ClientSlider";
 import HomeNoticesSection from "@/components/HomeNoticesSection";
 import prisma from "@/lib/prisma";
-import { formatDateDhaka, isNoticeExpired } from "@/lib/date";
+import { formatDateDhaka, isNoticeExpired, sortNoticesByDates } from "@/lib/date";
 import { resolveNoticeFileUrl } from "@/lib/fileUrl";
 
 export const revalidate = 0; // Live data on every load
@@ -36,7 +36,14 @@ export default async function HomePage() {
     console.error("Failed to fetch active notices for homepage categories:", error);
   }
 
-  const homepageNotices = allActiveNotices.map((notice) => {
+  const sortedActiveNotices = sortNoticesByDates(allActiveNotices, (notice) => {
+    const isExpired = isNoticeExpired(notice.lastDate);
+    return isExpired && notice.category !== "LOTTERY_RESULT"
+      ? "LOTTERY_PENDING"
+      : notice.category;
+  });
+
+  const homepageNotices = sortedActiveNotices.map((notice) => {
     let formattedPublishDate = "N/A";
     if (notice.publishDate) {
       formattedPublishDate = formatDateDhaka(notice.publishDate);

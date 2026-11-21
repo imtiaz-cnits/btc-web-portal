@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Landmark, Info, AlertCircle, Loader2, Phone, MapPin, Globe } from "lucide-react";
 import { sanitizeBijoyDeep, autoConvertBijoy } from "@/lib/bijoyToUnicode";
 import { parseNoticeTableData, tableSpecToRowsArray } from "@/lib/tableEngine/normalizer";
+import { sortRowsByTenderIdAsc } from "@/lib/tableEngine/sortRows";
 import { resolveNoticeFileUrl, buildNoticeDownloadFilename } from "@/lib/fileUrl";
 
 interface Notice {
@@ -52,6 +53,10 @@ const formatDisplayDate = (dateStr: any) => {
 
   if (/^\d{1,2}[-\/]\d{1,2}[-\/]\d{4}$/.test(datePart)) {
     return str.replace(/\//g, "-");
+  }
+
+  if (/^\d+$/.test(str) || !/[-/]|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(str)) {
+    return str;
   }
 
   const parsed = Date.parse(str);
@@ -114,6 +119,11 @@ const formatCellValue = (val: string, hdr: string) => {
   if (!val) return "";
   const str = String(val).trim();
   const lowerHdr = (hdr || "").toLowerCase();
+  const compactHdr = lowerHdr.replace(/[^a-z0-9]/g, "");
+
+  if (compactHdr === "tenderid" || compactHdr.includes("tenderid") || compactHdr === "slno" || compactHdr === "sl") {
+    return str;
+  }
 
   const isFullNumberAmountCol =
     lowerHdr.includes("estimate") ||
@@ -423,10 +433,12 @@ function TablePdfPreview({ tableData, category }: { tableData: string; title: st
                   (r: string[]) => r[winnerColIdx] && r[winnerColIdx].trim() !== "",
                 )
               : [];
-          const displayRows =
+          const displayRows = sortRowsByTenderIdAsc(
             isLotteryResult && winningRows.length > 0
               ? winningRows
-              : normalizedRows;
+              : normalizedRows,
+            headers,
+          );
 
           const totalSecurity =
             securityColIdx !== -1

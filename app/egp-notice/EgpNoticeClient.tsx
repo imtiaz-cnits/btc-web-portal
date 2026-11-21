@@ -27,7 +27,12 @@ export default function EgpNoticeClient({ initialNotices }: EgpNoticeClientProps
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
 
-  const tabs = ["LTM", "OTM", "Lottery Pending", "Lottery Result"];
+  const tabs = [
+    { value: "LTM", label: "Live LTM" },
+    { value: "OTM", label: "Live OTM" },
+    { value: "Lottery Pending", label: "Lottery Pending" },
+    { value: "Lottery Result", label: "Lottery Result" },
+  ];
 
   const filteredNotices = initialNotices.filter(
     (n) => n.category.toLowerCase() === activeTab.toLowerCase()
@@ -94,14 +99,14 @@ export default function EgpNoticeClient({ initialNotices }: EgpNoticeClientProps
           <div className="inline-flex flex-wrap justify-center gap-3 bg-white px-3 py-2 rounded-2xl border border-ac-2 shadow-sm">
             {tabs.map((tab) => (
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-8 py-1 h-8 rounded-xl font-bold text-sm transition-all duration-300 uppercase tracking-wide cursor-pointer ${activeTab.toLowerCase() === tab.toLowerCase()
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                className={`px-8 py-1 h-8 rounded-xl font-bold text-sm transition-all duration-300 uppercase tracking-wide cursor-pointer ${activeTab.toLowerCase() === tab.value.toLowerCase()
                   ? "bg-primary text-white shadow-lg scale-105"
                   : "bg-transparent text-text-2 hover:bg-shade-1"
                   }`}
               >
-                {tab}
+                {tab.label}
               </button>
             ))}
           </div>

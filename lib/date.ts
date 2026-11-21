@@ -151,15 +151,16 @@ export function sortNoticesByDates<
       return getTimeSafe(b.createdAt) - getTimeSafe(a.createdAt);
     }
 
-    // Live LTM / Live OTM: current / newest publishDate on top, older below;
-    // for same publishDate, earlier lastDate comes first (e.g. 12/11/2026 before 13/11/2026)
-    if (pubDayA !== pubDayB) {
-      return pubDayB.localeCompare(pubDayA);
-    }
+    // Live LTM / Live OTM: earliest lastDate (by year, month, day) on top, later dates/months below
+    // (e.g. 23-11-2026 -> 26-11-2026 -> 29-11-2026 -> 30-11-2026 -> 01-12-2026);
+    // for same lastDate, newest publishDate comes first
     if (lastDayA !== lastDayB) {
       if (!lastDayA) return 1;
       if (!lastDayB) return -1;
       return lastDayA.localeCompare(lastDayB);
+    }
+    if (pubDayA !== pubDayB) {
+      return pubDayB.localeCompare(pubDayA);
     }
 
     const pubTimeA = getTimeSafe(a.publishDate || a.createdAt);

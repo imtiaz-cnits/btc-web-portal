@@ -38,8 +38,10 @@ const formatDisplayDate = (dateStr: any) => {
     return str.replace(/\//g, "-");
   }
 
-  // Never parse pure numbers (e.g. Tender ID "123456") or plain text without date markers as JS dates
-  if (/^\d+$/.test(str) || !/[-/]|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(str)) {
+  // Only fallback to Date.parse for short, strictly date-like strings (never prose like "Cleaning of Septic tank... FY 2026-27")
+  const strictDatePattern =
+    /^(?:\d{1,4}[-/.]\d{1,2}[-/.]\d{1,4}|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s,.-]+\d{1,2}[\s,.-]+\d{2,4}|\d{1,2}[\s,.-]+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s,.-]+\d{2,4})(?:\s+\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm)?)?$/i;
+  if (str.length > 40 || !strictDatePattern.test(str)) {
     return str;
   }
 
@@ -161,7 +163,18 @@ const formatCellValue = (val: string, hdr: string) => {
       }
     }
   }
-  return formatDisplayDate(str);
+  const isDateColumn =
+    lowerHdr.includes("date") ||
+    lowerHdr.includes("selling") ||
+    lowerHdr.includes("schedule") ||
+    lowerHdr.includes("deadline") ||
+    lowerHdr.includes("time") ||
+    lowerHdr.includes("তারিখ");
+
+  if (isDateColumn) {
+    return formatDisplayDate(str);
+  }
+  return str;
 };
 
 const getSellingDateDisplay = (formattedVal: string) => {

@@ -55,7 +55,9 @@ const formatDisplayDate = (dateStr: any) => {
     return str.replace(/\//g, "-");
   }
 
-  if (/^\d+$/.test(str) || !/[-/]|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(str)) {
+  const strictDatePattern =
+    /^(?:\d{1,4}[-/.]\d{1,2}[-/.]\d{1,4}|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s,.-]+\d{1,2}[\s,.-]+\d{2,4}|\d{1,2}[\s,.-]+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s,.-]+\d{2,4})(?:\s+\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm)?)?$/i;
+  if (str.length > 40 || !strictDatePattern.test(str)) {
     return str;
   }
 
@@ -172,7 +174,18 @@ const formatCellValue = (val: string, hdr: string) => {
       }
     }
   }
-  return formatDisplayDate(str);
+  const isDateColumn =
+    lowerHdr.includes("date") ||
+    lowerHdr.includes("selling") ||
+    lowerHdr.includes("schedule") ||
+    lowerHdr.includes("deadline") ||
+    lowerHdr.includes("time") ||
+    lowerHdr.includes("তারিখ");
+
+  if (isDateColumn) {
+    return formatDisplayDate(str);
+  }
+  return str;
 };
 
 const getSellingDateDisplay = (formattedVal: string) => {

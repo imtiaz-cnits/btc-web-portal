@@ -108,7 +108,7 @@ const AboutPage: React.FC = () => {
                     <h2 className="title text-[38px] font-bold font-primary text-[var(--secondary-color)] mb-[10px] uppercase">
                       ABOUT US
                     </h2>
-                    <div className="wrap inline-block bg-[var(--text-1)] px-6 py-1.5 rounded-full">
+                    <div className="wrap inline-block bg-[var(--text-1)] px-3 py-1.5 rounded-full">
                       <ul className="breadcrumb_item flex items-center justify-center gap-2.5">
                         <li>
                           <Link

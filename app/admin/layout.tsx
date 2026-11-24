@@ -61,14 +61,28 @@ function AdminSearchBar() {
 
   return (
     <div className="relative hidden sm:block max-w-xs md:max-w-md w-full">
-      <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+      <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
       <input
-        type="text"
+        type="search"
+        name="dashboard-notice-search"
+        autoComplete="off"
+        autoCorrect="off"
+        spellCheck={false}
         value={searchValue}
         onChange={handleSearchChange}
         placeholder="Search dashboard..."
-        className="bg-slate-50 border border-slate-200 rounded-full pl-9 pr-4 py-1.5 text-xs outline-none focus:border-green-500 focus:bg-white w-[220px] transition-all font-semibold text-slate-700"
+        className="bg-slate-50 border border-slate-200 rounded-full pl-9 pr-7 py-1.5 text-xs outline-none focus:border-green-500 focus:bg-white w-[220px] transition-all font-semibold text-slate-700"
       />
+      {searchValue && (
+        <button
+          type="button"
+          onClick={() => setSearchValue("")}
+          className="text-slate-400 hover:text-slate-600 absolute right-2.5 top-1/2 -translate-y-1/2 bg-transparent border-0 p-0 cursor-pointer"
+          title="Clear search"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      )}
     </div>
   );
 }
@@ -158,9 +172,8 @@ export default function AdminLayout({
   ];
 
   return (
-    <div className={`admin-layout min-h-screen flex flex-col font-secondary antialiased overflow-x-hidden w-full transition-colors duration-300 ${
-      isDark ? "dark bg-slate-900 text-slate-100" : "bg-slate-50 text-slate-800"
-    }`}>
+    <div className={`admin-layout min-h-screen flex flex-col font-secondary antialiased overflow-x-hidden w-full transition-colors duration-300 ${isDark ? "dark bg-slate-900 text-slate-100" : "bg-slate-50 text-slate-800"
+      }`}>
       <div className="flex flex-1 relative overflow-x-hidden w-full min-w-0">
         {/* Mobile Sidebar click-outside backdrop overlay */}
         {sidebarOpen && (
@@ -172,11 +185,10 @@ export default function AdminLayout({
 
         {/* Sidebar */}
         <aside
-          className={`bg-slate-900 border-r border-slate-800 text-white fixed h-full z-30 transition-all duration-300 flex flex-col shadow-2xl overflow-hidden overflow-x-hidden ${
-            sidebarOpen
+          className={`bg-slate-900 border-r border-slate-800 text-white fixed h-full z-30 transition-all duration-300 flex flex-col shadow-2xl overflow-hidden overflow-x-hidden ${sidebarOpen
               ? "w-[260px] translate-x-0"
               : "w-0 -translate-x-[260px] md:w-[70px] md:translate-x-0"
-          }`}
+            }`}
         >
           {/* Logo Brand (Centered when collapsed) */}
           <div className="h-16 flex items-center justify-between border-b border-slate-800 shrink-0 px-[13px] transition-all duration-300 w-full overflow-hidden">
@@ -185,11 +197,10 @@ export default function AdminLayout({
                 B
               </div>
               <span
-                className={`font-bold text-base tracking-wider text-green-400 uppercase transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
-                  sidebarOpen
+                className={`font-bold text-base tracking-wider text-green-400 uppercase transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${sidebarOpen
                     ? "opacity-100 max-w-[150px]"
                     : "opacity-0 max-w-0 pointer-events-none"
-                }`}
+                  }`}
               >
                 BTC Admin
               </span>
@@ -216,21 +227,19 @@ export default function AdminLayout({
                 <Link
                   key={menu.name}
                   href={menu.href}
-                  className={`flex items-center gap-4 rounded-xl font-medium text-sm transition-all duration-300 group relative overflow-hidden whitespace-nowrap w-full border border-transparent px-[13px] py-3.5 justify-start ${
-                    isActive
+                  className={`flex items-center gap-4 rounded-xl font-medium text-sm transition-all duration-300 group relative overflow-hidden whitespace-nowrap w-full border border-transparent px-[13px] py-3.5 justify-start ${isActive
                       ? "bg-[var(--primary-color)] text-white shadow-lg shadow-green-600/20"
                       : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <Icon
                     className={`w-5 h-5 shrink-0 transition-colors duration-300 ${isActive ? "text-white" : "text-slate-400 group-hover:text-white"}`}
                   />
                   <span
-                    className={`transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
-                      sidebarOpen
+                    className={`transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${sidebarOpen
                         ? "opacity-100 max-w-[180px]"
                         : "opacity-0 max-w-0 pointer-events-none"
-                    }`}
+                      }`}
                   >
                     {menu.name}
                   </span>
@@ -252,11 +261,10 @@ export default function AdminLayout({
               >
                 <Globe className="w-5 h-5 shrink-0 text-slate-400 group-hover:text-white transition-colors duration-300" />
                 <span
-                  className={`transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
-                    sidebarOpen
+                  className={`transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${sidebarOpen
                       ? "opacity-100 max-w-[180px]"
                       : "opacity-0 max-w-0 pointer-events-none"
-                  }`}
+                    }`}
                 >
                   View Website
                 </span>
@@ -278,20 +286,18 @@ export default function AdminLayout({
             >
               <LogOut className="w-5 h-5 shrink-0 text-slate-400 group-hover:text-red-400 transition-colors duration-300" />
               <span
-                className={`font-medium text-sm transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
-                  sidebarOpen
+                className={`font-medium text-sm transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${sidebarOpen
                     ? "opacity-100 max-w-[100px]"
                     : "opacity-0 max-w-0 pointer-events-none"
-                }`}
+                  }`}
               >
                 Sign Out
               </span>
               <ChevronRight
-                className={`w-4 h-4 text-slate-600 transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ml-auto shrink-0 ${
-                  sidebarOpen
+                className={`w-4 h-4 text-slate-600 transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ml-auto shrink-0 ${sidebarOpen
                     ? "opacity-100 max-w-[20px]"
                     : "opacity-0 max-w-0 pointer-events-none"
-                }`}
+                  }`}
               />
             </button>
           </div>
@@ -299,19 +305,16 @@ export default function AdminLayout({
 
         {/* Content Wrapper */}
         <div
-          className={`flex-1 flex flex-col transition-all duration-300 min-h-screen min-w-0 w-full overflow-hidden ${
-            sidebarOpen ? "pl-0 md:pl-[260px]" : "pl-0 md:pl-[70px]"
-          }`}
+          className={`flex-1 flex flex-col transition-all duration-300 min-h-screen min-w-0 w-full overflow-hidden ${sidebarOpen ? "pl-0 md:pl-[260px]" : "pl-0 md:pl-[70px]"
+            }`}
         >
           {/* Header */}
           <header
-            className={`h-16 border-b flex items-center px-6 justify-between fixed top-0 right-0 z-20 shadow-sm backdrop-blur-md shrink-0 min-w-0 transition-all duration-300 ${
-              sidebarOpen ? "left-0 md:left-[260px]" : "left-0 md:left-[70px]"
-            } ${
-              isDark
+            className={`h-16 border-b flex items-center px-3 justify-between fixed top-0 right-0 z-20 shadow-sm backdrop-blur-md shrink-0 min-w-0 transition-all duration-300 ${sidebarOpen ? "left-0 md:left-[260px]" : "left-0 md:left-[70px]"
+              } ${isDark
                 ? "bg-slate-900/95 border-slate-800"
                 : "bg-white/90 border-slate-200"
-            }`}
+              }`}
           >
             <div className="flex items-center min-w-0">
               {/* Header Logo (ONLY visible on mobile, hidden on desktop!) */}
@@ -326,11 +329,10 @@ export default function AdminLayout({
 
               <button
                 onClick={toggleSidebar}
-                className={`p-2 rounded-lg transition ${
-                  isDark
+                className={`p-2 rounded-lg transition ${isDark
                     ? "hover:bg-slate-800 text-slate-400 hover:text-white"
                     : "hover:bg-slate-100 text-slate-500 hover:text-slate-700"
-                }`}
+                  }`}
               >
                 <Menu className="w-5 h-5" />
               </button>
@@ -351,11 +353,10 @@ export default function AdminLayout({
                 onClick={toggleDark}
                 aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
                 title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-                className={`p-2 rounded-lg transition relative ${
-                  isDark
+                className={`p-2 rounded-lg transition relative ${isDark
                     ? "hover:bg-slate-800 text-amber-400 hover:text-amber-300"
                     : "hover:bg-slate-100 text-slate-400 hover:text-slate-600"
-                }`}
+                  }`}
               >
                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -363,33 +364,28 @@ export default function AdminLayout({
               {/* Notification bell */}
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
-                className={`p-2 rounded-lg transition relative ${
-                  isDark
+                className={`p-2 rounded-lg transition relative ${isDark
                     ? "hover:bg-slate-800 text-slate-400 hover:text-slate-200"
                     : "hover:bg-slate-100 text-slate-400 hover:text-slate-600"
-                }`}
+                  }`}
               >
                 <Bell className="w-5 h-5" />
                 {notifications.length > 0 && (
-                  <span className={`absolute top-1 right-1 w-2.5 h-2.5 bg-green-500 border-2 rounded-full ${
-                    isDark ? "border-slate-900" : "border-white"
-                  }`}></span>
+                  <span className={`absolute top-1 right-1 w-2.5 h-2.5 bg-green-500 border-2 rounded-full ${isDark ? "border-slate-900" : "border-white"
+                    }`}></span>
                 )}
               </button>
 
               {/* Notification Dropdown Panel */}
               {showNotifications && (
-                <div className={`absolute top-[100%] right-0 mt-2 border rounded-2xl shadow-xl w-[320px] md:w-[360px] z-50 overflow-hidden divide-y animate-scale-in ${
-                  isDark
+                <div className={`absolute top-[100%] right-0 mt-2 border rounded-2xl shadow-xl w-[320px] md:w-[360px] z-50 overflow-hidden divide-y animate-scale-in ${isDark
                     ? "bg-slate-900 border-slate-700 divide-slate-800"
                     : "bg-white border-slate-200 divide-slate-100"
-                }`}>
-                  <div className={`p-4 flex justify-between items-center ${
-                    isDark ? "bg-slate-800" : "bg-slate-50"
                   }`}>
-                    <span className={`text-xs font-extrabold uppercase tracking-wider ${
-                      isDark ? "text-slate-300" : "text-slate-700"
+                  <div className={`p-4 flex justify-between items-center ${isDark ? "bg-slate-800" : "bg-slate-50"
                     }`}>
+                    <span className={`text-xs font-extrabold uppercase tracking-wider ${isDark ? "text-slate-300" : "text-slate-700"
+                      }`}>
                       Tender Notifications
                     </span>
                     <span className="bg-green-100 text-green-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
@@ -403,26 +399,23 @@ export default function AdminLayout({
                         key={notif.id}
                         href={`/admin/egp-notices`}
                         onClick={() => setShowNotifications(false)}
-                        className={`p-4 block transition cursor-pointer text-left ${
-                          isDark ? "hover:bg-slate-800" : "hover:bg-slate-50"
-                        }`}
+                        className={`p-4 block transition cursor-pointer text-left ${isDark ? "hover:bg-slate-800" : "hover:bg-slate-50"
+                          }`}
                       >
                         <div className="flex justify-between items-start gap-2">
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-green-50 text-green-700 text-[9px] font-bold uppercase border border-green-200 shrink-0">
                             {notif.category}
                           </span>
-                          <span className={`text-[10px] font-medium ${
-                            isDark ? "text-slate-500" : "text-slate-400"
-                          }`}>
+                          <span className={`text-[10px] font-medium ${isDark ? "text-slate-500" : "text-slate-400"
+                            }`}>
                             {(() => {
                               const d = new Date(notif.createdAt);
                               return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
                             })()}
                           </span>
                         </div>
-                        <p className={`text-xs font-bold mt-1.5 line-clamp-2 hover:text-[var(--primary-color)] transition leading-relaxed ${
-                          isDark ? "text-slate-300" : "text-slate-700"
-                        }`}>
+                        <p className={`text-xs font-bold mt-1.5 line-clamp-2 hover:text-[var(--primary-color)] transition leading-relaxed ${isDark ? "text-slate-300" : "text-slate-700"
+                          }`}>
                           {notif.title}
                         </p>
                       </Link>
@@ -446,18 +439,15 @@ export default function AdminLayout({
               )}
 
               {/* Profile Menu */}
-              <div className={`flex items-center gap-3 border-l pl-4 ${
-                isDark ? "border-slate-700" : "border-slate-200"
-              }`}>
+              <div className={`flex items-center gap-3 border-l pl-4 ${isDark ? "border-slate-700" : "border-slate-200"
+                }`}>
                 <div className="text-right hidden md:block">
-                  <div className={`text-sm font-semibold leading-tight ${
-                    isDark ? "text-slate-200" : "text-slate-800"
-                  }`}>
+                  <div className={`text-sm font-semibold leading-tight ${isDark ? "text-slate-200" : "text-slate-800"
+                    }`}>
                     {session?.user?.name || "Administrator"}
                   </div>
-                  <div className={`text-[11px] font-medium uppercase tracking-widest mt-0.5 ${
-                    isDark ? "text-slate-500" : "text-slate-400"
-                  }`}>
+                  <div className={`text-[11px] font-medium uppercase tracking-widest mt-0.5 ${isDark ? "text-slate-500" : "text-slate-400"
+                    }`}>
                     {session?.user?.email || "Admin User"}
                   </div>
                 </div>
@@ -478,9 +468,8 @@ export default function AdminLayout({
           </header>
 
           {/* Main Content Area (min-w-0 for flexbox responsive layout) */}
-          <main className={`p-4 sm:p-6 md:p-8 flex-grow min-w-0 w-full overflow-hidden mt-16 transition-colors duration-300 ${
-            isDark ? "bg-slate-900" : "bg-slate-50"
-          }`}>
+          <main className={`p-4 sm:p-6 md:p-8 flex-grow min-w-0 w-full overflow-hidden mt-16 transition-colors duration-300 ${isDark ? "bg-slate-900" : "bg-slate-50"
+            }`}>
             <div className="w-full h-full">{children}</div>
           </main>
         </div>

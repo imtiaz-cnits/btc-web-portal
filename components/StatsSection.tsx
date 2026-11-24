@@ -5,7 +5,7 @@ import { useCounter } from '@/lib/hooks/use-gsap';
 
 const StatsSection: React.FC = () => {
     const sectionRef = useRef<HTMLDivElement>(null);
-    
+
     const counters = [
         { id: 'tenders', target: 1000 },
         { id: 'design-clients', target: 700 },
@@ -17,10 +17,10 @@ const StatsSection: React.FC = () => {
 
     return (
         <section className="counter-wrapper py-20 bg-shade-1" ref={sectionRef}>
-            <div className="custom-container mx-auto px-4">
+            <div className="custom-container mx-auto px-3">
                 <div className="flex flex-wrap -mx-4">
                     {/* Item 1 */}
-                    <div className="w-full sm:w-1/2 lg:w-1/4 px-4 mb-10 lg:mb-0">
+                    <div className="w-full sm:w-1/2 lg:w-1/4 px-3 mb-10 lg:mb-0">
                         <div className="counter-item text-center">
                             <div className="flex justify-center items-center">
                                 <h1 className="text-[52px] font-bold text-text-1 font-primary mb-0 leading-none" ref={(el) => { if (el) counterRefs.current['tenders'] = el; }}>0</h1>
@@ -31,7 +31,7 @@ const StatsSection: React.FC = () => {
                     </div>
 
                     {/* Item 2 */}
-                    <div className="w-full sm:w-1/2 lg:w-1/4 px-4 mb-10 lg:mb-0">
+                    <div className="w-full sm:w-1/2 lg:w-1/4 px-3 mb-10 lg:mb-0">
                         <div className="counter-item text-center">
                             <div className="flex justify-center items-center">
                                 <h1 className="text-[52px] font-bold text-text-1 font-primary mb-0 leading-none" ref={(el) => { if (el) counterRefs.current['design-clients'] = el; }}>0</h1>
@@ -42,7 +42,7 @@ const StatsSection: React.FC = () => {
                     </div>
 
                     {/* Item 3 */}
-                    <div className="w-full sm:w-1/2 lg:w-1/4 px-4 mb-10 sm:mb-0">
+                    <div className="w-full sm:w-1/2 lg:w-1/4 px-3 mb-10 sm:mb-0">
                         <div className="counter-item text-center">
                             <div className="flex justify-center items-center">
                                 <h1 className="text-[52px] font-bold text-text-1 font-primary mb-0 leading-none" ref={(el) => { if (el) counterRefs.current['projects'] = el; }}>0</h1>
@@ -53,7 +53,7 @@ const StatsSection: React.FC = () => {
                     </div>
 
                     {/* Item 4 */}
-                    <div className="w-full sm:w-1/2 lg:w-1/4 px-4">
+                    <div className="w-full sm:w-1/2 lg:w-1/4 px-3">
                         <div className="counter-item text-center">
                             <div className="flex justify-center items-center">
                                 <h1 className="text-[52px] font-bold text-text-1 font-primary mb-0 leading-none" ref={(el) => { if (el) counterRefs.current['success'] = el; }}>0</h1>

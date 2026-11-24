@@ -826,16 +826,16 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
       <table className="w-full text-left border-collapse text-sm">
         <thead className="bg-slate-50 border-b border-slate-200">
           <tr>
-            <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs w-12 text-center">SL</th>
-            <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Title &amp; Type</th>
-            <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Category</th>
-            <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Year</th>
-            <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Status</th>
-            <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Publish Date</th>
+            <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs w-12 text-center">SL</th>
+            <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Title &amp; Type</th>
+            <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Category</th>
+            <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Year</th>
+            <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Status</th>
+            <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Publish Date</th>
             {(filter === "all" || filter === "published") && (
-              <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Last Date</th>
+              <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Last Date</th>
             )}
-            <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs text-right">Actions</th>
+            <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs text-right">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100 font-medium">
@@ -844,14 +844,14 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
             return (
               <tr key={notice.id} className="hover:bg-slate-50/50 transition">
                 {/* SL No */}
-                <td className="px-4 py-4 text-center">
+                <td className="px-3 py-4 text-center">
                   <span className="text-xs font-extrabold text-slate-400 bg-slate-100 w-7 h-7 rounded-lg flex items-center justify-center mx-auto">
                     {startIndex + idx + 1}
                   </span>
                 </td>
 
                 {/* Title & Type */}
-                <td className="px-6 py-4">
+                <td className="px-3 py-4">
                   <div className="space-y-1">
                     <span className="text-slate-800 font-bold line-clamp-1">{notice.title}</span>
                     <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold flex-wrap">
@@ -886,24 +886,24 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                 </td>
 
                 {/* Category */}
-                <td className="px-6 py-4">
+                <td className="px-3 py-4">
                   <span className="px-2.5 py-1 bg-green-50 text-green-700 text-xs rounded-full font-bold uppercase tracking-wider">
                     {notice.category.replace("_", " ")}
                   </span>
                 </td>
 
                 {/* Year */}
-                <td className="px-6 py-4 text-slate-600 text-sm font-semibold">{notice.year || "N/A"}</td>
+                <td className="px-3 py-4 text-slate-600 text-sm font-semibold">{notice.year || "N/A"}</td>
 
                 {/* Status */}
-                <td className="px-6 py-4">
+                <td className="px-3 py-4">
                   <span className={`px-2.5 py-1 text-xs rounded-full font-bold uppercase tracking-wider ${statusBadge.cls}`}>
                     {statusBadge.label}
                   </span>
                 </td>
 
                 {/* Publish Date */}
-                <td className="px-6 py-4 text-slate-400 text-xs font-semibold font-sans">
+                <td className="px-3 py-4 text-slate-400 text-xs font-semibold font-sans">
                   <div className="space-y-1">
                     <div className="flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 shrink-0 text-slate-400" />
@@ -928,7 +928,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
 
                 {/* Last Date */}
                 {(filter === "all" || filter === "published") && (
-                  <td className="px-6 py-4 text-slate-400 text-xs font-semibold font-sans">
+                  <td className="px-3 py-4 text-slate-400 text-xs font-semibold font-sans">
                     <div className="flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 shrink-0 text-slate-400" />
                       <span>{formatLastDate(notice)}</span>
@@ -937,7 +937,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
                 )}
 
                 {/* Actions */}
-                <td className="px-6 py-4 text-right">
+                <td className="px-3 py-4 text-right">
                   <div className="flex justify-end gap-2 items-center">
                     {/* Email Share Button */}
                     <EmailShareButton notice={notice} />
@@ -990,7 +990,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
 
           {notices.length === 0 && (
             <tr>
-              <td colSpan={(filter === "all" || filter === "published") ? 8 : 7} className="px-6 py-16 text-center text-slate-400 font-semibold text-sm">
+              <td colSpan={(filter === "all" || filter === "published") ? 8 : 7} className="px-3 py-16 text-center text-slate-400 font-semibold text-sm">
                 No procurement notices found. Create one to get started!
               </td>
             </tr>
@@ -1018,7 +1018,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[var(--primary-color)] via-blue-500 to-purple-500" />
 
             {/* Header */}
-            <div className="flex justify-between items-start gap-4 px-6 pt-7 pb-4 border-b border-slate-100 shrink-0">
+            <div className="flex justify-between items-start gap-4 px-3 pt-7 pb-4 border-b border-slate-100 shrink-0">
               <div className="space-y-1.5 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   {quickViewNotice.type === "FILE" && (
@@ -1208,7 +1208,7 @@ export default function NoticesTable({ notices, startIndex, now }: NoticesTableP
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-slate-100 flex justify-between items-center gap-3 shrink-0 bg-slate-50/60">
+            <div className="px-3 py-4 border-t border-slate-100 flex justify-between items-center gap-3 shrink-0 bg-slate-50/60">
               {isSelectingWinners ? (
                 <>
                   <span className="text-xs font-semibold text-amber-600 animate-pulse flex items-center gap-1.5">

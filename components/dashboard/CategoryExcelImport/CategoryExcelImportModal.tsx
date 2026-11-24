@@ -123,7 +123,7 @@ export default function CategoryExcelImportModal({
     <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
       <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-scale-in">
         {/* Modal Header */}
-        <div className="flex justify-between items-center px-6 pt-6 pb-4 border-b border-slate-100 shrink-0">
+        <div className="flex justify-between items-center px-3 pt-6 pb-4 border-b border-slate-100 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-xs">
               <FileSpreadsheet className="w-6 h-6 text-emerald-600" />
@@ -188,17 +188,15 @@ export default function CategoryExcelImportModal({
                       setParseResult(null);
                       setFileName("");
                     }}
-                    className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
-                      isSelected
-                        ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
-                        : "bg-white text-slate-700 border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/30"
-                    }`}
+                    className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${isSelected
+                      ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                      : "bg-white text-slate-700 border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/30"
+                      }`}
                   >
                     <span className="font-extrabold text-sm">{cat}</span>
                     <span
-                      className={`text-[11px] mt-1 font-semibold ${
-                        isSelected ? "text-emerald-100" : "text-slate-400"
-                      }`}
+                      className={`text-[11px] mt-1 font-semibold ${isSelected ? "text-emerald-100" : "text-slate-400"
+                        }`}
                     >
                       {cat === "OTM" ? "12 Columns" : "10 Columns"}
                     </span>
@@ -222,13 +220,12 @@ export default function CategoryExcelImportModal({
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-2xl p-6 text-center transition cursor-pointer flex flex-col items-center justify-center min-h-[140px] ${
-                isDragging
-                  ? "border-emerald-500 bg-emerald-50/60"
-                  : fileName
+              className={`border-2 border-dashed rounded-2xl p-6 text-center transition cursor-pointer flex flex-col items-center justify-center min-h-[140px] ${isDragging
+                ? "border-emerald-500 bg-emerald-50/60"
+                : fileName
                   ? "border-emerald-300 bg-emerald-50/20"
                   : "border-slate-200 hover:border-emerald-400 bg-slate-50/50 hover:bg-emerald-50/10"
-              }`}
+                }`}
             >
               <input
                 ref={fileInputRef}
@@ -318,7 +315,7 @@ export default function CategoryExcelImportModal({
                 <div className="space-y-4">
                   {/* Notice Details Preview */}
                   <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
-                    <div className="bg-slate-100/80 px-4 py-2.5 border-b border-slate-200 flex items-center justify-between">
+                    <div className="bg-slate-100/80 px-3 py-2.5 border-b border-slate-200 flex items-center justify-between">
                       <span className="font-bold text-xs text-slate-700 flex items-center gap-1.5">
                         <Building2 className="w-3.5 h-3.5 text-emerald-600" />
                         Notice Details Preview
@@ -353,7 +350,7 @@ export default function CategoryExcelImportModal({
 
                   {/* Tender Data Preview */}
                   <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
-                    <div className="bg-slate-100/80 px-4 py-2.5 border-b border-slate-200 flex items-center justify-between">
+                    <div className="bg-slate-100/80 px-3 py-2.5 border-b border-slate-200 flex items-center justify-between">
                       <span className="font-bold text-xs text-slate-700 flex items-center gap-1.5">
                         <Layers className="w-3.5 h-3.5 text-emerald-600" />
                         Tender Data Preview ({parseResult.tenderData.totalRows} row(s))
@@ -369,9 +366,8 @@ export default function CategoryExcelImportModal({
                             {parseResult.tenderData.headers.map((h, i) => (
                               <th
                                 key={i}
-                                className={`px-2.5 py-2 font-bold whitespace-nowrap text-left border-r border-slate-200 ${
-                                  h === "#" ? "bg-slate-100 text-center w-10" : ""
-                                }`}
+                                className={`px-2.5 py-2 font-bold whitespace-nowrap text-left border-r border-slate-200 ${h === "#" ? "bg-slate-100 text-center w-10" : ""
+                                  }`}
                               >
                                 {h}
                               </th>
@@ -384,11 +380,10 @@ export default function CategoryExcelImportModal({
                               {row.map((cell, cIdx) => (
                                 <td
                                   key={cIdx}
-                                  className={`px-2.5 py-1.5 border-r border-slate-100 whitespace-nowrap text-slate-700 ${
-                                    parseResult.tenderData.headers[cIdx] === "#"
-                                      ? "font-extrabold text-slate-400 bg-slate-50/50 text-center"
-                                      : ""
-                                  }`}
+                                  className={`px-2.5 py-1.5 border-r border-slate-100 whitespace-nowrap text-slate-700 ${parseResult.tenderData.headers[cIdx] === "#"
+                                    ? "font-extrabold text-slate-400 bg-slate-50/50 text-center"
+                                    : ""
+                                    }`}
                                 >
                                   {cell || "—"}
                                 </td>
@@ -402,7 +397,7 @@ export default function CategoryExcelImportModal({
 
                   {/* Footer Details Preview */}
                   <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
-                    <div className="bg-slate-100/80 px-4 py-2.5 border-b border-slate-200">
+                    <div className="bg-slate-100/80 px-3 py-2.5 border-b border-slate-200">
                       <span className="font-bold text-xs text-slate-700">
                         Footer Details Preview
                       </span>
@@ -436,7 +431,7 @@ export default function CategoryExcelImportModal({
             <button
               type="button"
               onClick={onClose}
-              className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer border-0 active:scale-95"
+              className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-3 py-2 rounded-xl text-xs transition cursor-pointer border-0 active:scale-95"
             >
               Cancel
             </button>
@@ -444,11 +439,10 @@ export default function CategoryExcelImportModal({
               type="button"
               disabled={!parseResult || !parseResult.validation.isValid}
               onClick={handleApplyClick}
-              className={`font-bold px-5 py-2 rounded-xl text-xs transition inline-flex items-center gap-2 shadow-sm border-0 ${
-                parseResult && parseResult.validation.isValid
-                  ? "bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer active:scale-95"
-                  : "bg-slate-200 text-slate-400 cursor-not-allowed"
-              }`}
+              className={`font-bold px-5 py-2 rounded-xl text-xs transition inline-flex items-center gap-2 shadow-sm border-0 ${parseResult && parseResult.validation.isValid
+                ? "bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer active:scale-95"
+                : "bg-slate-200 text-slate-400 cursor-not-allowed"
+                }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>Apply to Notice Form</span>

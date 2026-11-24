@@ -342,7 +342,7 @@ export default function SingleNoticeClient({
   );
   const isPdf = Boolean(
     resolvedFileUrl &&
-      resolvedFileUrl.split("?")[0].toLowerCase().endsWith(".pdf"),
+    resolvedFileUrl.split("?")[0].toLowerCase().endsWith(".pdf"),
   );
   const printAreaRef = useRef<HTMLDivElement>(null);
   const [pdfDownloading, setPdfDownloading] = React.useState(false);
@@ -1819,59 +1819,59 @@ export default function SingleNoticeClient({
         />
 
         {/* Fullscreen Top Navigation Bar */}
-        <div className="w-full bg-white border-b border-slate-200 py-3.5 px-4 flex justify-center gap-3 print:hidden">
+        <div className="w-full bg-white border-b border-slate-200 py-3.5 px-3 flex justify-center gap-3 print:hidden">
           <Link
             href="/"
-            className="bg-[#e74c3c] hover:bg-[#c0392b] !text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+            className="bg-[#e74c3c] hover:bg-[#c0392b] !text-white px-3 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-2 shadow-sm transition-all cursor-pointer"
           >
             <Home className="w-4 h-4" /> Home
           </Link>
           <Link
             href="/egp-notice"
-            className="bg-[#34495e] hover:bg-[#2c3e50] !text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+            className="bg-[#34495e] hover:bg-[#2c3e50] !text-white px-3 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-2 shadow-sm transition-all cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" /> Back
           </Link>
           <button
             onClick={handlePrint}
-            className="bg-[var(--primary-color)] hover:bg-green-700 !text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+            className="bg-[var(--primary-color)] hover:bg-green-700 !text-white px-3 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-2 shadow-sm transition-all cursor-pointer"
           >
             <Printer className="w-4 h-4" /> Print
           </button>
-            {
-              resolvedFileUrl && !resolvedFileUrl.includes("-result.pdf") && !notice.tableData ? (
-                <a
-                  href={attachedDownloadUrl}
-                  download={attachedDownloadFilename}
-                  className="bg-[#2980b9] hover:bg-[#3498db] !text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-2 shadow-sm transition-all cursor-pointer"
-                >
-                  <Download className="w-4 h-4" /> Download PDF
-                </a>
-              ) : notice.tableData ? (
-                <button
-                  type="button"
-                  onClick={handleDownloadPdf}
-                  disabled={pdfDownloading}
-                  className="bg-[#2980b9] hover:bg-[#3498db] !text-white px-6 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-60"
-                >
-                  {pdfDownloading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin text-white flex-shrink-0" /> Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="w-4 h-4" /> Download PDF
-                    </>
-                  )}
-                </button>
-              ) : null
-            }
+          {
+            resolvedFileUrl && !resolvedFileUrl.includes("-result.pdf") && !notice.tableData ? (
+              <a
+                href={attachedDownloadUrl}
+                download={attachedDownloadFilename}
+                className="bg-[#2980b9] hover:bg-[#3498db] !text-white px-3 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+              >
+                <Download className="w-4 h-4" /> Download PDF
+              </a>
+            ) : notice.tableData ? (
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={pdfDownloading}
+                className="bg-[#2980b9] hover:bg-[#3498db] !text-white px-3 py-2.5 rounded-lg font-bold text-xs uppercase flex items-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-60"
+              >
+                {pdfDownloading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-white flex-shrink-0" /> Generating...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" /> Download PDF
+                  </>
+                )}
+              </button>
+            ) : null
+          }
         </div>
 
         {/* Fullscreen Table Content Wrapper */}
         <div
           ref={printAreaRef}
-          className="print-wrapper-box w-full max-w-full px-2 sm:px-6 md:px-12 py-8 bg-white space-y-8"
+          className="print-wrapper-box w-full max-w-full px-2 sm:px-3 md:px-12 py-8 bg-white space-y-8"
         >
           {parsedTables.map((table, tIdx) => {
             const defaultHeaderBg =
@@ -2129,8 +2129,8 @@ export default function SingleNoticeClient({
                               className={`p-2 font-bold border border-gray-400 text-base capitalize text-center ${isDesc
                                 ? "desc-column w-[32%] min-w-[220px] print:w-auto whitespace-normal"
                                 : isLocation
-                                    ? "location-column w-[1%] print:w-[1%] whitespace-nowrap text-center"
-                                    : "auto-column print:w-[1%]"
+                                  ? "location-column w-[1%] print:w-[1%] whitespace-nowrap text-center"
+                                  : "auto-column print:w-[1%]"
                                 } ${isTender || isSl ? "whitespace-nowrap" : ""}`}
                               style={{
                                 backgroundColor:
@@ -2273,8 +2273,8 @@ export default function SingleNoticeClient({
                                   className={`p-2.5 border border-gray-400 text-black text-[15px] font-semibold ${cellAlignClass} ${isDesc
                                     ? "desc-column w-[32%] min-w-[220px] print:w-auto whitespace-normal text-left"
                                     : isLocationCol
-                                        ? "location-column w-[1%] print:w-[1%] whitespace-nowrap text-center"
-                                        : "auto-column print:w-[1%]"
+                                      ? "location-column w-[1%] print:w-[1%] whitespace-nowrap text-center"
+                                      : "auto-column print:w-[1%]"
                                     } ${isNoWrapCell ? "whitespace-nowrap" : ""
                                     }`}
                                   style={{
@@ -2585,7 +2585,7 @@ export default function SingleNoticeClient({
           <div className="flex-1">
             <Link
               href="/egp-notice"
-              className="inline-flex items-center bg-primary hover:!text-secondary !text-secondary px-4 py-2 mb-5 rounded-xl font-bold text-sm uppercase hover:bg-text-1 transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer"
+              className="inline-flex items-center bg-primary hover:!text-secondary !text-secondary px-3 py-2 mb-5 rounded-xl font-bold text-sm uppercase hover:bg-text-1 transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4 shrink-0" /> Back to All Notices
             </Link>
@@ -2593,7 +2593,7 @@ export default function SingleNoticeClient({
               {notice.title}
             </h1>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-4 text-sm font-bold">
-              <span className="bg-primary text-white px-4 py-1.5 rounded-full text-xs uppercase tracking-wider">
+              <span className="bg-primary text-white px-3 py-1.5 rounded-full text-xs uppercase tracking-wider">
                 {notice.category}
               </span>
               <span className="text-text-2 flex items-center gap-1.5">
@@ -2619,7 +2619,7 @@ export default function SingleNoticeClient({
           <div className="flex flex-wrap gap-3 w-full lg:w-auto shrink-0">
             <button
               onClick={handlePrint}
-              className="flex-1 lg:flex-initial bg-text-1 text-white px-6 py-3.5 rounded-xl font-bold text-sm uppercase hover:bg-primary transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer"
+              className="flex-1 lg:flex-initial bg-text-1 text-white px-3 py-3.5 rounded-xl font-bold text-sm uppercase hover:bg-primary transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer"
             >
               <Printer className="w-4 h-4 shrink-0" /> Print Notice
             </button>
@@ -2627,7 +2627,7 @@ export default function SingleNoticeClient({
               <a
                 href={attachedDownloadUrl}
                 download={attachedDownloadFilename}
-                className="flex-1 lg:flex-initial bg-primary hover:!text-secondary !text-secondary px-6 py-3.5 rounded-xl font-bold text-sm uppercase hover:bg-text-1 transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer"
+                className="flex-1 lg:flex-initial bg-primary hover:!text-secondary !text-secondary px-3 py-3.5 rounded-xl font-bold text-sm uppercase hover:bg-text-1 transition flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer"
               >
                 <Download className="w-4 h-4 shrink-0" /> Download File
               </a>
@@ -2920,8 +2920,8 @@ export default function SingleNoticeClient({
                                     className={`p-2 font-bold border border-gray-400 text-sm capitalize text-center ${isDesc
                                       ? "desc-column w-[30%] min-w-[220px] print:w-auto whitespace-normal"
                                       : isLocation
-                                          ? "location-column w-[1%] print:w-[1%] whitespace-nowrap text-center"
-                                          : "auto-column print:w-[1%]"
+                                        ? "location-column w-[1%] print:w-[1%] whitespace-nowrap text-center"
+                                        : "auto-column print:w-[1%]"
                                       }`}
                                     style={{
                                       backgroundColor:
@@ -3026,8 +3026,8 @@ export default function SingleNoticeClient({
                                           className={`p-2.5 border border-gray-400 text-black text-sm font-semibold ${cellAlignClass} ${isDesc
                                             ? "desc-column w-[30%] min-w-[220px] print:w-auto whitespace-normal text-left"
                                             : isLocationCol
-                                                ? "location-column w-[1%] print:w-[1%] whitespace-nowrap text-center"
-                                                : "auto-column print:w-[1%]"
+                                              ? "location-column w-[1%] print:w-[1%] whitespace-nowrap text-center"
+                                              : "auto-column print:w-[1%]"
                                             }`}
                                           style={{
                                             backgroundColor: cellBg,
@@ -3087,16 +3087,16 @@ export default function SingleNoticeClient({
                                               formattedVal &&
                                               formattedVal !== "N/A"
                                             ) {
-                                          const locationWords = getLocationWords(formattedVal);
-                                          return (
-                                            <div className="location-cell flex flex-col items-center justify-center text-center leading-tight">
-                                              {locationWords.map((word, wIdx) => (
-                                                <span key={wIdx} className="location-word whitespace-nowrap">
-                                                  {word}
-                                                </span>
-                                              ))}
-                                            </div>
-                                            );
+                                              const locationWords = getLocationWords(formattedVal);
+                                              return (
+                                                <div className="location-cell flex flex-col items-center justify-center text-center leading-tight">
+                                                  {locationWords.map((word, wIdx) => (
+                                                    <span key={wIdx} className="location-word whitespace-nowrap">
+                                                      {word}
+                                                    </span>
+                                                  ))}
+                                                </div>
+                                              );
                                             }
                                             return formattedVal;
                                           })()}

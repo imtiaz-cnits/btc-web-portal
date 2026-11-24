@@ -30,25 +30,25 @@ const Navbar: React.FC<NavbarProps> = ({ initialNotices = [] }) => {
     initialNotices.length > 0
       ? initialNotices
       : [
-          {
-            id: "1",
-            title:
-              "বিটিসি ওয়েব পোর্টালে আপনাকে স্বাগতম - আমাদের নতুন ই-টেন্ডার সুবিধা গ্রহণ করুন।",
-            link: "/egp-notice",
-          },
-          {
-            id: "2",
-            title:
-              "নতুন কনস্ট্রাকশন প্রজেক্টের টেন্ডার নোটিশ প্রকাশিত হয়েছে - বিস্তারিত জানতে ক্লিক করুন।",
-            link: "/egp-notice",
-          },
-          {
-            id: "3",
-            title:
-              "বিটিসি এর মাধ্যমে আপনার প্রজেক্টের সঠিক পরিকল্পনা এবং বাস্তবায়ন নিশ্চিত করুন।",
-            link: "/about",
-          },
-        ],
+        {
+          id: "1",
+          title:
+            "বিটিসি ওয়েব পোর্টালে আপনাকে স্বাগতম - আমাদের নতুন ই-টেন্ডার সুবিধা গ্রহণ করুন।",
+          link: "/egp-notice",
+        },
+        {
+          id: "2",
+          title:
+            "নতুন কনস্ট্রাকশন প্রজেক্টের টেন্ডার নোটিশ প্রকাশিত হয়েছে - বিস্তারিত জানতে ক্লিক করুন।",
+          link: "/egp-notice",
+        },
+        {
+          id: "3",
+          title:
+            "বিটিসি এর মাধ্যমে আপনার প্রজেক্টের সঠিক পরিকল্পনা এবং বাস্তবায়ন নিশ্চিত করুন।",
+          link: "/about",
+        },
+      ],
   );
 
   // Handle scroll to toggle fixed class and active section
@@ -265,17 +265,15 @@ const Navbar: React.FC<NavbarProps> = ({ initialNotices = [] }) => {
 
       {/* Navbar */}
       <nav
-        className={`w-full z-[50] transition-all duration-300 ${
-          isFixed
+        className={`w-full z-[50] transition-all duration-300 ${isFixed
             ? "fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md shadow-lg py-1 border-b border-slate-100"
             : "relative py-0"
-        }`}
+          }`}
       >
         <div className="custom-container">
           <div
-            className={`w-full bg-shade-1 rounded-xl border border-primary transition-all duration-300 ${
-              isFixed ? "!border-none !rounded-none !bg-transparent" : "mt-2 lg:mt-0"
-            }`}
+            className={`w-full bg-shade-1 rounded-xl border border-primary transition-all duration-300 ${isFixed ? "!border-none !rounded-none !bg-transparent" : "mt-2 lg:mt-0"
+              }`}
           >
             <div className="flex justify-between h-[80px] items-center px-3">
               <Link
@@ -293,41 +291,36 @@ const Navbar: React.FC<NavbarProps> = ({ initialNotices = [] }) => {
               <div className="hidden lg:flex space-x-6 items-center">
                 <Link
                   href="/"
-                  className={`nav-link-item transition duration-400 font-medium ${
-                    isLinkActive("/", "home") ? "active" : ""
-                  }`}
+                  className={`nav-link-item transition duration-400 font-medium ${isLinkActive("/", "home") ? "active" : ""
+                    }`}
                 >
                   HOME
                 </Link>
                 <Link
                   href="/#services"
-                  className={`nav-link-item transition duration-400 font-medium ${
-                    isLinkActive("/#services", "services") ? "active" : ""
-                  }`}
+                  className={`nav-link-item transition duration-400 font-medium ${isLinkActive("/#services", "services") ? "active" : ""
+                    }`}
                 >
                   SERVICES
                 </Link>
                 <Link
                   href="/#projects"
-                  className={`nav-link-item transition duration-400 font-medium ${
-                    isLinkActive("/#projects", "projects") ? "active" : ""
-                  }`}
+                  className={`nav-link-item transition duration-400 font-medium ${isLinkActive("/#projects", "projects") ? "active" : ""
+                    }`}
                 >
                   PROJECTS
                 </Link>
                 <Link
                   href="/egp-notice"
-                  className={`nav-link-item transition duration-400 font-medium ${
-                    pathname.includes("notice") ? "active" : ""
-                  }`}
+                  className={`nav-link-item transition duration-400 font-medium ${pathname.includes("notice") ? "active" : ""
+                    }`}
                 >
                   NOTICES
                 </Link>
                 <Link
                   href="/about"
-                  className={`nav-link-item transition duration-400 font-medium ${
-                    isLinkActive("/about") ? "active" : ""
-                  }`}
+                  className={`nav-link-item transition duration-400 font-medium ${isLinkActive("/about") ? "active" : ""
+                    }`}
                 >
                   ABOUT US
                 </Link>
@@ -335,11 +328,10 @@ const Navbar: React.FC<NavbarProps> = ({ initialNotices = [] }) => {
               <div className="hidden lg:block">
                 <Link
                   href="/contact"
-                  className={`contact_btn cursor-pointer relative inline-flex items-center justify-center px-8 py-2.5 overflow-hidden tracking-tighter text-white bg-primary rounded-tl-lg rounded-tr-lg rounded-bl-0 rounded-br-lg group transition-all duration-300 ${
-                    pathname === "/contact"
+                  className={`contact_btn cursor-pointer relative inline-flex items-center justify-center px-8 py-2.5 overflow-hidden tracking-tighter text-white bg-primary rounded-tl-lg rounded-tr-lg rounded-bl-0 rounded-br-lg group transition-all duration-300 ${pathname === "/contact"
                       ? "ring-2 ring-primary ring-offset-2"
                       : ""
-                  }`}
+                    }`}
                 >
                   <span className="absolute bottom-0 left-0 right-0 h-0 transition-all duration-500 ease-out bg-text-1 group-hover:h-full"></span>
                   <span className="relative text-base font-semibold text-white group-hover:text-white transition-colors duration-300 uppercase">
@@ -373,11 +365,10 @@ const Navbar: React.FC<NavbarProps> = ({ initialNotices = [] }) => {
 
       {/* Mobile Menu */}
       <div
-        className={`fixed overflow-auto top-0 left-0 h-full w-64 bg-white shadow-lg transform ${
-          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out z-[52] lg:hidden`}
+        className={`fixed overflow-auto top-0 left-0 h-full w-64 bg-white shadow-lg transform ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 ease-in-out z-[52] lg:hidden`}
       >
-        <div className="flex justify-between items-center px-4 py-3 border-b">
+        <div className="flex justify-between items-center px-3 py-3 border-b">
           <Link href="/" className="text-xl font-bold flex items-center">
             <Image
               src={Logo}
@@ -403,64 +394,59 @@ const Navbar: React.FC<NavbarProps> = ({ initialNotices = [] }) => {
             </svg>
           </button>
         </div>
-        <div className="px-4 py-2 space-y-1">
+        <div className="px-3 py-2 space-y-1">
           <Link
             href="/"
-            className={`block px-3 py-2 rounded-lg transition-all duration-300 ${
-              isLinkActive("/", "home")
+            className={`block px-3 py-2 rounded-lg transition-all duration-300 ${isLinkActive("/", "home")
                 ? "text-primary bg-shade-1"
                 : "text-text-1 hover:text-primary hover:bg-shade-1"
-            }`}
+              }`}
             onClick={toggleMobileMenu}
           >
             HOME
           </Link>
           <Link
             href="/#services"
-            className={`block px-3 py-2 rounded-lg transition-all duration-300 ${
-              isLinkActive("/#services", "services")
+            className={`block px-3 py-2 rounded-lg transition-all duration-300 ${isLinkActive("/#services", "services")
                 ? "text-primary bg-shade-1"
                 : "text-text-1 hover:text-primary hover:bg-shade-1"
-            }`}
+              }`}
             onClick={toggleMobileMenu}
           >
             SERVICES
           </Link>
           <Link
             href="/#projects"
-            className={`block px-3 py-2 rounded-lg transition-all duration-300 ${
-              isLinkActive("/#projects", "projects")
+            className={`block px-3 py-2 rounded-lg transition-all duration-300 ${isLinkActive("/#projects", "projects")
                 ? "text-primary bg-shade-1"
                 : "text-text-1 hover:text-primary hover:bg-shade-1"
-            }`}
+              }`}
             onClick={toggleMobileMenu}
           >
             PROJECTS
           </Link>
           <Link
             href="/egp-notice"
-            className={`block px-3 py-2 rounded-lg transition-all duration-300 ${
-              pathname.includes("notice")
+            className={`block px-3 py-2 rounded-lg transition-all duration-300 ${pathname.includes("notice")
                 ? "text-primary bg-shade-1"
                 : "text-text-1 hover:text-primary hover:bg-shade-1"
-            }`}
+              }`}
             onClick={toggleMobileMenu}
           >
             NOTICES
           </Link>
           <Link
             href="/about"
-            className={`block px-3 py-2 rounded-lg transition-all duration-300 ${
-              isLinkActive("/about")
+            className={`block px-3 py-2 rounded-lg transition-all duration-300 ${isLinkActive("/about")
                 ? "text-primary bg-shade-1"
                 : "text-text-1 hover:text-primary hover:bg-shade-1"
-            }`}
+              }`}
             onClick={toggleMobileMenu}
           >
             ABOUT US
           </Link>
         </div>
-        <div className="px-4 py-2">
+        <div className="px-3 py-2">
           <div className="border-t border-t-ac-1"></div>
           <div className="flex items-center gap-6 my-5">
             <a

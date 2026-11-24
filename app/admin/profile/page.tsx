@@ -165,11 +165,10 @@ export default function AdminProfilePage() {
 
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
               {/* Role Badge */}
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-extrabold uppercase tracking-wider border shadow-sm ${
-                isAdmin
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-extrabold uppercase tracking-wider border shadow-sm ${isAdmin
                   ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
                   : "bg-blue-500/20 text-blue-300 border-blue-500/30"
-              }`}>
+                }`}>
                 {isAdmin ? <Shield className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
                 {isAdmin ? "Administrator" : "User"}
               </span>
@@ -233,7 +232,7 @@ export default function AdminProfilePage() {
                 required
                 value={profileData.name}
                 onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:border-[var(--primary-color)] focus:bg-white outline-none transition text-sm"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-slate-800 focus:border-[var(--primary-color)] focus:bg-white outline-none transition text-sm"
                 placeholder="Your Full Name"
               />
             </div>
@@ -246,15 +245,14 @@ export default function AdminProfilePage() {
                 required
                 value={profileData.email}
                 onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:border-[var(--primary-color)] focus:bg-white outline-none transition text-sm"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-slate-800 focus:border-[var(--primary-color)] focus:bg-white outline-none transition text-sm"
                 placeholder="your@email.com"
               />
             </div>
 
             {profileMessage.text && (
-              <div className={`p-4 rounded-xl text-sm ${
-                profileMessage.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'
-              }`}>
+              <div className={`p-4 rounded-xl text-sm ${profileMessage.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'
+                }`}>
                 {profileMessage.text}
               </div>
             )}
@@ -284,7 +282,7 @@ export default function AdminProfilePage() {
                 type="password"
                 name="currentPassword"
                 required
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:border-[var(--primary-color)] focus:bg-white outline-none transition text-sm"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-slate-800 focus:border-[var(--primary-color)] focus:bg-white outline-none transition text-sm"
                 placeholder="Enter current password"
               />
             </div>
@@ -295,7 +293,7 @@ export default function AdminProfilePage() {
                 type="password"
                 name="newPassword"
                 required
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:border-[var(--primary-color)] focus:bg-white outline-none transition text-sm"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-slate-800 focus:border-[var(--primary-color)] focus:bg-white outline-none transition text-sm"
                 placeholder="Enter new password (min. 6 chars)"
               />
             </div>
@@ -306,15 +304,14 @@ export default function AdminProfilePage() {
                 type="password"
                 name="confirmPassword"
                 required
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:border-[var(--primary-color)] focus:bg-white outline-none transition text-sm"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-slate-800 focus:border-[var(--primary-color)] focus:bg-white outline-none transition text-sm"
                 placeholder="Confirm new password"
               />
             </div>
 
             {passwordMessage.text && (
-              <div className={`p-4 rounded-xl text-sm ${
-                passwordMessage.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'
-              }`}>
+              <div className={`p-4 rounded-xl text-sm ${passwordMessage.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'
+                }`}>
                 {passwordMessage.text}
               </div>
             )}

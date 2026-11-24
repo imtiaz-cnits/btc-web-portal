@@ -37,21 +37,21 @@ export default async function AdminNoticesPage({
   // Count matches based on search query before status filter
   const now = new Date();
   const totalCount = filtered.filter(n => !(n.status === "active" && n.publishDate && new Date(n.publishDate) > now)).length;
-  const activeCount = filtered.filter(n => 
-    n.status === "active" && 
+  const activeCount = filtered.filter(n =>
+    n.status === "active" &&
     (!n.publishDate || new Date(n.publishDate) <= now) &&
     (n.category === "LOTTERY_RESULT" || !n.lastDate || !isNoticeExpired(n.lastDate, now))
   ).length;
   const draftCount = filtered.filter(n => n.status !== "active").length;
   const scheduledCount = filtered.filter(n => n.status === "active" && n.publishDate && new Date(n.publishDate) > now).length;
-  const pendingCount = filtered.filter(n => 
-    n.status === "active" && 
-    n.lastDate && 
-    isNoticeExpired(n.lastDate, now) && 
+  const pendingCount = filtered.filter(n =>
+    n.status === "active" &&
+    n.lastDate &&
+    isNoticeExpired(n.lastDate, now) &&
     n.category !== "LOTTERY_RESULT"
   ).length;
-  const winnersCount = filtered.filter(n => 
-    n.status === "active" && 
+  const winnersCount = filtered.filter(n =>
+    n.status === "active" &&
     n.category === "LOTTERY_RESULT"
   ).length;
 
@@ -60,8 +60,8 @@ export default async function AdminNoticesPage({
   if (filter === "all") {
     notices = filtered.filter(n => !(n.status === "active" && n.publishDate && new Date(n.publishDate) > now));
   } else if (filter === "published") {
-    notices = filtered.filter(n => 
-      n.status === "active" && 
+    notices = filtered.filter(n =>
+      n.status === "active" &&
       (!n.publishDate || new Date(n.publishDate) <= now) &&
       (n.category === "LOTTERY_RESULT" || !n.lastDate || !isNoticeExpired(n.lastDate, now))
     );
@@ -70,15 +70,15 @@ export default async function AdminNoticesPage({
   } else if (filter === "scheduled") {
     notices = filtered.filter(n => n.status === "active" && n.publishDate && new Date(n.publishDate) > now);
   } else if (filter === "pending") {
-    notices = filtered.filter(n => 
-      n.status === "active" && 
-      n.lastDate && 
-      isNoticeExpired(n.lastDate, now) && 
+    notices = filtered.filter(n =>
+      n.status === "active" &&
+      n.lastDate &&
+      isNoticeExpired(n.lastDate, now) &&
       n.category !== "LOTTERY_RESULT"
     );
   } else if (filter === "winners") {
-    notices = filtered.filter(n => 
-      n.status === "active" && 
+    notices = filtered.filter(n =>
+      n.status === "active" &&
       n.category === "LOTTERY_RESULT"
     );
   }
@@ -123,9 +123,9 @@ export default async function AdminNoticesPage({
         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <Link
             href={`/admin/egp-notices?filter=all${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
-            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "all"
-                ? "border-[var(--primary-color)] text-[var(--primary-color)]"
-                : "border-transparent text-slate-400 hover:text-slate-600"
+            className={`px-3 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "all"
+              ? "border-[var(--primary-color)] text-[var(--primary-color)]"
+              : "border-transparent text-slate-400 hover:text-slate-600"
               }`}
           >
             All Notices
@@ -134,9 +134,9 @@ export default async function AdminNoticesPage({
           </Link>
           <Link
             href={`/admin/egp-notices?filter=published${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
-            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "published"
-                ? "border-[var(--primary-color)] text-[var(--primary-color)]"
-                : "border-transparent text-slate-400 hover:text-slate-600"
+            className={`px-3 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "published"
+              ? "border-[var(--primary-color)] text-[var(--primary-color)]"
+              : "border-transparent text-slate-400 hover:text-slate-600"
               }`}
           >
             Published
@@ -145,9 +145,9 @@ export default async function AdminNoticesPage({
           </Link>
           <Link
             href={`/admin/egp-notices?filter=pending${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
-            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "pending"
-                ? "border-[var(--primary-color)] text-[var(--primary-color)]"
-                : "border-transparent text-slate-400 hover:text-slate-600"
+            className={`px-3 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "pending"
+              ? "border-[var(--primary-color)] text-[var(--primary-color)]"
+              : "border-transparent text-slate-400 hover:text-slate-600"
               }`}
           >
             Pending
@@ -156,9 +156,9 @@ export default async function AdminNoticesPage({
           </Link>
           <Link
             href={`/admin/egp-notices?filter=winners${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
-            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "winners"
-                ? "border-[var(--primary-color)] text-[var(--primary-color)]"
-                : "border-transparent text-slate-400 hover:text-slate-600"
+            className={`px-3 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "winners"
+              ? "border-[var(--primary-color)] text-[var(--primary-color)]"
+              : "border-transparent text-slate-400 hover:text-slate-600"
               }`}
           >
             Winners
@@ -167,9 +167,9 @@ export default async function AdminNoticesPage({
           </Link>
           <Link
             href={`/admin/egp-notices?filter=draft${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
-            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "draft"
-                ? "border-[var(--primary-color)] text-[var(--primary-color)]"
-                : "border-transparent text-slate-400 hover:text-slate-600"
+            className={`px-3 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "draft"
+              ? "border-[var(--primary-color)] text-[var(--primary-color)]"
+              : "border-transparent text-slate-400 hover:text-slate-600"
               }`}
           >
             Drafts
@@ -178,9 +178,9 @@ export default async function AdminNoticesPage({
           </Link>
           <Link
             href={`/admin/egp-notices?filter=scheduled${query ? `&search=${query}` : ""}&limit=${currentLimit}`}
-            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "scheduled"
-                ? "border-[var(--primary-color)] text-[var(--primary-color)]"
-                : "border-transparent text-slate-400 hover:text-slate-600"
+            className={`px-3 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-1.5 ${filter === "scheduled"
+              ? "border-[var(--primary-color)] text-[var(--primary-color)]"
+              : "border-transparent text-slate-400 hover:text-slate-600"
               }`}
           >
             Scheduled
@@ -225,8 +225,8 @@ export default async function AdminNoticesPage({
                 key={page}
                 href={`/admin/egp-notices?filter=${filter}${query ? `&search=${query}` : ""}&limit=${currentLimit}&page=${page}`}
                 className={`w-9 h-9 rounded-xl flex items-center justify-center font-extrabold text-xs transition-all border-0 ${activePage === page
-                    ? "bg-[var(--primary-color)] text-white shadow-md shadow-green-600/10"
-                    : "bg-slate-450 hover:bg-slate-500 text-white"
+                  ? "bg-[var(--primary-color)] text-white shadow-md shadow-green-600/10"
+                  : "bg-slate-450 hover:bg-slate-500 text-white"
                   }`}
               >
                 {page}

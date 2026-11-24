@@ -21,7 +21,7 @@ interface HeroProps {
 const Hero: React.FC<HeroProps> = () => {
   return (
     <div className="hero bg-secondary overflow-hidden pt-[20px] pb-[20px]">
-      <div className="custom-container mx-auto px-4">
+      <div className="custom-container mx-auto px-3">
         <div className="max-w-4xl mx-auto text-center">
           <div className="flex justify-center items-center gap-[10px] mb-[16px]">
             <span className="text-[12px] font-primary font-semibold text-text-1 bg-shade-1 px-[16px] py-[4px] rounded-[30px] uppercase tracking-wider">

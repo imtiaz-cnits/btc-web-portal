@@ -21,7 +21,7 @@ const AboutSection: React.FC = () => {
 
   return (
     <section className="about_section bg-secondary pt-20" ref={sectionRef}>
-      <div className="custom-container mx-auto px-4">
+      <div className="custom-container mx-auto px-3">
         <div className="flex flex-wrap items-center">
           {/* Image & Counters Column */}
           <div className="w-full lg:w-1/2">

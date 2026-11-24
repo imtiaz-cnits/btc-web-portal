@@ -4,16 +4,16 @@ import { useState, useTransition, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { updateUserRole, resetUserPassword, deleteUserAccount } from "@/app/actions/auth";
-import { 
-  Shield, 
-  ShieldAlert, 
-  User, 
-  Check, 
-  Loader2, 
-  Key, 
-  Trash2, 
-  Lock, 
-  Search, 
+import {
+  Shield,
+  ShieldAlert,
+  User,
+  Check,
+  Loader2,
+  Key,
+  Trash2,
+  Lock,
+  Search,
   UserX,
   AlertTriangle,
   ChevronDown
@@ -49,7 +49,7 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
     window.addEventListener("avatarChanged", handleAvatarUpdate);
     return () => window.removeEventListener("avatarChanged", handleAvatarUpdate);
   }, [session]);
-  
+
   // Modal state for delete confirmation
   const [deleteConfirmUser, setDeleteConfirmUser] = useState<UserItem | null>(null);
 
@@ -134,7 +134,7 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
   };
 
   // Client-side filtering based on global search in layout header
-  const filteredUsers = users.filter((u) => 
+  const filteredUsers = users.filter((u) =>
     (u.name && u.name.toLowerCase().includes(searchQuery)) ||
     u.email.toLowerCase().includes(searchQuery)
   );
@@ -143,9 +143,8 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
     <div className="space-y-6">
       {/* Toast Alert */}
       {toast && (
-        <div className={`fixed bottom-5 right-5 px-5 py-3.5 rounded-xl shadow-xl text-sm font-semibold transition-all z-50 text-white flex items-center gap-2 ${
-          toast.type === "success" ? "bg-green-600 animate-slide-in" : "bg-red-600 animate-slide-in"
-        }`}>
+        <div className={`fixed bottom-5 right-5 px-5 py-3.5 rounded-xl shadow-xl text-sm font-semibold transition-all z-50 text-white flex items-center gap-2 ${toast.type === "success" ? "bg-green-600 animate-slide-in" : "bg-red-600 animate-slide-in"
+          }`}>
           {toast.type === "success" ? <Check className="w-4 h-4" /> : <ShieldAlert className="w-4 h-4" />}
           {toast.text}
         </div>
@@ -167,7 +166,7 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
               🔍 Filtered: {filteredUsers.length} of {users.length}
             </span>
           )}
-          <div className="px-4 py-2 bg-slate-100 rounded-xl text-xs font-bold text-slate-600 uppercase tracking-wide">
+          <div className="px-3 py-2 bg-slate-100 rounded-xl text-xs font-bold text-slate-600 uppercase tracking-wide">
             Total Users: {users.length}
           </div>
         </div>
@@ -208,11 +207,10 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
                                 className="w-10 h-10 rounded-full object-cover shadow-sm border border-slate-200"
                               />
                             ) : (
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border shadow-sm ${
-                                isAdmin 
-                                  ? "bg-green-50 border-green-200 text-green-700" 
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border shadow-sm ${isAdmin
+                                  ? "bg-green-50 border-green-200 text-green-700"
                                   : "bg-slate-100 border-slate-200 text-slate-600"
-                              }`}>
+                                }`}>
                                 {(user.name || user.email).substring(0, 1).toUpperCase()}
                               </div>
                             );
@@ -237,11 +235,10 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
                         })()}
                       </td>
                       <td className="p-5">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase border shadow-sm ${
-                          isAdmin 
-                            ? "bg-amber-50 text-amber-700 border-amber-200 font-extrabold" 
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase border shadow-sm ${isAdmin
+                            ? "bg-amber-50 text-amber-700 border-amber-200 font-extrabold"
                             : "bg-blue-50 text-blue-700 border-blue-200"
-                        }`}>
+                          }`}>
                           {isAdmin ? <Lock className="w-3 h-3 text-amber-500 animate-pulse" /> : <User className="w-3 h-3" />}
                           {isAdmin ? "ADMIN (PROTECTED)" : user.role}
                         </span>
@@ -266,7 +263,7 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
                         <td className="p-5">
                           <div className="flex items-center justify-center gap-3">
                             {isPending && <Loader2 className="w-4 h-4 text-slate-400 animate-spin mr-1" />}
-                            
+
                             {/* Role Switcher Selector */}
                             <div className="relative" onClick={(e) => e.stopPropagation()}>
                               <button
@@ -298,9 +295,8 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
                                         handleRoleChange(user.id, opt.value as any);
                                         setActiveDropdownUserId(null);
                                       }}
-                                      className={`px-3 py-2.5 text-xs font-bold hover:bg-green-50 hover:text-green-700 transition cursor-pointer flex items-center justify-between ${
-                                        user.role === opt.value ? "bg-green-50 text-green-700" : "text-slate-600"
-                                      }`}
+                                      className={`px-3 py-2.5 text-xs font-bold hover:bg-green-50 hover:text-green-700 transition cursor-pointer flex items-center justify-between ${user.role === opt.value ? "bg-green-50 text-green-700" : "text-slate-600"
+                                        }`}
                                     >
                                       <span>{opt.label}</span>
                                       {user.role === opt.value && <Check className="w-3.5 h-3.5 text-green-600" />}
@@ -338,11 +334,11 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
                   );
                 })
               ) : (
-                  <tr>
-                    <td colSpan={5} className="p-12 text-center text-slate-400 font-semibold italic">
-                      {searchQuery ? "No matching users found for your search query." : "No registered users found."}
-                    </td>
-                  </tr>
+                <tr>
+                  <td colSpan={5} className="p-12 text-center text-slate-400 font-semibold italic">
+                    {searchQuery ? "No matching users found for your search query." : "No registered users found."}
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
@@ -356,12 +352,12 @@ export default function RolesClient({ initialUsers }: { initialUsers: UserItem[]
             <div className="w-12 h-12 bg-rose-50 border border-rose-100 rounded-2xl flex items-center justify-center text-rose-500 mb-5 shadow-sm">
               <AlertTriangle className="w-6 h-6" />
             </div>
-            
+
             <h3 className="text-lg font-bold text-slate-800">Confirm Account Deletion</h3>
             <p className="text-slate-500 text-sm mt-2 leading-relaxed">
               Are you sure you want to permanently delete the user account of <strong className="text-slate-800 font-semibold">{deleteConfirmUser.name || deleteConfirmUser.email}</strong>?
             </p>
-            
+
             <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 text-xs text-amber-800 font-semibold mt-4 space-y-1.5">
               <div className="flex items-center gap-1.5 text-amber-700 uppercase tracking-wider text-[10px] font-bold">
                 <ShieldAlert className="w-3.5 h-3.5" /> Safety Pre-requisites Active

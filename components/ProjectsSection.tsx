@@ -87,7 +87,7 @@ const ProjectsSection: React.FC = () => {
       id="projects"
       className="Our_project bg-[var(--secondary-color)] mt-[80px] lg:mt-[140px]"
     >
-      <div className="custom-container mx-auto px-4">
+      <div className="custom-container mx-auto px-3">
         <div className="top_section flex justify-between items-end max-md:flex-col max-md:items-start">
           <div className="heading_wrap text-left">
             <span className="tag bg-[var(--primary-color)] text-[var(--secondary-color)] font-primary font-medium text-[16px] rounded-[30px] py-[5px] px-[20px]">

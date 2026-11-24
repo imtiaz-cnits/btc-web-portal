@@ -13,7 +13,7 @@ import ContactBg from "@/assets/img/contact/contact-bg.png";
 const ContactPage: React.FC = () => {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
-    
+
     let ctx = gsap.context(() => {
       const selectors = [
         ".contact_us .breadcrumb",
@@ -59,7 +59,7 @@ const ContactPage: React.FC = () => {
                   <h2 className="title text-[48px] lg:text-[32px] font-medium font-primary text-[var(--secondary-color)] uppercase mb-2.5">
                     CONTACT US
                   </h2>
-                  <div className="wrap inline-block bg-[var(--text-1)] px-6 py-1.5 lg:px-4 lg:py-1 rounded-[30px]">
+                  <div className="wrap inline-block bg-[var(--text-1)] px-3 py-1.5 lg:px-3 lg:py-1 rounded-[30px]">
                     <ul className="breadcrumb_item flex items-center justify-center gap-2.5">
                       <li>
                         <Link
@@ -261,7 +261,7 @@ const ContactPage: React.FC = () => {
                     <input
                       type="text"
                       required
-                      className="w-full bg-white outline-none px-4 py-3 text-base border-b-2 border-[var(--ac-1)] focus:border-[var(--primary-color)] transition-all"
+                      className="w-full bg-white outline-none px-3 py-3 text-base border-b-2 border-[var(--ac-1)] focus:border-[var(--primary-color)] transition-all"
                     />
                   </div>
                   <div className="flex flex-col gap-2">
@@ -271,7 +271,7 @@ const ContactPage: React.FC = () => {
                     <input
                       type="email"
                       required
-                      className="w-full bg-white outline-none px-4 py-3 text-base border-b-2 border-[var(--ac-1)] focus:border-[var(--primary-color)] transition-all"
+                      className="w-full bg-white outline-none px-3 py-3 text-base border-b-2 border-[var(--ac-1)] focus:border-[var(--primary-color)] transition-all"
                     />
                   </div>
                   <div className="flex flex-col gap-2">
@@ -281,7 +281,7 @@ const ContactPage: React.FC = () => {
                     <textarea
                       rows={3}
                       required
-                      className="w-full bg-white outline-none px-4 py-3 text-base border-b-2 border-[var(--ac-1)] focus:border-[var(--primary-color)] transition-all"
+                      className="w-full bg-white outline-none px-3 py-3 text-base border-b-2 border-[var(--ac-1)] focus:border-[var(--primary-color)] transition-all"
                     ></textarea>
                   </div>
                   <div className="button text-center mt-4">

@@ -153,7 +153,7 @@ export default function ClientHomePage() {
   // Register GSAP Animations
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
-    
+
     // Create a GSAP context for safe cleanup
     let ctx = gsap.context(() => {
       // --- 1. Counter Animations (Number Counting) ---
@@ -345,7 +345,7 @@ export default function ClientHomePage() {
         <div className="custom-container">
           <div className="bg-shade-1 rounded-[60px] p-10 lg:p-20 relative overflow-hidden">
             <div className="text-center mb-16 relative z-10 offer">
-              <span className="bg-primary text-white px-6 py-1.5 rounded-full font-bold text-sm uppercase">
+              <span className="bg-primary text-white px-3 py-1.5 rounded-full font-bold text-sm uppercase">
                 What We Offer
               </span>
               <h2 className="text-3xl lg:text-4xl font-bold text-text-1 mt-6 uppercase leading-tight max-w-2xl mx-auto">
@@ -472,7 +472,7 @@ export default function ClientHomePage() {
               </div>
             </div>
             <div className="w-full lg:w-1/2 wrapper">
-              <span className="bg-primary text-white px-6 py-1.5 rounded-full font-bold text-sm uppercase">
+              <span className="bg-primary text-white px-3 py-1.5 rounded-full font-bold text-sm uppercase">
                 About Us
               </span>
               <h2 className="text-3xl lg:text-4xl font-bold text-text-1 mt-6 uppercase leading-tight mb-8">
@@ -497,7 +497,7 @@ export default function ClientHomePage() {
         <div className="custom-container">
           <div className="flex justify-between items-end mb-16">
             <div className="Our_project">
-              <span className="bg-primary text-white px-6 py-1.5 rounded-full font-bold text-sm uppercase">
+              <span className="bg-primary text-white px-3 py-1.5 rounded-full font-bold text-sm uppercase">
                 Our Best Projects
               </span>
               <h2 className="text-3xl lg:text-4xl font-bold text-text-1 mt-6 uppercase leading-tight">
@@ -590,7 +590,7 @@ export default function ClientHomePage() {
       {/* Client Logo Slider */}
       <div className="py-20 bg-ac-2">
         <div className="text-center mb-16">
-          <span className="bg-primary text-white px-6 py-1.5 rounded-full font-bold text-sm uppercase">
+          <span className="bg-primary text-white px-3 py-1.5 rounded-full font-bold text-sm uppercase">
             Our Top Clients
           </span>
           <h2 className="text-3xl lg:text-4xl font-bold text-text-1 mt-6 uppercase leading-tight max-w-2xl mx-auto">

@@ -336,7 +336,7 @@ function CustomSelect({
       )}
       <div
         onClick={onToggle}
-        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 text-sm font-semibold focus:border-[var(--primary-color)] hover:border-slate-300 transition cursor-pointer flex justify-between items-center shadow-xs"
+        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3.5 text-slate-800 text-sm font-semibold focus:border-[var(--primary-color)] hover:border-slate-300 transition cursor-pointer flex justify-between items-center shadow-xs"
       >
         <span>{activeOption.label}</span>
         <ChevronDown
@@ -353,7 +353,7 @@ function CustomSelect({
                 onChange(opt.value);
                 onToggle();
               }}
-              className={`px-4 py-3 text-xs font-semibold hover:bg-green-50 hover:text-green-700 transition cursor-pointer flex items-center justify-between ${value === opt.value
+              className={`px-3 py-3 text-xs font-semibold hover:bg-green-50 hover:text-green-700 transition cursor-pointer flex items-center justify-between ${value === opt.value
                 ? "bg-green-50/50 text-green-700 font-bold"
                 : "text-slate-600"
                 }`}
@@ -2459,7 +2459,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           <div className="relative">
             <div
               onClick={() => setShowTitleDropdown(!showTitleDropdown)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 text-sm font-semibold focus:border-[var(--primary-color)] hover:border-slate-350 transition cursor-pointer flex justify-between items-center shadow-xs"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3.5 text-slate-800 text-sm font-semibold focus:border-[var(--primary-color)] hover:border-slate-350 transition cursor-pointer flex justify-between items-center shadow-xs"
             >
               <span className="flex items-center gap-2">
                 {title ? (
@@ -2552,7 +2552,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                         );
                         setShowTitleDropdown(false);
                       }}
-                      className="px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-green-50 hover:text-green-800 transition cursor-pointer flex items-center justify-between group"
+                      className="px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-green-50 hover:text-green-800 transition cursor-pointer flex items-center justify-between group"
                     >
                       <span className="truncate flex items-center gap-2">
                         <span>{opt}</span>
@@ -2574,7 +2574,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                 {titleOptions.filter((opt) =>
                   opt.toLowerCase().includes(newOptionInput.toLowerCase()),
                 ).length === 0 && (
-                    <div className="px-4 py-3 text-xs text-slate-400 font-semibold italic text-center">
+                    <div className="px-3 py-3 text-xs text-slate-400 font-semibold italic text-center">
                       No matching options. Type above and click Add!
                     </div>
                   )}
@@ -2593,7 +2593,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
           <div className="relative">
             <div
               onClick={() => setShowSubTitleDropdown(!showSubTitleDropdown)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 text-sm font-semibold focus:border-[var(--primary-color)] hover:border-slate-350 transition cursor-pointer flex justify-between items-center shadow-xs"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3.5 text-slate-800 text-sm font-semibold focus:border-[var(--primary-color)] hover:border-slate-350 transition cursor-pointer flex justify-between items-center shadow-xs"
             >
               <span className="flex items-center gap-2">
                 {subTitle ? (
@@ -2684,7 +2684,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                         );
                         setShowSubTitleDropdown(false);
                       }}
-                      className="px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-green-50 hover:text-green-800 transition cursor-pointer flex items-center justify-between group"
+                      className="px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-green-50 hover:text-green-800 transition cursor-pointer flex items-center justify-between group"
                     >
                       <span className="truncate">{opt}</span>
                       <button
@@ -2701,7 +2701,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                 {subTitleOptions.filter((opt) =>
                   opt.toLowerCase().includes(newSubTitleInput.toLowerCase()),
                 ).length === 0 && (
-                    <div className="px-4 py-3 text-xs text-slate-400 font-semibold italic text-center">
+                    <div className="px-3 py-3 text-xs text-slate-400 font-semibold italic text-center">
                       No matching options. Type above and click Add!
                     </div>
                   )}
@@ -3571,7 +3571,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                       );
                                       setActiveWarningDropdown(null);
                                     }}
-                                    className="px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition cursor-pointer flex items-center justify-between group"
+                                    className="px-3 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition cursor-pointer flex items-center justify-between group"
                                   >
                                     <span className="truncate">{opt}</span>
                                     <button
@@ -3594,7 +3594,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                                     newWarningOptionInput.toLowerCase(),
                                   ),
                               ).length === 0 && (
-                                  <div className="px-4 py-3 text-xs text-slate-400 font-semibold italic text-center">
+                                  <div className="px-3 py-3 text-xs text-slate-400 font-semibold italic text-center">
                                     No matching options. Type above and click Add!
                                   </div>
                                 )}
@@ -3761,7 +3761,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                   setModalPreviewUrl(null);
                   setModalPreviewType(null);
                 }}
-                className="bg-slate-800 hover:bg-slate-900 text-white font-extrabold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 cursor-pointer"
+                className="bg-slate-800 hover:bg-slate-900 text-white font-extrabold px-3 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 cursor-pointer"
               >
                 Close Preview
               </button>
@@ -3856,7 +3856,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
               <button
                 type="button"
                 onClick={handleModalScheduleConfirm}
-                className="bg-[var(--primary-color)] hover:bg-green-700 !text-white font-extrabold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 cursor-pointer border-0 shadow-lg shadow-green-600/20 flex items-center gap-1.5"
+                className="bg-[var(--primary-color)] hover:bg-green-700 !text-white font-extrabold px-3 py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 cursor-pointer border-0 shadow-lg shadow-green-600/20 flex items-center gap-1.5"
               >
                 Add Schedule
               </button>

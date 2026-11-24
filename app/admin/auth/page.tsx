@@ -43,7 +43,7 @@ export default function AdminAuthPage() {
 
       if (result.success) {
         setMessage({ type: "success", text: result.message + " Logging in..." });
-        
+
         // Log in immediately using the registered credentials
         const loginRes = await signIn("credentials", {
           email,
@@ -73,7 +73,7 @@ export default function AdminAuthPage() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px]"></div>
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-[32px] shadow-2xl relative z-10"
@@ -95,10 +95,10 @@ export default function AdminAuthPage() {
                 className="space-y-2"
               >
                 <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Full Name</label>
-                <input 
-                  name="name" 
+                <input
+                  name="name"
                   required={!isLogin}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)] outline-none transition"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-3 text-white focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)] outline-none transition"
                   placeholder="John Doe"
                 />
               </motion.div>
@@ -107,40 +107,39 @@ export default function AdminAuthPage() {
 
           <div className="space-y-2">
             <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Email Address</label>
-            <input 
-              type="email" 
-              name="email" 
-              required 
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)] outline-none transition"
+            <input
+              type="email"
+              name="email"
+              required
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-3 text-white focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)] outline-none transition"
               placeholder="admin@example.com"
             />
           </div>
 
           <div className="space-y-2">
             <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Password</label>
-            <input 
-              type="password" 
-              name="password" 
-              required 
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)] outline-none transition"
+            <input
+              type="password"
+              name="password"
+              required
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-3 text-white focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)] outline-none transition"
               placeholder="••••••••"
             />
           </div>
 
           {message.text && (
-            <motion.div 
-              initial={{ opacity: 0 }} 
+            <motion.div
+              initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className={`p-3 rounded-lg text-sm text-center ${
-                message.type === 'success' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-              }`}
+              className={`p-3 rounded-lg text-sm text-center ${message.type === 'success' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                }`}
             >
               {message.text}
             </motion.div>
           )}
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={loading}
             className="w-full bg-[var(--primary-color)] hover:bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-green-500/20 transition-all active:scale-95 disabled:opacity-50"
           >
@@ -149,7 +148,7 @@ export default function AdminAuthPage() {
         </form>
 
         <div className="mt-8 text-center">
-          <button 
+          <button
             onClick={() => setIsLogin(!isLogin)}
             className="text-slate-400 hover:text-white text-sm transition"
           >

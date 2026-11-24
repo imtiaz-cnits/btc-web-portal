@@ -102,7 +102,7 @@
 
 /* Container Setup */
 .website-layout .custom-container {
-    @apply mx-auto px-4 sm:px-6 lg:px-8 max-w-[1480px] xl:max-w-[1280px] lg:max-w-[1024px] md:max-w-[768px] sm:max-w-[640px];
+    @apply mx-auto px-3 sm:px-3 lg:px-8 max-w-[1480px] xl:max-w-[1280px] lg:max-w-[1024px] md:max-w-[768px] sm:max-w-[640px];
 }
 
 /* Output styles (merged from output.css) */

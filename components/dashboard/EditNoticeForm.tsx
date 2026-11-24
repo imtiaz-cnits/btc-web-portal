@@ -28,9 +28,9 @@ export default function EditNoticeForm({ notice }: { notice: any }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="md:col-span-2 space-y-2">
           <label className="text-sm font-semibold text-gray-700">Notice Title</label>
-          <input 
-            name="title" 
-            required 
+          <input
+            name="title"
+            required
             defaultValue={notice.title}
             className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[var(--primary-color)] outline-none"
           />
@@ -38,9 +38,9 @@ export default function EditNoticeForm({ notice }: { notice: any }) {
 
         <div className="md:col-span-2 space-y-2">
           <label className="text-sm font-semibold text-gray-700">Content / Description</label>
-          <textarea 
-            name="content" 
-            required 
+          <textarea
+            name="content"
+            required
             rows={5}
             defaultValue={notice.content}
             className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[var(--primary-color)] outline-none"
@@ -67,9 +67,9 @@ export default function EditNoticeForm({ notice }: { notice: any }) {
 
         <div className="space-y-2">
           <label className="text-sm font-semibold text-gray-700">Publish Date</label>
-          <input 
-            type="date" 
-            name="publishDate" 
+          <input
+            type="date"
+            name="publishDate"
             defaultValue={notice.publishDate ? new Date(notice.publishDate).toISOString().split('T')[0] : ""}
             className="w-full p-3 border rounded-lg outline-none"
           />
@@ -77,9 +77,9 @@ export default function EditNoticeForm({ notice }: { notice: any }) {
 
         <div className="space-y-2">
           <label className="text-sm font-semibold text-gray-700">Last Date</label>
-          <input 
-            type="date" 
-            name="lastDate" 
+          <input
+            type="date"
+            name="lastDate"
             defaultValue={notice.lastDate ? new Date(notice.lastDate).toISOString().split('T')[0] : ""}
             className="w-full p-3 border rounded-lg outline-none"
           />
@@ -87,9 +87,9 @@ export default function EditNoticeForm({ notice }: { notice: any }) {
 
         <div className="space-y-2">
           <label className="text-sm font-semibold text-gray-700">Lottery Date (Optional)</label>
-          <input 
-            type="date" 
-            name="lotteryDate" 
+          <input
+            type="date"
+            name="lotteryDate"
             defaultValue={notice.lotteryDate ? new Date(notice.lotteryDate).toISOString().split('T')[0] : ""}
             className="w-full p-3 border rounded-lg outline-none"
           />
@@ -97,9 +97,9 @@ export default function EditNoticeForm({ notice }: { notice: any }) {
 
         <div className="md:col-span-2 space-y-2">
           <label className="text-sm font-semibold text-gray-700">Replace File (Optional)</label>
-          <input 
-            type="file" 
-            name="file" 
+          <input
+            type="file"
+            name="file"
             accept=".pdf,image/*"
             className="w-full p-3 border rounded-lg outline-none"
           />
@@ -110,15 +110,15 @@ export default function EditNoticeForm({ notice }: { notice: any }) {
       </div>
 
       <div className="pt-4 flex justify-end gap-4">
-        <button 
-          type="button" 
+        <button
+          type="button"
           onClick={() => router.back()}
-          className="px-6 py-2 bg-slate-500 hover:bg-slate-600 text-white rounded-lg font-medium transition border-0 active:scale-95 shadow-sm cursor-pointer"
+          className="px-3 py-2 bg-slate-500 hover:bg-slate-600 text-white rounded-lg font-medium transition border-0 active:scale-95 shadow-sm cursor-pointer"
         >
           Cancel
         </button>
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={loading}
           className="px-8 py-2 bg-[var(--primary-color)] text-white rounded-lg font-medium hover:bg-green-700 transition disabled:opacity-50"
         >

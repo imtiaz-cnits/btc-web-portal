@@ -5,7 +5,7 @@ import React from "react";
 const Services: React.FC = () => {
   return (
     <section id="services" className="offer py-20">
-      <div className="custom-container mx-auto px-4">
+      <div className="custom-container mx-auto px-3">
         <div className="offer_wrapper relative bg-shade-1 lg:rounded-[80px] rounded-[40px] lg:py-[40px] py-[20px] lg:px-[20px] overflow-hidden">
           {/* Shape 1 SVG */}
           <div className="shape1 absolute left-[-20px] top-[30px] pointer-events-none">
@@ -101,7 +101,7 @@ const Services: React.FC = () => {
           {/* Cards */}
           <div className="flex flex-wrap gap-y-5 lg:gap-y-0">
             {/* Card 1 */}
-            <div className="w-full lg:w-1/3 px-4">
+            <div className="w-full lg:w-1/3 px-3">
               <div className="offer_card text-center group">
                 <div className="icons flex justify-center items-center">
                   <div className="icon relative">
@@ -158,7 +158,7 @@ const Services: React.FC = () => {
             </div>
 
             {/* Card 2 */}
-            <div className="w-full lg:w-1/3 px-4">
+            <div className="w-full lg:w-1/3 px-3">
               <div className="offer_card text-center group">
                 <div className="icons flex justify-center items-center">
                   <div className="icon relative w-[52px] h-[52px] bg-[linear-gradient(90deg,#5AA469_50%,transparent_50%),linear-gradient(90deg,#5AA469_50%,transparent_50%),linear-gradient(0deg,#5AA469_50%,transparent_50%),linear-gradient(0deg,#5AA469_50%,transparent_50%)] bg-repeat bg-[length:9px_2px,9px_2px,2px_9px,2px_9px] bg-[position:0%_0%,100%_100%,0%_100%,100%_0px] rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] p-[10px] mt-[10px] mb-[10px] animate-[dash_5s_linear_infinite] cursor-default z-[1]">
@@ -215,7 +215,7 @@ const Services: React.FC = () => {
             </div>
 
             {/* Card 3 */}
-            <div className="w-full lg:w-1/3 px-4">
+            <div className="w-full lg:w-1/3 px-3">
               <div className="offer_card text-center group">
                 <div className="icons flex justify-center items-center">
                   <div className="icon relative w-[52px] h-[52px] bg-[linear-gradient(90deg,#5AA469_50%,transparent_50%),linear-gradient(90deg,#5AA469_50%,transparent_50%),linear-gradient(0deg,#5AA469_50%,transparent_50%),linear-gradient(0deg,#5AA469_50%,transparent_50%)] bg-repeat bg-[length:9px_2px,9px_2px,2px_9px,2px_9px] bg-[position:0%_0%,100%_100%,0%_100%,100%_0px] rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] p-[10px] mt-[10px] mb-[10px] animate-[dash_5s_linear_infinite] cursor-default z-[1]">
@@ -275,7 +275,7 @@ const Services: React.FC = () => {
           {/* Details */}
           <div className="mt-[36px] flex flex-wrap">
             {/* Detail Card 1 */}
-            <div className="w-full lg:w-1/3 px-4 mb-4 flex items-stretch">
+            <div className="w-full lg:w-1/3 px-3 mb-4 flex items-stretch">
               <div className="offer_details flex items-start bg-[var(--secondary-color)] p-[14px] rounded-[16px] gap-[20px]">
                 <div className="icons flex justify-center items-center">
                   <div className="icon relative w-[52px] h-[52px] bg-[linear-gradient(90deg,#5AA469_50%,transparent_50%),linear-gradient(90deg,#5AA469_50%,transparent_50%),linear-gradient(0deg,#5AA469_50%,transparent_50%),linear-gradient(0deg,#5AA469_50%,transparent_50%)] bg-repeat bg-[length:9px_2px,9px_2px,2px_9px,2px_9px] bg-[position:0%_0%,100%_100%,0%_100%,100%_0px] rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] p-[10px] mt-[10px] mb-[10px] animate-[dash_5s_linear_infinite] cursor-default z-[1]">
@@ -365,7 +365,7 @@ const Services: React.FC = () => {
             </div>
 
             {/* Detail Card 2 */}
-            <div className="w-full lg:w-1/3 px-4 mb-4 flex items-stretch">
+            <div className="w-full lg:w-1/3 px-3 mb-4 flex items-stretch">
               <div className="offer_details flex items-start bg-[var(--secondary-color)] p-[14px] rounded-[16px] gap-[20px]">
                 <div className="icons flex justify-center items-center">
                   <div className="icon relative w-[52px] h-[52px] bg-[linear-gradient(90deg,#5AA469_50%,transparent_50%),linear-gradient(90deg,#5AA469_50%,transparent_50%),linear-gradient(0deg,#5AA469_50%,transparent_50%),linear-gradient(0deg,#5AA469_50%,transparent_50%)] bg-repeat bg-[length:9px_2px,9px_2px,2px_9px,2px_9px] bg-[position:0%_0%,100%_100%,0%_100%,100%_0px] rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] p-[10px] mt-[10px] mb-[10px] animate-[dash_5s_linear_infinite] cursor-default z-[1]">
@@ -423,7 +423,7 @@ const Services: React.FC = () => {
             </div>
 
             {/* Detail Card 3 */}
-            <div className="w-full lg:w-1/3 px-4 mb-4 flex items-stretch">
+            <div className="w-full lg:w-1/3 px-3 mb-4 flex items-stretch">
               <div className="offer_details flex items-start bg-[var(--secondary-color)] p-[14px] rounded-[16px] gap-[20px]">
                 <div className="icons flex justify-center items-center">
                   <div className="icon relative w-[52px] h-[52px] bg-[linear-gradient(90deg,#5AA469_50%,transparent_50%),linear-gradient(90deg,#5AA469_50%,transparent_50%),linear-gradient(0deg,#5AA469_50%,transparent_50%),linear-gradient(0deg,#5AA469_50%,transparent_50%)] bg-repeat bg-[length:9px_2px,9px_2px,2px_9px,2px_9px] bg-[position:0%_0%,100%_100%,0%_100%,100%_0px] rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] p-[10px] mt-[10px] mb-[10px] animate-[dash_5s_linear_infinite] cursor-default z-[1]">
@@ -481,7 +481,7 @@ const Services: React.FC = () => {
             </div>
 
             {/* Detail Card 4 */}
-            <div className="w-full lg:w-1/3 px-4 mb-4 flex items-stretch">
+            <div className="w-full lg:w-1/3 px-3 mb-4 flex items-stretch">
               <div className="offer_details flex items-start bg-[var(--secondary-color)] p-[14px] rounded-[16px] gap-[20px]">
                 <div className="icons flex justify-center items-center">
                   <div className="icon relative w-[52px] h-[52px] bg-[linear-gradient(90deg,#5AA469_50%,transparent_50%),linear-gradient(90deg,#5AA469_50%,transparent_50%),linear-gradient(0deg,#5AA469_50%,transparent_50%),linear-gradient(0deg,#5AA469_50%,transparent_50%)] bg-repeat bg-[length:9px_2px,9px_2px,2px_9px,2px_9px] bg-[position:0%_0%,100%_100%,0%_100%,100%_0px] rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] p-[10px] mt-[10px] mb-[10px] animate-[dash_5s_linear_infinite] cursor-default z-[1]">
@@ -539,7 +539,7 @@ const Services: React.FC = () => {
             </div>
 
             {/* Detail Card 5 */}
-            <div className="w-full lg:w-1/3 px-4 mb-4 flex items-stretch">
+            <div className="w-full lg:w-1/3 px-3 mb-4 flex items-stretch">
               <div className="offer_details flex items-start bg-[var(--secondary-color)] p-[14px] rounded-[16px] gap-[20px]">
                 <div className="icons flex justify-center items-center">
                   <div className="icon relative w-[52px] h-[52px] bg-[linear-gradient(90deg,#5AA469_50%,transparent_50%),linear-gradient(90deg,#5AA469_50%,transparent_50%),linear-gradient(0deg,#5AA469_50%,transparent_50%),linear-gradient(0deg,#5AA469_50%,transparent_50%)] bg-repeat bg-[length:9px_2px,9px_2px,2px_9px,2px_9px] bg-[position:0%_0%,100%_100%,0%_100%,100%_0px] rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] p-[10px] mt-[10px] mb-[10px] animate-[dash_5s_linear_infinite] cursor-default z-[1]">
@@ -597,7 +597,7 @@ const Services: React.FC = () => {
             </div>
 
             {/* Detail Card 6 */}
-            <div className="w-full lg:w-1/3 px-4 mb-4 flex items-stretch">
+            <div className="w-full lg:w-1/3 px-3 mb-4 flex items-stretch">
               <div className="offer_details flex items-start bg-[var(--secondary-color)] p-[14px] rounded-[16px] gap-[20px]">
                 <div className="icons flex justify-center items-center">
                   <div className="icon relative w-[52px] h-[52px] bg-[linear-gradient(90deg,#5AA469_50%,transparent_50%),linear-gradient(90deg,#5AA469_50%,transparent_50%),linear-gradient(0deg,#5AA469_50%,transparent_50%),linear-gradient(0deg,#5AA469_50%,transparent_50%)] bg-repeat bg-[length:9px_2px,9px_2px,2px_9px,2px_9px] bg-[position:0%_0%,100%_100%,0%_100%,100%_0px] rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] p-[10px] mt-[10px] mb-[10px] animate-[dash_5s_linear_infinite] cursor-default z-[1]">

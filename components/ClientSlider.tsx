@@ -41,7 +41,7 @@ const ClientSlider: React.FC = () => {
 
   return (
     <section className="client bg-secondary py-[40px] md:py-[80px] overflow-hidden">
-      <div className="custom-container mx-auto px-4">
+      <div className="custom-container mx-auto px-3">
         <div className="theame_content text-center mb-[40px]">
           <div className="flex justify-center items-center gap-[10px] mb-[20px]">
             <h1 className="text-[16px] font-primary text-secondary bg-primary px-[20px] py-[5px] rounded-[30px] uppercase">

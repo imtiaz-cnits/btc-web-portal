@@ -386,15 +386,15 @@ function TablePdfPreview({ tableData, category }: { tableData: string; title: st
               ? table.headers
               : table.type === "pwd_ltm"
                 ? [
-                    "Tender ID",
-                    "Description",
-                    "Location",
-                    "AppCost (Tk)",
-                    "Solvency (Tk)",
-                    "Security (Tk)",
-                    "Doc Fees (Tk)",
-                    "Last Date & Time",
-                  ]
+                  "Tender ID",
+                  "Description",
+                  "Location",
+                  "AppCost (Tk)",
+                  "Solvency (Tk)",
+                  "Security (Tk)",
+                  "Doc Fees (Tk)",
+                  "Last Date & Time",
+                ]
                 : [];
           const rawRows = table.rows || [];
 
@@ -443,8 +443,8 @@ function TablePdfPreview({ tableData, category }: { tableData: string; title: st
           const winningRows =
             winnerColIdx !== -1
               ? normalizedRows.filter(
-                  (r: string[]) => r[winnerColIdx] && r[winnerColIdx].trim() !== "",
-                )
+                (r: string[]) => r[winnerColIdx] && r[winnerColIdx].trim() !== "",
+              )
               : [];
           const displayRows = sortRowsByTenderIdAsc(
             isLotteryResult && winningRows.length > 0
@@ -456,16 +456,16 @@ function TablePdfPreview({ tableData, category }: { tableData: string; title: st
           const totalSecurity =
             securityColIdx !== -1
               ? displayRows.reduce(
-                  (sum: number, r: string[]) => sum + parseMoney(r[securityColIdx]),
-                  0,
-                )
+                (sum: number, r: string[]) => sum + parseMoney(r[securityColIdx]),
+                0,
+              )
               : 0;
           const totalDocFees =
             docFeesColIdx !== -1
               ? displayRows.reduce(
-                  (sum: number, r: string[]) => sum + parseMoney(r[docFeesColIdx]),
-                  0,
-                )
+                (sum: number, r: string[]) => sum + parseMoney(r[docFeesColIdx]),
+                0,
+              )
               : 0;
 
           const totalCols = headers.length + (!hasSl ? 1 : 0);
@@ -581,13 +581,12 @@ function TablePdfPreview({ tableData, category }: { tableData: string; title: st
                         return (
                           <th
                             key={idx}
-                            className={`p-2 font-bold text-base capitalize text-center ${
-                              isDesc
+                            className={`p-2 font-bold text-base capitalize text-center ${isDesc
                                 ? "desc-column w-[32%] min-w-[220px] whitespace-normal"
                                 : isLocation
                                   ? "location-column w-[1%] whitespace-nowrap text-center"
                                   : "auto-column"
-                            } ${isTender || isSl ? "whitespace-nowrap" : ""}`}
+                              } ${isTender || isSl ? "whitespace-nowrap" : ""}`}
                             style={{
                               backgroundColor: table.headerBgColor || defaultHeaderBg,
                               color: "#000000",
@@ -712,13 +711,12 @@ function TablePdfPreview({ tableData, category }: { tableData: string; title: st
                             return (
                               <td
                                 key={cIdx}
-                                className={`p-2.5 text-black text-[15px] font-semibold ${cellAlignClass} ${
-                                  isDesc
+                                className={`p-2.5 text-black text-[15px] font-semibold ${cellAlignClass} ${isDesc
                                     ? "desc-column w-[32%] min-w-[220px] whitespace-normal text-left"
                                     : isLocationCol
                                       ? "location-column w-[1%] whitespace-nowrap text-center"
                                       : "auto-column"
-                                } ${isNoWrapCell ? "whitespace-nowrap" : ""}`}
+                                  } ${isNoWrapCell ? "whitespace-nowrap" : ""}`}
                                 style={{
                                   backgroundColor: cellBg,
                                   textAlign:
@@ -1725,26 +1723,26 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices, category }) => {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-shade-1 border-b border-ac-2">
-              <th className="py-2 px-4 font-bold text-[16px] uppercase text-base w-16">
+              <th className="py-2 px-3 font-bold text-[16px] uppercase text-base w-16">
                 #
               </th>
-              <th className="py-2 px-4 font-bold text-[16px] uppercase text-base">
+              <th className="py-2 px-3 font-bold text-[16px] uppercase text-base">
                 Procuring Entity / Title
               </th>
               {showPublishDate && (
-                <th className="py-2 px-4 font-bold text-[16px] uppercase text-base w-40 text-center">
+                <th className="py-2 px-3 font-bold text-[16px] uppercase text-base w-40 text-center">
                   Publish Date
                 </th>
               )}
-              <th className="py-2 px-4 font-bold text-[16px] uppercase text-base w-40 text-center">
+              <th className="py-2 px-3 font-bold text-[16px] uppercase text-base w-40 text-center">
                 Last Date
               </th>
               {isLotteryResult && (
-                <th className="py-2 px-4 font-bold text-[16px] uppercase text-base w-40 text-center">
+                <th className="py-2 px-3 font-bold text-[16px] uppercase text-base w-40 text-center">
                   Lottery Date
                 </th>
               )}
-              <th className="py-2 px-4 font-bold text-[16px] uppercase text-base w-48 text-center">
+              <th className="py-2 px-3 font-bold text-[16px] uppercase text-base w-48 text-center">
                 Action
               </th>
             </tr>
@@ -1756,8 +1754,8 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices, category }) => {
                   key={notice.id}
                   className="border-b border-ac-2 hover:bg-slate-50 transition-colors single_notice"
                 >
-                  <td className="py-2.5 px-4 text-text-2 font-medium text-base">{index + 1}</td>
-                  <td className="py-2.5 px-4">
+                  <td className="py-2.5 px-3 text-text-2 font-medium text-base">{index + 1}</td>
+                  <td className="py-2.5 px-3">
                     <h4 className="text-text-1 font-semibold leading-tight font-bangla text-base lg:text-lg flex items-center flex-wrap gap-1.5">
                       <span>{notice.title}</span>
                       {(() => {
@@ -1774,29 +1772,29 @@ const NoticeTable: React.FC<NoticeTableProps> = ({ notices, category }) => {
                     </h4>
                   </td>
                   {showPublishDate && (
-                    <td className="py-2.5 px-4 text-center">
+                    <td className="py-2.5 px-3 text-center">
                       <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-text-2 text-base font-bold">
                         {notice.publishDate || "N/A"}
                       </div>
                     </td>
                   )}
-                  <td className="py-2.5 px-4 text-center">
+                  <td className="py-2.5 px-3 text-center">
                     <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-text-2 text-base font-bold">
                       {notice.date}
                     </div>
                   </td>
                   {isLotteryResult && (
-                    <td className="py-2.5 px-4 text-center">
+                    <td className="py-2.5 px-3 text-center">
                       <div className="inline-block bg-shade-1 px-3 py-1 rounded-full border border-primary/20 text-emerald-600 text-base font-bold bg-green-50/50">
                         {notice.lotteryDate || "N/A"}
                       </div>
                     </td>
                   )}
-                  <td className="py-2.5 px-4">
+                  <td className="py-2.5 px-3">
                     <div className="flex items-center justify-center gap-2">
                       <Link
                         href={`/egp-notice/${notice.id}`}
-                        className="bg-primary hover:!text-secondary !text-white px-4 py-1.5 rounded-lg font-bold text-xs uppercase hover:bg-text-1 transition shadow-sm flex items-center gap-2 cursor-pointer"
+                        className="bg-primary hover:!text-secondary !text-white px-3 py-1.5 rounded-lg font-bold text-xs uppercase hover:bg-text-1 transition shadow-sm flex items-center gap-2 cursor-pointer"
                       >
                         <i className="fa-solid fa-eye"></i> View
                       </Link>

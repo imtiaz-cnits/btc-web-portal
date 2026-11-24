@@ -19,7 +19,7 @@ export default function AdminLayout({
     <div className="min-h-screen flex flex-col bg-gray-50">
       <div className="flex flex-1">
         {/* Sidebar placeholder */}
-        <aside 
+        <aside
           className="bg-white border-r transition-all duration-300 fixed h-full z-20"
           style={{ width: `${sidebarWidth}px`, left: sidebarWidth === 0 ? '-270px' : '0' }}
         >
@@ -32,14 +32,14 @@ export default function AdminLayout({
           </div>
         </aside>
 
-        <div 
+        <div
           className="flex-1 flex flex-col transition-all duration-300"
           style={{ marginLeft: `${sidebarWidth}px` }}
         >
-          <header className="h-16 bg-white border-b flex items-center px-6 justify-between sticky top-0 z-10">
+          <header className="h-16 bg-white border-b flex items-center px-3 justify-between sticky top-0 z-10">
             <button onClick={toggleSidebar} className="p-2 hover:bg-gray-100 rounded">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
             <div className="flex items-center gap-4">

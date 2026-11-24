@@ -246,7 +246,7 @@ export default function ExcelImportModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
       <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden animate-scale-in">
         {/* Header */}
-        <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
+        <div className="px-3 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg">
               <FileSpreadsheet className="w-5 h-5" />
@@ -273,7 +273,7 @@ export default function ExcelImportModal({
         </div>
 
         {/* Step Indicator */}
-        <div className="px-6 py-2.5 bg-slate-100 border-b border-slate-200 flex items-center justify-between text-xs font-semibold text-slate-600 shrink-0">
+        <div className="px-3 py-2.5 bg-slate-100 border-b border-slate-200 flex items-center justify-between text-xs font-semibold text-slate-600 shrink-0">
           <div className="flex items-center gap-6">
             <span className={`flex items-center gap-1.5 ${step === 1 ? "text-emerald-700 font-bold" : "text-slate-500"}`}>
               <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] ${step === 1 ? "bg-emerald-600 text-white" : "bg-slate-300 text-slate-700"}`}>1</span>
@@ -314,11 +314,10 @@ export default function ExcelImportModal({
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-3 ${
-                  isDragging
-                    ? "border-emerald-500 bg-emerald-50/50 scale-[0.99]"
-                    : "border-slate-300 hover:border-emerald-500 hover:bg-slate-50/50"
-                }`}
+                className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-3 ${isDragging
+                  ? "border-emerald-500 bg-emerald-50/50 scale-[0.99]"
+                  : "border-slate-300 hover:border-emerald-500 hover:bg-slate-50/50"
+                  }`}
               >
                 <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-xs">
                   <UploadCloud className="w-7 h-7" />
@@ -434,11 +433,10 @@ export default function ExcelImportModal({
                                 onChange={(e) =>
                                   handleManualMapChange(mapping.destinationHeader, e.target.value)
                                 }
-                                className={`text-xs px-2.5 py-1 rounded-lg border outline-hidden transition ${
-                                  isMapped
-                                    ? "border-slate-300 bg-white text-slate-800 focus:border-emerald-500"
-                                    : "border-amber-300 bg-amber-50/50 text-amber-800"
-                                }`}
+                                className={`text-xs px-2.5 py-1 rounded-lg border outline-hidden transition ${isMapped
+                                  ? "border-slate-300 bg-white text-slate-800 focus:border-emerald-500"
+                                  : "border-amber-300 bg-amber-50/50 text-amber-800"
+                                  }`}
                               >
                                 <option value="__IGNORE__">(Ignore / Leave Blank)</option>
                                 {currentSheet.headers.map((srcHdr) => (
@@ -520,11 +518,10 @@ export default function ExcelImportModal({
                 <span className="text-xs font-bold text-slate-800">Select Import Operation:</span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <label
-                    className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${
-                      importMode === "append"
-                        ? "border-emerald-600 bg-emerald-50/50 ring-1 ring-emerald-500"
-                        : "border-slate-300 bg-white hover:bg-slate-50"
-                    }`}
+                    className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${importMode === "append"
+                      ? "border-emerald-600 bg-emerald-50/50 ring-1 ring-emerald-500"
+                      : "border-slate-300 bg-white hover:bg-slate-50"
+                      }`}
                   >
                     <input
                       type="radio"
@@ -546,11 +543,10 @@ export default function ExcelImportModal({
                   </label>
 
                   <label
-                    className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${
-                      importMode === "replace"
-                        ? "border-red-600 bg-red-50/50 ring-1 ring-red-500"
-                        : "border-slate-300 bg-white hover:bg-slate-50"
-                    }`}
+                    className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${importMode === "replace"
+                      ? "border-red-600 bg-red-50/50 ring-1 ring-red-500"
+                      : "border-slate-300 bg-white hover:bg-slate-50"
+                      }`}
                   >
                     <input
                       type="radio"
@@ -581,11 +577,11 @@ export default function ExcelImportModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-4 bg-slate-100 border-t border-slate-200 flex items-center justify-between shrink-0">
+        <div className="px-3 py-4 bg-slate-100 border-t border-slate-200 flex items-center justify-between shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 rounded-xl hover:bg-slate-200 transition"
+            className="px-3 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 rounded-xl hover:bg-slate-200 transition"
           >
             Cancel
           </button>
@@ -595,13 +591,12 @@ export default function ExcelImportModal({
               type="button"
               onClick={handleFinalConfirm}
               disabled={!validationResult || validationResult.validRows.length === 0}
-              className={`px-5 py-2.5 rounded-xl text-xs font-bold text-white shadow-md transition flex items-center gap-2 cursor-pointer ${
-                importMode === "replace"
-                  ? confirmReplace
-                    ? "bg-red-600 hover:bg-red-700 animate-pulse"
-                    : "bg-red-600 hover:bg-red-700"
-                  : "bg-emerald-600 hover:bg-emerald-700"
-              }`}
+              className={`px-5 py-2.5 rounded-xl text-xs font-bold text-white shadow-md transition flex items-center gap-2 cursor-pointer ${importMode === "replace"
+                ? confirmReplace
+                  ? "bg-red-600 hover:bg-red-700 animate-pulse"
+                  : "bg-red-600 hover:bg-red-700"
+                : "bg-emerald-600 hover:bg-emerald-700"
+                }`}
             >
               <FileSpreadsheet className="w-4 h-4" />
               {importMode === "replace"

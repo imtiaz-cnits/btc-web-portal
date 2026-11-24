@@ -47,7 +47,7 @@ export default function HomeNoticesSection({ notices }: HomeNoticesSectionProps)
               <button
                 key={tab.value}
                 onClick={() => setActiveTab(tab.value)}
-                className={`px-6 py-2 h-8 sm:px-8 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 uppercase tracking-wide cursor-pointer ${activeTab.toLowerCase() === tab.value.toLowerCase()
+                className={`px-3 py-2 h-8 sm:px-8 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 uppercase tracking-wide cursor-pointer ${activeTab.toLowerCase() === tab.value.toLowerCase()
                   ? "bg-primary text-white shadow-lg scale-105"
                   : "bg-transparent text-text-2 hover:bg-shade-1"
                   }`}

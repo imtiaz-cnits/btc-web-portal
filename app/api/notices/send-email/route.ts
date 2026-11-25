@@ -15,6 +15,8 @@ const isValidEmail = (email: string) =>
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const MAX_TOTAL_ATTACHMENT_BYTES = 18 * 1024 * 1024; // 18MB (safe for Gmail 25MB MIME limit)
+
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
@@ -25,10 +27,92 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const recipients = sanitizeEmailList(body?.recipients);
-    const subject = String(body?.subject || "").trim();
-    const message = String(body?.body || "").trim();
+    const contentType = request.headers.get("content-type") || "";
+    let rawRecipients: unknown = [];
+    let subject = "";
+    let message = "";
+    let rawFromEmail = "";
+    const attachments: Array<{
+      filename: string;
+      content: Buffer;
+      contentType: string;
+    }> = [];
+
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      const recipientsField = formData.get("recipients");
+      if (typeof recipientsField === "string") {
+        try {
+          rawRecipients = JSON.parse(recipientsField);
+        } catch {
+          rawRecipients = recipientsField.split(/[,;\s]+/);
+        }
+      }
+      subject = String(formData.get("subject") || "").trim();
+      message = String(formData.get("body") || "").trim();
+      const fromField = formData.get("fromEmail");
+      rawFromEmail = typeof fromField === "string" ? fromField : "";
+
+      const rawFiles = formData.getAll("attachments");
+      let totalBytes = 0;
+
+      for (const entry of rawFiles) {
+        if (
+          !entry ||
+          typeof entry === "string" ||
+          typeof (entry as File).arrayBuffer !== "function"
+        ) {
+          continue;
+        }
+        const file = entry as File;
+        if (file.size <= 0) continue;
+
+        const fileName = (file.name || "attachment.pdf").trim();
+        const lowerName = fileName.toLowerCase();
+        const mime = (file.type || "").toLowerCase();
+        const isPdf =
+          lowerName.endsWith(".pdf") ||
+          mime === "application/pdf" ||
+          mime === "application/x-pdf";
+
+        if (!isPdf) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: `শুধুমাত্র PDF ফাইল অ্যাটাচ করা যাবে ("${fileName}" গ্রহণযোগ্য নয়)।`,
+            },
+            { status: 400 },
+          );
+        }
+
+        totalBytes += file.size;
+        if (totalBytes > MAX_TOTAL_ATTACHMENT_BYTES) {
+          return NextResponse.json(
+            {
+              success: false,
+              message:
+                "অ্যাটাচ করা PDF ফাইলের মোট সাইজ ১৮ MB-এর বেশি হতে পারবে না (Gmail লিমিট)।",
+            },
+            { status: 400 },
+          );
+        }
+
+        const buffer = Buffer.from(await file.arrayBuffer());
+        attachments.push({
+          filename: fileName,
+          content: buffer,
+          contentType: "application/pdf",
+        });
+      }
+    } else {
+      const body = await request.json();
+      rawRecipients = body?.recipients;
+      subject = String(body?.subject || "").trim();
+      message = String(body?.body || "").trim();
+      rawFromEmail = typeof body?.fromEmail === "string" ? body.fromEmail : "";
+    }
+
+    const recipients = sanitizeEmailList(rawRecipients);
 
     if (recipients.length === 0) {
       return NextResponse.json(
@@ -46,8 +130,8 @@ export async function POST(request: NextRequest) {
 
     const storedConfig = await readStoredEmailConfig();
     const requestedFrom =
-      typeof body?.fromEmail === "string" && isValidEmail(body.fromEmail)
-        ? body.fromEmail.trim().toLowerCase()
+      rawFromEmail && isValidEmail(rawFromEmail)
+        ? rawFromEmail.trim().toLowerCase()
         : "";
 
     const activeSenderEmail =
@@ -132,6 +216,7 @@ export async function POST(request: NextRequest) {
             subject,
             text: message,
             textEncoding: "quoted-printable",
+            ...(attachments.length > 0 ? { attachments } : {}),
           });
 
           const acceptedList = Array.isArray(info?.accepted)

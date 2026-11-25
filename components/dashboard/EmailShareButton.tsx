@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { parseNoticeTableData } from "@/lib/tableEngine/normalizer";
 import {
   EmailCategory,
@@ -23,6 +23,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Pencil,
+  Upload,
+  FileText,
 } from "lucide-react";
 
 interface NoticeItem {
@@ -205,6 +207,14 @@ const buildDynamicEmail = (notice: NoticeItem) => {
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
+const MAX_TOTAL_PDF_BYTES = 18 * 1024 * 1024; // 18MB (safe for Gmail 25MB MIME limit)
+
+const formatFileSize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+};
+
 export default function EmailShareButton({ notice }: { notice: NoticeItem }) {
   const [isOpen, setIsOpen] = useState(false);
   const [directory, setDirectory] = useState<EmailRecipientDirectory>(() =>
@@ -227,6 +237,9 @@ export default function EmailShareButton({ notice }: { notice: NoticeItem }) {
   const [mainEmailDraft, setMainEmailDraft] = useState(MAIN_SENDER_EMAIL);
   const [appPasswordDraft, setAppPasswordDraft] = useState("");
   const [savingMainEmail, setSavingMainEmail] = useState(false);
+  const [attachedPdfs, setAttachedPdfs] = useState<File[]>([]);
+  const [isDraggingPdf, setIsDraggingPdf] = useState(false);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
 
   const activeMainEmail = directory.mainEmail || MAIN_SENDER_EMAIL;
 
@@ -349,6 +362,11 @@ export default function EmailShareButton({ notice }: { notice: NoticeItem }) {
     setErrorMsg("");
     setStatusMsg("");
     setActiveListTab("ALL");
+    setAttachedPdfs([]);
+    setIsDraggingPdf(false);
+    if (pdfInputRef.current) {
+      pdfInputRef.current.value = "";
+    }
 
     setIsOpen(true);
     await loadDirectory();
@@ -359,6 +377,64 @@ export default function EmailShareButton({ notice }: { notice: NoticeItem }) {
     setIsOpen(false);
     setErrorMsg("");
     setStatusMsg("");
+    setAttachedPdfs([]);
+    setIsDraggingPdf(false);
+    if (pdfInputRef.current) {
+      pdfInputRef.current.value = "";
+    }
+  };
+
+  const handleAddPdfFiles = (files: FileList | File[] | null) => {
+    if (!files || files.length === 0) return;
+    const incoming = Array.from(files);
+    const validNew: File[] = [];
+    let invalidFound = false;
+
+    for (const file of incoming) {
+      const lowerName = file.name.toLowerCase();
+      const mime = (file.type || "").toLowerCase();
+      const isPdf =
+        lowerName.endsWith(".pdf") ||
+        mime === "application/pdf" ||
+        mime === "application/x-pdf";
+
+      if (!isPdf) {
+        invalidFound = true;
+        continue;
+      }
+
+      const alreadyAdded = attachedPdfs.some(
+        (existing) => existing.name === file.name && existing.size === file.size,
+      );
+      if (!alreadyAdded) {
+        validNew.push(file);
+      }
+    }
+
+    if (invalidFound) {
+      setErrorMsg("শুধুমাত্র PDF (.pdf) ফাইল যোগ করা যাবে।");
+    }
+
+    if (validNew.length === 0) return;
+
+    const currentSize = attachedPdfs.reduce((sum, f) => sum + f.size, 0);
+    const addedSize = validNew.reduce((sum, f) => sum + f.size, 0);
+    if (currentSize + addedSize > MAX_TOTAL_PDF_BYTES) {
+      setErrorMsg("মোট PDF ফাইলের সাইজ ১৮ MB-এর বেশি হতে পারবে না।");
+      return;
+    }
+
+    if (!invalidFound) {
+      setErrorMsg("");
+    }
+    setAttachedPdfs((prev) => [...prev, ...validNew]);
+  };
+
+  const handleRemoveAttachedPdf = (index: number) => {
+    setAttachedPdfs((prev) => prev.filter((_, i) => i !== index));
+    if (pdfInputRef.current) {
+      pdfInputRef.current.value = "";
+    }
   };
 
   useEffect(() => {
@@ -599,16 +675,32 @@ export default function EmailShareButton({ notice }: { notice: NoticeItem }) {
 
     setSending(true);
     try {
-      const res = await fetch("/api/notices/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fromEmail: activeMainEmail,
-          recipients: finalRecipients,
-          subject,
-          body,
-        }),
-      });
+      let res: Response;
+      if (attachedPdfs.length > 0) {
+        const formData = new FormData();
+        formData.append("fromEmail", activeMainEmail);
+        formData.append("recipients", JSON.stringify(finalRecipients));
+        formData.append("subject", subject);
+        formData.append("body", body);
+        attachedPdfs.forEach((file) => {
+          formData.append("attachments", file);
+        });
+        res = await fetch("/api/notices/send-email", {
+          method: "POST",
+          body: formData,
+        });
+      } else {
+        res = await fetch("/api/notices/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fromEmail: activeMainEmail,
+            recipients: finalRecipients,
+            subject,
+            body,
+          }),
+        });
+      }
       const data = await res.json();
 
       if (data?.success && data?.mode === "smtp") {
@@ -1095,6 +1187,108 @@ export default function EmailShareButton({ notice }: { notice: NoticeItem }) {
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-700 outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition font-mono whitespace-pre-wrap leading-relaxed"
                   placeholder="Email body text..."
                 />
+              </div>
+
+              {/* Optional PDF Attachment (Import / Drag & Drop) */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                  <span>Attach PDF File / পিডিএফ ফাইল যোগ করুন (ঐচ্ছিক):</span>
+                  {attachedPdfs.length > 0 && (
+                    <span className="text-[11px] font-bold text-indigo-600">
+                      {attachedPdfs.length} টি PDF যুক্ত
+                    </span>
+                  )}
+                </label>
+
+                <div
+                  onClick={() => pdfInputRef.current?.click()}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!isDraggingPdf) setIsDraggingPdf(true);
+                  }}
+                  onDragLeave={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsDraggingPdf(false);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsDraggingPdf(false);
+                    handleAddPdfFiles(e.dataTransfer.files);
+                  }}
+                  className={`border-2 border-dashed rounded-xl px-4 py-3 text-center transition cursor-pointer select-none ${
+                    isDraggingPdf
+                      ? "border-indigo-500 bg-indigo-50/80"
+                      : "border-slate-300 bg-slate-50/70 hover:border-indigo-400 hover:bg-indigo-50/40"
+                  }`}
+                >
+                  <input
+                    ref={pdfInputRef}
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    multiple
+                    onChange={(e) => {
+                      handleAddPdfFiles(e.target.files);
+                      e.target.value = "";
+                    }}
+                    className="hidden"
+                  />
+                  <div className="flex items-center justify-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                      <Upload className="w-4 h-4" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs font-bold text-slate-700">
+                        PDF ফাইল ড্র্যাগ অ্যান্ড ড্রপ করুন অথবা{" "}
+                        <span className="text-indigo-600 underline">
+                          Import / Browse
+                        </span>{" "}
+                        করুন
+                      </p>
+                      <p className="text-[11px] text-slate-400 font-medium">
+                        শুধুমাত্র PDF ফাইল (সর্বোচ্চ ১৮ MB) — মেসেজের সাথে সরাসরি ইমেইলে যাবে
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {attachedPdfs.length > 0 && (
+                  <div className="space-y-1.5 pt-0.5">
+                    {attachedPdfs.map((file, idx) => (
+                      <div
+                        key={`${file.name}-${file.size}-${idx}`}
+                        className="flex items-center justify-between gap-2 bg-indigo-50/60 border border-indigo-200 rounded-xl px-3 py-1.5"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <FileText className="w-4 h-4 text-rose-600 shrink-0" />
+                          <span
+                            className="text-xs font-semibold text-slate-800 truncate"
+                            title={file.name}
+                          >
+                            {file.name}
+                          </span>
+                          <span className="text-[11px] font-medium text-slate-500 shrink-0">
+                            ({formatFileSize(file.size)})
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveAttachedPdf(idx);
+                          }}
+                          disabled={sending}
+                          className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg p-1 transition border-0 bg-transparent cursor-pointer shrink-0 disabled:opacity-50"
+                          title="Remove PDF"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
